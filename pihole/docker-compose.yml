@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  pihole:
+    image: pihole/pihole:latest
+    container_name: pihole
+    hostname: pihole
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+      - "80:80"
+      - "443:443"
+    environment:
+      TZ: "Europe/Oslo"
+      WEBPASSWORD: "pro12345"
+      DNS1: "1.1.1.1"
+      DNS2: "8.8.8.8"
+      DNSMASQ_LISTENING: "all"
+    volumes:
+      - ./pihole:/etc/pihole
+      - ./pihole/dnsmasq.d:/etc/dnsmasq.d
+    restart: unless-stopped
+    networks:
+      - komodo
+
+networks:
+  komodo:
+    driver: bridge
