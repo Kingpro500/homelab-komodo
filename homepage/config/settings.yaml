@@ -1,0 +1,20 @@
+---
+title: Smarthus
+headerStyle: clean
+maxGroupColumns: 4
+useEqualHeights: true
+fullWidth: true
+disableCollapse: true
+layout:
+  Monitoring & Infrastructure:
+    style: row
+    columns: 3
+  Media Management:
+    style: row
+    columns: 2
+  Downloads & Media:
+    style: row
+    columns: 2
+  Home Automation:
+    style: row
+    columns: 1

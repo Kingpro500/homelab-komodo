@@ -1,0 +1,157 @@
+---
+# For configuration options and examples, please see:
+# https://gethomepage.dev/configs/services/
+
+- Monitoring:
+    - Uptime Kuma:
+        href: http://10.0.0.101:3011/
+        description: Homelab monitoring
+    - Grafana:
+        icon: grafana.png
+        href: http://10.0.0.101:3001/
+        description: Metrics dashboards
+    - Speedtest Tracker:
+        icon: speedtest-tracker.png
+        href: http://10.0.0.101:8765/
+        description: Internet speed history
+        widget:
+          type: speedtest
+          url: http://10.0.0.101:8765
+          version: 2
+          key: "{{HOMEPAGE_VAR_SPEEDTEST_TOKEN}}"
+    - InfluxDB:
+        icon: influxdb.png
+        href: http://10.0.0.101:8086/
+        description: Metrics database
+
+- Media:
+    - Emby:
+        icon: emby.png
+        href: http://10.0.0.101:8096/
+        description: Media server
+        widget:
+          type: emby
+          url: http://10.0.0.101:8096
+          key: "{{HOMEPAGE_VAR_EMBY_KEY}}"
+    - Sonarr:
+        icon: sonarr.png
+        href: http://10.0.0.101:8989/
+        description: Series management
+        widget:
+          type: sonarr
+          url: http://10.0.0.101:8989
+          key: "{{HOMEPAGE_VAR_SONARR_KEY}}"
+          fields: ["wanted", "queued", "series"]
+    - Radarr:
+        icon: radarr.png
+        href: http://10.0.0.101:7878/
+        description: Movie management
+        widget:
+          type: radarr
+          url: http://10.0.0.101:7878
+          key: "{{HOMEPAGE_VAR_RADARR_KEY}}"
+          fields: ["wanted", "missing", "queued", "movies"]
+    - Prowlarr:
+        icon: prowlarr.png
+        href: http://10.0.0.101:9696/
+        description: Indexer management
+        widget:
+          type: prowlarr
+          url: http://10.0.0.101:9696
+          key: "{{HOMEPAGE_VAR_PROWLARR_KEY}}"
+    - Overseerr:
+        icon: overseerr.png
+        href: http://10.0.0.101:5055/
+        description: Media requests
+        widget:
+          type: overseerr
+          url: http://10.0.0.101:5055
+          key: "{{HOMEPAGE_VAR_OVERSEERR_KEY}}"
+    - Readarr:
+        icon: readarr.png
+        href: http://10.0.0.101:8787/
+        description: Book management
+        widget:
+          type: readarr
+          url: http://10.0.0.101:8787
+          key: "{{HOMEPAGE_VAR_READARR_KEY}}"
+    - Immich:
+        icon: immich.png
+        href: http://10.0.0.101:2283/
+        description: Photo library
+        widget:
+          type: immich
+          url: http://10.0.0.101:2283
+          key: "{{HOMEPAGE_VAR_IMMICH_KEY}}"
+          version: 2
+    - Magic Frame:
+        href: http://10.0.0.101:8880/
+        description: Digital photo frame
+
+- Downloads:
+    - Deluge:
+        icon: deluge.png
+        href: http://10.0.0.101:8112/
+        description: Torrent client
+        widget:
+          type: deluge
+          url: http://10.0.0.101:8112
+          password: "{{HOMEPAGE_VAR_DELUGE_PASSWORD}}"
+    - MeTube:
+        icon: metube.png
+        href: http://10.0.0.101:8081/
+        description: YouTube downloader
+    - Pinchflat:
+        icon: pinchflat.png
+        href: http://10.0.0.101:8945/
+        description: YouTube channel archiver
+    - Youtube-DL Material:
+        icon: youtube-dl-material.png
+        href: http://10.0.0.101:17442/
+        description: YouTube downloader UI
+
+- Network:
+    - Dockge:
+        icon: dockge.png
+        href: http://10.0.0.101:5001/
+        description: Docker compose manager
+    - Pi-hole:
+        icon: pi-hole.png
+        href: http://10.0.0.105/admin/
+        description: DNS ad-blocking
+        widget:
+          type: pihole
+          url: http://10.0.0.105
+          version: 6
+          key: "{{HOMEPAGE_VAR_PIHOLE_KEY}}"
+    - ESPHome:
+        icon: esphome.png
+        href: http://10.0.0.101:6052/
+        description: ESP device firmware
+        widget:
+          type: esphome
+          url: http://10.0.0.101:6052
+          username: "{{HOMEPAGE_VAR_ESPHOME_USER}}"
+          password: "{{HOMEPAGE_VAR_ESPHOME_PASSWORD}}"
+    - MySpeed:
+        icon: myspeed.png
+        href: http://10.0.0.101:5216/
+        description: ISP speed monitor
+        widget:
+          type: myspeed
+          url: http://10.0.0.101:5216
+    - OPNsense:
+        icon: opnsense.png
+        href: http://10.0.0.1/
+        description: Firewall/router
+
+- Home:
+    - Home Assistant:
+        icon: home-assistant.png
+        href: http://10.0.0.3:8123/
+        description: Home Automation
+        widget:
+          type: homeassistant
+          url: http://10.0.0.3:8123
+          key: "{{HOMEPAGE_VAR_HASS_TOKEN}}"
+          fields: ["people_home", "lights_on", "switches_on"]
