@@ -12,5 +12,5 @@ services:
       PUID: 65534
       PGID: 65534
     volumes:
-      - /mnt/user/media/z_data/komodo-configs/homepage/config:/app/config
+      - /mnt/user/media/z_data/komodo-configs/homepage:/app/config
       - /var/run/docker.sock:/var/run/docker.sock:ro
