@@ -8,8 +8,7 @@ services:
     ports:
       - "53:53/tcp"
       - "53:53/udp"
-      - "80:80"
-      - "443:443"
+      - "8080:80/tcp"
     environment:
       TZ: "Europe/Oslo"
       WEBPASSWORD: "pro12345"
@@ -17,8 +16,8 @@ services:
       DNS2: "8.8.8.8"
       DNSMASQ_LISTENING: "all"
     volumes:
-      - ./pihole:/etc/pihole
-      - ./pihole/dnsmasq.d:/etc/dnsmasq.d
+      - '/mnt/user/media/z_data/komodo-configs/pihole/config:/etc/pihole'
+      - '/mnt/user/media/z_data/komodo-configs/pihole/dnsmasq.d:/etc/dnsmasq.d'
     restart: unless-stopped
     networks:
       - komodo
