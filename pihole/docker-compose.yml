@@ -15,9 +15,11 @@ services:
       DNS1: "1.1.1.1"
       DNS2: "8.8.8.8"
       DNSMASQ_LISTENING: "all"
+      PUID: 99
+      PGID: 100
     volumes:
-      - '/mnt/user/media/z_data/komodo-configs/pihole/config:/etc/pihole'
-      - '/mnt/user/media/z_data/komodo-configs/pihole/dnsmasq.d:/etc/dnsmasq.d'
+      - "./config:/etc/pihole"
+      - "./dnsmasq.d:/etc/dnsmasq.d"
     restart: unless-stopped
     networks:
       - komodo
