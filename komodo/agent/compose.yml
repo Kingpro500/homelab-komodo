@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   komodo-periphery:
-    image: mbecker20/komodo-periphery:v2.3.3
+    image: ghcr.io/moghtech/komodo-periphery:2
     container_name: komodo-periphery-1
     restart: unless-stopped
     network_mode: host
