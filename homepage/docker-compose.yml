@@ -1,16 +1,16 @@
-version: '3.8'
-
 services:
   homepage:
     image: ghcr.io/gethomepage/homepage:latest
     container_name: homepage
     restart: unless-stopped
-    network_mode: bridge
     ports:
-      - 3009:3000
-    environment:
-      PUID: 65534
-      PGID: 65534
+      - 3000:3000
     volumes:
-      - /mnt/user/media/z_data/komodo-configs/homepage/config:/app/config
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - homepage_config:/app/config
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Oslo
+
+volumes:
+  homepage_config:
