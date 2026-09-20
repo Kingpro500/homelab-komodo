@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  komodo-periphery:
+    image: ghcr.io/moghtech/komodo-periphery:2
+    container_name: komodo-periphery-1
+    restart: unless-stopped
+    network_mode: host
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /opt/komodo/config:/config
+    environment:
+      - CORE_ADDRESS=ws://10.0.0.117:9120/ws/periphery?server=${NODE_NAME}
+      - PASSKEYS=${AGENT_PASSKEY}
+      - TLS_INSECURE_SKIP_VERIFY=true
