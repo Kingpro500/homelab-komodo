@@ -8,5 +8,6 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - KOMODO_SECRET=MCowBQYDK2VuAyEAQzm6PFQP/YhNdIoHYLNz@P@or/&x/Xw
-      - PORT=9121
+      - PERIPHERY_PORT=9121
+      - PERIPHERY_SSL_ENABLED=false
       - TZ=Europe/Oslo
