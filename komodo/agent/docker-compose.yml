@@ -1,14 +1,12 @@
-version: "3.8"
-
 services:
   komodo-periphery:
     image: ghcr.io/moghtech/komodo-periphery:v2.3.3
     container_name: komodo-periphery
     restart: unless-stopped
-    ports:
-      - "9121:9120"
-    environment:
-      - KOMODO_CORE_URL=http://10.0.0.117:9120
-      - TZ=Europe/Oslo
+    network_mode: host
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - KOMODO_SECRET=MCowBQYDK2VuAyEAQzm6PFQP/YhNdIoHYLNz@P@or/&x/Xw
+      - PORT=9121
+      - TZ=Europe/Oslo
