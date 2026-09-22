@@ -1,6 +1,6 @@
 services:
   komodo-periphery:
-    image: ghcr.io/moghtech/komodo-periphery:v2.3.3
+    image: ghcr.io/moghtech/komodo-periphery:2
     container_name: komodo-periphery
     restart: unless-stopped
     network_mode: host
@@ -8,4 +8,5 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - KOMODO_SECRET=MCowBQYDK2VuAyEAQzm6PFQP/YhNdIoHYLNz@P@or/&x/Xw
+      - PORT=9121
       - TZ=Europe/Oslo
