@@ -1,19 +1,16 @@
-version: '3.8'
+version: "3.8"
 
 services:
-  periphery:
+  komodo-periphery:
     image: ghcr.io/moghtech/komodo-periphery:2
-    container_name: komodo-periphery
+    container_name: komodo-periphery-pc9
     restart: unless-stopped
     init: true
     network_mode: host
-    environment:
-      - PERIPHERY_CORE_ADDRESS=${PERIPHERY_CORE_ADDRESS}
-      - PERIPHERY_CONNECT_AS=${PERIPHERY_CONNECT_AS}
-      - PERIPHERY_ONBOARDING_KEY=${PERIPHERY_ONBOARDING_KEY}
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock # Lar Periphery styre Docker på verten
-      - periphery_keys:/config/keys
+      - komodo_keys_pc9:/config/keys
+      - /var/run/docker.sock:/var/run/docker.sock
 
 volumes:
-  periphery_keys:
+  komodo_keys_pc9:
+    name: komodo_keys_pc9
