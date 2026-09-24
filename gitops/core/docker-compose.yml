@@ -1,34 +1,52 @@
-version: '3.8'
+version: "3.8"
 
 services:
-  database:
-    image: mongo:7.0
-    container_name: komodo-mongodb
-    restart: unless-stopped
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
-    volumes:
-      - mongo_data:/data/db
-
-  core:
+  komodo-core:
     image: ghcr.io/moghtech/komodo-core:2
-    container_name: komodo-core
+    container_name: komodo-core-1
     restart: unless-stopped
     init: true
-    depends_on:
-      - database
     ports:
       - "9120:9120"
     environment:
-      # Tilkoblingsstreng til den lokale MongoDB-containeren
-      KOMODO_MONGODB_URI: mongodb://${MONGO_ROOT_USER}:${MONGO_ROOT_PASSWORD}@database:27017/?authSource=admin
+      - KOMODO_DB_URI=mongodb://root:mongopassword@komodo-mongodb:27017/komodo?authSource=admin
+      - KOMODO_INIT=true
     volumes:
-      - core_keys:/config/keys
-      - core_data:/config/periphery # Valgfritt: For lokal lagring/state
+      - komodo_keys:/config/keys
+    depends_on:
+      - komodo-mongodb
+    networks:
+      - komodo_network
+
+  komodo-mongodb:
+    image: mongo:6.0
+    container_name: komodo-mongodb-1
+    restart: unless-stopped
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=mongopassword
+    volumes:
+      - komodo_mongo_data:/data/db
+    networks:
+      - komodo_network
+
+  komodo-periphery:
+    image: ghcr.io/moghtech/komodo-periphery:2
+    container_name: komodo-periphery-1
+    restart: unless-stopped
+    init: true
+    volumes:
+      - komodo_keys:/config/keys
+    networks:
+      - komodo_network
+
+networks:
+  komodo_network:
+    name: komodo_default
 
 volumes:
-  mongo_data:
-  core_keys:
-  core_data:
+  komodo_keys:
+    name: komodo_keys
+  komodo_mongo_data:
+    name: komodo_mongo_data
 
