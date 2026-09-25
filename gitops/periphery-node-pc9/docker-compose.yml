@@ -6,7 +6,8 @@ services:
     container_name: komodo-periphery-pc9
     restart: unless-stopped
     init: true
-    network_mode: host
+    networks:
+      - komodo-network
     volumes:
       - komodo_keys_pc9:/config/keys
       - /var/run/docker.sock:/var/run/docker.sock
@@ -14,3 +15,8 @@ services:
 volumes:
   komodo_keys_pc9:
     name: komodo_keys_pc9
+
+networks:
+  komodo-network:
+    name: komodo-network
+    driver: bridge
