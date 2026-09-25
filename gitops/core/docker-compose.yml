@@ -9,24 +9,35 @@ services:
     ports:
       - "9120:9120"
     environment:
-      - KOMODO_DB_URI=mongodb://root:mongopassword@komodo-mongodb:27017/komodo?authSource=admin
+      - KOMODO_DB_URI=mongodb://komodo-ferretdb:27017/komodo
       - KOMODO_INIT=true
     volumes:
       - komodo_keys:/config/keys
     depends_on:
-      - komodo-mongodb
+      - komodo-ferretdb
     networks:
       - komodo_network
 
-  komodo-mongodb:
-    image: mongo:6.0
-    container_name: komodo-mongodb-1
+  komodo-ferretdb:
+    image: ghcr.io/ferretdb/ferretdb:1
+    container_name: komodo-ferretdb-1
+    restart: unless-stopped
+    command: [ "-postgresql-url=postgres://username:password@komodo-postgres:5432/komodo" ]
+    depends_on:
+      - komodo-postgres
+    networks:
+      - komodo_network
+
+  komodo-postgres:
+    image: postgres:16-alpine
+    container_name: komodo-postgres-1
     restart: unless-stopped
     environment:
-      - MONGO_INITDB_ROOT_USERNAME=root
-      - MONGO_INITDB_ROOT_PASSWORD=mongopassword
+      - POSTGRES_USER=username
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=komodo
     volumes:
-      - komodo_mongo_data:/data/db
+      - komodo_postgres_data:/var/lib/postgresql/data
     networks:
       - komodo_network
 
@@ -47,6 +58,5 @@ networks:
 volumes:
   komodo_keys:
     name: komodo_keys
-  komodo_mongo_data:
-    name: komodo_mongo_data
-
+  komodo_postgres_data:
+    name: komodo_postgres_data
