@@ -6,6 +6,10 @@ services:
     container_name: komodo-periphery-pc9
     restart: unless-stopped
     init: true
+    ports:
+      - "9121:9121"
+    environment:
+      - PERIPHERY_CORE_PUBLIC_KEYS=MCowBQYDK2VuAyEAysGhIUE9ukbCPqQjzedsIownzCgPfCEmJMpQaSXqOGs=
     networks:
       - komodo-network
     volumes:
@@ -15,7 +19,7 @@ services:
 volumes:
   komodo_keys_pc9:
     name: komodo_keys_pc9
-
+    
 networks:
   komodo-network:
     name: komodo-network
