@@ -1,0 +1,8 @@
+.env
+.env.*
+!.env.example
+*.secret
+*.key
+*.pem
+pihole/config/
+pihole/dnsmasq.d/
