@@ -1,0 +1,23 @@
+# Reserve Emby on pc9, deployed by Komodo.
+services:
+  emby:
+    image: emby/embyserver:4.10.0.40
+    container_name: emby-backup
+    hostname: Emby-Backup
+    network_mode: host
+    environment:
+      UID: "2"
+      GID: "2"
+      GIDLIST: "2,44"
+      TZ: Europe/Oslo
+    volumes:
+      - /srv/emby-backup/config:/config
+      - /srv/emby-backup/backups:/backups
+      - /srv/emby-backup/transcode:/transcode
+      - "/srv/emby-backup/media/1 Serier Amalie:/mnt/1 Serier Amalie:ro"
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
