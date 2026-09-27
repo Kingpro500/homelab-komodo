@@ -12,12 +12,14 @@ Create a unique random password in Komodo Settings → Variables with **Secret**
 PIHOLE_BIND_IP=<target-host-LAN-IP>
 PIHOLE_HOSTNAME=<instance-name>
 PIHOLE_UPSTREAM_DNS=<upstream-resolver-IP>#53
+# Optional local forward/reverse DNS:
+PIHOLE_REVERSE_SERVERS=true,<LAN-CIDR>,<local-resolver-IP>#53,<local-domain>
 PIHOLE_WEB_PASSWORD=[[YOUR_PIHOLE_SECRET_NAME]]
 ```
 
 Use a separate IP, secret and persistent volume for each instance. Compose rejects missing/empty passwords, binding IPs and upstream DNS settings. DNS uses TCP/UDP 53; the web interface uses port 8080 at `/admin/`. DHCP remains with the existing DHCP server. Test each DNS instance before updating client DNS settings. Docker Swarm is not required.
 
-Use an upstream resolver reachable from the Docker host (for example, your router’s Unbound service). Multiple upstreams are separated by semicolons. Avoid DNS loops: the upstream resolver must not forward requests back to these Pi-hole instances.
+Use an upstream resolver reachable from the Docker host (for example, your router’s Unbound service). Multiple upstreams are separated by semicolons. Local domains such as `internal` require explicit conditional forwarding via `PIHOLE_REVERSE_SERVERS`; configure it when the upstream resolver owns your local records. Leave it empty if unused. Avoid DNS loops: the upstream resolver must not forward requests back to these Pi-hole instances.
 
 ## Credential handling rule
 
