@@ -10,7 +10,7 @@ services:
     environment:
       TZ: Europe/Oslo
       FTLCONF_webserver_api_password: "${PIHOLE_WEB_PASSWORD:?Set a new secret password in Komodo}"
-      FTLCONF_dns_upstreams: "1.1.1.1;8.8.8.8"
+      FTLCONF_dns_upstreams: "${PIHOLE_UPSTREAM_DNS:?Set PIHOLE_UPSTREAM_DNS in Komodo}"
       FTLCONF_dns_listeningMode: "ALL"
     volumes:
       - pihole_data:/etc/pihole
