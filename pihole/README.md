@@ -11,10 +11,13 @@ Create a unique random password in Komodo Settings → Variables with **Secret**
 ```dotenv
 PIHOLE_BIND_IP=<target-host-LAN-IP>
 PIHOLE_HOSTNAME=<instance-name>
+PIHOLE_UPSTREAM_DNS=<upstream-resolver-IP>#53
 PIHOLE_WEB_PASSWORD=[[YOUR_PIHOLE_SECRET_NAME]]
 ```
 
-Use a separate IP, secret and persistent volume for each instance. Compose rejects missing/empty passwords and binding IPs. DNS uses TCP/UDP 53; the web interface uses port 8080 at `/admin/`. DHCP remains with the existing DHCP server. Test each DNS instance before updating client DNS settings. Docker Swarm is not required.
+Use a separate IP, secret and persistent volume for each instance. Compose rejects missing/empty passwords, binding IPs and upstream DNS settings. DNS uses TCP/UDP 53; the web interface uses port 8080 at `/admin/`. DHCP remains with the existing DHCP server. Test each DNS instance before updating client DNS settings. Docker Swarm is not required.
+
+Use an upstream resolver reachable from the Docker host (for example, your router’s Unbound service). Multiple upstreams are separated by semicolons. Avoid DNS loops: the upstream resolver must not forward requests back to these Pi-hole instances.
 
 ## Credential handling rule
 
