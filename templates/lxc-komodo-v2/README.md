@@ -61,3 +61,34 @@ them. Media stays on Tower and is mounted into the CT; it is never copied.
   short-lived **privileged V2 onboarding key**; do not replace the volume.
 - Before retiring Tower containers, validate the new service and keep the old
   service stopped as rollback until acceptance.
+
+## Native systemd Periphery
+
+Some existing CTs use the native `periphery.service` instead of the Docker
+Periphery container. Keep that installation model when maintaining those CTs;
+do not install a second Periphery agent beside it.
+
+The persistent identity is normally
+`/etc/komodo/keys/periphery.key`. Preserve it across repairs and make the
+configured `connect_as` match the existing Komodo Server name exactly, for
+example:
+
+```toml
+core_address = "http://10.0.0.117:9120"
+connect_as = "pc9-ct116-pihole"
+```
+
+For an identity mismatch, use a short-lived **privileged V2** onboarding key
+only for the repair. Put the private onboarding key in
+`/etc/komodo/onboarding.key` with mode `600`, then create the temporary systemd
+drop-in `/etc/systemd/system/periphery.service.d/onboard.conf`:
+
+```ini
+[Service]
+Environment=PERIPHERY_ONBOARDING_KEY_FILE=/etc/komodo/onboarding.key
+```
+
+Run `systemctl daemon-reload && systemctl restart periphery`, verify the
+`Logged in to Komodo Core` log line, and then remove both temporary files,
+delete the onboarding key in Komodo, and restart Periphery once more. Do not
+remove `/etc/komodo/keys/periphery.key`.
