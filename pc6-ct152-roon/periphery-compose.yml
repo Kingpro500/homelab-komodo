@@ -1,0 +1,21 @@
+# Bootstrap infrastructure for this CT only; Roon itself is deployed by Komodo.
+services:
+  periphery:
+    image: ghcr.io/moghtech/komodo-periphery:2.3.3
+    container_name: komodo-periphery
+    init: true
+    restart: unless-stopped
+    environment:
+      PERIPHERY_CORE_ADDRESS: "${PERIPHERY_CORE_ADDRESS:?Set in /opt/komodo/periphery/.env}"
+      PERIPHERY_CONNECT_AS: "${PERIPHERY_CONNECT_AS:?Set in /opt/komodo/periphery/.env}"
+      PERIPHERY_ROOT_DIRECTORY: /opt/komodo
+    volumes:
+      - periphery-data:/config
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /proc:/proc
+      - /opt/komodo:/opt/komodo
+
+volumes:
+  periphery-data:
+    # Keep Periphery identity stable across Compose recreations.
+    name: periphery-data

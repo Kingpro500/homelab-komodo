@@ -1,0 +1,20 @@
+# Roon Server on dedicated Proxmox CT 152 (pc6).
+# Host networking is deliberate: Roon discovery relies on LAN multicast.
+services:
+  roonserver:
+    image: steefdebruijn/docker-roonserver:latest
+    container_name: roonserver
+    network_mode: host
+    environment:
+      TZ: "${TZ:-Europe/Oslo}"
+    volumes:
+      - "${ROON_APP_PATH:?Set ROON_APP_PATH in Komodo}:/app"
+      - "${ROON_DATA_PATH:?Set ROON_DATA_PATH in Komodo}:/data"
+      - "${ROON_MUSIC_PATH:?Set ROON_MUSIC_PATH in Komodo}:/music:ro"
+      - "${ROON_BACKUP_PATH:?Set ROON_BACKUP_PATH in Komodo}:/backup"
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
