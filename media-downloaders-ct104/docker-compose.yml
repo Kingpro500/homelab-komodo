@@ -1,0 +1,36 @@
+# Pinchflat and MeTube on Proxmox CT 104 (pc6).
+# Tower remains the authoritative media store; only application state lives in CT 104.
+services:
+  pinchflat:
+    image: ghcr.io/kieraneglin/pinchflat:latest
+    container_name: pinchflat
+    ports:
+      - "8945:8945"
+    environment:
+      TZ: "${TZ:-Europe/Oslo}"
+    volumes:
+      - "${PINCHFLAT_CONFIG_PATH:?Set PINCHFLAT_CONFIG_PATH in Komodo}:/config"
+      - "${TOWER_MEDIA_PATH:?Set TOWER_MEDIA_PATH in Komodo}/YouTube:/downloads"
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  metube:
+    image: ghcr.io/alexta69/metube:latest
+    container_name: metube
+    ports:
+      - "8081:8081"
+    environment:
+      TZ: "${TZ:-Europe/Oslo}"
+    volumes:
+      - "${TOWER_MEDIA_PATH:?Set TOWER_MEDIA_PATH in Komodo}/metube:/downloads"
+      - "${METUBE_COOKIES_PATH:?Set METUBE_COOKIES_PATH in Komodo}:/cookies"
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
