@@ -7,10 +7,12 @@ services:
     environment:
       PERIPHERY_CORE_ADDRESS: "${PERIPHERY_CORE_ADDRESS:?Set in /opt/komodo/periphery/.env}"
       PERIPHERY_CONNECT_AS: "${PERIPHERY_CONNECT_AS:?Set in /opt/komodo/periphery/.env}"
-      PERIPHERY_ONBOARDING_KEY: "${PERIPHERY_ONBOARDING_KEY:?Set in /opt/komodo/periphery/.env}"
       PERIPHERY_ROOT_DIRECTORY: /opt/komodo
-      PERIPHERY_LEGACY_COMPOSE_CLI: "true"
     volumes:
+      - periphery-data:/config
       - /var/run/docker.sock:/var/run/docker.sock
       - /proc:/proc
       - /opt/komodo:/opt/komodo
+
+volumes:
+  periphery-data:
