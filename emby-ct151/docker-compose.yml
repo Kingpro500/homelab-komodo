@@ -1,0 +1,27 @@
+# Emby migration target on Proxmox CT 151 (emby-pc6).
+# Deployed by Komodo after the restored configuration is in place.
+services:
+  emby:
+    image: emby/embyserver:4.10.0.40
+    container_name: emby
+    hostname: emby-pc6
+    network_mode: host
+    environment:
+      UID: "${EMBY_UID:-2}"
+      GID: "${EMBY_GID:-2}"
+      GIDLIST: "${EMBY_GIDLIST:-2,44}"
+      TZ: "${TZ:-Europe/Oslo}"
+      MALLOC_TRIM_THRESHOLD_: "${MALLOC_TRIM_THRESHOLD_:-131072}"
+    volumes:
+      - "${EMBY_CONFIG_PATH:?Set EMBY_CONFIG_PATH in Komodo}:/config"
+      - "${EMBY_TRANSCODE_PATH:?Set EMBY_TRANSCODE_PATH in Komodo}:/transcode"
+      # Keep the original library paths used by the restored Emby database.
+      - "${EMBY_MEDIA_PATH:?Set EMBY_MEDIA_PATH in Komodo}:${EMBY_LIBRARY_PATH:?Set EMBY_LIBRARY_PATH in Komodo}"
+    devices:
+      - /dev/dri/renderD128:/dev/dri/renderD128
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
