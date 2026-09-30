@@ -1,0 +1,52 @@
+# Immich on dedicated Proxmox CT 153 (pc6).
+# Photo files remain on Tower and are mounted in this CT at /photos.
+services:
+  immich-server:
+    container_name: immich_server
+    image: ghcr.io/immich-app/immich-server@sha256:46dedfc5848f7313bd6b584ea9f2648057430307aad6de56de968f6710a72cae
+    volumes:
+      - ${IMMICH_UPLOAD_LOCATION:?Set in Komodo}:/usr/src/app/upload
+    devices:
+      - /dev/dri:/dev/dri
+    environment:
+      DB_PASSWORD: ${IMMICH_DB_PASSWORD:?Set in Komodo}
+      DB_USERNAME: ${IMMICH_DB_USERNAME:?Set in Komodo}
+      DB_DATABASE_NAME: ${IMMICH_DB_DATABASE_NAME:?Set in Komodo}
+    ports:
+      - "2283:2283"
+    depends_on:
+      - redis
+      - database
+    restart: unless-stopped
+
+  immich-machine-learning:
+    container_name: immich_machine_learning
+    image: ghcr.io/immich-app/immich-machine-learning@sha256:d5561b55333f88ac4fe240f846c89f498693b0a9cedef6b1c45fcca0c7969cc4
+    volumes:
+      - model-cache:/cache
+    devices:
+      - /dev/dri:/dev/dri
+    environment:
+      DB_PASSWORD: ${IMMICH_DB_PASSWORD:?Set in Komodo}
+      DB_USERNAME: ${IMMICH_DB_USERNAME:?Set in Komodo}
+      DB_DATABASE_NAME: ${IMMICH_DB_DATABASE_NAME:?Set in Komodo}
+    restart: unless-stopped
+
+  redis:
+    container_name: immich_redis
+    image: docker.io/redis:6.2-alpine
+    restart: unless-stopped
+
+  database:
+    container_name: immich_postgres
+    image: ghcr.io/immich-app/postgres@sha256:971d18060781e929dc3a0b72b02e3f09ba9d146d4c00b2acac81a7ae837bbde5
+    environment:
+      POSTGRES_PASSWORD: ${IMMICH_DB_PASSWORD:?Set in Komodo}
+      POSTGRES_USER: ${IMMICH_DB_USERNAME:?Set in Komodo}
+      POSTGRES_DB: ${IMMICH_DB_DATABASE_NAME:?Set in Komodo}
+    volumes:
+      - ${IMMICH_POSTGRES_PATH:?Set in Komodo}:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  model-cache:
