@@ -9,10 +9,14 @@ services:
     environment:
       PERIPHERY_CORE_ADDRESS: "${PERIPHERY_CORE_ADDRESS:?Set in /opt/komodo/periphery/.env}"
       PERIPHERY_CONNECT_AS: "${PERIPHERY_CONNECT_AS:?Set in /opt/komodo/periphery/.env}"
+      PERIPHERY_CORE_PUBLIC_KEYS: file:/config/core.pub
+      # Present only during a short-lived V2 onboarding or key-repair flow.
+      PERIPHERY_ONBOARDING_KEY: "${PERIPHERY_ONBOARDING_KEY:-}"
       PERIPHERY_ROOT_DIRECTORY: /opt/komodo
     volumes:
       # The identity key lives here. Never remove this volume during upgrades.
       - periphery-data:/config
+      - /opt/komodo/periphery/core.pub:/config/core.pub:ro
       - /var/run/docker.sock:/var/run/docker.sock
       - /proc:/proc
       - /opt/komodo:/opt/komodo
