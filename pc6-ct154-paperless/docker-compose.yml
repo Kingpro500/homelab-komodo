@@ -1,0 +1,62 @@
+services:
+  broker:
+    image: docker.io/valkey/valkey:9-alpine
+    container_name: paperless-broker
+    restart: unless-stopped
+    volumes:
+      - "${PAPERLESS_REDIS_PATH:?Set in Komodo}:/data"
+
+  db:
+    image: docker.io/library/postgres:18
+    container_name: paperless-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: paperless
+      POSTGRES_USER: paperless
+      POSTGRES_PASSWORD: "${PAPERLESS_DB_PASSWORD:?Set a secret in Komodo}"
+    volumes:
+      - "${PAPERLESS_POSTGRES_PATH:?Set in Komodo}:/var/lib/postgresql"
+
+  gotenberg:
+    image: docker.io/gotenberg/gotenberg:8.37
+    container_name: paperless-gotenberg
+    restart: unless-stopped
+    command:
+      - gotenberg
+      - --chromium-disable-javascript=true
+      - --chromium-allow-list=file:///tmp/.*
+
+  tika:
+    image: docker.io/apache/tika:3.3.1.0
+    container_name: paperless-tika
+    restart: unless-stopped
+
+  webserver:
+    image: ghcr.io/paperless-ngx/paperless-ngx:latest
+    container_name: paperless-webserver
+    restart: unless-stopped
+    depends_on:
+      - broker
+      - db
+      - gotenberg
+      - tika
+    ports:
+      - "8000:8000"
+    environment:
+      PAPERLESS_REDIS: redis://broker:6379
+      PAPERLESS_DBHOST: db
+      PAPERLESS_DBENGINE: postgresql
+      PAPERLESS_DBPASS: "${PAPERLESS_DB_PASSWORD:?Set a secret in Komodo}"
+      PAPERLESS_SECRET_KEY: "${PAPERLESS_SECRET_KEY:?Set a secret in Komodo}"
+      PAPERLESS_URL: http://10.0.0.131:8000
+      PAPERLESS_TIME_ZONE: Europe/Oslo
+      PAPERLESS_OCR_LANGUAGE: nor+eng
+      PAPERLESS_OCR_LANGUAGES: nor
+      PAPERLESS_TIKA_ENABLED: "1"
+      PAPERLESS_TIKA_GOTENBERG_ENDPOINT: http://gotenberg:3000
+      PAPERLESS_TIKA_ENDPOINT: http://tika:9998
+    volumes:
+      - "${PAPERLESS_DATA_PATH:?Set in Komodo}:/usr/src/paperless/data"
+      - "${PAPERLESS_MEDIA_PATH:?Set in Komodo}:/usr/src/paperless/media"
+      - "${PAPERLESS_EXPORT_PATH:?Set in Komodo}:/usr/src/paperless/export"
+      - "${PAPERLESS_CONSUME_PATH:?Set in Komodo}:/usr/src/paperless/consume"

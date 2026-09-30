@@ -50,6 +50,26 @@ them. Media stays on Tower and is mounted into the CT; it is never copied.
 8. Add the application stack in Git and deploy it through Komodo. Do not start
    the application with a separate, unmanaged Compose command.
 
+## Deployment SSH access
+
+Every managed LXC must receive the approved `codex_fleet_deploy` public key
+during bootstrap. This permits remote recovery, configuration transfer and
+Docker administration when the Proxmox web UI is unavailable. It is separate
+from the limited diagnostic key and never belongs in Git, a Compose file or a
+Komodo variable.
+
+Install it before the service is considered ready:
+
+```sh
+install -d -m 700 /root/.ssh
+install -m 600 /dev/null /root/.ssh/authorized_keys
+# Append the approved public key exactly once.
+```
+
+Confirm non-interactive login from the administration Mac using the private
+key at `~/.ssh/codex_fleet_deploy`. Record only that access is working; never
+commit keys or their private material.
+
 ## Guardrails
 
 - Never commit `.env`, API credentials, onboarding keys, database passwords,
