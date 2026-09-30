@@ -1,0 +1,14 @@
+services:
+  grovemap:
+    image: ghcr.io/robsmallridge/grovemap:latest
+    container_name: grovemap
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      SCAN_CACHE_TTL: "3600"
+      SCAN_ON_START: "false"
+    volumes:
+      - /scan/media:/data/media:ro
+      - /scan/photos:/data/photos:ro
+      - /scan/backups:/data/backups:ro
