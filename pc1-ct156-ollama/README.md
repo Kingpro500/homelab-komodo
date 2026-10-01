@@ -13,6 +13,11 @@ copied to Tower.
 The LXC receives only the NVIDIA device nodes required by this workload. The
 host NVIDIA driver and Docker GPU runtime were validated before deployment.
 
+## Current status
+
+Deployed through Komodo on 2026-10-01. Ollama detected the NVIDIA GeForce RTX
+3070 through CUDA and its local API responded successfully after deployment.
+
 ## Capacity profile
 
 pc1 has 8 GB of host RAM. CT 103 (the generic Docker node) is intentionally
