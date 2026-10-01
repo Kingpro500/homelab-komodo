@@ -1,0 +1,11 @@
+services:
+  audiobookshelf:
+    image: ghcr.io/advplyr/audiobookshelf:latest
+    container_name: audiobookshelf
+    restart: unless-stopped
+    ports:
+      - "13378:80"
+    volumes:
+      - /scan/media/Video/Z Audiobook:/audiobooks:ro
+      - "${AUDIOBOOKSHELF_CONFIG_PATH:?Set in Komodo}:/config"
+      - "${AUDIOBOOKSHELF_CONFIG_PATH:?Set in Komodo}/metadata:/metadata"
