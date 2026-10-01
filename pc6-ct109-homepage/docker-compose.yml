@@ -1,0 +1,12 @@
+services:
+  homepage:
+    image: ghcr.io/gethomepage/homepage:latest
+    container_name: homepage
+    restart: unless-stopped
+    ports:
+      - "3009:3000"
+    environment:
+      HOMEPAGE_ALLOWED_HOSTS: 10.0.0.128:3009
+    volumes:
+      - "${HOMEPAGE_CONFIG_PATH:?Set in Komodo}:/app/config"
+      - /var/run/docker.sock:/var/run/docker.sock:ro

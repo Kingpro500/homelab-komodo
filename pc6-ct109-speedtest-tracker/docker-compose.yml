@@ -1,0 +1,19 @@
+services:
+  speedtest-tracker:
+    image: lscr.io/linuxserver/speedtest-tracker:latest
+    container_name: speedtest-tracker
+    restart: unless-stopped
+    ports:
+      - "8765:80"
+      - "8766:443"
+    environment:
+      PUID: "99"
+      PGID: "100"
+      TZ: Europe/Oslo
+      DB_CONNECTION: sqlite
+      SPEEDTEST_SCHEDULE: "*/30 * * * *"
+      APP_TIMEZONE: Europe/Oslo
+      DISPLAY_TIMEZONE: Europe/Oslo
+      APP_KEY: "${SPEEDTEST_APP_KEY:?Set a secret in Komodo}"
+    volumes:
+      - "${SPEEDTEST_CONFIG_PATH:?Set in Komodo}:/config"
