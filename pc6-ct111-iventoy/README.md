@@ -14,5 +14,9 @@ LXC.
 ## Network notes
 
 The PXE service is enabled automatically. Configure only one DHCP/PXE proxy on
-the LAN, and do not enable iVentoy DHCP if OPNsense already provides DHCP. Add
-a DHCP reservation for `10.0.0.134` in OPNsense before relying on the service.
+the LAN, and do not enable iVentoy DHCP if OPNsense already provides DHCP.
+
+CT 111 uses the static address `10.0.0.134`, outside the active Kea dynamic
+pool (`10.0.0.2`–`10.0.0.99`). Do not add a Kea reservation for it: the static
+address already avoids the pool and this avoids the known outside-pool
+reservation edge case.

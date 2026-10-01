@@ -14,5 +14,7 @@ services:
       - /iso:/app/iso
       - /opt/iventoy/data:/app/data
       - /opt/iventoy/log:/app/log
+      # iVentoy derives its local identity from this host value.
+      - /sys/class/dmi/id/product_uuid:/app/data/sys/class/dmi/id/product_uuid:ro
     environment:
       AUTO_START_PXE: "true"
