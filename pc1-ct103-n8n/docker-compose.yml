@@ -35,6 +35,8 @@ services:
       N8N_HOST: 10.0.0.119
       N8N_PORT: "5678"
       N8N_PROTOCOL: http
+      # LAN-only access until n8n is placed behind HTTPS.
+      N8N_SECURE_COOKIE: "false"
       N8N_EDITOR_BASE_URL: http://10.0.0.119:5678
       WEBHOOK_URL: http://10.0.0.119:5678
       GENERIC_TIMEZONE: ${TZ}
