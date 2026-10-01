@@ -1,0 +1,86 @@
+services:
+  bazarr:
+    image: lscr.io/linuxserver/bazarr:latest
+    container_name: bazarr
+    restart: unless-stopped
+    environment:
+      PUID: "99"
+      PGID: "100"
+      TZ: America/Los_Angeles
+      UMASK: "022"
+    ports:
+      - "6767:6767"
+    volumes:
+      - "${MEDIA_AUTOMATION_CONFIG_ROOT:?Set in Komodo}/bazarr:/config"
+      - /data:/movies
+      - /data:/tv
+
+  prowlarr:
+    image: binhex/arch-prowlarr:latest
+    container_name: prowlarr
+    restart: unless-stopped
+    environment:
+      PUID: "99"
+      PGID: "100"
+      TZ: America/Los_Angeles
+      UMASK: "000"
+    ports:
+      - "9696:9696"
+    volumes:
+      - "${MEDIA_AUTOMATION_CONFIG_ROOT:?Set in Komodo}/prowlarr:/config"
+
+  sonarr:
+    image: binhex/arch-sonarr:latest
+    container_name: sonarr
+    restart: unless-stopped
+    environment:
+      PUID: "99"
+      PGID: "100"
+      TZ: America/Los_Angeles
+      UMASK: "000"
+    ports:
+      - "8989:8989"
+    volumes:
+      - "${MEDIA_AUTOMATION_CONFIG_ROOT:?Set in Komodo}/sonarr:/config"
+      - /data:/data
+
+  radarr:
+    image: binhex/arch-radarr:latest
+    container_name: radarr
+    restart: unless-stopped
+    environment:
+      PUID: "99"
+      PGID: "100"
+      TZ: America/Los_Angeles
+      UMASK: "000"
+    ports:
+      - "7878:7878"
+    volumes:
+      - "${MEDIA_AUTOMATION_CONFIG_ROOT:?Set in Komodo}/radarr:/config"
+      - /data:/data
+
+  readarr:
+    image: binhex/arch-readarr:latest
+    container_name: readarr
+    restart: unless-stopped
+    environment:
+      PUID: "99"
+      PGID: "100"
+      TZ: Europe/Berlin
+      UMASK: "000"
+    ports:
+      - "8787:8787"
+    volumes:
+      - "${MEDIA_AUTOMATION_CONFIG_ROOT:?Set in Komodo}/readarr:/config"
+      - "/data/z downloads:/data"
+      - /data:/media
+
+  podgrab:
+    image: akhilrex/podgrab:latest
+    container_name: podgrab
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - /data/podcasts:/assets
+      - "${MEDIA_AUTOMATION_CONFIG_ROOT:?Set in Komodo}/podgrab:/config"
