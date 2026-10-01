@@ -7,9 +7,11 @@
 - **ISO storage:** Tower `Unraid-ISO`, mounted at `/iso` in the LXC
 
 iVentoy is isolated because PXE needs UDP 67 (DHCP proxy) and UDP 69 (TFTP),
-and its Docker image requires privileged mode. The ISO directory remains on
-Tower; only iVentoy configuration and logs live under `/opt/iventoy` inside the
-LXC.
+and its Docker image requires privileged mode and host networking. Host
+networking is necessary for LAN broadcast PXE traffic; CT 111 is dedicated to
+iVentoy so no other application can conflict with its ports. The ISO directory
+remains on Tower; only iVentoy configuration and logs live under
+`/opt/iventoy` inside the LXC.
 
 ## Network notes
 
