@@ -1,40 +1,13 @@
 services:
-  gluetun:
-    image: qmcgaw/gluetun:latest
-    container_name: deluge-gluetun
+  deluge:
+    image: binhex/arch-deluge:latest
+    container_name: deluge
     restart: unless-stopped
-    cap_add:
-      - NET_ADMIN
-    devices:
-      - /dev/net/tun:/dev/net/tun
-    environment:
-      TZ: Europe/Oslo
-      VPN_SERVICE_PROVIDER: custom
-      VPN_TYPE: openvpn
-      OPENVPN_CUSTOM_CONFIG: /gluetun/openvpn/netherlands.ovpn
-      FIREWALL: "on"
-      FIREWALL_INPUT_PORTS: 8112,58846,58946
-    volumes:
-      - "${DELUGE_VPN_CONFIG_PATH:?Set in Komodo}:/gluetun"
     ports:
       - "8112:8112/tcp"
       - "58846:58846/tcp"
       - "58946:58946/tcp"
       - "58946:58946/udp"
-    healthcheck:
-      test: ["CMD", "/gluetun-entrypoint", "healthcheck"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-  deluge:
-    image: binhex/arch-deluge:latest
-    container_name: deluge
-    restart: unless-stopped
-    network_mode: "service:gluetun"
-    depends_on:
-      gluetun:
-        condition: service_healthy
     environment:
       PUID: "99"
       PGID: "100"
