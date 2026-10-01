@@ -1,0 +1,11 @@
+services:
+  grafana:
+    image: docker.io/grafana/grafana:latest
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SERVER_ROOT_URL: http://10.0.0.128:3000
+    volumes:
+      - "${GRAFANA_DATA_PATH:?Set in Komodo}:/var/lib/grafana"
