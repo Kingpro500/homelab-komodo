@@ -17,6 +17,12 @@ layout:
   Monitoring:
     style: row
     columns: 3
+  Network & Utilities:
+    style: row
+    columns: 3
   Media & Downloads:
     style: row
     columns: 4
+  Photos & Documents:
+    style: row
+    columns: 2
