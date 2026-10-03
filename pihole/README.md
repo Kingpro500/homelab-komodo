@@ -21,6 +21,67 @@ Use a separate IP, secret and persistent volume for each instance. Compose rejec
 
 Use an upstream resolver reachable from the Docker host (for example, your router’s Unbound service). Multiple upstreams are separated by semicolons. Local domains such as `internal` require explicit conditional forwarding via `PIHOLE_REVERSE_SERVERS`; configure it when the upstream resolver owns your local records. Leave it empty if unused. Avoid DNS loops: the upstream resolver must not forward requests back to these Pi-hole instances.
 
+## DNS chain in this homelab
+
+```text
+client ──(Kea DHCP gives 10.0.0.115 / 10.0.0.116)──▶ Pi-hole
+                                                             │
+                                          PIHOLE_UPSTREAM_DNS=10.0.0.1#53
+                                                             ▼
+                                       Unbound on OPNsense (10.0.0.1)
+                                             │                    │
+                        lan.local host overrides            1.1.1.1 (system DNS)
+                        (homeassistant, bridge, ac-pro,        via General → Settings
+                         espcontrol-*, media-player,           → DNS Servers
+                         pihole-pc8/9, komodo, pve, pc9)
+                                             │                    │
+                                             └───── internet ───┘
+```
+
+Two instances, one Compose file:
+
+| Stack | Container host | IP | Upstream |
+|---|---|---|---|
+| `pc8-ct115-pihole` | `pihole-pc8` | 10.0.0.115 | 10.0.0.1#53 |
+| `pc9-ct116-pihole` | `pihole-pc9` | 10.0.0.116 | 10.0.0.1#53 |
+
+See `.env.example` for the exact Stack Environment values. Passwords are secret
+references only, never values.
+
+### Why the local domain must match Unbound
+
+`PIHOLE_REVERSE_SERVERS` ends with the local domain. It must be the same string as
+the Domain column of the Unbound Host Overrides in OPNsense
+(Services → Unbound DNS → Overrides), which is `lan.local`. Clients also receive
+`search lan.local` from Kea, so an unqualified name such as `homeassistant` is
+resolved as `homeassistant.lan.local`.
+
+If the two disagree, local names fail silently: Unbound has no matching record and
+Pi-hole returns nothing, with no error on either side. This is the single most
+fragile value in this stack.
+
+### DNS loop
+
+Pi-hole forwards `lan.local` to Unbound; Unbound resolves it locally and never
+forwards to Pi-hole. Upstream must stay a resolver that does not point back here.
+Changing `PIHOLE_UPSTREAM_DNS` to either Pi-hole address creates a loop.
+
+### Client hand-over
+
+Clients are moved onto Pi-hole by pointing the Kea DHCP server at `10.0.0.115` and
+`10.0.0.116`. Until that is done, clients query `10.0.0.1` directly, Unbound answers
+everything, and Pi-hole filtering is bypassed entirely. Keep `94.140.14.14` as a third
+server so DNS survives both instances being down. Lease renewal is what hands the new
+servers to clients; existing clients keep the old ones until renewal.
+
+Verify with:
+
+```bash
+dig @10.0.0.115 github.com
+dig @10.0.0.115 homeassistant.lan.local   # expect 10.0.0.7
+dig @10.0.0.1   github.com
+```
+
 ## Credential handling rule
 
 Git stores configuration and secret references only. Store application passwords and API keys in Komodo secret variables, referenced with `[[NAME]]`. Never put actual values in Compose files, commits, issue descriptions or logs. Komodo writes a deployment `.env` on the target: restrict access to administrators/the deployment service and keep it outside Git.
