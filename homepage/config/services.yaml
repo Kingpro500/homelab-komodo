@@ -19,6 +19,10 @@
         icon: mdi:rocket-launch
         href: http://10.0.0.128:3012/
         description: 10.0.0.128:3012 · CT109 · pc6 · launcher
+    - Crafty:
+        icon: mdi:gamepad-variant
+        href: https://10.0.0.128:8000/
+        description: 10.0.0.128:8000 · CT109 · pc6 · Minecraft · selvsignert sertifikat
     - Komodo:
         icon: komodo.png
         href: http://10.0.0.117:9120/

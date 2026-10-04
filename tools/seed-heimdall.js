@@ -59,6 +59,7 @@ const CDN = {
   // Scanopy has no icon in Simple Icons or selfh.st; falls back to a generic
   // tile until a real brand asset exists.
   'Scanopy': 'https://cdn.jsdelivr.net/npm/@mdi/svg@latest/svg/sitemap.svg',
+  'Crafty': 'https://cdn.jsdelivr.net/npm/@mdi/svg@latest/svg/gamepad-variant.svg',
 };
 
 const norm = (s) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
