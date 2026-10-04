@@ -7,14 +7,19 @@ IPAM/DCIM platform for infrastructure management, device tracking, and network d
 - **NetBox app** (port 8001): Django web UI + API
 - **PostgreSQL**: device inventory database
 - **Redis**: cache and task queue
+- **NetBox worker**: consumes queued and scheduled background jobs
 
 ## First-time setup
 
-1. **Create the stack in Komodo UI:**
+1. **Komodo stack configuration:**
    - Stack name: `pc8-ct102-netbox`
-   - Server: `pc8-ct102-komodo`
-   - Run directory: `/opt/stacks/pc8-ct102-netbox`
+   - Server: `pc8-ct102-core`
+   - Run directory: `stacks/pc8-ct102-netbox`
    - File paths: `docker-compose.yml`
+   - Source: `https://github.com/Kingpro500/homelab-komodo`, branch `main`
+   - Stack Environment: configure `POSTGRES_PASSWORD`, `SECRET_KEY`,
+     `SUPERUSER_PASSWORD`, and `SUPERUSER_EMAIL` in Komodo. Do not commit
+     or maintain a runtime `.env` file for this stack.
 
 2. **After Komodo creates the stack, deploy it:**
    - Komodo UI → Stacks → `pc8-ct102-netbox` → Deploy
@@ -22,7 +27,7 @@ IPAM/DCIM platform for infrastructure management, device tracking, and network d
 
 3. **Access NetBox:**
    - URL: `http://10.0.0.117:8001`
-   - Default credentials: `admin` / `admin` (change immediately in GUI)
+   - Sign in using the superuser configured in Komodo.
 
 4. **Generate API token:**
    - NetBox UI → Admin → Users → admin → API Tokens → Generate
