@@ -71,15 +71,29 @@
         href: https://openrouter.ai/workspaces/default
         description: Workspace · forbruk og kreditter
 
+- Infrastructure & IPAM:
+    - NetBox:
+        icon: netbox.png
+        href: http://10.0.0.117:8001/
+        description: 10.0.0.117:8001 · CT102 · pve (pc8) · IPAM/DCIM
+    - Scanopy:
+        icon: mdi-network-outline
+        href: http://10.0.0.117:8002/
+        description: 10.0.0.117:8002 · CT102 · pve (pc8) · SNMP discovery
+    - Grafana:
+        icon: grafana.png
+        href: http://10.0.0.117:3000/
+        description: 10.0.0.117:3000 · CT102 · pve (pc8) · visualisering
+
 - Monitoring:
     - Uptime Kuma:
         icon: uptime-kuma.png
         href: http://10.0.0.128:3001/
         description: 10.0.0.128:3001 · CT109 · pc6
-    - Grafana:
+    - Grafana CT109:
         icon: grafana.png
         href: http://10.0.0.128:3000/
-        description: 10.0.0.128:3000 · CT109 · pc6
+        description: 10.0.0.128:3000 · CT109 · pc6 (legacy)
     - Speedtest Tracker:
         icon: speedtest-tracker.png
         href: http://10.0.0.128:8765/
