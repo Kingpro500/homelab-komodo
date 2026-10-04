@@ -6,147 +6,143 @@
     - Homepage:
         icon: homepage.png
         href: http://10.0.0.128:3009/
-        description: CT109 · pc6 · port 3009
+        description: 10.0.0.128:3009 · CT109 · pc6
     - Komodo:
         icon: komodo.png
         href: http://10.0.0.117:9120/
-        description: CT102 · pc8 · port 9120
+        description: 10.0.0.117:9120 · CT102 · pc8
     - OPNsense:
         icon: opnsense.png
         href: http://10.0.0.1/
-        description: Router / firewall · ikke CT
+        description: 10.0.0.1:80 · Router / firewall
 - Proxmox:
     - pc1:
         icon: proxmox.png
         href: https://10.0.0.112:8006/
-        description: Proxmox-node · RTX 3070 / Ollama
+        description: 10.0.0.112:8006 · Proxmox · RTX 3070 / Ollama
     - pc6:
         icon: proxmox.png
         href: https://10.0.0.120:8006/
-        description: Proxmox-node · Docker, n8n og Hermes
+        description: 10.0.0.120:8006 · Proxmox · Docker, n8n og Hermes
     - pc9:
         icon: proxmox.png
         href: https://10.0.0.103:8006/
-        description: Proxmox-node
+        description: 10.0.0.103:8006 · Proxmox
     - pc8:
         icon: proxmox.png
         href: https://10.0.0.102:8006/
-        description: Proxmox-node
+        description: 10.0.0.102:8006 · Proxmox
 
 - AI & Automation:
     - n8n:
         icon: n8n.png
         href: http://10.0.0.119:5678/
-        description: CT103 · pc6 · port 5678
+        description: 10.0.0.119:5678 · CT103 · pc6
     - Ollama:
         icon: ollama.png
         href: http://10.0.0.133:11434/
-        description: CT156 · pc1 · qwen3:4b API · port 11434
+        description: 10.0.0.133:11434 · CT156 · pc1 · qwen3:4b API
     - Hermes Agent:
         icon: mdi-robot
         href: https://10.0.0.120:8006/
-        description: CT157 · pc6 · terminal-agent
+        description: 10.0.0.135:22 · CT157 · pc6 · terminal-agent
 
 - Monitoring:
     - Uptime Kuma:
         icon: uptime-kuma.png
         href: http://10.0.0.128:3001/
-        description: CT109 · pc6 · port 3001
+        description: 10.0.0.128:3001 · CT109 · pc6
     - Grafana:
         icon: grafana.png
         href: http://10.0.0.128:3000/
-        description: CT109 · pc6 · port 3000
+        description: 10.0.0.128:3000 · CT109 · pc6
     - Speedtest Tracker:
         icon: speedtest-tracker.png
         href: http://10.0.0.128:8765/
-        description: CT109 · pc6 · port 8765
+        description: 10.0.0.128:8765 · CT109 · pc6
     - MySpeed:
         icon: mdi-speedometer
         href: http://10.0.0.124:5216/
-        description: CT104 · pc6 · port 5216
+        description: 10.0.0.124:5216 · CT104 · pc6
     - DiskSpeed:
         icon: mdi-harddisk
         href: http://10.0.0.124:8888/
-        description: CT104 · pc6 · port 8888
+        description: 10.0.0.124:8888 · CT104 · pc6
 
 - Network & Utilities:
     - Pi-hole pc8:
         icon: pi-hole.png
         href: http://10.0.0.115:8080/admin/
-        description: CT115 · pc8 · port 8080
+        description: 10.0.0.115:8080 · CT115 · pc8
     - Pi-hole pc9:
         icon: pi-hole.png
         href: http://10.0.0.116:8080/admin/
-        description: CT116 · pc9 · port 8080
+        description: 10.0.0.116:8080 · CT116 · pc9
     - iVentoy:
         icon: mdi-server-network
         href: http://10.0.0.134:26000/
-        description: CT111 · pc6 · port 26000
+        description: 10.0.0.134:26000 · CT111 · pc6
     - UniFi Network:
         icon: unifi.png
         href: https://10.0.0.132:8443/
-        description: CT155 · pc6 · port 8443
+        description: 10.0.0.132:8443 · CT155 · pc6
 
 - Media & Downloads:
     - MeTube:
         icon: metube.png
         href: http://10.0.0.124:8081/
-        description: CT104 · pc6 · port 8081
+        description: 10.0.0.124:8081 · CT104 · pc6
     - Pinchflat:
         icon: pinchflat.png
         href: http://10.0.0.124:8945/
-        description: CT104 · pc6 · port 8945
+        description: 10.0.0.124:8945 · CT104 · pc6
     - Sonarr:
         icon: sonarr.png
         href: http://10.0.0.128:8989/
-        description: CT109 · pc6 · port 8989
+        description: 10.0.0.128:8989 · CT109 · pc6
     - Radarr:
         icon: radarr.png
         href: http://10.0.0.128:7878/
-        description: CT109 · pc6 · port 7878
+        description: 10.0.0.128:7878 · CT109 · pc6
     - Prowlarr:
         icon: prowlarr.png
         href: http://10.0.0.128:9696/
-        description: CT109 · pc6 · port 9696
+        description: 10.0.0.128:9696 · CT109 · pc6
     - Readarr:
         icon: readarr.png
         href: http://10.0.0.128:8787/
-        description: CT109 · pc6 · port 8787
+        description: 10.0.0.128:8787 · CT109 · pc6
     - Bazarr:
         icon: bazarr.png
         href: http://10.0.0.128:6767/
-        description: CT109 · pc6 · port 6767
+        description: 10.0.0.128:6767 · CT109 · pc6
     - Audiobookshelf:
         icon: audiobookshelf.png
         href: http://10.0.0.128:13378/
-        description: CT109 · pc6 · port 13378
+        description: 10.0.0.128:13378 · CT109 · pc6
     - Deluge:
         icon: deluge.png
         href: http://10.0.0.128:8112/
-        description: CT109 · pc6 · port 8112
+        description: 10.0.0.128:8112 · CT109 · pc6
     - Podgrab:
         icon: podgrab.png
         href: http://10.0.0.128:8081/
-        description: CT109 · pc6 · port 8081
+        description: 10.0.0.128:8081 · CT109 · pc6
     - Grovemap:
         icon: mdi-map
         href: http://10.0.0.128:8080/
-        description: CT109 · pc6 · port 8080
+        description: 10.0.0.128:8080 · CT109 · pc6
     - Emby:
         icon: emby.png
         href: http://10.0.0.150:8096/
-        description: CT151 · pc6 · port 8096
-    - Emby Backup:
-        icon: emby.png
-        href: http://10.0.0.151:8096/
-        description: CT107 · pc9 · port 8096
+        description: 10.0.0.150:8096 · CT151 · pc6
 
 - Photos & Documents:
     - Immich:
         icon: immich.png
         href: http://10.0.0.127:2283/
-        description: CT153 · pc6 · port 2283
+        description: 10.0.0.127:2283 · CT153 · pc6
     - Paperless-ngx:
         icon: paperless-ngx.png
         href: http://10.0.0.131:8000/
-        description: CT154 · pc6 · port 8000
+        description: 10.0.0.131:8000 · CT154 · pc6
