@@ -1,0 +1,33 @@
+services:
+  cleanuparr:
+    image: ghcr.io/cleanuparr/cleanuparr:latest
+    container_name: cleanuparr
+    restart: unless-stopped
+    ports:
+      - "11011:11011"
+    environment:
+      PORT: "11011"
+      BASE_PATH: ""
+      PUID: "99"
+      PGID: "100"
+      UMASK: "022"
+      TZ: Europe/Oslo
+    volumes:
+      # Named volume: Docker creates it on first deploy, nothing to prepare on
+      # the host. Holds config.json (which contains the *arr and Deluge API
+      # keys) plus Cleanuparr's database.
+      - cleanuparr-config:/config
+      # The shared download tree, same host volume Deluge, Sonarr and Radarr see
+      # as /data. Cleanuparr's queue and malware actions go through the Deluge
+      # API, but the file access is what lets it read what a download produced.
+      # Mounted read-write because orphan removal deletes from here.
+      - /data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11011/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 30s
+      retries: 3
+
+volumes:
+  cleanuparr-config:
