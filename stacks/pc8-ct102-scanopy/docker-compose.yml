@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  scanopy:
+    image: nicolaka/scanopy:latest
+    container_name: scanopy-app
+    environment:
+      NETBOX_HOST: http://netbox:8080
+      NETBOX_TOKEN: your_netbox_api_token_here
+      SNMP_COMMUNITY: public
+      SNMP_VERSION: 2c
+      DISCOVERY_THREADS: 10
+      LOG_LEVEL: INFO
+    ports:
+      - "8002:8000"
+    depends_on:
+      - netbox
+    restart: unless-stopped
+    networks:
+      - netbox
+
+networks:
+  netbox:
+    external: true
