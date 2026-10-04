@@ -50,6 +50,15 @@ const CDN = {
   'DiskSpeed': 'https://cdn.jsdelivr.net/npm/@mdi/svg@latest/svg/harddisk.svg',
   'iVentoy': 'https://cdn.jsdelivr.net/npm/@mdi/svg@latest/svg/server-network.svg',
   'Grovemap': 'https://cdn.jsdelivr.net/npm/@mdi/svg@latest/svg/earth.svg',
+  'Netdata Cloud': 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/netdata.svg',
+  'Netdata Tower': 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/netdata.svg',
+  'Netdata pc6': 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/netdata.svg',
+  'Netdata pve': 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/netdata.svg',
+  'Netdata pc9': 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/netdata.svg',
+  'Grafana CT109': 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/grafana.svg',
+  // Scanopy has no icon in Simple Icons or selfh.st; falls back to a generic
+  // tile until a real brand asset exists.
+  'Scanopy': 'https://cdn.jsdelivr.net/npm/@mdi/svg@latest/svg/sitemap.svg',
 };
 
 const norm = (s) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -132,6 +141,7 @@ async function pinItem(id) {
 
   // Resolve the icon for each service once, up front.
   const plan = [];
+  const noIconList = [];
   let builtIn = 0, cdnOk = 0, noIcon = 0;
   for (const [i, s] of services.entries()) {
     const item = {
@@ -155,14 +165,19 @@ async function pinItem(id) {
         cdnOk++;
       } else {
         noIcon++;
-        console.log(`  ! ikon 404, sender uten: ${s.name}`);
+        noIconList.push(`${s.name} (ikon-URL 404)`);
       }
     } else {
       noIcon++;
+      noIconList.push(`${s.name} (ikke i biblioteket, ingen CDN-URL)`);
     }
     plan.push(item);
   }
   console.log(`innebygd ikon: ${builtIn}   cdn-ikon: ${cdnOk}   uten ikon: ${noIcon}`);
+  if (noIconList.length) {
+    console.log('  mangler ikon:');
+    for (const n of noIconList) console.log(`    - ${n}`);
+  }
 
   if (DRY) {
     console.log('\n-- dry run, ingenting sendt. første tre:');
