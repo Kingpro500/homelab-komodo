@@ -1,0 +1,160 @@
+{
+  "_les_meg": "Oppsett for gjeldssystemet. Kjør trinnene i rekkefølge. Trinn 4 og 5 er de eneste som krever at du logger inn med bruker/passord — alt annet kan Hermes ikke gjøre for deg.",
+  "_arkitektur": {
+    "flyt": "Brother-skanner -> scan-til-e-post -> Paperless (innebygd IMAP/Gmail-OAuth) -> n8n webhook -> uttrekk -> Google Sheets -> Ramsey-rapport",
+    "hvorfor_paperless_henter_post": "Paperless-ngx 6.0 har innebygd e-postimport (API: /api/mail_accounts/). Da slipper n8n Gmail-node og OAuth-credential, og du har ett sted a slette dokumenter istedenfor to.",
+    "hvorfor_bruker_vanlig_pol": "Uten workflow_trigger i Paperless maa n8n polle hvert 2. minutt. Med trigger rykkes dokumentet inn med en gang, og du slipper 1440 API-kall dagligvis.",
+    "hva_n8n_gjor": "Kun det Paperless ikke gjor: trekker ut tallene (saldo, rente, min-betaling), setter dem i et regneark, og kjorer Ramsey-simuleringen.",
+    "ikke_gjor_dette": "n8n skal ikke lese PDF-ene selv og ikke sende e-post. Paperless har alt dette. To steder a holde rede pa papirene er to steder a glemme."
+  },
+
+  "trinn_1_paperless_tilgang": {
+    "hva": "Lag en superuser hvis det ikke finnes, og hent en API-token.",
+    "gjor": [
+      "Aapne http://10.0.0.131:8000",
+      "Hvis du faar foerste-gangs-skjermen: lag bruker (brukernavn + passord du velger)",
+      "Hvis du allerede er logget inn: hopp til neste steg",
+      "Klikk profilikonet oppe til hoyre -> 'Application API Token' eller bruk URL'en:",
+      "  http://10.0.0.131:8000/api/profile/generate_auth_token",
+      "Kopier tokenen. Den ser ut som: 8f3a2b1c9d4e5f60718293a4b5c6d7e8f9012a3b4"
+    ],
+    "her_lagres_token": {
+      "komodo": "Paperless -> Edit -> Environment Variables -> add PAPERLESS_TOKEN",
+      "eller": "Komodo stack 'pc6-ct154-paperless' -> env-variabel paa containeren paperless-webserver",
+      "advarsel": "Ikke skriv tokenen i chat med meg. Jeg trenger den ikke — n8n leser den fra env-variabelen selv."
+    },
+    "verifiser": "curl -H 'Authorization: Token <TOKEN>' http://10.0.0.131:8000/api/documents/?page_size=1  -> skal svare 200 (ikke 401)"
+  },
+
+  "trinn_2_tags_og_typer": {
+    "hva": "Paperless bruker tags til a styre hva som blir behandlet.",
+    "gjor_i_gui": [
+      "Paperless -> Tags -> Add, lag disse fire:",
+      "  skann        = fysiske papirer fra Brother (eller skannede fakturaer)",
+      "  faktura      = fakturaer fra butikker/leverandorer",
+      "  gjeld        = dokumenter om laan, saldo, betalingsplan",
+      "  uutrekt      = leger automatisk av workflow 1 naar uttrekket er lagret",
+      "Paperless -> Document Types -> Add:",
+      "  Saldo-oversikt = periodisk oversikt fra bank/kreditor",
+      "  Faktura       = en faktura med et fast belop",
+      "  Avtale        = betalingsavtale eller gjeldsordning"
+    ],
+    "hvorfor_viktig": "Workflow 1 henter bare tag 'skann' og setter 'uutrekt'. Uten taggen filtreres alt, og du får 0 dokumenter hver gang uten feilmelding."
+  },
+
+  "trinn_3_custom_fields": {
+    "hva": "Structured data paa hvert dokument, slik at tallene kan filtreres og sorteres i Paperless selv.",
+    "gjor_i_gui": "Paperless -> Custom Fields -> Add, en for en:",
+    "felter": [
+      { "navn": "kreditor",       "type": "string",  "gruppering": "Gjeld" },
+      { "navn": "saldo",          "type": "float",   "gruppering": "Gjeld", "enhet": "kr" },
+      { "navn": "rente_prosent",  "type": "float",   "gruppering": "Gjeld", "enhet": "%" },
+      { "navn": "min_betaling",   "type": "float",   "gruppering": "Gjeld", "enhet": "kr" },
+      { "navn": "forfall",        "type": "date",    "gruppering": "Gjeld" },
+      { "navn": "dokumentasjon",  "type": "string",  "gruppering": "Gjeld", "farge": "gul" }
+    ],
+    "grupperingspoeng": "Alle feltene maa ligge i gruppen 'Gjeld', ellers dukker de ikke opp paa dokumenttypen.",
+    "etterpaa": "Paperless -> Document Types -> Saldo-oversikt -> Edit -> legg alle seks feltene til i Custom fields-t-tabellen. Gjoer det samme for Faktura og Avtale."
+  },
+
+  "trinn_4_brev_scanner_til_epost": {
+    "hva": "Dette er det eneste steget du gjoer fysisk ved skanneren.",
+    "bakgrunn": "Brother har innebygd 'Scan to E-mail'. Da slipper du FTP, SMB og en ekstra tjeneste. Skannet kommer rett i postkassen du allerede har.",
+    "brother_innstillinger": [
+      "Trykk pA skannerens meny -> 'Scan to PC/Network' eller 'Scan' -> 'Scan to E-mail'",
+      "Profil: velg 'PDF' (ikke JPEG) og '200-300 dpi' for gjeldsdokumenter",
+      "Filnavn-mal: legg inn 'BROTHER-%Y%m%d-%%' saa datoen gaar med",
+      "Mottakeradresse: BRUK EN DEDIKERT ADRESSE, f.eks. gjeld@domene.no — ikke din personlige adresse",
+      "Emnefelt (viktig): 'GJELD' — workflowen filtrerer paa dette"
+    ],
+    "hvorfor_dedikert_adresse": "Da kan du vaere helt sikker paa at alt i den kassen er gjeld, og du kan regelere videre. Med Gmail-filter: {subject:'GJELD'} -> flytt til label 'gjeld'.",
+    "gmail_filter": {
+      "gjor_i_gmail": "Innstillinger -> Filtrer og blokkerte merknader -> Opprett nytt filter",
+      "har_kriterier": "Emne: inneholder GJELD",
+      "har_handling": "Flytt til merknad: GjeldInn (ikke velg 'Merk som lest' — du vil se det komme)"
+    }
+  },
+
+  "trinn_5_paperless_henter_posten": {
+    "hva": "Koble Paperless til den dedikerte adressen. Da importerer Paperless vedleggene selv, med tag 'skann'.",
+    "gmail_oauth_anbefalt": {
+      "hvorfor": "IMAP med app-passord krever at du slår paa 2FA og lager et app-passord. Gmail OAuth gjoer det samme uten app-passord, men krever at du registrerer en OAuth-client hos Google (5 min).",
+      "gjor": [
+        "https://console.cloud.google.com/ -> velg eller lag et prosjekt",
+        "Aktiver 'Gmail API' under APIer og tjenester -> Bibliotek",
+        "Konfigurer OAuth-samtykke: scope https://www.googleapis.com/auth/gmail.readonly",
+        "Lag en OAuth-client av typen 'Web application'",
+        "Paperless -> Settings -> Mail Accounts -> Add",
+        "  Name: GjeldInn",
+        "  IMAP server: imap.gmail.com, port 993, SSL",
+        "  Account type: velg 'Gmail OAuth' (felt 2 i API-en)",
+        "  Trykk 'Connect' og logg inn med Google — du blir sendt ut og tilbake",
+        "Username: din gmail-adresse, eks. rogerlillefosse@gmail.com"
+      ]
+    },
+    "imap_med_app_passord": {
+      "naar": "Hvis OAuth-feiler — f.eks. hvis kontoen din ikke har 2FA eller du bruker et bedriftskonto-problem.",
+      "gjor": [
+        "Google-konto -> Sikkerhet -> 2-trinns bekreftelse ON (krav for app-passord)",
+        "Google-konto -> Sikkerhet -> App-passord -> 'Annen enhet' -> navn 'Paperless'",
+        "Kopier det 16-tegns passordet (det har mellomrom, og det er normalt)",
+        "Paperless -> Mail Accounts -> Add: imap.gmail.com / 993 / SSL / IMAP",
+        "Username = full gmail-adresse, Password = app-passordet",
+        "Paperless -> Mail Rules -> Add: regel paa at alt med emne GJELD faar tag 'skann'"
+      ]
+    },
+    "verifiser": "Paperless -> Tasks. Du skal se en oppgave 'Mail Fetch' kjore med gront resultat, og nye dokumenter under tag 'skann'.",
+    "hvis_ingenting_skjer": "Sjekk: 1) er app-passordet uten mellomrom? 2) er 'SSL' valgt, ikke STARTTLS? 3) har filteret din label GJELDInn -> 'skann'?"
+  },
+
+  "trinn_6_n8n": {
+    "hva": "Importer de to workflow-filene fra /home/hermes/gjeld/ i n8n.",
+    "import": "n8n -> Workflows -> ... -> Import from File",
+    "filer": [
+      "wf-1-uttrekk.json  = leser tallene fra Paperless, skriver dem i regneark",
+      "wf-2-ramsey.json    = kjorer simulasjonen og lager rapporten"
+    ],
+    "credentials_maa_du_koble": [
+      {
+        "node": "Hent uskannede fra Paperless / Skriv til Paperless",
+        "type": "Header Auth",
+        "felt": "Name = Authorization",
+        "verdi": "Token <DIN TOKEN FRA TRINN 1>"
+      },
+      {
+        "node": "Skriv til Google Sheets",
+        "type": "Google Sheets (OAuth2) eller Service Account",
+        "felt": "Koble kontoen din",
+        "merknad": "Samme konto som Paperless-mailen, eller en annen — arket bor ikke vaere personlig."
+      }
+    ],
+    "env_variabel": {
+      "hva": "PAPERLESS_TOKEN maa vaere tilgjengelig som n8n-variabel.",
+      "gjor": "Komodo -> stack pc6-ct103-n8n -> Edit -> Environment -> PAPERLESS_TOKEN = <token>",
+      "alternativ": "Hvis du vil boende i workflowen: Erstatt ={{ $env.PAPERLESS_TOKEN }} med Token <token> i Header Auth-noden.",
+      "etterpaa": "Workflowene maa deaktiveres, n8n startes paa nytt, og saa aktiveres."
+    }
+  },
+
+  "trinn_7_ark": {
+    "hva": "Regnearket som holder oversikt.",
+    "gjor_i_gui": [
+      "Lag et nytt Google-regneark, navn 'Gjeldsoversikt'",
+      "Rad 1 (headere): kreditor | saldo | rente | min_betaling | forfall | dokumentasjon | oppdatert | kilde | status",
+      "Ark 2: 'Ramsey' — la workflow 2 skrive her",
+      "Ark 3: 'Kreditorer' — den riktige oversikten, 22 rader",
+      "Del ark -> 'Kreditorer' med bare deg (ingen and som kan endre tall ved et uhell)"
+    ],
+    "viktig": "Rediger alltid i ark 'Kreditorer'. Ark 'Ramsey' og 'GjeldInn' blir overskrevet hver kjoring."
+  },
+
+  "feilsok": {
+    "Ingen dokumenter i Paperless": "Sjekk tag-filteret. Uten tag 'skann' paa dokumentet gir workflowen 0 treff uten feil. Se Paperless -> Tasks for om mail fetch feilet.",
+    "401 fra Paperless i n8n": "Tokenen er feil eller env-variabelen er ikke lest. Test tokenen med curl fra terminalen forst.",
+    "Utrekket finner ingen tall": "OCR-teksten er for kort, eller dokumentet er en PDF av et bilde i darlig kvalitet. Sjekk Paperless -> Dokument -> 'Full tekst' for a se hva OCR faktisk fant.",
+    "Regnearket er tomt": "Google Sheets-credentialen er ikke koblet. i OAuth er noden koblet men datakilden peker paa feil ark.",
+    "Rapporten sier 'budsjett under minimum'": "Det er ikke en feil. Det er den viktigste funnende i hele systemet — 22 minimumsbetalinger overstiger inntekten i dalige maaneder."
+  },
+
+  "viktig_til_slutt": "Dette er et regnestykke-verktoy, ikke juridisk raadgivning. Gjeldsordning, dekningstopp og avslagsforhandling avgjoeres av kreditor og forvalter, ikke av et regneark. Men tallene du får her er de tallene du skal ta med inn i den samtalen."
+}
