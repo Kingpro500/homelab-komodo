@@ -1,0 +1,202 @@
+server:
+  port: 8080
+
+branding:
+  app-name: Homelab
+  logo-text: H
+  hide-footer: true
+
+theme:
+  background-color: 220 18 11
+  primary-color: 210 70 55
+  positive-color: 150 45 45
+  negative-color: 2 75 60
+  contrast-multiplier: 1.15
+
+pages:
+  - name: Home
+    columns:
+      - size: small
+        widgets:
+          - type: clock
+            hour-format: 24h
+            timezones:
+              - timezone: Europe/Oslo
+                label: Oslo
+
+          - type: calendar
+            first-day-of-week: monday
+
+          - type: search
+            search-engine: duckduckgo
+            bangs:
+              - title: Komodo
+                shortcut: "!komodo"
+                url: http://10.0.0.117:9120/
+              - title: Proxmox pc8
+                shortcut: "!pve"
+                url: https://10.0.0.102:8006/
+
+      - size: full
+        widgets:
+          - type: monitor
+            title: Tjenester
+            cache: 1m
+            style: compact
+            sites:
+              - title: Homepage
+                url: http://10.0.0.128:3009/
+                icon: si:homepage
+              - title: Komodo
+                url: http://10.0.0.117:9120/
+                icon: sh:komodo
+              - title: OPNsense
+                url: http://10.0.0.1/
+                icon: si:opnsense
+              - title: Grafana
+                url: http://10.0.0.128:3000/
+                icon: si:grafana
+              - title: Uptime Kuma
+                url: http://10.0.0.128:3001/
+                icon: sh:uptime-kuma
+              - title: Hermes
+                url: http://10.0.0.135:9119/
+                icon: mdi-robot
+              - title: Immich
+                url: http://10.0.0.127:2283/
+                icon: si:immich
+              - title: Paperless
+                url: http://10.0.0.131:8000/
+                icon: sh:paperless-ngx
+              - title: Emby
+                url: http://10.0.0.150:8096/
+                icon: si:emby
+              - title: Seerr
+                url: http://10.0.0.128:5055/
+                icon: sh:overseerr
+              - title: Audiobookshelf
+                url: http://10.0.0.128:13378/
+                icon: mdi-book-open-variant
+              - title: Deluge
+                url: http://10.0.0.128:8112/
+                icon: si:deluge
+              - title: Sonarr
+                url: http://10.0.0.128:8989/
+                icon: si:sonarr
+              - title: Radarr
+                url: http://10.0.0.128:7878/
+                icon: si:radarr
+              - title: Prowlarr
+                url: http://10.0.0.128:9696/
+                icon: sh:prowlarr
+              - title: Bazarr
+                url: http://10.0.0.128:6767/
+                icon: sh:bazarr
+              - title: Readarr
+                url: http://10.0.0.128:8787/
+                icon: sh:readarr
+              - title: Grovemap
+                url: http://10.0.0.128:8080/
+                icon: mdi-earth
+              - title: n8n
+                url: http://10.0.0.119:5678/
+                icon: si:n8n
+              - title: Open WebUI
+                url: http://10.0.0.119:3080/
+                icon: sh:open-webui
+              - title: Pi-hole pc8
+                url: http://10.0.0.115:8080/admin/
+                icon: si:pihole
+              - title: Pi-hole pc9
+                url: http://10.0.0.116:8080/admin/
+                icon: si:pihole
+              - title: UniFi
+                url: https://10.0.0.132:8443/
+                icon: si:ubiquiti
+                allow-insecure: true
+              - title: Proxmox pc8
+                url: https://10.0.0.102:8006/
+                icon: mdi-server
+                allow-insecure: true
+              - title: Proxmox pc6
+                url: https://10.0.0.120:8006/
+                icon: mdi-server
+                allow-insecure: true
+              - title: Proxmox pc9
+                url: https://10.0.0.103:8006/
+                icon: mdi-server
+                allow-insecure: true
+              - title: iVentoy
+                url: http://10.0.0.134:26000/
+                icon: mdi-server-network
+              - title: Ollama
+                url: http://10.0.0.133:11434/
+                icon: si:ollama
+
+          - type: docker-containers
+            title: containere
+            hide-by-default: false
+            format-container-names: true
+
+      - size: small
+        widgets:
+          - type: bookmarks
+            title: Lenker
+            groups:
+              - title: Drift
+                links:
+                  - title: Homepage
+                    url: http://10.0.0.128:3009/
+                  - title: Komodo
+                    url: http://10.0.0.117:9120/
+                  - title: Proxmox pc8
+                    url: https://10.0.0.102:8006/
+                  - title: Proxmox pc6
+                    url: https://10.0.0.120:8006/
+                  - title: Proxmox pc9
+                    url: https://10.0.0.103:8006/
+                  - title: OPNsense
+                    url: http://10.0.0.1/
+                  - title: Grafana
+                    url: http://10.0.0.128:3000/
+                  - title: Uptime Kuma
+                    url: http://10.0.0.128:3001/
+
+              - title: AI
+                links:
+                  - title: Hermes
+                    url: http://10.0.0.135:9119/
+                  - title: Open WebUI
+                    url: http://10.0.0.119:3080/
+                  - title: n8n
+                    url: http://10.0.0.119:5678/
+                  - title: Ollama
+                    url: http://10.0.0.133:11434/
+
+              - title: Media
+                links:
+                  - title: Emby
+                    url: http://10.0.0.150:8096/
+                  - title: Immich
+                    url: http://10.0.0.127:2283/
+                  - title: Seerr
+                    url: http://10.0.0.128:5055/
+                  - title: Audiobookshelf
+                    url: http://10.0.0.128:13378/
+
+              - title: Verktoy
+                links:
+                  - title: Pi-hole pc8
+                    url: http://10.0.0.115:8080/admin/
+                  - title: Pi-hole pc9
+                    url: http://10.0.0.116:8080/admin/
+                  - title: UniFi
+                    url: https://10.0.0.132:8443/
+                  - title: Paperless
+                    url: http://10.0.0.131:8000/
+
+          - type: server-stats
+            title: CT109
+            servers:
+              - type: local
+                name: CT109

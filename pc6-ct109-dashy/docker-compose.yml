@@ -1,0 +1,11 @@
+services:
+  dashy:
+    image: lissy93/dashy:4.7.17
+    container_name: dashy
+    restart: unless-stopped
+    ports:
+      - "3011:8080"
+    environment:
+      TZ: Europe/Oslo
+    volumes:
+      - "${DASHY_CONFIG_PATH:?Set in Komodo}:/usr/src/app/data"

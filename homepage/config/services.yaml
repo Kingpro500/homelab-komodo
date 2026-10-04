@@ -7,6 +7,18 @@
         icon: homepage.png
         href: http://10.0.0.128:3009/
         description: 10.0.0.128:3009 · CT109 · pc6
+    - Glance:
+        icon: si:glance
+        href: http://10.0.0.128:3010/
+        description: 10.0.0.128:3010 · CT109 · pc6 · status og containere
+    - Dashy:
+        icon: mdi:view-dashboard
+        href: http://10.0.0.128:3011/
+        description: 10.0.0.128:3011 · CT109 · pc6 · lenker
+    - Heimdall:
+        icon: mdi:rocket-launch
+        href: http://10.0.0.128:3012/
+        description: 10.0.0.128:3012 · CT109 · pc6 · launcher
     - Komodo:
         icon: komodo.png
         href: http://10.0.0.117:9120/

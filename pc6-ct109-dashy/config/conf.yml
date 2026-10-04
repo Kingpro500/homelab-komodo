@@ -1,0 +1,156 @@
+---
+# Starter config for Dashy 4.7. Runtime copy lives at /opt/dashy/conf.yml on
+# CT109. Dashy 4.7 uses the sections/items format; appConfig replaces the old
+# top-level `settings` block.
+pageInfo:
+  title: Homelab Dashy
+  description: pc6 CT109
+  navLinks:
+    - title: Glance
+      path: http://10.0.0.128:3010/
+      target: newtab
+    - title: Heimdall
+      path: http://10.0.0.128:3012/
+      target: newtab
+    - title: Homepage
+      path: http://10.0.0.128:3009/
+      target: newtab
+
+appConfig:
+  layout: masonry
+  allowConfigEdit: true
+  language: nb
+  iconSize: medium
+  nightTheme: callisto
+  enableMaterialDesignIcons: true
+
+sections:
+  - name: Drift
+    displayData:
+      sortBy: default
+    items:
+      - title: Homepage
+        url: http://10.0.0.128:3009/
+        description: CT109
+        icon: si:homepage
+      - title: Glance
+        url: http://10.0.0.128:3010/
+        description: status og containere
+        icon: si:glance
+      - title: Heimdall
+        url: http://10.0.0.128:3012/
+        description: launcher
+        icon: mdi:rocket-launch
+      - title: Komodo
+        url: http://10.0.0.117:9120/
+        description: CT102
+        icon: sh:komodo
+      - title: Grafana
+        url: http://10.0.0.128:3000/
+        description: CT109
+        icon: si:grafana
+      - title: Uptime Kuma
+        url: http://10.0.0.128:3001/
+        description: CT109
+        icon: sh:uptime-kuma
+      - title: Proxmox pc8
+        url: https://10.0.0.102:8006/
+        description: master
+        icon: mdi:server
+      - title: Proxmox pc6
+        url: https://10.0.0.120:8006/
+        description: workload
+        icon: mdi:server
+      - title: Proxmox pc9
+        url: https://10.0.0.103:8006/
+        icon: mdi:server
+      - title: OPNsense
+        url: http://10.0.0.1/
+        description: firewall
+        icon: si:opnsense
+
+  - name: AI og automasjon
+    items:
+      - title: Hermes
+        url: http://10.0.0.135:9119/
+        description: CT157
+        icon: mdi:robot
+      - title: Open WebUI
+        url: http://10.0.0.119:3080/
+        description: CT103
+        icon: sh:open-webui
+      - title: n8n
+        url: http://10.0.0.119:5678/
+        description: CT103
+        icon: si:n8n
+      - title: Ollama
+        url: http://10.0.0.133:11434/
+        description: CT156, kjører på CPU
+        icon: si:ollama
+
+  - name: Media
+    items:
+      - title: Emby
+        url: http://10.0.0.150:8096/
+        description: CT151
+        icon: si:emby
+      - title: Immich
+        url: http://10.0.0.127:2283/
+        description: CT153
+        icon: si:immich
+      - title: Seerr
+        url: http://10.0.0.128:5055/
+        description: CT109
+        icon: sh:overseerr
+      - title: Audiobookshelf
+        url: http://10.0.0.128:13378/
+        icon: mdi:book-open-variant
+      - title: Sonarr
+        url: http://10.0.0.128:8989/
+        icon: si:sonarr
+      - title: Radarr
+        url: http://10.0.0.128:7878/
+        icon: si:radarr
+      - title: Prowlarr
+        url: http://10.0.0.128:9696/
+        icon: sh:prowlarr
+      - title: Deluge
+        url: http://10.0.0.128:8112/
+        icon: si:deluge
+      - title: Bazarr
+        url: http://10.0.0.128:6767/
+        icon: sh:bazarr
+      - title: Readarr
+        url: http://10.0.0.128:8787/
+        icon: sh:readarr
+
+  - name: Nettverk og verktoy
+    items:
+      - title: Pi-hole pc8
+        url: http://10.0.0.115:8080/admin/
+        description: CT115
+        icon: si:pihole
+      - title: Pi-hole pc9
+        url: http://10.0.0.116:8080/admin/
+        description: CT116
+        icon: si:pihole
+      - title: UniFi
+        url: https://10.0.0.132:8443/
+        description: CT155
+        icon: si:ubiquiti
+      - title: Paperless
+        url: http://10.0.0.131:8000/
+        description: CT154
+        icon: sh:paperless-ngx
+      - title: iVentoy
+        url: http://10.0.0.134:26000/
+        description: CT111
+        icon: mdi:server-network
+      - title: Grovemap
+        url: http://10.0.0.128:8080/
+        description: CT109
+        icon: mdi:earth
+      - title: Speedtest
+        url: http://10.0.0.128:8765/
+        description: CT109
+        icon: mdi:speedometer

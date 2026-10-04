@@ -1,0 +1,10 @@
+services:
+  glance:
+    image: glanceapp/glance:v0.8.6
+    container_name: glance
+    restart: unless-stopped
+    ports:
+      - "3010:8080"
+    volumes:
+      - "${GLANCE_CONFIG_PATH:?Set in Komodo}:/app/config"
+      - /var/run/docker.sock:/var/run/docker.sock:ro

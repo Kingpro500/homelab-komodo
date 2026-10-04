@@ -1,0 +1,16 @@
+services:
+  heimdall:
+    image: lscr.io/linuxserver/heimdall:latest
+    container_name: heimdall
+    restart: unless-stopped
+    ports:
+      - "3012:80"
+    environment:
+      PUID: "99"
+      PGID: "100"
+      TZ: Europe/Oslo
+      # Heimdall blocks lookups to private IPs by default. Every service on this
+      # dashboard is RFC1918, so this has to be true for the search to work.
+      ALLOW_INTERNAL_REQUESTS: "true"
+    volumes:
+      - "${HEIMDALL_CONFIG_PATH:?Set in Komodo}:/config"

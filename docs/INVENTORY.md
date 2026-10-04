@@ -25,7 +25,7 @@ on pc6, pc8 or pc9. n8n used to violate this; it moved to CT 103 on pc6.
 | pc6 | 101 qemu | `Unraid-Tower` | 10.0.0.101 | 15G | — | no (VM) | 0 | | Docker in a VM. 31 of 32 containers stopped. **Holds the only GPU passthrough in the cluster** |
 | pc6 | 103 lxc | **`pc1-ct103-node`** | 10.0.0.119 | 4G | 32G | yes | 2 | `pc6-ct103-node` | n8n and Open WebUI. Name still says pc1 after the move |
 | pc6 | 104 lxc | **`pc6`** | 10.0.0.124 | 4G | 32G | yes | 1 | `pc6-ct104-media-downloaders` | MeTube, Pinchflat, MySpeed, DiskSpeed |
-| pc6 | 109 lxc | **`pc6-ct109-node`** | 10.0.0.128 | 4G | 32G | yes | 9 | `pc6-ct109-docker` | Shared Docker node: arr stack, Grafana, Homepage, Kuma, Seerr, Speedtest, Deluge, Audiobookshelf, Grovemap |
+| pc6 | 109 lxc | **`pc6-ct109-node`** | 10.0.0.128 | 4G | 32G | yes | 12 | `pc6-ct109-docker` | Shared Docker node: arr stack, Grafana, Homepage, Kuma, Seerr, Speedtest, Deluge, Audiobookshelf, Grovemap, Glance, Dashy, Heimdall |
 | pc6 | 111 lxc | `pc6-ct111-iventoy` | 10.0.0.134 | 1G | 16G | yes | 1 | | iVentoy PXE boot |
 | pc6 | 151 lxc | **`emby-pc6`** | 10.0.0.150 | 8G | 256G | yes | 1 | `pc6-ct151-emby` | Active Emby. Transcoding should use the N355 iGPU |
 | pc6 | 152 lxc | `pc6-ct152-roon` | 10.0.0.125 | 4G | 32G | yes | 1 | | Roon server. Source of the multicast noise behind the September ARP flapping |
