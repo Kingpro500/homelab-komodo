@@ -1,20 +1,26 @@
 services:
   crafty:
-    image: lscr.io/linuxserver/cygot-docker:latest
+    # NOT lscr.io/linuxserver/cygot-docker: that image does not exist. LSIO's
+    # own catalogue (201 images) has no cygot entry and the pull is denied.
+    # NOT mholt/crafty-controller either: gone from Docker Hub, also denied.
+    # cybercube/crafty-controller is the remaining maintained fork, verified
+    # pulling and serving on CT109.
+    image: cybercube/crafty-controller:latest
     container_name: crafty
     restart: unless-stopped
     ports:
       - "8000:8000"
-    environment:
-      PUID: "99"
-      PGID: "100"
-      TZ: Europe/Oslo
-      # Crafty starts game servers as this account; keep it aligned with PUID.
-      USER: "abc"
     volumes:
-      # Named volume: Docker creates it on first deploy, so no host preparation.
-      # Holds both the Crafty config and any game server files added later.
-      - crafty-data:/data
+      # Named volume: Docker creates it on first deploy, no host preparation.
+      # Crafty v3 keeps its config under the crafty user's home and writes there
+      # on every start.
+      - crafty-data:/home/crafty
+    # Crafty's entrypoint is `sh -c "python3 crafty.py"`. Without a TTY the
+    # wrapper reads EOF on Crafty's interactive prompt and exits 0, which under
+    # restart: unless-stopped becomes a crash loop. Verified: with tty and
+    # stdin_open the container stays up and answers HTTP 200 on 8000.
+    tty: true
+    stdin_open: true
     mem_limit: 2g
 
 volumes:
