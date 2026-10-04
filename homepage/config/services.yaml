@@ -190,6 +190,10 @@
         icon: bazarr.png
         href: http://10.0.0.128:6767/
         description: 10.0.0.128:6767 · CT109 · pc6
+    - Cleanuparr:
+        icon: mdi:delete-sweep
+        href: http://10.0.0.128:11011/
+        description: 10.0.0.128:11011 · CT109 · pc6 · rydder *Arr-køer
     - Audiobookshelf:
         icon: audiobookshelf.png
         href: http://10.0.0.128:13378/

@@ -60,6 +60,7 @@ const CDN = {
   // tile until a real brand asset exists.
   'Scanopy': 'https://cdn.jsdelivr.net/npm/@mdi/svg@latest/svg/sitemap.svg',
   'Crafty': 'https://cdn.jsdelivr.net/npm/@mdi/svg@latest/svg/gamepad-variant.svg',
+  'Cleanuparr': 'https://cdn.jsdelivr.net/npm/@mdi/svg@latest/svg/delete-sweep.svg',
 };
 
 const norm = (s) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
