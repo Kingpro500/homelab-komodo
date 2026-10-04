@@ -5,7 +5,7 @@ services:
     image: nicolaka/scanopy:latest
     container_name: scanopy-app
     environment:
-      NETBOX_HOST: http://netbox:8080
+      NETBOX_HOST: http://netbox-app:8080
       NETBOX_TOKEN: your_netbox_api_token_here
       SNMP_COMMUNITY: public
       SNMP_VERSION: 2c
@@ -13,12 +13,10 @@ services:
       LOG_LEVEL: INFO
     ports:
       - "8002:8000"
-    depends_on:
-      - netbox
     restart: unless-stopped
     networks:
-      - netbox
+      - scanopy
 
 networks:
-  netbox:
-    external: true
+  scanopy:
+    driver: bridge
