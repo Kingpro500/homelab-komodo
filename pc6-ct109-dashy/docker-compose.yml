@@ -8,4 +8,9 @@ services:
     environment:
       TZ: Europe/Oslo
     volumes:
-      - "${DASHY_CONFIG_PATH:?Set in Komodo}:/usr/src/app/data"
+      # Named volume: Docker creates it on first deploy, so nothing has to be
+      # prepared on the host by hand. conf.yml here is edited from the Dashy UI.
+      - dashy-data:/usr/src/app/data
+
+volumes:
+  dashy-data:

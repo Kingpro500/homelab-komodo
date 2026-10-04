@@ -6,5 +6,8 @@ services:
     ports:
       - "3010:8080"
     volumes:
-      - "${GLANCE_CONFIG_PATH:?Set in Komodo}:/app/config"
+      # Komodo clones the repo and lists both files in the stack's file_paths,
+      # so the config arrives from Git. Read-only: Glance never writes to it,
+      # and this keeps the git checkout clean.
+      - ./config/glance.yml:/app/config/glance.yml:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro

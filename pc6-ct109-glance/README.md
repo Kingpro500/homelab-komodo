@@ -2,13 +2,18 @@
 
 - **Komodo server / stack:** `pc6-ct109-node` / `pc6-ct109-glance`
 - **Address:** `http://10.0.0.128:3010`
-- **Runtime config:** `/opt/glance`
 
-Glance has no web UI for its configuration, so `glance.yml` is committed here in
-Git as `config/glance.yml` and copied to `/opt/glance/glance.yml` on CT109 once.
-Glance hot-reloads that file, so later edits can be made in Git and pushed.
+Glance has no web UI for its configuration, so `config/glance.yml` lives in Git
+and is deployed with the stack. The stack's `file_paths` must list both files:
 
-Komodo variable: `GLANCE_CONFIG_PATH=/opt/glance`
+```
+docker-compose.yml
+config/glance.yml
+```
+
+The compose file bind-mounts `./config/glance.yml` read-only, relative to the
+cloned repo, so nothing has to be prepared on the host by hand. Verified that
+Glance v0.8.6 starts and serves with a read-only config file.
 
 `docker.sock` is mounted read-only for the `docker-containers` widget. Glance only
 ever reads from it.

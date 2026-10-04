@@ -13,4 +13,9 @@ services:
       # dashboard is RFC1918, so this has to be true for the search to work.
       ALLOW_INTERNAL_REQUESTS: "true"
     volumes:
-      - "${HEIMDALL_CONFIG_PATH:?Set in Komodo}:/config"
+      # Named volume: Docker creates it on first deploy. Holds the SQLite
+      # database Heimdall 2.8 stores apps in, plus its generated app key.
+      - heimdall-data:/config
+
+volumes:
+  heimdall-data:
