@@ -27,6 +27,10 @@
         icon: opnsense.png
         href: http://10.0.0.1/
         description: 10.0.0.1:80 · Router / firewall
+    - Home Assistant:
+        icon: home-assistant.png
+        href: http://10.0.0.7:8123/
+        description: 10.0.0.7:8123 · VM100 · pve (pc8) · smarthus
 - Proxmox:
     - pc1:
         icon: proxmox.png
