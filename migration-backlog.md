@@ -24,9 +24,12 @@ GPU-en. Ingen nåværende oppgave avhenger av pc1-veien.
   Se `pc1-ai-roadmap.md`. Løses ikke her.
 - **Komodo-alert `pc1-ct156-ollama`:** CRITICAL `ServerUnreachable` siden
   1. oktober 21:50 UTC, fordi Komodo-agenten ikke kjører i CT-en.
-- **Komodo-alert `pc6-ct103-node`:** `ServerUnreachable` åpnet 4. oktober 13:59.
-  n8n (`.119:5678`) og Open WebUI (`.119:3080`) svarer begge, så CT-en kjører —
-  det er agenten som er borte. Samme agent har flappet siden 1. oktober.
+- **Komodo-alert `pc6-ct103-node` er løst.** Var `ServerUnreachable` fra 4. oktober 13:59.
+  Årsak: filbanen var aldri problemet — `run_directory` og `file_paths` var korrekte
+  hele veien. Periphery på CT103 identifiserte seg fortsatt som `pc1-ct103-node`
+  etter flyttingen til pc6. Løst ved å gi agenten navnet `pc6-ct103-node` og
+  gjenskape Periphery. n8n-stacken kjører med n8n + postgres, begge friske.
+  Se `docs/INVENTORY.md` — navnedriften er der ennå ikke ryddet.
 - **Homepage GitOps har et hull.** `file_paths` er bare `['docker-compose.yml']`,
   så Komodo henter ikke `services.yaml` fra repoet. Redeploy trekker riktig commit
   (`deployed_hash` matcher), men fila som serveres ligger i repo-klonen på
