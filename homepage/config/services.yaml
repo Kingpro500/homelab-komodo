@@ -65,6 +65,14 @@
         icon: speedtest-tracker.png
         href: http://10.0.0.128:8765/
         description: CT109 · pc6 · port 8765
+    - MySpeed:
+        icon: mdi-speedometer
+        href: http://10.0.0.124:5216/
+        description: CT104 · pc6 · port 5216
+    - DiskSpeed:
+        icon: mdi-harddisk
+        href: http://10.0.0.124:8888/
+        description: CT104 · pc6 · port 8888
 
 - Network & Utilities:
     - Pi-hole pc8:
