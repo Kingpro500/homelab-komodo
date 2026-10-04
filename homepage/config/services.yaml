@@ -86,10 +86,26 @@
         description: 10.0.0.117:3000 · CT102 · pve (pc8) · visualisering
 
 - Monitoring:
-    - Netdata:
+    - Netdata Cloud:
         icon: si:netdata
         href: https://app.netdata.cloud/spaces/rogerlillefoss-space/rooms/all-nodes/overview
-        description: Netdata Cloud · alle noder · krever innlogging
+        description: Netdata Cloud · alle noder · fra internett · krever innlogging
+    - Netdata Tower:
+        icon: si:netdata
+        href: http://10.0.0.101:19999/
+        description: 10.0.0.101:19999 · VM101 · Unraid Tower · 16 GB
+    - Netdata pc6:
+        icon: si:netdata
+        href: http://10.0.0.120:19999/
+        description: 10.0.0.120:19999 · Proxmox pc6 · 32 GB
+    - Netdata pve:
+        icon: si:netdata
+        href: http://10.0.0.102:19999/
+        description: 10.0.0.102:19999 · Proxmox master · 16 GB
+    - Netdata pc9:
+        icon: si:netdata
+        href: http://10.0.0.103:19999/
+        description: 10.0.0.103:19999 · Proxmox pc9 · 16 GB
     - Uptime Kuma:
         icon: uptime-kuma.png
         href: http://10.0.0.128:3001/
