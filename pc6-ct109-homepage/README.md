@@ -2,49 +2,54 @@
 
 - **Komodo server / stack:** `pc6-ct109-node` / `pc6-ct109-homepage`
 - **Address:** `http://10.0.0.128:3009`
-- **Runtime config:** `/opt/homepage`
+- **Config:** `homepage/config/` i repoet, mountet read-only
 
-Tower's prior Homepage YAML configuration is copied once as runtime data and is
-kept out of Git because it can contain integration credentials. Required Komodo
-variable: `HOMEPAGE_CONFIG_PATH=/opt/homepage`.
-
-## services.yaml er GitOps — med et forbehold
-
-`docker-compose.yml` mounter fila fra repoet:
+Hele konfigurasjonsmappa kommer fra Git:
 
 ```yaml
-- ../homepage/config/services.yaml:/app/config/services.yaml:ro
+- ../homepage/config:/app/config:ro
 ```
 
-Fila i git er det Homepage serverer, og mounten er read-only. Men det er en
-felle ved endringer, funnet og verifisert 4. oktober 2026:
+Ingen Komodo-variabel trengs lenger. `HOMEPAGE_CONFIG_PATH=/opt/homepage` ligger
+fortsatt i Stack Environment, men compose-fila bruker den ikke lenger.
 
-**Komodo henter ikke `services.yaml` fra repoet.** Stackens `file_paths` er bare
-`['docker-compose.yml']`, så Komodo synkroniserer kun den filen. Redeploy
-trekker riktig commit — `deployed_hash` matcher — men `services.yaml` som
-serveres ligger i repo-klonen på verten, mountet relativt til `run_directory`.
+## Mount hele mappa, ikke enkeltfilen
 
-Konsekvens i praksis: en commit til `services.yaml` plukkes ikke opp av en vanlig
-redeploy. Etter endring må den klonede fila på verten oppdateres eksplisitt.
+Dette er ikke en smakssak. Bind-mount av **en fil** går stale ved `git pull`:
 
-Verifisert 4. oktober 2026: etter redeploy med `deployed_hash: 0247141` serverer
-`/api/services` fortsatt den gamle `Monitoring`-gruppen uten Netdata-oppføringene,
-mens git har dem. Lokale agenter ble kontrollert OK (HTTP 200 på port 19999), så
-lenkene er gyldige — de er bare ikke blitt publisert.
+- `git pull` bytter ut filen med en ny inode
+- Mounten peker på den gamle inoden, så containeren fortsetter å lese gammelt innhold
+- `docker compose up` gjenoppretter ikke containeren når compose-fila er uendret
 
-## Endre services.yaml
+Verifisert 4. oktober 2026: etter en redeploy med korrekt `deployed_hash` viste
+klonen på verten 8 grupper og 49 tjenester, mens containeren serverte 7 grupper og
+41. Containeren hadde startet timer tidligere. Fiksen er å mounte **mappen**; da
+følger mounten nye filer fordi katalogen, ikke inoden, er det som er bundet.
 
-1. Endre `homepage/config/services.yaml` i git og push.
-2. Oppdater klonen på verten som mounten peker på — enten ved å trekke commiten
-   dit, eller ved å redeploye med `reclone` slik at Komodo bygger klonen på nytt.
-3. Kontroller med `curl -s http://10.0.0.128:3009/api/services | grep -i netdata`.
+## Endre tjenestelisten
 
-Steg 2 er det som mangler ved en vanlig redeploy. Strukturen i fila er
-`icon` / `href` / `description` per oppføring, med 4 mellomrom for oppføringsnivå
-og 8 for feltene. PyYAML finnes ikke på CT157, så valider lokalt med en
-indentasjonssammenligning mot en eksisterende oppføring.
+1. Endre `homepage/config/services.yaml` og push.
+2. Redeploy `pc6-ct109-homepage` i Komodo.
+3. Kontroller: `curl -s http://10.0.0.128:3009/api/services | grep -c href`
+
+Komodos `file_paths` er `['docker-compose.yml']`. Det er riktig: `file_paths`
+er for **ekstra compose-filer** (`docker compose -f … -f …`), ikke for datafiler.
+Konfigurasjonsfilene hentes av `git pull` under deploy, ikke av `file_paths`.
+
+Strukturen i `services.yaml` er `icon` / `href` / `description` per oppføring, med
+4 mellomrom for oppføring og 8 for feltene. `icon: noen.png` slår opp i
+`/opt/homepage/icons/` og gir en ødelagt flis; bruk `si:`, `sh:`, `di:` eller
+`mdi:` for ikoner som hentes fra et CDN.
+
+## /opt/homepage
+
+Den gamle runtime-katalogen ligger fortsatt på CT109 og brukes ikke lenger. Den
+inneholder kun `custom.css` og `custom.js` (begge tomme) samt noen
+`services.yaml.bak-*` fra tidligere kopieringer. Kan slettes, men er ikke
+undersøkt — ingen sletting gjort av automatisering.
 
 ## Relatert
 
-- `homepage/config/services.yaml` — live tjenesteliste
-- `migration-backlog.md` — oppføringen «Homepage» og GitOps-forbeholdet
+- `homepage/config/services.yaml` — tjenestelisten
+- `tools/seed-heimdall.js` — speiler samme liste inn i Heimdall
+- `migration-backlog.md` — oppføringen «Homepage»
