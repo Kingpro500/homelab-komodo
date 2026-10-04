@@ -30,8 +30,11 @@ GPU-en. Ingen nåværende oppgave avhenger av pc1-veien.
   etter flyttingen til pc6. Løst ved å gi agenten navnet `pc6-ct103-node` og
   gjenskape Periphery. n8n-stacken kjører med n8n + postgres, begge friske.
   Se `docs/INVENTORY.md` — navnedriften er der ennå ikke ryddet.
-- **Homepage GitOps har et hull.** `file_paths` er bare `['docker-compose.yml']`,
-  så Komodo henter ikke `services.yaml` fra repoet. Redeploy trekker riktig commit
-  (`deployed_hash` matcher), men fila som serveres ligger i repo-klonen på
-  verten og er mountet relativt til `run_directory`. Endringene i `services.yaml`
-  ble derfor ikke synlige. Se `docs/INVENTORY.md` for detaljer.
+- **Homepage GitOps: løst 4. oktober.** Mounten er nå hele mappa
+  (`../homepage/config:/app/config:ro`), ikke enkeltfilen. `git pull` bytter ut
+  filer med nye inoder, så en enkeltfil-bind-mount fortsatte å servere gammelt
+  innhold. Konfigurasjonen kommer nå fra
+  `/opt/komodo/stacks/pc6-ct109-homepage/homepage/config`, ikke `/opt/homepage`.
+  Netdata-lenkene er live og verifisert via `/api/services`.
+  Min tidligere notat om at `file_paths` var årsaken var feil — `file_paths` er
+  for ekstra compose-filer, ikke datafiler. Se `pc6-ct109-homepage/README.md`.

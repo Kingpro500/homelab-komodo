@@ -41,6 +41,34 @@ Strukturen i `services.yaml` er `icon` / `href` / `description` per oppføring, 
 `/opt/homepage/icons/` og gir en ødelagt flis; bruk `si:`, `sh:`, `di:` eller
 `mdi:` for ikoner som hentes fra et CDN.
 
+### Widgets
+
+En oppføring kan ha et `widget:`-nivå på 8 mellomrom, under `description`:
+
+```yaml
+    - Uptime Kuma:
+        icon: uptime-kuma.png
+        href: http://10.0.0.128:3001/
+        description: 10.0.0.128:3001 · CT109 · pc6
+        widget:
+          type: uptimekuma
+          url: http://10.0.0.128:3001
+          version: 1
+```
+
+Uptime Kuma-widgeten snakker **socket.io**, ikke REST. Verifisert 4. oktober
+2026 på `10.0.0.128:3001`:
+
+- `GET /socket.io/?EIO=4&transport=polling` svarer `200` med en gyldig handshake
+- `GET /api/status/heartbeat` og `/api/status/up` returnerer **HTML**, ikke JSON —
+  de er ikke widgetens vei
+- `GET /api/status-page/heartbeat/default` svarer JSON, men `heartbeatList` var
+  tom, så ingen statuspage er satt opp
+
+Det betyr widgeten virker teknisk, men viser ingenting før det finnes en
+statuspage med monitorer i Uptime Kuma. REST-endepunktene som ser «ut til å
+svare» med HTTP 200 er SPA-fallback, ikke bevis på at widgeten har data.
+
 ## /opt/homepage
 
 Den gamle runtime-katalogen ligger fortsatt på CT109 og brukes ikke lenger. Den

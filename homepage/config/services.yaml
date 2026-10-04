@@ -110,6 +110,10 @@
         icon: uptime-kuma.png
         href: http://10.0.0.128:3001/
         description: 10.0.0.128:3001 · CT109 · pc6
+        widget:
+          type: uptimekuma
+          url: http://10.0.0.128:3001
+          version: 1
     - Grafana CT109:
         icon: grafana.png
         href: http://10.0.0.128:3000/
