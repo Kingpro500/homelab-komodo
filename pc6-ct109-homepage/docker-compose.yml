@@ -8,9 +8,10 @@ services:
     environment:
       HOMEPAGE_ALLOWED_HOSTS: 10.0.0.128:3009
     volumes:
-      - "${HOMEPAGE_CONFIG_PATH:?Set in Komodo}:/app/config"
-      # services.yaml is GitOps: it comes from the cloned repo, not from
-      # /opt/homepage. Mounted read-only and on top of the directory above, so
-      # the file in git is what Homepage serves. Change it in git, then redeploy.
-      - ../homepage/config/services.yaml:/app/config/services.yaml:ro
+      # GitOps: the whole config directory comes from the cloned repo, read-only.
+      # Mount the DIRECTORY, not the individual file. `git pull` replaces files
+      # with a new inode, so a single-file bind mount keeps serving the old
+      # content until the container is recreated by hand, and `compose up` does
+      # not recreate when the compose file itself is unchanged.
+      - ../homepage/config:/app/config:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
