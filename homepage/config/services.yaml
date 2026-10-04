@@ -10,7 +10,7 @@
     - Komodo:
         icon: komodo.png
         href: http://10.0.0.117:9120/
-        description: 10.0.0.117:9120 · CT102 · pc8
+        description: 10.0.0.117:9120 · CT102 · pve (pc8)
     - OPNsense:
         icon: opnsense.png
         href: http://10.0.0.1/
@@ -19,7 +19,7 @@
     - pc1:
         icon: proxmox.png
         href: https://10.0.0.112:8006/
-        description: 10.0.0.112:8006 · Proxmox · RTX 3070 / Ollama
+        description: 10.0.0.112:8006 · Proxmox · dual boot, CT156 Ollama (CPU)
     - pc6:
         icon: proxmox.png
         href: https://10.0.0.120:8006/
@@ -28,10 +28,10 @@
         icon: proxmox.png
         href: https://10.0.0.103:8006/
         description: 10.0.0.103:8006 · Proxmox
-    - pc8:
+    - pve (pc8):
         icon: proxmox.png
         href: https://10.0.0.102:8006/
-        description: 10.0.0.102:8006 · Proxmox
+        description: 10.0.0.102:8006 · Proxmox master · HA, Komodo core
 
 - AI & Automation:
     - n8n:
@@ -77,7 +77,7 @@
     - Pi-hole pc8:
         icon: pi-hole.png
         href: http://10.0.0.115:8080/admin/
-        description: 10.0.0.115:8080 · CT115 · pc8
+        description: 10.0.0.115:8080 · CT115 · pve (pc8)
     - Pi-hole pc9:
         icon: pi-hole.png
         href: http://10.0.0.116:8080/admin/
