@@ -44,8 +44,12 @@
         description: 10.0.0.133:11434 · CT156 · pc1 · qwen3:4b API
     - Hermes Agent:
         icon: mdi-robot
-        href: https://10.0.0.120:8006/
-        description: 10.0.0.135:22 · CT157 · pc6 · terminal-agent
+        href: http://10.0.0.135:9119/chat?profile=default
+        description: 10.0.0.135:9119 · CT157 · pc6 · chat
+    - Spend OpenRouter:
+        icon: openrouter.png
+        href: https://openrouter.ai/workspaces/default
+        description: Workspace · forbruk og kreditter
 
 - Monitoring:
     - Uptime Kuma:
@@ -136,6 +140,10 @@
         icon: emby.png
         href: http://10.0.0.150:8096/
         description: 10.0.0.150:8096 · CT151 · pc6
+    - Sonos:
+        icon: sonos.png
+        href: https://play.sonos.com/
+        description: play.sonos.com · musikk og rom
 
 - Photos & Documents:
     - Immich:
