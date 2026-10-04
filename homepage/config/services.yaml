@@ -15,11 +15,6 @@
         icon: opnsense.png
         href: http://10.0.0.1/
         description: Router / firewall · ikke CT
-    - Netdata Tower:
-        icon: netdata.png
-        href: http://10.0.0.101:19999/
-        description: Tower / Unraid · port 19999
-
 - Proxmox:
     - pc1:
         icon: proxmox.png
