@@ -5,9 +5,9 @@ services:
     image: postgres:16-alpine
     container_name: netbox-postgres
     environment:
-      POSTGRES_USER: netbox
-      POSTGRES_PASSWORD: netbox_secure_password_change_me
-      POSTGRES_DB: netbox
+      POSTGRES_USER: ${POSTGRES_USER:-netbox}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-netbox}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
@@ -32,21 +32,21 @@ services:
       - redis
     environment:
       DB_ENGINE: django.db.backends.postgresql
-      DB_NAME: netbox
-      DB_USER: netbox
-      DB_PASSWORD: netbox_secure_password_change_me
+      DB_NAME: ${POSTGRES_DB:-netbox}
+      DB_USER: ${POSTGRES_USER:-netbox}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
       DB_HOST: postgres
       DB_PORT: 5432
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_DB_TASKS: 0
       REDIS_DB_CACHE: 1
-      SECRET_KEY: abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijk
-      ALLOWED_HOSTS: "*"
-      SUPERUSER_USERNAME: admin
-      SUPERUSER_PASSWORD: admin
-      SUPERUSER_EMAIL: admin@netbox.local
-      TIME_ZONE: UTC
+      SECRET_KEY: ${SECRET_KEY:?Set SECRET_KEY in .env}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-*}
+      SUPERUSER_USERNAME: ${SUPERUSER_USERNAME:-admin}
+      SUPERUSER_PASSWORD: ${SUPERUSER_PASSWORD:?Set SUPERUSER_PASSWORD in .env}
+      SUPERUSER_EMAIL: ${SUPERUSER_EMAIL:-admin@netbox.local}
+      TIME_ZONE: ${TIME_ZONE:-UTC}
     ports:
       - "8001:8080"
     volumes:

@@ -82,8 +82,8 @@
         description: 10.0.0.117:8002 · CT102 · pve (pc8) · SNMP discovery
     - Grafana:
         icon: grafana.png
-        href: http://10.0.0.117:3000/
-        description: 10.0.0.117:3000 · CT102 · pve (pc8) · visualisering
+        href: http://10.0.0.128:3000/
+        description: 10.0.0.128:3000 · CT109 · pc6 · visualisering
 
 - Monitoring:
     - Netdata Cloud:
@@ -113,7 +113,7 @@
     - Grafana CT109:
         icon: grafana.png
         href: http://10.0.0.128:3000/
-        description: 10.0.0.128:3000 · CT109 · pc6 (legacy)
+        description: 10.0.0.128:3000 · CT109 · pc6
     - Speedtest Tracker:
         icon: speedtest-tracker.png
         href: http://10.0.0.128:8765/
