@@ -86,6 +86,10 @@
         description: 10.0.0.117:3000 · CT102 · pve (pc8) · visualisering
 
 - Monitoring:
+    - Netdata:
+        icon: si:netdata
+        href: https://app.netdata.cloud/spaces/rogerlillefoss-space/rooms/all-nodes/overview
+        description: Netdata Cloud · alle noder · krever innlogging
     - Uptime Kuma:
         icon: uptime-kuma.png
         href: http://10.0.0.128:3001/
