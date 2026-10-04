@@ -1,0 +1,41 @@
+# Open WebUI, deployed from GitHub by Komodo.
+# Secrets come from the Stack environment; never from Git.
+#
+# Shares CT 103 with n8n (pc6-ct103-node). Both stacks bind their own port on
+# the same host IP, so only one can use a given port.
+services:
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:${OPEN_WEBUI_VERSION:-main}
+    container_name: open-webui
+    restart: unless-stopped
+    ports:
+      - "${OPEN_WEBUI_BIND_IP:?Set OPEN_WEBUI_BIND_IP in Komodo}:${OPEN_WEBUI_PORT:-3080}:8080"
+    environment:
+      TZ: ${TZ:-Europe/Oslo}
+      # Signs and encrypts sessions. Rotating this invalidates every login.
+      WEBUI_SECRET_KEY: "${OPEN_WEBUI_SECRET_KEY:?Set the Komodo secret OPEN_WEBUI_SECRET_KEY}"
+      # Only accept LAN connections; there is no TLS in front.
+      WEBUI_HOST: "${OPEN_WEBUI_BIND_IP}"
+      # Local inference on pc1. It answers on CPU only while GPU access is
+      # unfixed, so OpenRouter is the primary provider and Ollama is optional.
+      OLLAMA_BASE_URL: ${OLLAMA_URL:-http://10.0.0.133:11434}
+      ENABLE_OLLAMA_API: ${ENABLE_OLLAMA_API:-false}
+      # OpenRouter speaks the OpenAI wire format.
+      OPENAI_API_BASE_URL: https://openrouter.ai/api/v1
+      OPENAI_API_KEY: "${OPENROUTER_API_KEY_WEBUI:?Set the Komodo secret OPENROUTER_API_KEY_WEBUI}"
+      ENABLE_MODEL_USAGE: ${ENABLE_MODEL_USAGE:-true}
+      # The first account becomes admin; signup closes afterwards.
+      ENABLE_SIGNUP: ${ENABLE_SIGNUP:-false}
+    volumes:
+      - /opt/open-webui:/app/backend/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8080/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
