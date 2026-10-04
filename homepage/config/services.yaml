@@ -38,6 +38,10 @@
         icon: n8n.png
         href: http://10.0.0.119:5678/
         description: 10.0.0.119:5678 · CT103 · pc6
+    - Open WebUI:
+        icon: open-webui.png
+        href: http://10.0.0.119:3080/
+        description: 10.0.0.119:3080 · CT103 · pc6 · OpenRouter-chat
     - Ollama:
         icon: ollama.png
         href: http://10.0.0.133:11434/
