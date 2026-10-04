@@ -1,0 +1,14 @@
+services:
+  unifi-network-application:
+    image: jacobalberty/unifi:latest
+    container_name: unifi-network-application
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      TZ: Europe/Oslo
+    volumes:
+      - /opt/unifi:/unifi
+      - unifi-run:/unifi/run
+
+volumes:
+  unifi-run:

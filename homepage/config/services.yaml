@@ -79,6 +79,10 @@
         icon: mdi-server-network
         href: http://10.0.0.134:26000/
         description: CT111 · pc6 · port 26000
+    - UniFi Network:
+        icon: unifi.png
+        href: https://10.0.0.132:8443/
+        description: CT155 · pc6 · port 8443
 
 - Media & Downloads:
     - MeTube:
