@@ -1,0 +1,21 @@
+services:
+  crafty:
+    image: lscr.io/linuxserver/cygot-docker:latest
+    container_name: crafty
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      PUID: "99"
+      PGID: "100"
+      TZ: Europe/Oslo
+      # Crafty starts game servers as this account; keep it aligned with PUID.
+      USER: "abc"
+    volumes:
+      # Named volume: Docker creates it on first deploy, so no host preparation.
+      # Holds both the Crafty config and any game server files added later.
+      - crafty-data:/data
+    mem_limit: 2g
+
+volumes:
+  crafty-data:
