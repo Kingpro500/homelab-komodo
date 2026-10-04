@@ -92,6 +92,10 @@
         description: 10.0.0.132:8443 · CT155 · pc6
 
 - Media & Downloads:
+    - Seerr:
+        icon: seerr.png
+        href: http://10.0.0.128:5055/
+        description: 10.0.0.128:5055 · CT109 · pc6 · requests
     - MeTube:
         icon: metube.png
         href: http://10.0.0.124:8081/
