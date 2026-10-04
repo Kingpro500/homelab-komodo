@@ -16,7 +16,9 @@ const fs = require('fs');
 const path = require('path');
 const yaml = require('js-yaml');
 
-const SCRATCH = process.env.SCRATCH || '/home/hermes/.hermes/cache/scratch';
+// Repo root by default, so `node tools/seed-heimdall.js` works with no
+// environment set. Override with SCRATCH when services.yaml lives elsewhere.
+const SCRATCH = process.env.SCRATCH || path.join(__dirname, '..');
 const HEIMDALL = 'http://10.0.0.128:3012';
 const SERVICES = path.join(SCRATCH, 'homepage/config/services.yaml');
 // Heimdall's own app catalogue, committed next to this script so a fresh
