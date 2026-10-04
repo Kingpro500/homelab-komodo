@@ -9,4 +9,8 @@ services:
       HOMEPAGE_ALLOWED_HOSTS: 10.0.0.128:3009
     volumes:
       - "${HOMEPAGE_CONFIG_PATH:?Set in Komodo}:/app/config"
+      # services.yaml is GitOps: it comes from the cloned repo, not from
+      # /opt/homepage. Mounted read-only and on top of the directory above, so
+      # the file in git is what Homepage serves. Change it in git, then redeploy.
+      - ../homepage/config/services.yaml:/app/config/services.yaml:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro

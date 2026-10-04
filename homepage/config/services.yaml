@@ -44,6 +44,10 @@
         icon: proxmox.png
         href: https://10.0.0.102:8006/
         description: 10.0.0.102:8006 · Proxmox master · HA, Komodo core
+    - Unraid Tower:
+        icon: unraid.png
+        href: http://10.0.0.101/
+        description: 10.0.0.101:80 · VM101 · pc6 · Docker og lagring
 
 - AI & Automation:
     - n8n:
