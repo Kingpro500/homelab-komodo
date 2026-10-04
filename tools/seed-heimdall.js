@@ -14,12 +14,16 @@
 // Usage: node seed-heimdall.js [--dry-run]
 const fs = require('fs');
 const path = require('path');
-const yaml = require('/home/hermes/.hermes/cache/scratch/node_modules/js-yaml');
+const yaml = require('js-yaml');
 
 const SCRATCH = process.env.SCRATCH || '/home/hermes/.hermes/cache/scratch';
 const HEIMDALL = 'http://10.0.0.128:3012';
-const SERVICES = path.join(SCRATCH, 'homelab-komodo/homepage/config/services.yaml');
-const SUPPORTED = path.join(SCRATCH, 'supportedapps.json');
+const SERVICES = path.join(SCRATCH, 'homepage/config/services.yaml');
+// Heimdall's own app catalogue, committed next to this script so a fresh
+// checkout works offline. Falls back to the scratch copy if absent.
+const SUPPORTED = fs.existsSync(path.join(__dirname, 'supportedapps.json'))
+  ? path.join(__dirname, 'supportedapps.json')
+  : path.join(SCRATCH, 'supportedapps.json');
 const DRY = process.argv.includes('--dry-run');
 
 // CDN icons for the services Heimdall has no built-in icon for. Only the ones
