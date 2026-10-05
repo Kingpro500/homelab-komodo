@@ -16,6 +16,17 @@ services:
       # directory the image expects — it declares no VOLUME, so the path is not
       # discoverable from `docker inspect`.
       - tunarr-config:/config
+    devices:
+      # QuickSync. The host is a pc6 node with an Intel Alder Lake-N (N355) GPU
+      # on /dev/dri, and CT109 now has the same renderD128 passthrough CT151
+      # (Emby) already uses. Without this the container has no /dev/dri at all
+      # and ffmpeg falls back to a failing h264_nvenc attempt, which cannot work
+      # on Intel hardware in any case.
+      #
+      # This does not share anything with Emby: each container gets its own
+      # encoder context against the same device node. Copying this config into
+      # Emby's stack would not have fixed anything.
+      - /dev/dri/renderD128:/dev/dri/renderD128
     mem_limit: 1g
 
 volumes:
