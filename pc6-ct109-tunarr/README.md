@@ -32,13 +32,16 @@ Tunarr needs an Emby account with access to the libraries being turned into
 channels. Create a dedicated user in Emby rather than reusing the admin one, so
 Tunarr can be revoked independently later.
 
-## Channels versus the earlier QuasiTV idea
+## Channels, not a library
 
-QuasiTVSync on CT109 was never deployed — work stopped before the stack was
-brought up. Tunarr covers the same need better: it is an official maintained
-image, it needs no paid Android app, and it talks to Emby directly. QuasiTV is an
-Android TV player plus a sync server; Tunarr is server-side only and works with
-whatever plays M3U, including the Emby app already on the TV.
+Tunarr adds a spoofed HDHomeRun tuner to Emby, so Emby shows a channel lineup
+rather than its library, and it also serves a plain M3U URL that IPTV players
+such as Tivimate or UHF can open directly — those need no Emby connection at
+all.
+
+Media stays where it is. Tunarr neither moves nor copies anything: it points at
+the Emby library and streams from it. Emby's own library sits over NFS from Tower
+Unraid, so Tunarr needs only network access to Emby, not a media mount.
 
 ## Config
 
