@@ -39,7 +39,10 @@ gjenoppretting — derfor skal enhver meningsfylt endring også havne i Git.
 
 1. **Diagnose før handling.** En workflow leser og varsler; den endrer ikke
    nettverk, brannmur eller lagring uten eksplisitt vedtak. Reparasjon er et
-   forslag i meldingen, ikke et automatisk inngrep.
+   forslag i meldingen, ikke et automatisk inngrep. Det eneste eksplisitt
+   godkjente unntaket er Pi-hole DNS-failover: etter tre bekreftede feil kan
+   Hermes bytte kun Kea DHCP option 6 mellom Pi-hole og Unbound, og varsler om
+   begge overganger.
 2. **Idempotens og dedup.** En feil varsles når den *oppstår*, ikke ved hver
    kjøring. Deduplikering ligger i endepunktet (state-fil), ikke i n8n, slik
    at flere workflow-er kan dele samme grunnlag uten dobbeltvarsling.

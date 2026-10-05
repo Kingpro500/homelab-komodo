@@ -6,3 +6,4 @@
 *.pem
 pihole/config/
 pihole/dnsmasq.d/
+config-backups/

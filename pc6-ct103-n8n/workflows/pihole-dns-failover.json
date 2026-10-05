@@ -1,0 +1,186 @@
+{
+  "name": "Pi-hole DNS failover",
+  "id": "d8c564c5-3e89-4fba-9e3c-4ba2e51a3f37",
+  "description": "EKSPORTERT UTEN HEMMELIGHETER. Bytt REDACTED_AUDIT_TOKEN og REDACTED_HASS_TOKEN ved import. Hermes gjør DNS-testene og den begrensede Kea-endringen.",
+  "nodes": [
+    {
+      "name": "Hvert minutt",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -440,
+        0
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Sjekk og avstem DNS",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -200,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://10.0.0.135:9118/dns/reconcile",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Audit-Token",
+              "value": "REDACTED_AUDIT_TOKEN"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000,
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Er det en overgang eller feil?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        40,
+        0
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "transition",
+              "leftValue": "={{ Boolean($json.transition || $json.error) }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "name": "Formater DNS-varsel",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        280,
+        -100
+      ],
+      "parameters": {
+        "jsCode": "const d = $json;\nconst checks = Object.entries(d.checks || {}).map(([ip, ok]) => ip + ': ' + (ok ? 'OK' : 'NED')).join('\\n');\nlet title, message;\nif (d.transition === 'failover') { title = 'DNS nødmodus aktivert'; message = 'Begge Pi-hole svarte ikke i tre påfølgende tester. Kea DHCP annonserer nå Unbound (10.0.0.1).\\n\\n' + checks + '\\n\\nEksisterende klienter tar endringen ved DHCP-fornyelse.'; }\nelse if (d.transition === 'recovery') { title = 'DNS filtrering gjenopprettet'; message = 'Minst én Pi-hole var frisk i tre påfølgende tester. Kea DHCP annonserer igjen 10.0.0.115 og 10.0.0.116.\\n\\n' + checks; }\nelse { title = 'DNS-failover: OPNsense-feil'; message = (d.error || 'Ukjent feil') + '\\n\\n' + checks; }\nreturn [{json: {title, message}}];"
+      }
+    },
+    {
+      "name": "Push DNS-varsel",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        520,
+        -100
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://10.0.0.7:8123/api/services/notify/mobile_app_1_iphone_r",
+        "authentication": "none",
+        "sendHeaders": true,
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ title: $json.title, message: $json.message }) }}",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer REDACTED_HASS_TOKEN"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Hvert minutt": {
+      "main": [
+        [
+          {
+            "node": "Sjekk og avstem DNS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sjekk og avstem DNS": {
+      "main": [
+        [
+          {
+            "node": "Er det en overgang eller feil?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Er det en overgang eller feil?": {
+      "main": [
+        [
+          {
+            "node": "Formater DNS-varsel",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Formater DNS-varsel": {
+      "main": [
+        [
+          {
+            "node": "Push DNS-varsel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

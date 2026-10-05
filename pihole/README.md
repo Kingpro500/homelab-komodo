@@ -69,10 +69,11 @@ Changing `PIHOLE_UPSTREAM_DNS` to either Pi-hole address creates a loop.
 ### Client hand-over
 
 Clients are moved onto Pi-hole by pointing the Kea DHCP server at `10.0.0.115` and
-`10.0.0.116`. Until that is done, clients query `10.0.0.1` directly, Unbound answers
-everything, and Pi-hole filtering is bypassed entirely. Keep `94.140.14.14` as a third
-server so DNS survives both instances being down. Lease renewal is what hands the new
-servers to clients; existing clients keep the old ones until renewal.
+`10.0.0.116` only. Until that is done, clients query `10.0.0.1` directly, Unbound
+answers everything, and Pi-hole filtering is bypassed entirely. Do not hand out a
+public DNS server as a third address: clients may use it directly, bypassing Pi-hole.
+The two Pi-hole instances provide the intended DNS redundancy. Lease renewal is what
+hands the new servers to clients; existing clients keep the old ones until renewal.
 
 Verify with:
 

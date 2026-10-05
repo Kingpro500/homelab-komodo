@@ -38,6 +38,7 @@ Assistant tokens and SSH private keys remain only in the running service.
 |---|---|---|---|
 | Daglig homelab-diagnose | daglig 08:15 | [docs/daglig-homelab-diagnose.md](docs/daglig-homelab-diagnose.md) | [workflows/daglig-homelab-diagnose.json](workflows/daglig-homelab-diagnose.json) |
 | Nettverksovervaakning | time + daglig 08:00 | [docs/nettverksovervaakning.md](docs/nettverksovervaakning.md) | [workflows/nettverksovervaakning.json](workflows/nettverksovervaakning.json) |
+| Pi-hole DNS failover | hvert minutt | [docs/pihole-dns-failover.md](docs/pihole-dns-failover.md) | [workflows/pihole-dns-failover.json](workflows/pihole-dns-failover.json) |
 
 Driftsprinsipper for hvordan n8n-automasjoner bygges, sikres og gjenopprettes
 er samlet i [docs/operations/n8n-workflows.md](../docs/operations/n8n-workflows.md).
