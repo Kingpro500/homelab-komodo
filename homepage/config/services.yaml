@@ -190,6 +190,10 @@
         icon: mdi:delete-sweep
         href: http://10.0.0.128:11011/
         description: 10.0.0.128:11011 · CT109 · pc6 · rydder *Arr-køer
+    - Tunarr:
+        icon: mdi:video-input-component
+        href: http://10.0.0.128:8005/
+        description: 10.0.0.128:8005 · CT109 · pc6 · TV-kanaler fra Emby
     - Audiobookshelf:
         icon: audiobookshelf.png
         href: http://10.0.0.128:13378/

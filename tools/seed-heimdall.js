@@ -68,6 +68,7 @@ const CDN = {
   'Scanopy': 'https://cdn.jsdelivr.net/npm/@mdi/svg@latest/svg/sitemap.svg',
   'Crafty': 'https://cdn.jsdelivr.net/npm/@mdi/svg@latest/svg/gamepad-variant.svg',
   'Cleanuparr': 'https://cdn.jsdelivr.net/npm/@mdi/svg@latest/svg/delete-sweep.svg',
+  'Tunarr': 'https://cdn.jsdelivr.net/npm/@mdi/svg@latest/svg/video-input-component.svg',
 };
 
 const norm = (s) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
