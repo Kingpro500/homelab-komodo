@@ -1,0 +1,13 @@
+# Independent Tunarr worker on pc9 / CT106.
+services:
+  tunarr:
+    image: ghcr.io/chrisbenincasa/tunarr:latest
+    container_name: tunarr
+    restart: unless-stopped
+    ports:
+      - "8005:8000"
+    volumes:
+      - "${TUNARR_CONFIG_PATH:-/opt/tunarr/config}:/config"
+    devices:
+      - /dev/dri/renderD128:/dev/dri/renderD128
+    mem_limit: 4g

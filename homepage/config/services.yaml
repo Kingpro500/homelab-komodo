@@ -206,6 +206,14 @@
         icon: emby.png
         href: http://10.0.0.150:8096/
         description: 10.0.0.150:8096 · CT151 · pc6
+    - Tunarr:
+        icon: mdi-television-classic
+        href: http://10.0.0.150:8005/
+        description: 10.0.0.150:8005 · CT151 · pc6 · Live TV
+    - Tunarr pc9:
+        icon: mdi-television-classic
+        href: http://10.0.0.122:8005/
+        description: 10.0.0.122:8005 · CT106 · pc9 · independent worker
     - Sonos:
         icon: sonos.png
         href: https://play.sonos.com/

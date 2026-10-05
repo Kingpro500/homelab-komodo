@@ -23,3 +23,10 @@ Windows boots.
 
 Ollama stays in CT 156 on pc1 with autostart disabled until GPU access is fixed.
 It is independent of n8n and no longer needs to be started or stopped around it.
+
+## Documented workflows
+
+Versioned workflow definitions belong in `workflows/`. Operational principles,
+secret-handling rules and recovery notes are in
+`docs/operations/n8n-workflows.md` at the repository root. n8n credentials,
+Home Assistant tokens and SSH private keys remain only in the running service.

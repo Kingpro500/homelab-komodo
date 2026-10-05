@@ -1,0 +1,39 @@
+{
+  "id": "tower-media-nfs-health-repair",
+  "name": "Tower media NFS health and repair",
+  "active": true,
+  "nodes": [
+    {
+      "name": "Every 5 minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "parameters": { "rule": { "interval": [{ "field": "minutes", "minutesInterval": 5 }] } }
+    },
+    {
+      "name": "Check and repair Tower media",
+      "type": "n8n-nodes-base.executeCommand",
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "command": "ssh -o BatchMode=yes -o ConnectTimeout=10 -o StrictHostKeyChecking=yes -i /home/node/.n8n/ssh/tower_media_ed25519 root@10.0.0.120 && ssh -o BatchMode=yes -o ConnectTimeout=10 -o StrictHostKeyChecking=yes -i /home/node/.n8n/ssh/tower_media_ed25519 root@10.0.0.103"
+      }
+    },
+    {
+      "name": "Only when repaired",
+      "type": "n8n-nodes-base.code",
+      "parameters": {
+        "jsCode": "const output = String($json.stdout ?? $json.error?.message ?? ''); const failed = Number($json.exitCode ?? 0) !== 0 || Boolean($json.error); return (failed || output.includes('repaired;')) ? items : [];"
+      }
+    },
+    {
+      "name": "Notify iPhone: Tower media repaired",
+      "type": "n8n-nodes-base.httpRequest",
+      "parameters": {
+        "method": "POST",
+        "url": "http://10.0.0.7:8123/api/services/notify/mobile_app_1_iphone_r",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ title: (Number($json.exitCode ?? 0) !== 0 || $json.error) ? 'Tower media NFS: reparasjon feilet' : 'Tower media NFS reparert', message: String($json.stdout ?? $json.error?.message ?? 'Se n8n-kjoringen for detaljer') }) }}"
+      }
+    }
+  ],
+  "documentation": "Sanitized export: configure the Home Assistant Authorization header in n8n after import. Do not commit tokens or SSH private keys."
+}
