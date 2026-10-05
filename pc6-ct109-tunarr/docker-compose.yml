@@ -1,0 +1,22 @@
+services:
+  tunarr:
+    image: ghcr.io/chrisbenincasa/tunarr:latest
+    container_name: tunarr
+    restart: unless-stopped
+    ports:
+      # The image defaults to 8000, which Crafty Controller already holds on this
+      # node, so Tunarr gets 8005 on the host and keeps 8000 inside.
+      - "8005:8000"
+      # 1900/udp is SSDP, which Tunarr uses to discover Emby automatically.
+      # Without it the Emby connection has to be added by hand; with it, Tunarr
+      # finds it on the LAN on its own.
+      - "1900:1900/udp"
+    volumes:
+      # Named volume: Docker creates it on first deploy. This is the /config
+      # directory the image expects — it declares no VOLUME, so the path is not
+      # discoverable from `docker inspect`.
+      - tunarr-config:/config
+    mem_limit: 1g
+
+volumes:
+  tunarr-config:
