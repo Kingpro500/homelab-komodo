@@ -1,0 +1,19 @@
+# Grafana datakilder for Netdata — IKKE ferdig.
+#
+# Netdata kan IKKE mates direkte til Grafana:
+#   - Netdata-pluginen er fjernet fra Grafanas register (404).
+#   - `type: prometheus` mot Netdata sitt /api/v1/allmetrics virker ikke: Netdata
+#     svarer 404 "Unsupported API command" på /api/v1/query og query_range, som
+#     er det en Grafana Prometheus-kilde krever. Endepunktet er kun for å bli
+#     skrapet av en ekte Prometheus.
+#
+# Riktig bro: deploy en Prometheus-server som skraper de fire Netdata-nodene:
+#   - http://10.0.0.101:19999/api/v1/allmetrics   (Tower)
+#   - http://10.0.0.120:19999/api/v1/allmetrics   (pc6)
+#   - http://10.0.0.102:19999/api/v1/allmetrics   (pve)
+#   - http://10.0.0.103:19999/api/v1/allmetrics   (pc9)
+# og deretter legge til Prometheus som Grafana-datakilde med url til den.
+#
+# Inntil Prometheus er på plass, blir INGEN datakilde provisjonert her.
+apiVersion: 1
+datasources: []
