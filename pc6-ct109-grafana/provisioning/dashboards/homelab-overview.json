@@ -1,0 +1,112 @@
+{
+  "uid": "homelab-overview",
+  "title": "Homelab – Ressurser",
+  "tags": ["homelab", "resources"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "time": { "from": "now-3h", "to": "now" },
+  "templating": {
+    "list": [
+      {
+        "name": "node",
+        "label": "Node",
+        "type": "query",
+        "datasource": { "type": "prometheus", "uid": "prometheus" },
+        "query": "label_values(proxmox_guest_mem_used_bytes, node)",
+        "includeAll": true,
+        "allValue": ".*",
+        "multi": true,
+        "current": { "text": "All", "value": "$__all" }
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Gjester oppe",
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "refId": "A", "expr": "sum(proxmox_guest_up{node=~\"$node\"})", "instant": true }],
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "red", "value": null }, { "color": "green", "value": 1 } ] },
+          "unit": "short" },
+        "overrides": []
+      },
+      "options": { "colorMode": "value", "graphMode": "area", "justifyMode": "auto",
+        "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } }
+    },
+    {
+      "id": 2,
+      "type": "table",
+      "title": "RAM-bruk per gjest",
+      "gridPos": { "h": 8, "w": 8, "x": 4, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        { "refId": "A", "format": "table",
+          "expr": "proxmox_guest_mem_used_bytes{node=~\"$node\"} / 1073741824",
+          "legendFormat": "{{name}}" },
+        { "refId": "B", "format": "table",
+          "expr": "(proxmox_guest_mem_used_bytes / proxmox_guest_mem_total_bytes) * 100",
+          "legendFormat": "{{name}}" }
+      ],
+      "fieldConfig": {
+        "defaults": { "custom": { "align": "auto", "filterable": true },
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "green", "value": null }, { "color": "yellow", "value": 70 },
+            { "color": "red", "value": 90 } ] } },
+        "overrides": []
+      }
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "CPU % per gjest",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "refId": "A",
+        "expr": "proxmox_guest_cpu_percent{node=~\"$node\"}",
+        "legendFormat": "{{name}}" }],
+      "fieldConfig": { "defaults": { "unit": "percent", "min": 0,
+        "thresholds": { "mode": "absolute", "steps": [
+          { "color": "green", "value": null }, { "color": "yellow", "value": 80 },
+          { "color": "red", "value": 95 } ] } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" },
+        "tooltip": { "mode": "multi" } }
+    },
+    {
+      "id": 4,
+      "type": "timeseries",
+      "title": "RAM i bruk (GiB)",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "refId": "A",
+        "expr": "proxmox_guest_mem_used_bytes{node=~\"$node\"} / 1073741824",
+        "legendFormat": "{{name}}" }],
+      "fieldConfig": { "defaults": { "unit": "decdbytes",
+        "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null } ] } },
+        "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" },
+        "tooltip": { "mode": "multi" } }
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Disk-bruk (GiB)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "refId": "A",
+        "expr": "proxmox_guest_disk_used_bytes{node=~\"$node\"} / 1073741824",
+        "legendFormat": "{{name}}" }],
+      "fieldConfig": { "defaults": { "unit": "decdbytes",
+        "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null } ] } },
+        "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" },
+        "tooltip": { "mode": "multi" } }
+    }
+  ]
+}

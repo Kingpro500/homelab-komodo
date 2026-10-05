@@ -1,12 +1,14 @@
-# Grafana datakilde for Netdata, via Prometheus-broen.
+# Grafana datakilde for homelab-ressurser, via Prometheus.
 #
-# Netdata kan IKKE mates direkte til Grafana (plugin fjernet fra registeret,
-# og /api/v1/allmetrics er et export-endepunkt, ikke et PromQL API). Derfor
-# skraper pc6-ct109-prometheus de fire Netdata-nodene, og denne kilden spør
-# Prometheus — som implementerer PromQL.
+# Netdata kan IKKE mates direkte til Grafana (plugin fjernet fra registeret, og
+# /api/v1/allmetrics er et export-endepunkt Prometheus avviser). Derfor skraper
+# pc6-ct109-prometheus eksportøren homelab_metrics_exporter.py på CT157:9120
+# (per-gjest CPU/RAM/disk fra Proxmox, read-only), og denne kilden spør
+# Prometheus, som implementerer PromQL.
 apiVersion: 1
 datasources:
   - name: Prometheus
+    uid: prometheus
     type: prometheus
     access: proxy
     url: http://10.0.0.128:9090
