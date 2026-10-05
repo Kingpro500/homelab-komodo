@@ -1,0 +1,295 @@
+{
+  "name": "Nettverksovervaakning",
+  "description": "EKSPORTERT UTEN HEMMELIGHETER. Erstatt REDACTED_AUDIT_TOKEN og REDACTED_HASS_TOKEN før import. Se docs/*.md i pc6-ct103-n8n.",
+  "nodes": [
+    {
+      "name": "Hver time",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -240,
+        -200
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "triggerAtMinute": 5
+            }
+          ]
+        }
+      },
+      "id": "34eaba4d-a539-490f-b250-b1106d19a9c3"
+    },
+    {
+      "name": "Hent nettverksstatus",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "url": "http://10.0.0.135:9118/network/status",
+        "authentication": "none",
+        "options": {
+          "timeout": 90000,
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Audit-Token",
+              "value": "REDACTED_AUDIT_TOKEN"
+            }
+          ]
+        }
+      },
+      "id": "bcbdb39c-7598-401f-b97e-d3185d6e8495"
+    },
+    {
+      "name": "Er det nye problemer?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -20,
+        -200
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c-sev",
+              "leftValue": "={{ $json.new_problems.some(p => p.sev === 'KRITISK' || p.sev === 'ADVARSEL') }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "f69184e5-6548-4b30-89a8-fe3153a4d094"
+    },
+    {
+      "name": "Push nytt nettverksproblem",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        200,
+        -260
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://10.0.0.7:8123/api/services/notify/mobile_app_roger_sin_ipad_mini",
+        "authentication": "none",
+        "sendHeaders": true,
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ title: 'Nettverk: ' + $json.new_problems.filter(p => p.sev === 'KRITISK' || p.sev === 'ADVARSEL').length + ' nye problemer', message: $json.new_problems.filter(p => p.sev === 'KRITISK' || p.sev === 'ADVARSEL').map(p => '[' + p.sev + '] ' + p.text).join('\\n\\n') }) }}",
+        "options": {
+          "timeout": 30000
+        },
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer REDACTED_HASS_TOKEN"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        }
+      },
+      "id": "f4053967-d426-4972-93aa-7e36cfc59b59"
+    },
+    {
+      "name": "Hver dag 08:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -240,
+        160
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "days",
+              "triggerAtHour": 8,
+              "triggerAtMinute": 0
+            }
+          ]
+        }
+      },
+      "id": "183f33e6-912e-4e91-8610-1d369906e5e0"
+    },
+    {
+      "name": "Hent full nettverksrapport",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "url": "http://10.0.0.135:9118/network",
+        "authentication": "none",
+        "options": {
+          "timeout": 90000,
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Audit-Token",
+              "value": "REDACTED_AUDIT_TOKEN"
+            }
+          ]
+        }
+      },
+      "id": "0ba6601f-1752-49bc-a4b6-55499b38c266"
+    },
+    {
+      "name": "Formater rapport",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -20,
+        160
+      ],
+      "parameters": {
+        "jsCode": "const d = $json;\nconst lan = d.lan || {};\nconst wan = d.wan || {};\nconst flaps = lan.flaps_24h || {};\nlet m = 'Tjenester: ' + d.services_up + '/' + d.services_total + '\\n';\nm += 'WAN: ' + (wan.wan_outages_1h || 0) + ' hopp siste time, '\n     + Math.round(wan.wan_downtime_s_1h || 0) + ' sek nede\\n';\nm += 'LAN: ' + (lan.hosts || 0) + ' enheter';\nif (lan.conflicts && Object.keys(lan.conflicts).length) {\n  m += ', ' + Object.keys(lan.conflicts).length + ' ARP-konflikt'; }\nm += '\\nFysiske hopp siste døgn: '\n     + (Object.keys(flaps).length ? Object.entries(flaps).map(([k,v]) => k + '=' + v).join(', ') : 'ingen') + '\\n';\nm += 'Port-counters (CRC/drops): ikke tilgjengelig via OPNsense-API\\n';\nif (d.services_down && d.services_down.length) {\n  m += '\\nNede: ' + d.services_down.join(', ') + '\\n'; }\nif (d.problems && d.problems.length) {\n  m += '\\nAktive problemer:\\n' + d.problems.map(p => '- [' + p.sev + '] ' + p.text).join('\\n') + '\\n'; }\nelse { m += '\\nIngen aktive problemer.\\n'; }\nreturn [{ json: { tittel: d.all_clear ? 'Nettverk: alt OK' : 'Nettverk: ' + d.problems.length + ' problemer', rapport: m } }];"
+      },
+      "id": "9f04554a-d5cf-4e8d-ad72-14be642be1dd"
+    },
+    {
+      "name": "Push dagsrapport nettverk",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        220,
+        160
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://10.0.0.7:8123/api/services/notify/mobile_app_roger_sin_ipad_mini",
+        "authentication": "none",
+        "sendHeaders": true,
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ title: $json.tittel, message: $json.rapport }) }}",
+        "options": {
+          "timeout": 30000
+        },
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer REDACTED_HASS_TOKEN"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        }
+      },
+      "id": "75595220-9ea1-40d4-8fe1-9f84f75f97ec"
+    }
+  ],
+  "connections": {
+    "Hver time": {
+      "main": [
+        [
+          {
+            "node": "Hent nettverksstatus",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hent nettverksstatus": {
+      "main": [
+        [
+          {
+            "node": "Er det nye problemer?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Er det nye problemer?": {
+      "main": [
+        [
+          {
+            "node": "Push nytt nettverksproblem",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hver dag 08:00": {
+      "main": [
+        [
+          {
+            "node": "Hent full nettverksrapport",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hent full nettverksrapport": {
+      "main": [
+        [
+          {
+            "node": "Formater rapport",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formater rapport": {
+      "main": [
+        [
+          {
+            "node": "Push dagsrapport nettverk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
