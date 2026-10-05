@@ -24,9 +24,20 @@ Windows boots.
 Ollama stays in CT 156 on pc1 with autostart disabled until GPU access is fixed.
 It is independent of n8n and no longer needs to be started or stopped around it.
 
-## Documented workflows
+## Workflows
 
 Versioned workflow definitions belong in `workflows/`. Operational principles,
 secret-handling rules and recovery notes are in
-`docs/operations/n8n-workflows.md` at the repository root. n8n credentials,
-Home Assistant tokens and SSH private keys remain only in the running service.
+`docs/operations/n8n-workflows.md` at the repository root. The exported JSON
+never contains secrets — `X-Audit-Token` and the Home Assistant token are
+placeholders (`REDACTED_*`) that must be restored from n8n credentials/Secrets
+at import time (see each doc's "Gjenoppretting"). n8n credentials, Home
+Assistant tokens and SSH private keys remain only in the running service.
+
+| Workflow | Trigger | Doc | Eksport |
+|---|---|---|---|
+| Daglig homelab-diagnose | daglig 08:15 | [docs/daglig-homelab-diagnose.md](docs/daglig-homelab-diagnose.md) | [workflows/daglig-homelab-diagnose.json](workflows/daglig-homelab-diagnose.json) |
+| Nettverksovervaakning | time + daglig 08:00 | [docs/nettverksovervaakning.md](docs/nettverksovervaakning.md) | [workflows/nettverksovervaakning.json](workflows/nettverksovervaakning.json) |
+
+Driftsprinsipper for hvordan n8n-automasjoner bygges, sikres og gjenopprettes
+er samlet i [docs/operations/n8n-workflows.md](../docs/operations/n8n-workflows.md).

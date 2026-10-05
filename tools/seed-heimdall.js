@@ -27,6 +27,13 @@ const SUPPORTED = fs.existsSync(path.join(__dirname, 'supportedapps.json'))
   ? path.join(__dirname, 'supportedapps.json')
   : path.join(SCRATCH, 'supportedapps.json');
 const DRY = process.argv.includes('--dry-run');
+// Remove items that exist in Heimdall but no longer in services.yaml. Off by
+  // default: pruning deletes data, so it must be asked for explicitly.
+  // NOTE: on Heimdall 2.8.3 DELETE /api/item/{id} returns HTTP 500 for every
+  // existing row, so this only DETECTS orphans — the actual removal is a
+  // database operation. See references/heimdall-tweaks.md in the
+  // homelab-infrastructure-automation skill.
+const PRUNE = process.argv.includes('--prune');
 
 // CDN icons for the services Heimdall has no built-in icon for. Only the ones
 // that probe 200 are actually sent.
@@ -59,6 +66,9 @@ const CDN = {
   // Scanopy has no icon in Simple Icons or selfh.st; falls back to a generic
   // tile until a real brand asset exists.
   'Scanopy': 'https://cdn.jsdelivr.net/npm/@mdi/svg@latest/svg/sitemap.svg',
+  'Crafty': 'https://cdn.jsdelivr.net/npm/@mdi/svg@latest/svg/gamepad-variant.svg',
+  'Cleanuparr': 'https://cdn.jsdelivr.net/npm/@mdi/svg@latest/svg/delete-sweep.svg',
+  'Tunarr': 'https://cdn.jsdelivr.net/npm/@mdi/svg@latest/svg/video-input-component.svg',
 };
 
 const norm = (s) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -107,6 +117,22 @@ async function post(item) {
   });
   const body = await r.text();
   return { status: r.status, body };
+}
+
+// The route is DELETE /api/item/{id} keyed on the numeric id, not the title.
+// Sending one without the CSRF token answers 419, which is how the route was
+// confirmed to exist at all.
+async function del(id) {
+  const r = await fetch(`${HEIMDALL}/api/item/${id}`, {
+    method: 'DELETE',
+    headers: {
+      Accept: 'application/json',
+      Cookie: cookieHeader(),
+      'X-XSRF-TOKEN': decodeURIComponent(cookies['XSRF-TOKEN']),
+      'X-Requested-With': 'XMLHttpRequest',
+    },
+  });
+  return { status: r.status, body: await r.text() };
 }
 
 // resolveTags() creates tags WITHOUT pinned, so a freshly seeded category is
@@ -185,14 +211,46 @@ async function pinItem(id) {
     return;
   }
 
-  // Idempotent: skip anything already present, so a re-run after a partial
-  // failure cannot create duplicates.
-  const existing = new Set(
-    (await (await fetch(`${HEIMDALL}/api/item`)).json()).map((x) => x.title)
-  );
-  if (existing.size) {
-    console.log(`\nallerede i Heimdall, hopper over: ${[...existing].join(', ')}`);
-  }
+  // /api/item does not include the numeric id — only `appid`, which is null for
+    // apps with no built-in icon. The rendered dashboard page does carry it, as
+    // data-id on each <section class="item-container">, so scrape the id from
+    // there rather than guessing or touching the database.
+    async function idFromDashboard(title) {
+      const html = await (await fetch(`${HEIMDALL}/`)).text();
+      const re = new RegExp(
+        `data-name="${title.replace(/[.*+?^\${}()|[\]\\]/g, '\\$&')}"[^>]*data-id="(\\d+)"`,
+        'i'
+      );
+      const m = html.match(re);
+      return m ? m[1] : null;
+    }
+
+    // The existing check needs the id, not just the title, because pruning deletes
+    // by id. Fetch the full objects once and key on both.
+    const current = await (await fetch(`${HEIMDALL}/api/item`)).json();
+    const existing = new Map(current.map((x) => [x.title, x.id]));
+    const idOf = new Map(current.map((x) => [x.title, x.id]));
+    if (existing.size) {
+      console.log(`\nalle rede i Heimdall, hopper over: ${[...existing.keys()].join(', ')}`);
+    }
+
+    const wanted = new Set(plan.map((i) => i.title));
+    const orphans = [...existing.keys()].filter((t) => !wanted.has(t));
+    if (orphans.length) {
+      console.log(`\ndisse finnes i Heimdall, men ikke i services.yaml: ${orphans.join(', ')}`);
+      if (!PRUNE) {
+        console.log('  (kjør med --prune for å fjerne dem)');
+      } else {
+        await primeSession();
+        for (const title of orphans) {
+          const id = await idFromDashboard(title);
+          if (!id) { console.log(`  FEIL fant ikke id for ${title} i dashboarden`); continue; }
+          const r = await del(id);
+          console.log(`  ${r.status >= 200 && r.status < 300 ? 'fjernet' : 'FEIL'} ${title} (id ${id}, HTTP ${r.status})`);
+          await new Promise((res) => setTimeout(res, 120));
+        }
+      }
+    }
 
   await primeSession();
   console.log('sesjon primet, sender...');

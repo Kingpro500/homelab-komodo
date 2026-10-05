@@ -19,6 +19,10 @@
         icon: mdi:rocket-launch
         href: http://10.0.0.128:3012/
         description: 10.0.0.128:3012 · CT109 · pc6 · launcher
+    - Crafty:
+        icon: mdi:gamepad-variant
+        href: https://10.0.0.128:8000/
+        description: 10.0.0.128:8000 · CT109 · pc6 · Minecraft · selvsignert sertifikat
     - Komodo:
         icon: komodo.png
         href: http://10.0.0.117:9120/
@@ -80,10 +84,6 @@
         icon: netbox.png
         href: http://10.0.0.117:8001/
         description: 10.0.0.117:8001 · CT102 · pve (pc8) · IPAM/DCIM
-    - Scanopy:
-        icon: mdi-network-outline
-        href: http://10.0.0.117:8002/
-        description: 10.0.0.117:8002 · CT102 · pve (pc8) · SNMP discovery
     - Grafana:
         icon: grafana.png
         href: http://10.0.0.128:3000/
@@ -186,6 +186,14 @@
         icon: bazarr.png
         href: http://10.0.0.128:6767/
         description: 10.0.0.128:6767 · CT109 · pc6
+    - Cleanuparr:
+        icon: mdi:delete-sweep
+        href: http://10.0.0.128:11011/
+        description: 10.0.0.128:11011 · CT109 · pc6 · rydder *Arr-køer
+    - Tunarr:
+        icon: mdi:video-input-component
+        href: http://10.0.0.128:8005/
+        description: 10.0.0.128:8005 · CT109 · pc6 · TV-kanaler fra Emby
     - Audiobookshelf:
         icon: audiobookshelf.png
         href: http://10.0.0.128:13378/

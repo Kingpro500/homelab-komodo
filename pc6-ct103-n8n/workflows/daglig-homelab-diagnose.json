@@ -1,0 +1,394 @@
+{
+  "name": "Daglig homelab-diagnose",
+  "description": "EKSPORTERT UTEN HEMMELIGHETER. Erstatt REDACTED_AUDIT_TOKEN og REDACTED_HASS_TOKEN før import. Se docs/*.md i pc6-ct103-n8n.",
+  "nodes": [
+    {
+      "name": "Hver dag 08:15",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -260,
+        300
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "days",
+              "triggerAtHour": 8,
+              "triggerAtMinute": 15
+            }
+          ]
+        }
+      },
+      "id": "ecdb3d18-6a1b-4153-856d-2bd9359f0e70"
+    },
+    {
+      "name": "Hent diagnose",
+      "notes": "Kaller Hermes-endepunktet paa CT157. Ingen av homelab-noeklene ligger i n8n.",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        0,
+        300
+      ],
+      "parameters": {
+        "url": "http://10.0.0.135:9118/audit",
+        "authentication": "none",
+        "options": {
+          "timeout": 120000,
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Audit-Token",
+              "value": "REDACTED_AUDIT_TOKEN"
+            }
+          ]
+        }
+      },
+      "id": "91b785b1-7668-44c0-bf03-d1597299cfc1"
+    },
+    {
+      "name": "Er noe nytt?",
+      "notes": "False-grenen stopper med vilje, slik at du ikke faar push hver dag.",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        240,
+        300
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "cond-new",
+              "leftValue": "={{ $json.new_findings.length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "6d15f5f4-920d-41c9-9a10-a17998d42e9e"
+    },
+    {
+      "name": "Er det kritisk?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        480,
+        300
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "cond-critical",
+              "leftValue": "={{ $json.new_findings.some(f => f.severity === 'KRITISK') }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "8cf1c1e6-676e-4b3b-9196-4f47961d882c"
+    },
+    {
+      "name": "Push kritisk - iPhone",
+      "notes": "Home Assistant sender videre til telefonen. Punktum-format (/api/notify/...) gir 404.",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        720,
+        180
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://10.0.0.7:8123/api/services/notify/mobile_app_1_iphone_r",
+        "authentication": "none",
+        "sendHeaders": true,
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ title: 'Homelab: ' + ($json.summary.KRITISK || 0) + ' kritisk, ' + ($json.summary.ADVARSEL || 0) + ' advarsel', message: $json.report_markdown }) }}",
+        "options": {
+          "timeout": 30000
+        },
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer REDACTED_HASS_TOKEN"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        }
+      },
+      "id": "596903d0-b65c-4250-9898-680558358942"
+    },
+    {
+      "name": "Push advarsel - iPad",
+      "notes": "Kritikk til telefonen, resten til iPad, slik at telefonen ikke fylles opp.",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        720,
+        420
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://10.0.0.7:8123/api/services/notify/mobile_app_roger_sin_ipad_mini",
+        "authentication": "none",
+        "sendHeaders": true,
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ title: 'Homelab: ' + ($json.new_findings.length) + ' nye funn', message: $json.report_markdown }) }}",
+        "options": {
+          "timeout": 30000
+        },
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer REDACTED_HASS_TOKEN"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        }
+      },
+      "id": "fc15b7b8-7178-4e23-badd-16f7df31f788"
+    },
+    {
+      "name": "Hent audit for kritisk-sjekk",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -240,
+        380
+      ],
+      "parameters": {
+        "url": "http://10.0.0.135:9118/audit",
+        "authentication": "none",
+        "options": {
+          "timeout": 120000,
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Audit-Token",
+              "value": "REDACTED_AUDIT_TOKEN"
+            }
+          ]
+        }
+      },
+      "id": "98e868dc-e3fe-41db-b186-9a5b219992be"
+    },
+    {
+      "name": "Er noe vedvarende kritisk?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -20,
+        380
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c-persist",
+              "leftValue": "={{ $json.persistent_critical.length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "607d2893-f7c6-492d-913a-b599c49cc341"
+    },
+    {
+      "name": "Push vedvarende kritisk",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        220,
+        380
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://10.0.0.7:8123/api/services/notify/mobile_app_1_iphone_r",
+        "authentication": "none",
+        "sendHeaders": true,
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ title: 'Homelab: ' + $json.persistent_critical.length + ' KRITISK som har stått over ' + $json.persist_threshold_h + ' timer', message: $json.persistent_critical.map(f => '[' + f.title + '] ' + Math.round(f.age_hours) + ' timer\\n  ' + (f.detail || '') + '\\n  Handling: ' + (f.action || 'ingen angitt')).join('\\n\\n') }) }}",
+        "options": {
+          "timeout": 30000
+        },
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer REDACTED_HASS_TOKEN"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        }
+      },
+      "id": "2d143218-f835-4f1e-b3f8-1b557a8fb1e1"
+    }
+  ],
+  "connections": {
+    "Hver dag 08:15": {
+      "main": [
+        [
+          {
+            "node": "Hent diagnose",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Hent audit for kritisk-sjekk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hent diagnose": {
+      "main": [
+        [
+          {
+            "node": "Er noe nytt?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Er noe nytt?": {
+      "main": [
+        [
+          {
+            "node": "Er det kritisk?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Er det kritisk?": {
+      "main": [
+        [
+          {
+            "node": "Push kritisk - iPhone",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Push advarsel - iPad",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Push kritisk - iPhone": {
+      "main": [
+        []
+      ]
+    },
+    "Push advarsel - iPad": {
+      "main": [
+        []
+      ]
+    },
+    "Hent audit for kritisk-sjekk": {
+      "main": [
+        [
+          {
+            "node": "Er noe vedvarende kritisk?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Er noe vedvarende kritisk?": {
+      "main": [
+        [
+          {
+            "node": "Push vedvarende kritisk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true,
+    "executionOrder": "v1",
+    "availableInMCP": false
+  }
+}
