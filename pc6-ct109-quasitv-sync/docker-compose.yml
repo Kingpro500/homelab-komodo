@@ -1,0 +1,25 @@
+services:
+  quasitv-sync:
+    image: ghcr.io/gonemadsoftware/quasitv-sync:latest
+    container_name: quasitv-sync
+    restart: unless-stopped
+    ports:
+      # Web admin UI, opened once to create the account and pick Emby.
+      - "26988:26988"
+      # The sync port the QuasiTV apps on the TVs connect to.
+      - "51234:51234"
+    environment:
+      PUID: "99"
+      PGID: "100"
+    volumes:
+      # Both are named volumes so Docker creates them on first deploy and PUID/PGID
+      # ownership is handled by the image itself — no host preparation, and no
+      # chmod 755 on a shared /data the way the upstream README asks for.
+      - quasitv-settings:/settings
+      - quasitv-data:/data
+    # Read and write access is required on both mounts.
+    mem_limit: 512m
+
+volumes:
+  quasitv-settings:
+  quasitv-data:
