@@ -39,4 +39,4 @@ running service.
 |---|---|---|---|
 | Daglig homelab-diagnose | daglig 08:15 | [docs/daglig-homelab-diagnose.md](docs/daglig-homelab-diagnose.md) | [workflows/daglig-homelab-diagnose.json](workflows/daglig-homelab-diagnose.json) |
 | Nettverksovervaakning | time + daglig 08:00 | [docs/nettverksovervaakning.md](docs/nettverksovervaakning.md) | [workflows/nettverksovervaakning.json](workflows/nettverksovervaakning.json) |
-| Tower media NFS health and repair | hvert 5. min | _ikke dokumentert ennå_ | [workflows/tower-media-nfs-health-repair.json](workflows/tower-media-nfs-health-repair.json) |
+| Tower media NFS health and repair | hvert 5. min | [docs/tower-media-nfs-health-repair.md](docs/tower-media-nfs-health-repair.md) | [workflows/tower-media-nfs-health-repair.json](workflows/tower-media-nfs-health-repair.json) |

@@ -1,39 +1,126 @@
 {
-  "id": "tower-media-nfs-health-repair",
   "name": "Tower media NFS health and repair",
-  "active": true,
+  "description": "EKSPORTERT UTEN HEMMELIGHETER. Erstatt REDACTED_HASS_TOKEN i Notify-noden etter import. SSH-nøkkel sti er bevart; selve nøkkelen ligger i n8n-containeren (/home/node/.n8n/ssh/), ikke her. Se docs/tower-media-nfs-health-repair.md.",
   "nodes": [
     {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 5
+            }
+          ]
+        }
+      },
+      "id": "d9dcd2e1-55bd-40a4-9f0b-04b858d7c6cd",
       "name": "Every 5 minutes",
       "type": "n8n-nodes-base.scheduleTrigger",
-      "parameters": { "rule": { "interval": [{ "field": "minutes", "minutesInterval": 5 }] } }
+      "typeVersion": 1.2,
+      "position": [
+        260,
+        300
+      ]
     },
     {
-      "name": "Check and repair Tower media",
-      "type": "n8n-nodes-base.executeCommand",
-      "onError": "continueRegularOutput",
       "parameters": {
         "command": "ssh -o BatchMode=yes -o ConnectTimeout=10 -o StrictHostKeyChecking=yes -i /home/node/.n8n/ssh/tower_media_ed25519 root@10.0.0.120 && ssh -o BatchMode=yes -o ConnectTimeout=10 -o StrictHostKeyChecking=yes -i /home/node/.n8n/ssh/tower_media_ed25519 root@10.0.0.103"
-      }
+      },
+      "id": "29d886fa-4c1d-46f7-bf3c-f69bb2edfd99",
+      "name": "Check and repair Tower media",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        520,
+        300
+      ],
+      "onError": "continueRegularOutput"
     },
     {
+      "id": "bd124761-34e0-4e28-a230-22f874fb2e84",
       "name": "Only when repaired",
       "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        760,
+        300
+      ],
       "parameters": {
         "jsCode": "const output = String($json.stdout ?? $json.error?.message ?? ''); const failed = Number($json.exitCode ?? 0) !== 0 || Boolean($json.error); return (failed || output.includes('repaired;')) ? items : [];"
       }
     },
     {
       "name": "Notify iPhone: Tower media repaired",
+      "notes": "Home Assistant sender videre til telefonen. Punktum-format (/api/notify/...) gir 404.",
       "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1000,
+        300
+      ],
       "parameters": {
         "method": "POST",
         "url": "http://10.0.0.7:8123/api/services/notify/mobile_app_1_iphone_r",
+        "authentication": "none",
+        "sendHeaders": true,
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ title: (Number($json.exitCode ?? 0) !== 0 || $json.error) ? 'Tower media NFS: reparasjon feilet' : 'Tower media NFS reparert', message: String($json.stdout ?? $json.error?.message ?? 'Se n8n-kjoringen for detaljer') }) }}"
-      }
+        "jsonBody": "={{ JSON.stringify({ title: (Number(.exitCode ?? 0) !== 0 || .error) ? 'Tower media NFS: reparasjon feilet' : 'Tower media NFS reparert', message: String(.stdout ?? .error?.message ?? 'Se n8n-kjøringen for detaljer') }) }}",
+        "options": {
+          "timeout": 30000
+        },
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer REDACTED_HASS_TOKEN"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        }
+      },
+      "id": "26ace145-23fc-46c4-94af-3a91d3c84f1f"
     }
   ],
-  "documentation": "Sanitized export: configure the Home Assistant Authorization header in n8n after import. Do not commit tokens or SSH private keys."
+  "connections": {
+    "Every 5 minutes": {
+      "main": [
+        [
+          {
+            "node": "Check and repair Tower media",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check and repair Tower media": {
+      "main": [
+        [
+          {
+            "node": "Only when repaired",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Only when repaired": {
+      "main": [
+        [
+          {
+            "node": "Notify iPhone: Tower media repaired",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
 }
