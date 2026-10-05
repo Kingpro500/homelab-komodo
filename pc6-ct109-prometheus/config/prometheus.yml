@@ -1,0 +1,26 @@
+global:
+  # Netdata already stores per-second history; Prometheus just needs periodic
+  # samples to serve Grafana. 30s is plenty for a "running out of disk/RAM?" view.
+  scrape_interval: 30s
+  evaluation_interval: 30s
+
+scrape_configs:
+  # Each Netdata node exports Prometheus-format metrics at /api/v1/allmetrics.
+  # This is an EXPOSE endpoint (Prometheus scrapes it); it is not a PromQL API,
+  # which is why Grafana cannot query Netdata directly but Prometheus can.
+  - job_name: 'netdata-tower'
+    metrics_path: '/api/v1/allmetrics'
+    static_configs:
+      - targets: ['10.0.0.101:19999']
+  - job_name: 'netdata-pc6'
+    metrics_path: '/api/v1/allmetrics'
+    static_configs:
+      - targets: ['10.0.0.120:19999']
+  - job_name: 'netdata-pve'
+    metrics_path: '/api/v1/allmetrics'
+    static_configs:
+      - targets: ['10.0.0.102:19999']
+  - job_name: 'netdata-pc9'
+    metrics_path: '/api/v1/allmetrics'
+    static_configs:
+      - targets: ['10.0.0.103:19999']
