@@ -28,7 +28,11 @@ const SUPPORTED = fs.existsSync(path.join(__dirname, 'supportedapps.json'))
   : path.join(SCRATCH, 'supportedapps.json');
 const DRY = process.argv.includes('--dry-run');
 // Remove items that exist in Heimdall but no longer in services.yaml. Off by
-// default: pruning deletes data, so it must be asked for explicitly.
+  // default: pruning deletes data, so it must be asked for explicitly.
+  // NOTE: on Heimdall 2.8.3 DELETE /api/item/{id} returns HTTP 500 for every
+  // existing row, so this only DETECTS orphans — the actual removal is a
+  // database operation. See references/heimdall-tweaks.md in the
+  // homelab-infrastructure-automation skill.
 const PRUNE = process.argv.includes('--prune');
 
 // CDN icons for the services Heimdall has no built-in icon for. Only the ones
