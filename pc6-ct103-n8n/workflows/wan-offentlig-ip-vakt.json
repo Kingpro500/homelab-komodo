@@ -1,0 +1,182 @@
+{
+  "name": "WAN offentlig IP-vakt",
+  "description": "",
+  "nodes": [
+    {
+      "id": "1932db65-448a-43ba-a38b-a8b68953c29d",
+      "name": "Hver 6. time",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -260,
+        300
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 6
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "ddfcb601-deaf-4a90-8ec4-d594163dd801",
+      "name": "Hent offentlig IP",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        0,
+        300
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.ipify.org?format=json",
+        "authentication": "none",
+        "options": {
+          "timeout": 30000,
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "4514b349-23fc-4885-9b19-080e153d2bb8",
+      "name": "Har IP-en endret seg?",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const sd = $getWorkflowStaticData('global');\nconst current = String($json.ip ?? '').trim();\nconst prev = sd.lastIp;\n// changed = 1 naar IP-en faktisk har endret seg fra en kjent forrige verdi.\n// Forste kjoring (prev == undefined) gir 0: vi etablerer bare utgangspunktet.\nconst changed = (current !== '' && prev !== undefined && current !== prev) ? 1 : 0;\nsd.lastIp = current;\nreturn [{ json: { ip: current, prevIp: prev ?? null, changed } }];"
+      }
+    },
+    {
+      "id": "0de16625-281f-4f9f-ba73-0349064ab9f4",
+      "name": "Endret?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        480,
+        300
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "cond-changed",
+              "leftValue": "={{ $json.changed }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "b84d268e-d7c4-4027-8544-748eb5acb894",
+      "name": "Varsle iPhone",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        720,
+        300
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://10.0.0.7:8123/api/services/notify/mobile_app_1_iphone_r",
+        "authentication": "none",
+        "sendHeaders": true,
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ title: 'WAN IP endret', message: 'Ny offentlig IP: ' + $json.ip + ' (var ' + $json.prevIp + ')' }) }}",
+        "options": {
+          "timeout": 30000
+        },
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer REDACTED_HASS_TOKEN"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Hver 6. time": {
+      "main": [
+        [
+          {
+            "node": "Hent offentlig IP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hent offentlig IP": {
+      "main": [
+        [
+          {
+            "node": "Har IP-en endret seg?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Har IP-en endret seg?": {
+      "main": [
+        [
+          {
+            "node": "Endret?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Endret?": {
+      "main": [
+        [
+          {
+            "node": "Varsle iPhone",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true,
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "parentFolder": null
+}
