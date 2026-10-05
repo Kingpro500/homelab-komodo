@@ -84,10 +84,6 @@
         icon: netbox.png
         href: http://10.0.0.117:8001/
         description: 10.0.0.117:8001 · CT102 · pve (pc8) · IPAM/DCIM
-    - Scanopy:
-        icon: mdi-network-outline
-        href: http://10.0.0.117:8002/
-        description: 10.0.0.117:8002 · CT102 · pve (pc8) · SNMP discovery
     - Grafana:
         icon: grafana.png
         href: http://10.0.0.128:3000/
