@@ -1,0 +1,225 @@
+{
+  "uid": "proxmox-guests",
+  "title": "Proxmox – Ressurser per maskin",
+  "tags": ["proxmox", "resources", "guests"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "time": { "from": "now-6h", "to": "now" },
+  "templating": {
+    "list": [
+      {
+        "name": "maskin",
+        "label": "Maskin",
+        "type": "query",
+        "datasource": { "type": "prometheus", "uid": "prometheus" },
+        "query": "label_values(proxmox_guest_mem_total_bytes, name)",
+        "includeAll": true,
+        "allValue": ".*",
+        "multi": true,
+        "current": { "text": "All", "value": "$__all" },
+        "sort": 1
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "table",
+      "title": "Alle maskiner – nå",
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        { "refId": "A", "format": "table",
+          "expr": "label_replace(proxmox_guest_up, \"_up\", \"$1\", \"instance\", \"(.*)\")",
+          "instant": true, "legendFormat": "{{name}}" },
+        { "refId": "B", "format": "table",
+          "expr": "proxmox_guest_cpu_percent", "instant": true, "legendFormat": "{{name}}" },
+        { "refId": "C", "format": "table",
+          "expr": "proxmox_guest_mem_used_bytes / 1073741824", "instant": true, "legendFormat": "{{name}}" },
+        { "refId": "D", "format": "table",
+          "expr": "proxmox_guest_mem_total_bytes / 1073741824", "instant": true, "legendFormat": "{{name}}" },
+        { "refId": "E", "format": "table",
+          "expr": "proxmox_guest_disk_used_bytes / 1073741824", "instant": true, "legendFormat": "{{name}}" },
+        { "refId": "F", "format": "table",
+          "expr": "proxmox_guest_disk_total_bytes / 1073741824", "instant": true, "legendFormat": "{{name}}" }
+      ],
+      "fieldConfig": {
+        "defaults": { "custom": { "align": "auto", "filterable": true } },
+        "overrides": []
+      },
+      "transformations": [
+        { "id": "merge", "options": {} },
+        { "id": "organize",
+          "options": { "renameByName": {
+              "Time 1": "Opp", "name": "Maskin", "Value #B": "CPU %",
+              "Value #C": "RAM brukt (GiB)", "Value #D": "RAM total (GiB)",
+              "Value #E": "Disk brukt (GiB)", "Value #F": "Disk total (GiB)",
+              "Value #A": "Opp" } } }
+      ],
+      "options": { "showHeader": true, "sortBy": [ { "displayName": "Maskin" } ] }
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "CPU bruk",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 10 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "refId": "A",
+        "expr": "max by (name) (proxmox_guest_cpu_percent{name=~\"$maskin\"})", "instant": true }],
+      "fieldConfig": {
+        "defaults": { "unit": "percent", "min": 0, "max": 100,
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "green", "value": null }, { "color": "yellow", "value": 70 },
+            { "color": "red", "value": 90 } ] } },
+        "overrides": []
+      },
+      "options": { "colorMode": "value", "graphMode": "area", "justifyMode": "auto",
+        "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } }
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "RAM brukt",
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 10 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "refId": "A",
+        "expr": "max by (name) (proxmox_guest_mem_used_bytes{name=~\"$maskin\"}) / 1073741824",
+        "instant": true }],
+      "fieldConfig": {
+        "defaults": { "unit": "decdbytes",
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "green", "value": null } ] } },
+        "overrides": []
+      },
+      "options": { "colorMode": "value", "graphMode": "area", "justifyMode": "auto",
+        "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } }
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "RAM total",
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 10 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "refId": "A",
+        "expr": "max by (name) (proxmox_guest_mem_total_bytes{name=~\"$maskin\"}) / 1073741824",
+        "instant": true }],
+      "fieldConfig": {
+        "defaults": { "unit": "decdbytes",
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null } ] } },
+        "overrides": []
+      },
+      "options": { "colorMode": "value", "graphMode": "none", "justifyMode": "auto",
+        "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } }
+    },
+    {
+      "id": 5,
+      "type": "stat",
+      "title": "Disk brukt",
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 10 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "refId": "A",
+        "expr": "max by (name) (proxmox_guest_disk_used_bytes{name=~\"$maskin\"}) / 1073741824",
+        "instant": true }],
+      "fieldConfig": {
+        "defaults": { "unit": "decdbytes",
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null } ] } },
+        "overrides": []
+      },
+      "options": { "colorMode": "value", "graphMode": "area", "justifyMode": "auto",
+        "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } }
+    },
+    {
+      "id": 6,
+      "type": "gauge",
+      "title": "RAM fylling",
+      "gridPos": { "h": 5, "w": 6, "x": 0, "y": 14 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "refId": "A",
+        "expr": "max by (name) (proxmox_guest_mem_used_bytes{name=~\"$maskin\"}) / max by (name) (proxmox_guest_mem_total_bytes{name=~\"$maskin\"}) * 100",
+        "instant": true }],
+      "fieldConfig": {
+        "defaults": { "unit": "percent", "min": 0, "max": 100,
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "green", "value": null }, { "color": "yellow", "value": 85 },
+            { "color": "red", "value": 95 } ] } },
+        "overrides": []
+      },
+      "options": { "showThresholdLabels": false, "showThresholdMarkers": true }
+    },
+    {
+      "id": 7,
+      "type": "gauge",
+      "title": "Disk fylling",
+      "gridPos": { "h": 5, "w": 6, "x": 6, "y": 14 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "refId": "A",
+        "expr": "max by (name) (proxmox_guest_disk_used_bytes{name=~\"$maskin\"}) / max by (name) (proxmox_guest_disk_total_bytes{name=~\"$maskin\"}) * 100",
+        "instant": true }],
+      "fieldConfig": {
+        "defaults": { "unit": "percent", "min": 0, "max": 100,
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "green", "value": null }, { "color": "yellow", "value": 85 },
+            { "color": "red", "value": 95 } ] } },
+        "overrides": []
+      },
+      "options": { "showThresholdLabels": false, "showThresholdMarkers": true }
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "CPU-kurve",
+      "gridPos": { "h": 6, "w": 12, "x": 0, "y": 19 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "refId": "A",
+        "expr": "proxmox_guest_cpu_percent{name=~\"$maskin\"}", "legendFormat": "{{name}}" }],
+      "fieldConfig": { "defaults": { "unit": "percent", "min": 0, "max": 100,
+        "color": { "mode": "thresholds" },
+        "thresholds": { "mode": "absolute", "steps": [
+          { "color": "green", "value": null }, { "color": "yellow", "value": 70 },
+          { "color": "red", "value": 90 } ] } },
+        "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" },
+        "tooltip": { "mode": "multi" } }
+    },
+    {
+      "id": 9,
+      "type": "timeseries",
+      "title": "RAM-kurve (GiB)",
+      "gridPos": { "h": 6, "w": 12, "x": 12, "y": 19 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "refId": "A",
+        "expr": "proxmox_guest_mem_used_bytes{name=~\"$maskin\"} / 1073741824",
+        "legendFormat": "{{name}}" }],
+      "fieldConfig": { "defaults": { "unit": "decdbytes",
+        "color": { "mode": "thresholds" },
+        "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null } ] } },
+        "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" },
+        "tooltip": { "mode": "multi" } }
+    },
+    {
+      "id": 10,
+      "type": "timeseries",
+      "title": "Disk-kurve (GiB)",
+      "gridPos": { "h": 6, "w": 24, "x": 0, "y": 25 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "refId": "A",
+        "expr": "proxmox_guest_disk_used_bytes{name=~\"$maskin\"} / 1073741824",
+        "legendFormat": "{{name}}" }],
+      "fieldConfig": { "defaults": { "unit": "decdbytes",
+        "color": { "mode": "thresholds" },
+        "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null } ] } },
+        "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" },
+        "tooltip": { "mode": "multi" } }
+    }
+  ]
+}
