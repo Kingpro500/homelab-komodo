@@ -15,3 +15,19 @@ chown -R 472:472 /opt/grafana/data
 ```
 
 Komodo variable required: `GRAFANA_DATA_PATH=/opt/grafana/data`.
+
+## Dashboards (version-controlled in `provisioning/dashboards/`)
+
+File-based dashboard provisioning WORKS on this Grafana (13.2.3) — contrary to the
+older note that it was skipped. Verified 6 Oct 2026: `homelab-overview` and
+`unraid-storage` are both imported into the unified object store on start.
+
+| Dashboard | uid | Data source | Purpose |
+|---|---|---|---|
+| Homelab – Ressurser | `homelab-overview` | Prometheus 30s | Per-gjest CPU/RAM/disk fra Proxmox |
+| Unraid – Lagring (Tower) | `unraid-storage` | Prometheus 60s (job `unraid-storage`) | Array/disks/caches/shares fylling fra Unraid GraphQL |
+
+Recreate the container after adding a dashboard JSON — `docker kill --signal=HUP`
+does NOT pick up new files (bind mount holds the old inode until recreate):
+`docker-compose up -d --force-recreate grafana`.
+
