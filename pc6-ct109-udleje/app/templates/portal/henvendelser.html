@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Henvendelser — {{ bolig.overskrift }}{% endblock %}
+{% block content %}
+<h1>Henvendelser til «{{ bolig.overskrift }}»</h1>
+<p class="muted"><a href="{{ url_for('portal') }}">← Tilbage til portalen</a></p>
+
+{% for h in henvendelser %}
+  <div class="henvendelse {{ '' if h.laest else 'ulaest' }}">
+    <div class="henv-top">
+      <strong>{{ h.navn }}</strong>
+      <span class="muted">{{ h.oprettet_vis }} · {{ h.email }}{% if h.telefon %} · {{ h.telefon }}{% endif %}</span>
+    </div>
+    <p>{{ h.besked or 'Ingen besked.' }}</p>
+    {% if not h.laest %}
+      <form class="inline" method="post" action="{{ url_for('mark_laest', h_id=h.id) }}">
+        <input type="hidden" name="csrf" value="{{ g.csrf }}">
+        <button class="btn sm" type="submit">Marker som læst</button>
+      </form>
+    {% endif %}
+  </div>
+{% else %}
+  <p class="none">Ingen henvendelser endnu.</p>
+{% endfor %}
+{% endblock %}

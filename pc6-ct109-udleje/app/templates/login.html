@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Log ind{% endblock %}
+{% block content %}
+<div class="smal">
+  <h1>Log ind</h1>
+  {% if not g.bruger %}
+  <p class="muted">Har du en bolig til udlejning? <a href="{{ url_for('registrer') }}">Opret en udlejerkonto</a> — det er gratis.</p>
+  {% endif %}
+  <form method="post">
+    <input type="hidden" name="csrf" value="{{ g.csrf }}">
+    <input type="email" name="email" placeholder="E-mail" required>
+    <input type="password" name="password" placeholder="Adgangskode" required>
+    <button type="submit">Log ind</button>
+  </form>
+</div>
+{% endblock %}

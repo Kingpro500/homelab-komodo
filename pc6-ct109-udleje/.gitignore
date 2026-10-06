@@ -1,0 +1,5 @@
+# lokale pakker/test-miljø
+pylib/
+.venv/
+__pycache__/
+*.pyc

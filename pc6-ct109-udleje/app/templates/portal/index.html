@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Min portal{% endblock %}
+{% block content %}
+<div class="portal-head">
+  <h1>Min portal</h1>
+  <a class="btn" href="{{ url_for('ny_bolig') }}">+ Ny bolig</a>
+</div>
+<p class="muted">Velkommen, {{ g.bruger.navn }}. Her administrerer du dine udlejninger.</p>
+
+{% for b in boliger %}
+  <div class="portal-row">
+    {% if b.hovedbillede %}
+      <img class="mini" src="{{ url_for('uploads', filnavn=b.hovedbillede.filnavn) }}" alt="">
+    {% else %}
+      <div class="mini ph">—</div>
+    {% endif %}
+    <div class="portal-info">
+      <strong>{{ b.overskrift }}</strong>
+      <span class="muted">{{ b.by or b.kommune }} · {{ b.husleje_vis }}/md · <span class="status {{ b.status }}">{{ status_label(b.status) }}</span></span>
+      <span class="muted">Henvendelser: {{ b.henvendelser.count() }}</span>
+    </div>
+    <div class="portal-actions">
+      <a class="btn sm" href="{{ url_for('henvendelser', b_id=b.id) }}">Henvendelser</a>
+      <a class="btn sm" href="{{ url_for('rediger_bolig', b_id=b.id) }}">Rediger</a>
+      <form class="inline" method="post" action="{{ url_for('slet_bolig', b_id=b.id) }}"
+            onsubmit="return confirm('Slet «{{ b.overskrift }}»? Dette kan ikke fortrydes.');">
+        <input type="hidden" name="csrf" value="{{ g.csrf }}">
+        <button class="btn sm fare" type="submit">Slet</button>
+      </form>
+    </div>
+  </div>
+{% else %}
+  <p class="none">Du har endnu ingen boliger. <a href="{{ url_for('ny_bolig') }}">Opret din første</a>.</p>
+{% endfor %}
+{% endblock %}
