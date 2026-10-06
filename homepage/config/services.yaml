@@ -175,9 +175,13 @@
     - Speedtest Tracker:
         icon: speedtest-tracker.png
         href: http://10.0.0.128:8765/
-        description: 10.0.0.128:8765 · CT109 · pc6
+        description: 10.0.0.128:8765 · CT109 · pc6 · automatisert hver time
         server: ct109
         container: speedtest-tracker
+        widget:
+          type: speedtest
+          url: http://10.0.0.128:8765
+          version: 1
     - Prometheus:
         icon: si:prometheus
         href: http://10.0.0.128:9090/
@@ -200,6 +204,9 @@
         icon: mdi-speedometer
         href: http://10.0.0.124:5216/
         description: 10.0.0.124:5216 · CT104 · pc6
+        widget:
+          type: myspeed
+          url: http://10.0.0.124:5216
     - DiskSpeed:
         icon: mdi-harddisk
         href: http://10.0.0.124:8888/

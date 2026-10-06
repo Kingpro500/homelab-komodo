@@ -65,6 +65,20 @@ påvirkes ikke.
 containere): restart→running, stop→exited, start→running, 404 på ukjent
 container, 401 uten/fell-token. Konfig: `docker compose config -q` OK.
 
+## Hastighetsmetre (internett ned/opp)
+
+To speedtest-kilder på dashboardet, begge nøkkel-hvit uten passord:
+
+- **Speedtest Tracker** (`.128:8765`, LinuxServer/alexjustesen) → `widget type: speedtest`,
+  `version: 1` (kaller `/api/speedtest/latest`, ingen API-nøkkel). Data oppdateres av appens
+  egen scheduler.
+- **MySpeed** (`.124:5216`, germannewsmaker) → `widget type: myspeed`
+  (kaller `/api/speedtests?limit=1`).
+
+`version: 1` for speedtest bruker v1-endepunktet som også LinuxServer-bildet svarer på uten
+token (v2 `/api/v1/results/latest` er 302→login og krever `key:`). Hvis du senere setter et
+passord på MySpeed, legg `password:` i widget-oppføringen.
+
 ## Deploy-merknad
 
 Depotets `docker-compose.yml` MÅ vedlikeholdes likt det som kjører. En redeploy
