@@ -1,10 +1,12 @@
-# Double Commander on CT 151 (emby-pc6)
+# Double Commander on CT 151 (emby-pc6) — via HTTPS
 #
 # Modern open-source twin-pane file manager (Chrome/Firefox-flavored UI) over
-# the Unraid media NFS share, in the browser via linuxserver's KasmVNC base.
-# Chosen as the modern alternative to Krusader: same side-by-side panels, but
-# actively maintained and a lighter, more reliable GUI-in-browser than a full
-# KDE desktop.
+# the Unraid media NFS share, in the browser. The linuxserver/Selkies image
+# refuses plain HTTP from a LAN IP (WebRTC needs a secure context), so this
+# stack puts a small Caddy reverse proxy in front that terminates TLS with an
+# internal (self-signed) cert on port 8099. The browser shows a "not secure"
+# warning on first connect — click through. Krusader (8098) is the plain-HTTP
+# twin-pane alternative.
 #
 # Runs as PUID 99 / PGID 100 (Unraid nobody/users) on the privileged CT 151, so
 # NFS writes keep the media share's ownership.
@@ -20,20 +22,17 @@
 #
 #   install -d -o 99 -g 100 -m 0755 /opt/doublecommander
 #
-# Web UI is published on port 8099: http://10.0.0.150:8099
+# Web UI: https://10.0.0.150:8099
 services:
-  double-commander:
+  doublecommander:
     image: lscr.io/linuxserver/doublecommander:latest
     container_name: doublecommander
     restart: unless-stopped
-    ports:
-      - "8099:3000"        # KasmVNC web UI
     environment:
       PUID: "99"
       PGID: "100"
       TZ: "${TZ:-Europe/Oslo}"
-      # Selkies web gateway demands HTTPS by default; disable so the UI works
-      # over plain HTTP from the LAN (port 8099).
+      # Selkies is served as plain HTTP internally; Caddy provides HTTPS outside.
       SELKIES_ENABLE_HTTPS: "false"
     volumes:
       - "${DOUBLE_COMMANDER_CONFIG_PATH:-/opt/doublecommander}:/config"
@@ -43,3 +42,23 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: dc-proxy
+    restart: unless-stopped
+    ports:
+      - "8099:8099"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+    depends_on:
+      - doublecommander
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "3"
+
+volumes:
+  caddy-data:

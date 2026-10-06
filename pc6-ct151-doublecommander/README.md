@@ -19,11 +19,13 @@ deploy.
 ## Access
 
 ```
-http://10.0.0.150:8099
+https://10.0.0.150:8099
 ```
 
-Reach the desktop, open Double Commander; container mounts `/media` (the Unraid
-media share).
+HTTPS with an internal (self-signed) cert via the bundled Caddy proxy; the
+browser shows a "not secure" warning on first connect — click through. Reach
+the desktop, open Double Commander; the container mounts `/media` (the Unraid
+media share). Krusader (8098) is the plain-HTTP twin-pane alternative.
 
 ## Scope note
 

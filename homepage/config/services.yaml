@@ -277,8 +277,8 @@
         description: 10.0.0.150:8098 · CT151 · pc6 · KDE Krusader over Unraid media
     - Double Commander:
         icon: mdi-folder-swap
-        href: http://10.0.0.150:8099/
-        description: 10.0.0.150:8099 · CT151 · pc6 · moderne twin-pane filbehandler, Unraid media
+        href: https://10.0.0.150:8099/
+        description: 10.0.0.150:8099 · CT151 · pc6 · moderne twin-pane filbehandler (HTTPS/selfsigned)
     - Tunarr:
         icon: mdi-television-classic
         href: http://10.0.0.150:8005/
