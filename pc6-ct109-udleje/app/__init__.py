@@ -57,6 +57,10 @@ def create_app(test_config=None):
         uid = session.get("user_id")
         if uid:
             g.bruger = db.session.get(User, uid)
+        # CSRF-token skal findes allerede ved første besøg, ellers er alle
+        # formularer døde indtil login. Opret den her hvis den mangler.
+        if not session.get("csrf"):
+            session["csrf"] = secrets.token_hex(16)
         g.csrf = session.get("csrf")
 
     def login_påkrævet(fn):
