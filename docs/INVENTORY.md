@@ -37,7 +37,7 @@ on pc6, pc8 or pc9. n8n used to violate this; it moved to CT 103 on pc6.
 | pc9 | 108 lxc | **`docker-test`** | 10.0.0.130 | 1G | 8G | yes | 0 | *delete* | **Unused.** No stacks, not in Homepage, not mentioned anywhere. 1 GB RAM for nothing |
 | pc9 | 116 lxc | `pihole-pc9` | 10.0.0.116 | 1G | 8G | yes | 1 | | Pi-hole DNS, upstream Unbound |
 | pve | 100 qemu | `homeassistant` | 10.0.0.7 | 9G | — | no (VM) | 0 | | Home Assistant, a VM not a container. 1834 entities |
-| pve | 102 lxc | **`Komodo-core`** | 10.0.0.117 | 1G | 36G | yes | 1 | `pc8-ct102-core` | Komodo API and FerretDB |
+| pve | 102 lxc | **`Komodo-core`** | 10.0.0.117 | 1G | 36G | yes | 3 | `pc8-ct102-core` | Komodo API, FerretDB, NetBox, step-ca (intern CA) |
 | pve | 110 lxc | `pc8-ct110-node` | 10.0.0.129 | 2G | 16G | yes | 0 | | Periphery agent, no stacks |
 | pve | 115 lxc | `pihole-pc8` | 10.0.0.115 | 1G | 8G | yes | 1 | | Pi-hole DNS, upstream Unbound |
 

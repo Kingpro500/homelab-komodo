@@ -99,6 +99,10 @@
         description: Workspace · forbruk og kreditter
 
 - Infrastructure & IPAM:
+    - Step CA:
+        icon: mdi:shield-key-outline
+        href: https://10.0.0.117:9000/
+        description: 10.0.0.117:9000 · CT102 · pve (pc8) · intern CA/ACME
     - NetBox:
         icon: netbox.png
         href: http://10.0.0.117:8001/

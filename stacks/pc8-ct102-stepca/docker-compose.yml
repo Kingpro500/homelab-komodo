@@ -1,0 +1,30 @@
+name: pc8-ct102-stepca
+
+services:
+  stepca:
+    image: smallstep/step-ca:0.30.2
+    container_name: stepca
+    environment:
+      # Public CA name as shown in the UI.
+      DOCKER_STEPCA_INIT_NAME: "Homelab Internal CA (step-ca)"
+      # DNS names / IPs baked into the CA's own server certificate. Clients
+      # reach the ACME/API endpoint through these. 10.0.0.117 is this host.
+      DOCKER_STEPCA_INIT_DNS_NAMES: "stepca.lan.local,10.0.0.117,localhost"
+      # Provisioner used for initial bootstrap. The JWK admin password below
+      # is what `step ca bootstrap` + `step ca certificate` prompt for.
+      DOCKER_STEPCA_INIT_PROVISIONER_NAME: "admin"
+      DOCKER_STEPCA_INIT_ADMIN_SUBJECT: "STEP_ADMIN"
+      DOCKER_STEPCA_INIT_ADMIN_EMAIL: "admin@lan.local"
+      # Password protecting the intermediate/root signing keys (first boot only).
+      DOCKER_STEPCA_INIT_PASSWORD: "${STEPCA_PASSWORD:?Set STEPCA_PASSWORD in Komodo stack environment}"
+      # Password for the "admin" JWK provisioner (used once to bootstrap,
+      # then kept only for issuing ad-hoc certs via step CLI).
+      DOCKER_STEPCA_INIT_ADMIN_PASSWORD: "${STEPCA_ADMIN_PASSWORD:?Set STEPCA_ADMIN_PASSWORD in Komodo stack environment}"
+    ports:
+      - "9000:9000"
+    volumes:
+      - stepca_data:/home/step
+    restart: unless-stopped
+
+volumes:
+  stepca_data:
