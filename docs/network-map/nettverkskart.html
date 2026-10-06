@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nettverkskart — Homelab 10.0.0.0/24</title>
+<style>
+:root{
+  --bg:#0b0f14; --panel:#141a22; --panel2:#1a222d; --border:#2a3542;
+  --text:#d7e0ea; --muted:#8a97a6; --dim:#5d6b7a;
+  --wan:#3e8ef7; --lan:#34c88a; --iot:#f0a63c; --prox:#e86f51;
+  --ct:#7aa2f7; --vm:#9d7bf7; --svc:#4bc0c0; --danger:#f05a5a;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;padding:24px;line-height:1.35}
+h1{font-size:20px;margin-bottom:4px}
+.sub{color:var(--muted);font-size:12.5px;margin-bottom:18px}
+.sub b{color:var(--text)}
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:16px;font-size:12px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.dot{width:10px;height:10px;border-radius:3px;display:inline-block}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
+
+/* Layer bands */
+.band{border:1px solid var(--border);border-radius:10px;background:var(--panel);padding:12px;margin-bottom:14px}
+.band-title{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.band-title .bar{width:3px;height:14px;border-radius:2px;background:var(--lan)}
+.wan .band-title .bar{background:var(--wan)}
+.band-body{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-start}
+.linkbox{border:1px solid var(--border);border-radius:8px;padding:10px 12px;background:var(--panel2);min-width:150px}
+.linkbox .id{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:1px}
+.linkbox .nm{font-weight:600;font-size:13.5px;margin:3px 0}
+.linkbox .ip{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--muted)}
+.linkbox.core{border-color:#35506e;background:linear-gradient(160deg,#18212d,#141a22)}
+.linkbox.core .nm{color:#9dc3ff}
+.proxmox{grid-column:1/-1;border:1px solid var(--border);border-radius:10px;padding:12px;background:var(--panel);margin-bottom:14px}
+.px-head{font-size:12.5px;font-weight:700;color:var(--prox);margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.node-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.node{border:1px solid var(--border);border-radius:9px;background:var(--panel2);padding:10px;position:relative}
+.node .n-title{font-weight:700;font-size:13px}
+.node .n-ip{font-family:monospace;font-size:11.5px;color:var(--muted);margin:2px 0 8px}
+.guest{border-top:1px dashed var(--border);padding:6px 0 2px;display:flex;justify-content:space-between;align-items:baseline;gap:6px}
+.guest .g{font-size:12px}
+.guest .g b{font-weight:600}
+.guest .g .vt{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;margin-right:5px}
+.gt{background:#7aa2f71a;color:var(--ct)}
+.gv{background:#9d7bf71a;color:var(--vm)}
+.guest .ip{margin-left:auto;font-family:monospace;font-size:11px;color:var(--ct);white-space:nowrap}
+.svc-list{font-size:11px;color:var(--muted);margin-left:6px;line-height:1.5}
+.svc-list i{color:var(--svc);font-style:normal}
+.status-note{font-size:10px;color:var(--danger)}
+.bad{color:var(--danger)}
+
+/* IoT grid */
+.iot-wrap{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.iot{border:1px solid var(--border);border-radius:7px;background:var(--panel2);padding:7px 9px;font-size:12px}
+.iot .i-nm{font-weight:600;color:#f2c879}
+.iot .i-ip{font-family:monospace;font-size:10.5px;color:var(--muted)}
+.iot .i-m{font-size:10px;color:var(--dim);font-family:monospace}
+.tooltip{position:relative}
+footer{margin-top:18px;font-size:11px;color:var(--dim);text-align:center}
+a{color:var(--svc);text-decoration:none}
+h3.sec{font-size:13px;color:var(--muted);margin:18px 0 8px;text-transform:uppercase;letter-spacing:1px}
+mark{background:transparent;color:var(--danger);font-weight:700}
+</style>
+</head>
+<body>
+<h1>🕸️ Nettverkskart — Homelab <span style="color:var(--lan)">10.0.0.0/24</span></h1>
+<div class="sub">Bygd fra levende OPNsense-ARP (48 enheter, 6. okt) + Proxmox-gjesteliste (<b>19 VM/CT</b>) + Homepage-services + konfig-XML. Router <b>pc7</b>, fjernstyrt via Tailscale <b>100.126.80.67</b> (exit/subnet-node pve).</div>
+
+<div class="legend">
+  <span><span class="dot" style="background:var(--wan)"></span>WAN/Internett</span>
+  <span><span class="dot" style="background:var(--lan)"></span>LAN / ruting</span>
+  <span><span class="dot" style="background:var(--prox)"></span>Proxmox-node</span>
+  <span><span class="dot" style="background:var(--ct)"></span>Container (CT)</span>
+  <span><span class="dot" style="background:var(--vm)"></span>VM (Qemu)</span>
+  <span><span class="dot" style="background:var(--iot)"></span>Enhet / IoT</span>
+</div>
+
+<!-- ===== WAN ===== -->
+<div class="band wan">
+  <div class="band-title"><span class="bar"></span>Internett — WAN · VLAN 101 · igc1</div>
+  <div class="band-body">
+    <div class="linkbox">
+      <div class="id">NextGenTel Fiber · 750</div>
+      <div class="nm">ONT</div>
+      <div class="ip">89.10.228.222/23 · gw 89.10.228.1<br>WAN-DHCP · 184 flaps/30d (fysisk link, ~0.5 min/dag)</div>
+    </div>
+    <div style="align-self:center;color:var(--dim)">◄– fiber –►</div>
+    <div class="linkbox core">
+      <div class="id">OPNsense · bare-metal</div>
+      <div class="nm">pc7 · Router/Firewall</div>
+      <div class="ip">LAN 10.0.0.1 · igc0 · fq_codel<br>igc1 WAN · Tailscale via pve</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Switch layer ===== -->
+<div class="band">
+  <div class="band-title"><span class="bar"></span>Switch-lag — LAN 10.0.0.0/24 · Kea DHCP pool .2–.99</div>
+  <div class="band-body">
+    <div class="linkbox"><div class="id">Switch L2</div><div class="nm">Flex Mini 2.5G</div><div class="ip">STP priority 4096 · bod</div></div>
+    <div class="linkbox"><div class="id">Switch L2</div><div class="nm">EdgeSwitch 8 150W</div><div class="ip">stue · Arc/Amp/PC-kabler</div></div>
+    <div class="linkbox"><div class="id">WAP</div><div class="nm">UniFi AC Pro</div><div class="ip">10.0.0.22 · gang<br><span style="font-size:10px">MAC 78:8a:20 · enhet, ikke controller</span></div></div>
+  </div>
+</div>
+
+<!-- ===== Proxmox cluster ===== -->
+<div class="proxmox">
+  <div class="px-head">◈ Proxmox-kluster «CyberCluster»</div>
+  <div class="node-row">
+
+    <!-- pve pc8 -->
+    <div class="node">
+      <div class="n-title">pve (pc8)</div>
+      <div class="n-ip">10.0.0.102 · 16 GB · iOS15-HW · 3x I226-V 2.5G · master</div>
+      <div class="gui" style="font-size:10.5px;color:var(--muted);margin-bottom:2px">Tailscale exit/subnet-node <b style="color:var(--svc)">100.126.80.67</b></div>
+      <div class="guest"><span class="g"><span class="vt gv">VM</span><b>homeassistant</b> · CT100</span><span class="ip">10.0.0.7:8123</span></div>
+      <div class="svc-list">Home Assistant OS · smarthus + push-varsel</div>
+      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>Komodo-core</b> · 102</span><span class="ip">10.0.0.117</span></div>
+      <div class="svc-list"><i>Komodo</i> :9120 · <i>NetBox</i> :8001 · FerretDB · 2 GB RAM</div>
+      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>pihole-pc8</b> · 115</span><span class="ip">10.0.0.115:8080</span></div>
+      <div class="svc-list">Pi-hole v6 · DNS1</div>
+      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>pc8-ct110-node</b> · 110</span><span class="ip">10.0.0.129</span></div>
+      <div class="svc-list">Komodo-periphery (ingen stabel)</div>
+    </div>
+
+    <!-- pc6 -->
+    <div class="node">
+      <div class="n-title">pc6</div>
+      <div class="n-ip">10.0.0.120 · 32 GB · N355 · QuickSync · Docker-vert</div>
+      <div class="guest"><span class="g"><span class="vt gv">VM</span><b>Unraid-Tower</b> · 101</span><span class="ip">10.0.0.101</span></div>
+      <div class="svc-list"><i>Netdata</i> :19999 · Docker+lagring → flyttes · Valheim UDP 2456-58 · lavprior Q</div>
+      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct103-node</b> · 103</span><span class="ip">10.0.0.119</span></div>
+      <div class="svc-list"><i>n8n</i> :5678 · <i>Open WebUI</i> :3080</div>
+      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct109-node</b> · 109</span><span class="ip">10.0.0.128</span></div>
+      <div class="svc-list">*arr-stack: Sonarr/Radarr/Prowlarr/Readarr/Bazarr/Cleanuparr/Deluge · Homepage/Glance/Dashy/Heimdall/Grafana/Uptime-Kuma/Speedtest · docker.sock</div>
+      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct104</b> · 104</span><span class="ip">10.0.0.124</span></div>
+      <div class="svc-list"><i>MySpeed</i> :5216 · <i>DiskSpeed</i> :8888 · <i>MeTube</i> :8081 · <i>Pinchflat</i> :8945</div>
+      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>emby-pc6</b> · 151</span><span class="ip">10.0.0.150</span></div>
+      <div class="svc-list"><i>Emby</i> :8096 (WAN-fwd) · <i>Tunarr</i> :8005 · QuickSync</div>
+      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct152-roon</b> · 152</span><span class="ip">10.0.0.125</span></div>
+      <div class="svc-list">Roon — <mark>stoppet</mark> (loop-historikk)</div>
+      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct153-immich</b> · 153</span><span class="ip">10.0.0.127:2283</span></div>
+      <div class="svc-list">Immich · bilder</div>
+      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct154-paperless</b> · 154</span><span class="ip">10.0.0.131:8000</span></div>
+      <div class="svc-list">Paperless-ngx 6.0 · gjeld/hushold</div>
+      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct155-unifi</b> · 155</span><span class="ip">10.0.0.132:8443</span></div>
+      <div class="svc-list">UniFi Network controller · ingen AC-enheter adoptert</div>
+      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct111-iventoy</b> · 111</span><span class="ip">10.0.0.134:26000</span></div>
+      <div class="svc-list">iVentoy · PXE/ISO</div>
+      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct157-hermes</b> · 157</span><span class="ip">10.0.0.135</span></div>
+      <div class="svc-list"><i>Hermes dash</i> :9119 · <i>audit-api</i> :9118 · dette systemet</div>
+    </div>
+
+    <!-- pc9 -->
+    <div class="node">
+      <div class="n-title">pc9</div>
+      <div class="n-ip">10.0.0.103 · 16 GB · N100 · 1 GbE</div>
+      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>komodo-pc9</b> · 106</span><span class="ip">10.0.0.122</span></div>
+      <div class="svc-list"><i>Tunarr</i> :8005 · independent worker</div>
+      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>pihole-pc9</b> · 116</span><span class="ip">10.0.0.116:8080</span></div>
+      <div class="svc-list">Pi-hole v6 · DNS2</div>
+    </div>
+
+    <!-- pc1 -->
+    <div class="node">
+      <div class="n-title">pc1</div>
+      <div class="n-ip">10.0.0.112 · 8 GB · 3900X · RTX 3070 · dual-boot Win11</div>
+      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct156-ollama</b> · 156</span><span class="ip">10.0.0.133:11434</span></div>
+      <div class="svc-list"><span class="status-note bad">NEDE</span> qwen3:4b · driver/GPU-issue · avventer</div>
+      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct158-browsers</b> · 158</span><span class="ip">10.0.0.158</span></div>
+      <div class="svc-list">Browsers · ny (kom ut i ARP 6. okt)</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== Services overview ===== -->
+<h3 class="sec">Portforward (WAN → LAN)</h3>
+<div class="grid">
+  <div class="band" style="margin-bottom:0"><div class="band-body">
+    <div class="linkbox"><div class="id">TCP</div><div class="nm">8096 → Emby</div><div class="ip">10.0.0.150 · aktiv · <mark>fjern: bruk VPN</mark></div></div>
+    <div class="linkbox"><div class="id">UDP</div><div class="nm">2456-2458 → Valheim</div><div class="ip">10.0.0.101 · lukket (ikke startet)</div></div>
+  </div></div>
+
+  <div class="band" style="margin-bottom:0"><div class="band-body" style="gap:8px">
+    <div class="linkbox" style="min-width:120px"><div class="id">DNS1</div><div class="nm">Pi-hole</div><div class="ip">10.0.0.115</div></div>
+    <div class="linkbox" style="min-width:120px"><div class="id">DNS2</div><div class="nm">Pi-hole</div><div class="ip">10.0.0.116</div></div>
+    <div class="linkbox" style="min-width:120px"><div class="id">Recursor</div><div class="nm">Unbound</div><div class="ip">10.0.0.1:53 · lan.local</div></div>
+    <div class="linkbox" style="min-width:120px"><div class="id">DHCP</div><div class="nm">Kea</div><div class="ip">10.0.0.1 · pool .2–.99</div></div>
+  </div></div>
+</div>
+
+<!-- ===== IoT devices ===== -->
+<h3 class="sec">Enheter &amp; IoT — målt via OPNsense-ARP (48 stk, 6. okt)</h3>
+<div class="band"><div class="band-body" style="flex-direction:column">
+  <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Sonos ×8 · Google/Nest ×4 · Apple ×3 · ESP ×6 · Philips Hue · Ubiquiti · Sony/Dreame/Xiaomi</div>
+  <div class="iot-wrap" id="iot"></div>
+</div></div>
+
+<footer>Generert 6. okt 2026 av Hermes (CT157) — data fra OPNsense ARP/live + Proxmox API + Homepage + konfig-XML. IP-er merket <mark>NEDE</mark> svarer ikke.</footer>
+
+<script>
+const iot = {
+ "10.0.0.2":"Sonos · 94",   "10.0.0.12":"Sonos B",   "10.0.0.13":"Sonos",   "10.0.0.15":"Sonos",
+ "10.0.0.16":"Sonos S",     "10.0.0.19":"Sonos R",   "10.0.0.46":"Sonos Lampe(Bedroom)",
+ "10.0.0.4":"Google/Nest",  "10.0.0.21":"Google",    "10.0.0.24":"Google",   "10.0.0.30":"Nest", "10.0.0.52":"Google",
+ "10.0.0.5":"ESP · Espressif","10.0.0.8":"ESPControl lysskjerm","10.0.0.10":"ESP","10.0.0.27":"ESP","10.0.0.48":"EspMedia 10.1″","10.0.0.86":"ESPControl medieskjerm",
+ "10.0.0.11":"Apple",       "10.0.0.20":"Apple",     "10.0.0.84":"Apple",
+ "10.0.0.9":"Hue Bridge · 09","10.0.0.18":"PS5 (sov2)","10.0.0.22":"UniFi AC Pro (gang)","10.0.0.25":"Dreame støvsuger","10.0.0.28":"Xiaomi",
+ "10.0.0.14":"(virtuell)",  "10.0.0.23":"(virtuell)","10.0.0.36":"(virtuell)","10.0.0.45":"(virtuell)"
+};
+const macs = { "10.0.0.2":"78:28:ca:15:6b:80","10.0.0.12":"78:28:ca:b5:e0:6a","10.0.0.13":"38:42:0b:2b:6b:ce","10.0.0.15":"48:a6:b8:b0:88:62","10.0.0.16":"78:28:ca:80:48:54","10.0.0.19":"48:a6:b8:f4:b4:64","10.0.0.46":"78:28:ca:17:bc:92","10.0.0.4":"ac:67:84:0e:3e:86","10.0.0.21":"d8:eb:46:96:de:3e","10.0.0.24":"d8:eb:46:7a:3d:92","10.0.0.30":"ac:67:84:1a:0d:a5","10.0.0.52":"ac:67:84:23:2b:14","10.0.0.5":"ec:da:3b:93:d8:f6","10.0.0.8":"28:84:85:85:fd:30","10.0.0.10":"94:b5:55:20:3e:88","10.0.0.27":"48:27:e2:0f:5f:ac","10.0.0.48":"10:20:ba:f3:c7:48","10.0.0.86":"1c:db:d4:76:da:34","10.0.0.11":"64:0c:91:b1:54:e3","10.0.0.20":"4c:20:b8:a8:52:d6","10.0.0.84":"84:8c:8d:e2:d7:f0","10.0.0.9":"ec:b5:fa:12:10:17","10.0.0.18":"0c:70:43:4d:95:3b","10.0.0.22":"78:8a:20:d0:87:21","10.0.0.25":"70:c9:32:bf:bb:d6","10.0.0.28":"5c:e5:0c:a3:36:8d"};
+const el = document.getElementById('iot');
+Object.entries(iot).sort((a,b)=>a[0].split('.').pop()*1-b[0].split('.').pop()*1).forEach(([ip,nm])=>{
+  const d=document.createElement('div');d.className='iot tooltip';
+  d.innerHTML=`<div class="i-nm">${nm}</div><div class="i-ip">${ip}</div><div class="i-m">${macs[ip]||''}</div>`;
+  el.appendChild(d);
+});
+</script>
+</body>
+</html>
