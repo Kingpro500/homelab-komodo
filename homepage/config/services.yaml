@@ -96,14 +96,16 @@
     - OpenRouter Spend:
         icon: mdi-robot-happy
         href: http://10.0.0.135:9118/openrouter/spend
-        description: 10.0.0.135:9118 · CT157 · pc6 · spend tracking fra API
+        description: 10.0.0.135:9118 · CT157 · pc6 · forbruk fra API
         widget:
-          type: stats
-          color: linear-gradient(135deg, rgb(255, 107, 107) 0%, rgb(255, 180, 107) 100%)
-          method: GET
-          headers:
-            - key: Content-Type
-              value: application/json
+          type: customapi
+          url: http://10.0.0.135:9118/openrouter/spend
+          refreshInterval: 300
+          mappings:
+            - field:
+                field: total_cost
+              label: Forbruk ($)
+              format: text
 
 - Infrastructure & IPAM:
     - Step CA:

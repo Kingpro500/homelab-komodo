@@ -42,14 +42,14 @@ pages:
             url: http://10.0.0.135:9118/openrouter/spend
             cache: 5m
             fields:
-              - title: Total Cost ($)
+              - title: Total ($)
                 label: total_cost
                 color: "#FF6B6B"
-              - title: Requests
-                label: total_requests
+              - title: Siste 7 dager
+                label: cost_weekly
                 color: "#4ECDC4"
-              - title: Weekly Avg
-                label: weekly_avg
+              - title: Gjenstår av tak
+                label: limit_remaining
                 color: "#95E1D3"
 
       - size: full
