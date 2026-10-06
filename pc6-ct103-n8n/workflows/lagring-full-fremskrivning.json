@@ -1,0 +1,192 @@
+{
+  "name": "Lagring - full-fremskrivning",
+  "description": null,
+  "nodes": [
+    {
+      "id": "7e65c83b-a968-4804-8bd3-7ece009b1093",
+      "name": "Hver dag 08:30",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -260,
+        300
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "days",
+              "triggerAtHour": 8,
+              "triggerAtMinute": 30
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "82f602c6-1e69-4c48-9b4b-e39753f44fd0",
+      "name": "Hent volumstatus",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        0,
+        300
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "http://10.0.0.135:9118/storage",
+        "authentication": "none",
+        "options": {
+          "timeout": 60000,
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Audit-Token",
+              "value": "REDACTED_AUDIT_TOKEN"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "60b92691-a587-40c9-88e9-973f5e685bdb",
+      "name": "Logg og prosjekter",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const sd = $getWorkflowStaticData('global');\nconst today = new Date().toISOString().slice(0, 10);\nconst hist = sd.hist || {};\n// Bare de volumene som faktisk fylles og er over 80 % gir mening aa feilsoeke.\nconst volumes = ($json.storage || []).filter(s => s.plugintype === 'nfs' && s.used_pct >= 80);\nconst alerts = [];\nfor (const v of volumes) {\n  const key = v.storage;\n  const arr = hist[key] || [];\n  arr.push({ date: today, used_pct: v.used_pct });\n  while (arr.length > 60) arr.shift();          // behold siste 60 dagers historikk\n  hist[key] = arr;\n  const win = arr.slice(-14);\n  if (win.length < 5) continue;                 // trenger minst 5 proever\n  const first = win[0], last = win[win.length - 1];\n  const days = (new Date(last.date) - new Date(first.date)) / 86400000 || 1;\n  const rate = days > 0 ? (last.used_pct - first.used_pct) / days : 0;  // %/dag\n  if (rate < 0.02) continue;                    // for svak vekst til aa projisere\n  const daysToFull = Math.round((100 - last.used_pct) / rate);\n  if (daysToFull <= 60) {\n    alerts.push({ name: key, used_pct: last.used_pct,\n                  rate_per_day: +rate.toFixed(2), days_to_full: daysToFull });\n  }\n}\nsd.hist = hist;\nreturn [{ json: { alerts } }];"
+      }
+    },
+    {
+      "id": "62a06b62-6d0b-441b-ad3d-679ba0753c43",
+      "name": "Fylles innen 60 dager?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        480,
+        300
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "cond-alerts",
+              "leftValue": "={{ $json.alerts.length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "06d8d844-1cb7-4845-8a25-82cebf6aa490",
+      "name": "Varsle iPhone",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        720,
+        300
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://10.0.0.7:8123/api/services/notify/mobile_app_1_iphone_r",
+        "authentication": "none",
+        "sendHeaders": true,
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ title: 'Lagring: ' + $json.alerts.length + ' volum paa vei til aa fylles', message: $json.alerts.map(a => a.name + ': ' + a.used_pct + '% brukt, full om ~' + a.days_to_full + ' d (' + a.rate_per_day + ' %/dag)').join('\\n') }) }}",
+        "options": {
+          "timeout": 30000
+        },
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer REDACTED_HASS_TOKEN"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Hver dag 08:30": {
+      "main": [
+        [
+          {
+            "node": "Hent volumstatus",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hent volumstatus": {
+      "main": [
+        [
+          {
+            "node": "Logg og prosjekter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Logg og prosjekter": {
+      "main": [
+        [
+          {
+            "node": "Fylles innen 60 dager?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fylles innen 60 dager?": {
+      "main": [
+        [
+          {
+            "node": "Varsle iPhone",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true,
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "parentFolder": null
+}
