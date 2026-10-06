@@ -226,13 +226,17 @@ footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-
 
 <h3 class="sec">📡 Enheter &amp; IoT — OPNsense-ARP (48 stk, 6. okt)</h3>
 <div class="band"><div class="band-body" style="flex-direction:column">
-  <div style="font-size:14.5px;color:var(--muted);margin-bottom:7px">Sonos ×7 · Google/Nest ×5 · Apple ×3 · ESP ×5 · Hue · Ubiquiti · Dreame · Xiaomi · PS5</div>
+  <div style="font-size:14.5px;color:var(--muted);margin-bottom:7px">Sonos ×7 (i ARP) · Google/Nest ×5 · Apple ×3 · ESP ×5 · Hue · Ubiquiti · Dreame · Xiaomi · PS5</div>
   <div class="iot-wrap" id="iot"></div>
+  <div style="margin-top:12px;border-top:1px dashed var(--border);padding-top:10px">
+    <div style="font-size:13px;color:var(--muted);margin-bottom:6px"><b style="color:var(--iot)">Sonos One — offline/uten strøm (legges til permanent, ARP-verifiseres senere)</b></div>
+    <div class="iot-wrap" id="iot-offline"></div>
+  </div>
 </div></div>
 
 <div class="note">
 <b>Verifiserte avvik fra krav/vedlegg (6. okt):</b><br>
-• <b>Sonos:</b> ARP viser 7 (.2/.12/.13/.15/.16/.19/.46), ikke 8. Arc-surround med Sonos One front/side + lampen: enkelte One-høyttalere kan være offline/trådløse nå og telles ikke i ARP. Legges til statisk hvis ønsket.<br>
+• <b>Sonos:</b> ARP viser 7 (.2/.12/.13/.15/.16/.19/.46), ikke 8. De to Sonos One (front/side i Arc-surround) i tillegg er lagt til som <b>offline</b> (uten strøm nå) under rutenettet; rett dem når de er online. Totalt 9 Sonos-enheter.<br>
 • <b>ESP ×5</b> i ARP (EspControl lys .8, EspControl media .86, EspMedia 10.1″ .48 + .5/.10/.27). Den store 10.1″-skjermen (media-player-d395ce) er <b>.48</b> — på kartet.<br>
 • <b>CT107 emby-backup</b> finnes <b>ikke</b> — verifisert slettet i Proxmox og Komodo.<br>
 • <b>«pc1-ct103-node»</b>: navnet er misvisende — CT103 ligger fysisk på <b>pc6</b> (vmid 103).
@@ -255,6 +259,17 @@ Object.entries(iot).sort((a,b)=>a[0].split('.').pop()*1-b[0].split('.').pop()*1)
   const d=document.createElement('div');d.className='iot';
   d.innerHTML=`<div class="i-nm">${nm}</div><div class="i-ip">${ip}</div><div class="i-m">${macs[ip]||''}</div>`;
   el.appendChild(d);
+});
+const offline = [
+  {nm:'Sonos One (front L)', ip:'offline', mac:''},
+  {nm:'Sonos One (front R)', ip:'offline', mac:''}
+];
+const elo = document.getElementById('iot-offline');
+offline.forEach(o=>{
+  const d=document.createElement('div');d.className='iot';
+  d.innerHTML=`<div class="i-nm">${o.nm}</div><div class="i-ip">${o.ip}</div><div class="i-m">${o.mac||'ARP-verifiseres'}</div>`;
+  d.style.borderStyle='dashed'; d.style.opacity='.75';
+  elo.appendChild(d);
 });
 </script>
 </body>
