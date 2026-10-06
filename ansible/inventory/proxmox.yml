@@ -1,0 +1,27 @@
+---
+all:
+  children:
+    proxmox_nodes:
+      children:
+        # Proxmox er nådd over API (HTTPS 8006), ikke SSH.
+        # Hver node er en "host" som modulene kaller mot.
+        cluster_master:
+          hosts:
+            pve:
+              ansible_host: 10.0.0.102
+              ansible_connection: local
+              comment: "pc8 - Proxmox master + Komodo core (CT102)"
+        workers:
+          hosts:
+            pc6:
+              ansible_host: 10.0.0.120
+              ansible_connection: local
+              comment: "pc6 - n8n, *arr, media (CT104/109/151-157)"
+            pc9:
+              ansible_host: 10.0.0.103
+              ansible_connection: local
+              comment: "pc9 - media backup, pihole (CT106/108/116)"
+            pc1:
+              ansible_host: 10.0.0.112
+              ansible_connection: local
+              comment: "pc1 - gaming + Ollama (CT156), browsers (CT158)"

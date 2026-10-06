@@ -1,0 +1,14 @@
+---
+# Credentials leses fra miljøet (finnes i ~/.hermes/.env).
+# TOKEN_ID har formen <user>!<tokenid>, f.eks. hermes@pve!monitor.
+proxmox_api_url: "{{ lookup('env', 'PROXMOX_URL') }}"
+proxmox_api_user: "{{ lookup('env', 'PROXMOX_TOKEN_ID').split('!')[0] }}"
+proxmox_api_token_id: "{{ lookup('env', 'PROXMOX_TOKEN_ID').split('!')[1] }}"
+proxmox_api_token_secret: "{{ lookup('env', 'PROXMOX_TOKEN_SECRET') }}"
+
+# API-verten hentes fra URL-en (uten skjema og port).
+proxmox_api_host: "{{ proxmox_api_url | regex_replace('^https?://', '') | regex_replace(':.*$', '') }}"
+
+# Alle noder deler samme cluster-token; module hates per-node api_host.
+proxmox_validate_certs: false
+

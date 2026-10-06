@@ -1,0 +1,71 @@
+---
+# Read-only diagnose-playbook for CyberCluster (Proxmox).
+# Treffer clusteret via API-token (hermes@pve!monitor, PVEAuditor) lokalt
+# fra kontrollmaskinen (10.0.0.135). Ingenting installeres på nodene.
+- name: CyberCluster status (read-only)
+  hosts: pve
+  gather_facts: false
+  become: false
+  tasks:
+    - name: Cluster status
+      community.proxmox.proxmox_cluster_status_info:
+        api_host: "{{ proxmox_api_host }}"
+        api_user: "{{ proxmox_api_user }}"
+        api_token_id: "{{ proxmox_api_token_id }}"
+        api_token_secret: "{{ proxmox_api_token_secret }}"
+        validate_certs: false
+      register: cluster
+
+    - name: Vise clusternavn og kvorum
+      ansible.builtin.debug:
+        msg: >-
+          Cluster {{ (cluster.cluster_status | selectattr('type', 'equalto', 'cluster') | first)['name'] }}
+          — {{ (cluster.cluster_status | selectattr('type', 'equalto', 'cluster') | first)['nodes'] }} noder,
+          kvorum {{ (cluster.cluster_status | selectattr('type', 'equalto', 'cluster') | first)['quorate'] }}
+
+    - name: Liste VM-er og CT-er i clusteret
+      community.proxmox.proxmox_vm_info:
+        api_host: "{{ proxmox_api_host }}"
+        api_user: "{{ proxmox_api_user }}"
+        api_token_id: "{{ proxmox_api_token_id }}"
+        api_token_secret: "{{ proxmox_api_token_secret }}"
+        validate_certs: false
+      register: vms
+
+    - name: Vise VM/CT-oversikt (sortert på vmid)
+      ansible.builtin.debug:
+        msg: "{{ item.vmid }} | {{ item.type }} | {{ item.name | default('(uten navn)') }} | node={{ item.node }} | status={{ item.status }}"
+      loop: "{{ vms.proxmox_vms | sort(attribute='vmid') }}"
+
+    - name: "Oversikt: antall kjørende vs stoppet"
+      ansible.builtin.debug:
+        msg: "{{ (vms.proxmox_vms | selectattr('status', 'equalto', 'running') | list | length) }} kjorende, {{ (vms.proxmox_vms | selectattr('status', 'equalto', 'stopped') | list | length) }} stoppet av {{ vms.proxmox_vms | length }} totalt"
+
+    - name: Nodeoversikt (noder i clusteret)
+      community.proxmox.proxmox_node_info:
+        api_host: "{{ proxmox_api_host }}"
+        api_user: "{{ proxmox_api_user }}"
+        api_token_id: "{{ proxmox_api_token_id }}"
+        api_token_secret: "{{ proxmox_api_token_secret }}"
+        validate_certs: false
+      register: nodes
+
+    - name: Vise nodeoversikt
+      ansible.builtin.debug:
+        msg: "{{ item.node }} — status={{ item.status }}
+               cpu={{ item.cpu }} mem={% if item.mem %}{{ item.mem }}{% else %}?{% endif %}"
+      loop: "{{ nodes.proxmox_nodes }}"
+
+    - name: Lagringsoversikt
+      community.proxmox.proxmox_storage_info:
+        api_host: "{{ proxmox_api_host }}"
+        api_user: "{{ proxmox_api_user }}"
+        api_token_id: "{{ proxmox_api_token_id }}"
+        api_token_secret: "{{ proxmox_api_token_secret }}"
+        validate_certs: false
+      register: storage
+
+    - name: Vise lagringsressurser
+      ansible.builtin.debug:
+        msg: "{{ item.storage }} ({{ item.type }}) — path: {{ item.path | default('(n/a)') }}"
+      loop: "{{ storage.proxmox_storages }}"
