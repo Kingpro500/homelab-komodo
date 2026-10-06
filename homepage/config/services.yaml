@@ -261,6 +261,14 @@
         icon: emby.png
         href: http://10.0.0.150:8096/
         description: 10.0.0.150:8096 · CT151 · pc6
+    - FileBrowser:
+        icon: mdi-folder-multiple-outline
+        href: http://10.0.0.150:8097/
+        description: 10.0.0.150:8097 · CT151 · pc6 · filbehandling Unraid media
+    - Krusader:
+        icon: mdi-folder-multiple
+        href: http://10.0.0.150:8098/
+        description: 10.0.0.150:8098 · CT151 · pc6 · KDE Krusader over Unraid media
     - Tunarr:
         icon: mdi-television-classic
         href: http://10.0.0.150:8005/
