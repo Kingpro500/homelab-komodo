@@ -45,6 +45,7 @@ running service.
 | Lagring - full-fremskrivning | daglig 08:30 | [docs/lagring-full-fremskrivning.md](docs/lagring-full-fremskrivning.md) | [workflows/lagring-full-fremskrivning.json](workflows/lagring-full-fremskrivning.json) |
 | Emby - overvaaking og autorestart | hvert minutt | [docs/emby-overvaaking-autorestart.md](docs/emby-overvaaking-autorestart.md) | [workflows/emby-overvaaking-autorestart.json](workflows/emby-overvaaking-autorestart.json) |
 | Homelab-ressurs-alarmer | Alertmanager webhook | [docs/homelab-ressurs-alarmer.md](docs/homelab-ressurs-alarmer.md) | [workflows/homelab-ressurs-alarmer.json](workflows/homelab-ressurs-alarmer.json) |
+| Hendelseslogg - FerretDB | webhook `/events` | [docs/hendelseslogg-ferretdb.md](docs/hendelseslogg-ferretdb.md) | [workflows/hendelseslogg-ferretdb.json](workflows/hendelseslogg-ferretdb.json) |
 
 Driftsprinsipper for hvordan n8n-automasjoner bygges, sikres og gjenopprettes
 er samlet i [docs/operations/n8n-workflows.md](../docs/operations/n8n-workflows.md).
