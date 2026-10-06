@@ -1,0 +1,42 @@
+# Double Commander on CT 151 (emby-pc6)
+#
+# Modern open-source twin-pane file manager (Chrome/Firefox-flavored UI) over
+# the Unraid media NFS share, in the browser via linuxserver's KasmVNC base.
+# Chosen as the modern alternative to Krusader: same side-by-side panels, but
+# actively maintained and a lighter, more reliable GUI-in-browser than a full
+# KDE desktop.
+#
+# Runs as PUID 99 / PGID 100 (Unraid nobody/users) on the privileged CT 151, so
+# NFS writes keep the media share's ownership.
+#
+# Deploy through Komodo on the emby-pc6 server with these Stack variables
+# (all optional; defaults shown):
+#
+#   DOUBLE_COMMANDER_MEDIA_PATH=/media   # CT path of the Unraid media NFS (mp0)
+#   DOUBLE_COMMANDER_CONFIG_PATH=/opt/doublecommander
+#   TZ=Europe/Oslo
+#
+# Prepare the config dir once on CT 151:
+#
+#   install -d -o 99 -g 100 -m 0755 /opt/doublecommander
+#
+# Web UI is published on port 8099: http://10.0.0.150:8099
+services:
+  double-commander:
+    image: lscr.io/linuxserver/doublecommander:latest
+    container_name: doublecommander
+    restart: unless-stopped
+    ports:
+      - "8099:3000"        # KasmVNC web UI
+    environment:
+      PUID: "99"
+      PGID: "100"
+      TZ: "${TZ:-Europe/Oslo}"
+    volumes:
+      - "${DOUBLE_COMMANDER_CONFIG_PATH:-/opt/doublecommander}:/config"
+      - "${DOUBLE_COMMANDER_MEDIA_PATH:-/media}:/media"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
