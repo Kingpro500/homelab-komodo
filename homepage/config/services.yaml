@@ -105,6 +105,12 @@
         description: 10.0.0.128:3000 · CT109 · pc6 · visualisering
         server: ct109
         container: grafana
+    - Nettverkskart:
+        icon: mdi:sitemap
+        href: http://10.0.0.128:3020/
+        description: 10.0.0.128:3020 · CT109 · pc6 · kart over hele LAN-et (6. okt)
+        server: ct109
+        container: nettkart
 
 - Monitoring:
     - Netdata Cloud:
