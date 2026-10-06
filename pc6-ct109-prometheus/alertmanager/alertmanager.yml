@@ -1,0 +1,17 @@
+global:
+  resolve_timeout: 5m
+
+route:
+  receiver: phone-alerts
+  group_by: ['alertname', 'node']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 2h
+
+receivers:
+  - name: phone-alerts
+    webhook_configs:
+      # n8n-workflow "Homelab-ressurs-alarmer" (Webhook-node `homelab-alerts`).
+      # n8n formaterer og kaller /notify på 10.0.0.135:9118 -> notify_ha.py -> HA.
+      - url: 'http://10.0.0.119:5678/webhook/homelab-alerts'
+        send_resolved: true

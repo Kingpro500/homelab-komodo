@@ -1,0 +1,47 @@
+groups:
+  - name: homelab-resources
+    rules:
+      - alert: GuestMemoryHigh
+        expr: (proxmox_guest_mem_used_bytes / proxmox_guest_mem_total_bytes) * 100 >= 90
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "RAM høy: {{ $labels.name }} ({{ $labels.node }})"
+          description: "{{ $labels.name }} på {{ $labels.node }} bruker {{ $value | printf \"%.0f\" }} % av RAM. Vurder å rydde eller skaffe mer."
+
+      - alert: GuestMemoryCritical
+        expr: (proxmox_guest_mem_used_bytes / proxmox_guest_mem_total_bytes) * 100 >= 97
+        for: 3m
+        labels:
+          severity: critical
+        annotations:
+          summary: "RAM TOMT: {{ $labels.name }} ({{ $labels.node }})"
+          description: "{{ $labels.name }} på {{ $labels.node }} bruker {{ $value | printf \"%.0f\" }} % av RAM — fare for OOM-kill / swapping."
+
+      - alert: GuestDiskHigh
+        expr: (proxmox_guest_disk_used_bytes / proxmox_guest_disk_total_bytes) * 100 >= 85
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Disk høy: {{ $labels.name }} ({{ $labels.node }})"
+          description: "{{ $labels.name }} på {{ $labels.node }} bruker {{ $value | printf \"%.0f\" }} % av disken."
+
+      - alert: GuestDiskCritical
+        expr: (proxmox_guest_disk_used_bytes / proxmox_guest_disk_total_bytes) * 100 >= 90
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Disk TOMT: {{ $labels.name }} ({{ $labels.node }})"
+          description: "{{ $labels.name }} på {{ $labels.node }} bruker {{ $value | printf \"%.0f\" }} % av disken."
+
+      - alert: GuestSustainedCPU
+        expr: proxmox_guest_cpu_percent >= 90
+        for: 15m
+        labels:
+          severity: info
+        annotations:
+          summary: "CPU høyt: {{ $labels.name }} ({{ $labels.node }})"
+          description: "{{ $labels.name }} på {{ $labels.node }} har ligget over 90 % CPU i 15 min."
