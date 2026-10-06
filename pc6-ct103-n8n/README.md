@@ -44,6 +44,7 @@ running service.
 | WAN offentlig IP-vakt | hvert 6. time | [docs/wan-offentlig-ip-vakt.md](docs/wan-offentlig-ip-vakt.md) | [workflows/wan-offentlig-ip-vakt.json](workflows/wan-offentlig-ip-vakt.json) |
 | Lagring - full-fremskrivning | daglig 08:30 | [docs/lagring-full-fremskrivning.md](docs/lagring-full-fremskrivning.md) | [workflows/lagring-full-fremskrivning.json](workflows/lagring-full-fremskrivning.json) |
 | Emby - overvaaking og autorestart | hvert minutt | [docs/emby-overvaaking-autorestart.md](docs/emby-overvaaking-autorestart.md) | [workflows/emby-overvaaking-autorestart.json](workflows/emby-overvaaking-autorestart.json) |
+| Homelab-ressurs-alarmer | Alertmanager webhook | [docs/homelab-ressurs-alarmer.md](docs/homelab-ressurs-alarmer.md) | [workflows/homelab-ressurs-alarmer.json](workflows/homelab-ressurs-alarmer.json) |
 
 Driftsprinsipper for hvordan n8n-automasjoner bygges, sikres og gjenopprettes
 er samlet i [docs/operations/n8n-workflows.md](../docs/operations/n8n-workflows.md).
