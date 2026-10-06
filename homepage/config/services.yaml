@@ -89,6 +89,10 @@
         icon: mdi-robot
         href: http://10.0.0.135:9119/chat?profile=default
         description: 10.0.0.135:9119 · CT157 · pc6 · chat
+    - Gjeld:
+        icon: mdi-cash-multiple
+        href: http://10.0.0.119:8099/
+        description: 10.0.0.119:8099 · CT103 · pc6 · gjeld-overvåking (Paperless+n8n)
     - Spend OpenRouter:
         icon: openrouter.png
         href: https://openrouter.ai/workspaces/default
@@ -161,6 +165,24 @@
         description: 10.0.0.128:8765 · CT109 · pc6
         server: ct109
         container: speedtest-tracker
+    - Prometheus:
+        icon: si:prometheus
+        href: http://10.0.0.128:9090/
+        description: 10.0.0.128:9090 · CT109 · pc6 · metrikker
+        server: ct109
+        container: prometheus
+    - Alertmanager:
+        icon: mdi:bell-alert-outline
+        href: http://10.0.0.128:9093/
+        description: 10.0.0.128:9093 · CT109 · pc6 · varsler
+        server: ct109
+        container: alertmanager
+    - FlareSolverr:
+        icon: mdi:cloud-question
+        href: http://10.0.0.128:8191/
+        description: 10.0.0.128:8191 · CT109 · pc6 · løser Cloudflare-beskytta sider
+        server: ct109
+        container: flaresolverr
     - MySpeed:
         icon: mdi-speedometer
         href: http://10.0.0.124:5216/
@@ -169,6 +191,10 @@
         icon: mdi-harddisk
         href: http://10.0.0.124:8888/
         description: 10.0.0.124:8888 · CT104 · pc6
+    - QDirStat:
+        icon: mdi-folder-chart
+        href: http://10.0.0.124:5800/
+        description: 10.0.0.124:5800 · CT104 · pc6 · treemap over Unraid media
 
 - Network & Utilities:
     - Pi-hole pc8:
@@ -187,6 +213,10 @@
         icon: unifi.png
         href: https://10.0.0.132:8443/
         description: 10.0.0.132:8443 · CT155 · pc6
+    - Browser-pool:
+        icon: mdi-web
+        href: http://10.0.0.158:3001/
+        description: 10.0.0.158 · CT158 · pc1 · firefox:3001 chromium:3002 msedge:3003 opera:3004 brave:3005
 
 - Media & Downloads:
     - Seerr:
