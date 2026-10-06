@@ -100,14 +100,16 @@ td.name{font-weight:600}.state{display:inline-block;padding:2px 8px;border-radiu
 const tokEl=document.getElementById('tok'),rows=document.getElementById('rows'),
 errEl=document.getElementById('err'),meta=document.getElementById('meta');
 let token=localStorage.getItem('ct109_tok')||''; if(token)tokEl.value=token;
+function curTok(){return token||tokEl.value.trim();}
 function setErr(m){errEl.textContent=m||''}
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
 async function api(path,method){
-  const r=await fetch(path,{method:method||'GET',headers:{'Authorization':'Bearer '+token}});
-  if(r.status===401)throw new Error('401 – sjekk token');
+  const r=await fetch(path,{method:method||'GET',headers:{'Authorization':'Bearer '+curTok()}});
+  if(r.status===401)throw new Error('401');
   if(!r.ok)throw new Error(r.status+' '+ (await r.text()));
   return r.json();
 }
+function needToken(){setErr('Skriv inn token under og trykk "Lagre token" for å koble til.');meta.textContent='';rows.innerHTML='';return;}
 function render(list){
   rows.innerHTML=list.map(c=>{
     const up=c.state==='running';
@@ -120,20 +122,21 @@ function render(list){
   }).join('');
 }
 async function load(){
+  if(!curTok()) return needToken();
   try{const d=await api('/api/containers');meta.textContent=d.length+' containere';render(d);setErr('');}
-  catch(e){setErr('Kunne ikke hente status: '+e.message)}
+  catch(e){setErr('401 – tokenet er feil. Skriv riktig token og trykk "Lagre token".');}
 }
-document.getElementById('save').onclick=()=>{token=tokEl.value;localStorage.setItem('ct109_tok',token);load();setErr('Token lagret i denne nettleseren.');};
+document.getElementById('save').onclick=async()=>{token=tokEl.value.trim();localStorage.setItem('ct109_tok',token);setErr('');await load();};
 document.getElementById('refresh').onclick=load;
 rows.addEventListener('click',async ev=>{
   const b=ev.target.closest('button.btn');if(!b)return;b.disabled=true;setErr('');
   try{
     const r=await fetch('/api/containers/'+encodeURIComponent(b.dataset.n)+'/'+b.dataset.a,
-      {method:'POST',headers:{'Authorization':'Bearer '+token}});
-    if(r.status===401)throw new Error('401 – sjekk token');
+      {method:'POST',headers:{'Authorization':'Bearer '+curTok()}});
+    if(r.status===401)throw new Error('401');
     if(!r.ok)throw new Error((await r.text())||r.status);
     await new Promise(r=>setTimeout(r,400)); load();
-  }catch(e){setErr(b.dataset.a+' feilet: '+e.message)}
+  }catch(e){setErr(b.dataset.a+' feilet: '+(e.message==='401'?'tokenet er feil eller mangler.':e.message))}
   load();
 });
 load();setInterval(load,5000);
