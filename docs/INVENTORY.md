@@ -27,7 +27,7 @@ on pc6, pc8 or pc9. n8n used to violate this; it moved to CT 103 on pc6.
 | pc6 | 104 lxc | **`pc6`** | 10.0.0.124 | 4G | 32G | yes | 1 | `pc6-ct104-media-downloaders` | MeTube, Pinchflat, MySpeed, DiskSpeed |
 | pc6 | 109 lxc | **`pc6-ct109-node`** | 10.0.0.128 | 4G | 32G | yes | 12 | `pc6-ct109-docker` | Shared Docker node: arr stack, Grafana, Homepage, Kuma, Seerr, Speedtest, Deluge, Audiobookshelf, Grovemap, Glance, Dashy, Heimdall |
 | pc6 | 111 lxc | `pc6-ct111-iventoy` | 10.0.0.134 | 1G | 16G | yes | 1 | | iVentoy PXE boot |
-| pc6 | 151 lxc | **`emby-pc6`** | 10.0.0.150 | 8G | 256G | yes | 1 | `pc6-ct151-emby` | Active Emby. Transcoding should use the N355 iGPU |
+| pc6 | 151 lxc | **`emby-pc6`** | 10.0.0.150 | 8G | 256G | yes | 2 | `pc6-ct151-emby` | Active Emby + FileBrowser (web file manager over Unraid media NFS). Transcoding should use the N355 iGPU |
 | pc6 | 152 lxc | `pc6-ct152-roon` | 10.0.0.125 | 4G | 32G | yes | 1 | | Roon server. Source of the multicast noise behind the September ARP flapping |
 | pc6 | 153 lxc | `pc6-ct153-immich` | 10.0.0.127 | 8G | 64G | yes | 1 | | Photo library |
 | pc6 | 154 lxc | `pc6-ct154-paperless` | 10.0.0.131 | 4G | 64G | yes | 1 | | Documents and scanning |

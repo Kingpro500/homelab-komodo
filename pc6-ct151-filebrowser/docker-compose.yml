@@ -1,0 +1,54 @@
+# FileBrowser on CT 151 (emby-pc6)
+#
+# Lightweight web file manager that moves files between Unraid shares.
+# Runs on the same privileged container as Emby so it can write to the
+# Tower media NFS share (/media in CT 151, bound via mp0) without breaking
+# file ownership: the container runs as uid 99 (Unraid's "nobody")/gid 100
+# ("users"), which passes straight through NFS sec=sys from this privileged
+# container.
+#
+# Deploy through Komodo on the emby-pc6 server with these Stack variables
+# (all optional except creating /opt/filebrowser; defaults shown):
+#
+#   FILEBROWSER_MEDIA_PATH=/media        # CT path of the Unraid media NFS
+#   FILEBROWSER_CONFIG_PATH=/opt/filebrowser
+#   TZ=Europe/Oslo
+#
+# Before the first deployment, prepare the config dir on CT 151:
+#
+#   install -d -o 99 -g 100 -m 0755 /opt/filebrowser
+#
+# Web UI is published on port 8097 of CT 151: http://10.0.0.150:8097
+# First login prompts for an admin user (standard admin/admin, forced change).
+services:
+  filebrowser:
+    image: filebrowser/filebrowser:latest
+    container_name: filebrowser
+    user: "99:100"
+    restart: unless-stopped
+    ports:
+      - "8097:80"
+    environment:
+      TZ: "${TZ:-Europe/Oslo}"
+    volumes:
+      - "${FILEBROWSER_CONFIG_PATH:-/opt/filebrowser}:/config"
+      - "${FILEBROWSER_MEDIA_PATH:-/media}:/srv"
+    command:
+      - /filebrowser
+      - --address
+      - 0.0.0.0
+      - --port
+      - "80"
+      - --root
+      - /srv
+      - --database
+      - /config/filebrowser.db
+      - --config
+      - /config/settings.json
+      - --log
+      - /config/filebrowser.log
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
