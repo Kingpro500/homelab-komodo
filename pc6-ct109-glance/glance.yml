@@ -39,17 +39,18 @@ pages:
 
           - type: http
             title: OpenRouter Spend
-            url: http://localhost:9119/openrouter/spend
+            url: http://10.0.0.135:9118/openrouter/spend
             cache: 5m
             fields:
-              - title: Total Cost
+              - title: Total Cost ($)
                 label: total_cost
                 color: "#FF6B6B"
               - title: Requests
                 label: total_requests
                 color: "#4ECDC4"
-              - title: Models
-                label: models
+              - title: Weekly Avg
+                label: weekly_avg
+                color: "#95E1D3"
 
       - size: full
         widgets:
