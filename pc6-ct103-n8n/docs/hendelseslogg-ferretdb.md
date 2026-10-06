@@ -94,8 +94,19 @@ Tre fallgruver som kostet tid (6. okt):
 ## Varsling tilknytning
 
 Dette er *datalagring*, ikke varsling. Varslingen (→ iPhone) skjer fortsatt i
-«Homelab-ressurs-alarmer»-workflowen. Fremover kan kildene poste til begge:
-varsle telefonen ved kritiske hendelser, og alltid lagre til hendelsesloggen.
+«Homelab-ressurs-alarmer»-workflowen. **Fra 6. okt 2026 logger to kilder også
+inn i hendelsesloggen**, ved siden av varslingen:
+
+- **Homelab-ressurs-alarmer** (webhook `homelab-alerts`): Webhook → `Send til
+  telefon` (iPhone) **og** `Logg hendelse` (parallell) → POST `/webhook/events`.
+- **Emby - overvaaking og autorestart**: `Varsle om nedetid` → `Logg nedetid`,
+  og `Varsle om tilbakekomst` → `Logg tilbakekomst`.
+
+**Fan-out-felle:** når én node skal videresende til to parallelle noder, må
+begge grenene ha `"index": 0` (kilde-output-branch). En gren med `"index": 1`
+kjører men får *ingen* data (tom utgang) — ser ut som suksess men skriver
+ingenting. Rettet for `res`-workflowen; verifisert: Alertmanager-hendelse landet
+i FerretDB med `source=alertmanager`.
 
 ## Avhengigheter
 
