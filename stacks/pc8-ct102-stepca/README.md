@@ -40,9 +40,14 @@ inside the LAN can use it as its "Let's Encrypt" endpoint.
    ```sh
    ssh root@10.0.0.102 'pct exec 102 -- docker logs stepca | tail -20'
    # should end with: Serving HTTPS on :9000 ... 
-   curl -s https://10.0.0.117:9000/step_ca/ -k | head
-   # {{ "ca": "..." }}  -> step-ca health/roots endpoint answers
+   curl -s https://10.0.0.117:9000/roots -k | head
+   # HTTP 201 with the root CA cert in JWK format
    ```
+   The compose file pins `stepca.lan.local` to loopback via `extra_hosts`
+   because the image's healthcheck (`step ca health`) probes that hostname
+   from inside the container, and the container's embedded DNS cannot resolve
+   it — the CA otherwise shows `unhealthy` forever even though `/health`
+   answers 200 on every interface.
 
 ## Trusting the root CA on a client
 

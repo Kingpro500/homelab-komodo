@@ -22,6 +22,11 @@ services:
       DOCKER_STEPCA_INIT_ADMIN_PASSWORD: "${STEPCA_ADMIN_PASSWORD:?Set STEPCA_ADMIN_PASSWORD in Komodo stack environment}"
     ports:
       - "9000:9000"
+    extra_hosts:
+      # step ca health probes https://stepca.lan.local:9000/health from inside
+      # the container, but the container's embedded DNS cannot resolve that
+      # name. Pin it to loopback (the CA listens on all interfaces).
+      - "stepca.lan.local:127.0.0.1"
     volumes:
       - stepca_data:/home/step
     restart: unless-stopped
