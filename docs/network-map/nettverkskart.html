@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Nettverkskart — Homelab 10.0.0.0/24</title>
+<title>Homelab — tjenesteoversikt &amp; nettverkskart · 10.0.0.0/24</title>
 <style>
 :root{
   --bg:#0b0f14; --panel:#141a22; --panel2:#1a222d; --border:#2a3542;
@@ -14,15 +14,39 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;padding:26px;line-height:1.45;font-size:16px}
 h1{font-size:26px;margin-bottom:8px}
-.sub{color:var(--muted);font-size:15px;margin-bottom:22px}
+.sub{color:var(--muted);font-size:15px}
 .sub b{color:var(--text)}
-.legend{display:flex;gap:20px;flex-wrap:wrap;margin-bottom:20px;font-size:14.5px;color:var(--muted)}
-.legend span{display:inline-flex;align-items:center;gap:8px}
-.dot{width:12px;height:12px;border-radius:3px;display:inline-block}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
-@media(max-width:900px){.grid{grid-template-columns:1fr}}
+.meta{font-size:13.5px;color:var(--dim);margin:8px 0 22px;line-height:1.5}
+.meta code{background:#1d2733;padding:1px 5px;border-radius:4px;font-size:13px;color:#9dc3ff}
+a{color:var(--svc);text-decoration:none}
+a:hover{text-decoration:underline}
+h3.sec{font-size:16px;color:var(--muted);margin:30px 0 14px;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border);padding-bottom:6px}
 
-.band{border:1px solid var(--border);border-radius:10px;background:var(--panel);padding:16px;margin-bottom:18px}
+/* Service table */
+table{width:100%;border-collapse:collapse;font-size:14px;margin-bottom:10px}
+th{text-align:left;color:var(--muted);font-size:12.5px;text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid var(--border);padding:8px 10px}
+td{border-bottom:1px solid var(--border);padding:8px 10px;vertical-align:top}
+td.ip{font-family:ui-monospace,Menlo,monospace;font-size:13px;color:var(--ct);white-space:nowrap}
+tr:hover td{background:#1a232e}
+.section-row td{color:var(--prox);font-weight:700;text-transform:uppercase;font-size:12px;background:#1a232e55}
+.tag{display:inline-block;font-size:11px;font-weight:700;text-transform:uppercase;padding:2px 7px;border-radius:10px;margin-right:6px}
+.tag-ct{background:#7aa2f71a;color:var(--ct)}
+.tag-vm{background:#9d7bf71a;color:var(--vm)}
+.bad{color:var(--danger);font-weight:700;text-transform:uppercase;font-size:11.5px}
+
+/* hardware */
+.enhet-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.enhet{border:1px solid var(--border);border-radius:9px;background:var(--panel2);padding:12px 14px}
+.enhet .e-nm{font-weight:700;font-size:15.5px}
+.enhet .e-role{font-size:13px;color:var(--muted);margin:2px 0 6px}
+.enhet .e-spec{font-size:13px;color:var(--muted);font-family:ui-monospace,monospace}
+.enhet .e-ip{font-size:13px;color:var(--ct);font-family:monospace}
+.enhet.inactive{opacity:.7}
+.tag-aktiv{background:#34c88a22;color:#34c88a}
+.tag-inaktiv{background:#5d6b7a33;color:#aeb9c6}
+
+/* map */
+.band{border:1px solid var(--border);border-radius:10px;background:var(--panel);padding:16px;margin-bottom:16px}
 .band-title{font-size:13px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:14px;display:flex;align-items:center;gap:9px}
 .band-title .bar{width:3px;height:17px;border-radius:2px;background:var(--lan)}
 .wan .band-title .bar{background:var(--wan)}
@@ -33,9 +57,8 @@ h1{font-size:26px;margin-bottom:8px}
 .linkbox .ip{font-family:ui-monospace,Menlo,monospace;font-size:14px;color:var(--muted)}
 .linkbox.core{border-color:#35506e;background:linear-gradient(160deg,#18212d,#141a22)}
 .linkbox.core .nm{color:#9dc3ff}
-
-.proxmox{border:1px solid var(--border);border-radius:10px;padding:16px;background:var(--panel);margin-bottom:18px}
-.px-head{font-size:15.5px;font-weight:700;color:var(--prox);margin-bottom:12px;display:flex;align-items:center;gap:9px}
+.proxmox{border:1px solid var(--border);border-radius:10px;padding:16px;background:var(--panel);margin-bottom:16px}
+.px-head{font-size:15.5px;font-weight:700;color:var(--prox);margin-bottom:12px}
 .node-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:16px}
 .node{border:1px solid var(--border);border-radius:9px;background:var(--panel2);padding:13px}
 .node .n-title{font-weight:700;font-size:16px}
@@ -49,158 +72,181 @@ h1{font-size:26px;margin-bottom:8px}
 .guest .ip{margin-left:auto;font-family:monospace;font-size:13.5px;color:var(--ct);white-space:nowrap}
 .svc-list{font-size:13.5px;color:var(--muted);margin:2px 0 7px 5px;line-height:1.6}
 .svc-list i{color:var(--svc);font-style:normal}
-.status-note{font-size:13px;color:var(--danger)}
-.bad{color:var(--danger)}
-
 .iot-wrap{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
 .iot{border:1px solid var(--border);border-radius:7px;background:var(--panel2);padding:9px 11px;font-size:14px}
 .iot .i-nm{font-weight:600;color:#f2c879}
 .iot .i-ip{font-family:monospace;font-size:13px;color:var(--muted)}
 .iot .i-m{font-size:11.5px;color:var(--dim);font-family:monospace}
-h3.sec{font-size:16px;color:var(--muted);margin:24px 0 12px;text-transform:uppercase;letter-spacing:1px}
 mark{background:transparent;color:var(--danger);font-weight:700}
-footer{margin-top:24px;font-size:13px;color:var(--dim);text-align:center}
+.note{font-size:13.5px;color:var(--dim);line-height:1.7;max-width:860px;margin-top:14px}
+.note b{color:var(--muted)}
+footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-top:1px solid var(--border);padding-top:16px}
 </style>
 </head>
 <body>
-<h1>🕸️ Nettverkskart — Homelab <span style="color:var(--lan)">10.0.0.0/24</span></h1>
-<div class="sub">Bygd fra levende data hentet 6. okt 2026: OPNsense-ARP (48 enheter) + <b>alle 19 Proxmox-gjester</b> (docker-inventar fra hver CT) + Homepage + Komodo (32 stacker). Router <b>pc7</b>, fjernstyrt via Tailscale <b>100.126.80.67</b>.</div>
 
-<div class="legend">
-  <span><span class="dot" style="background:var(--wan)"></span>WAN/Internett</span>
-  <span><span class="dot" style="background:var(--lan)"></span>LAN / ruting</span>
-  <span><span class="dot" style="background:var(--prox)"></span>Proxmox-node</span>
-  <span><span class="dot" style="background:var(--ct)"></span>Container (CT)</span>
-  <span><span class="dot" style="background:var(--vm)"></span>VM (Qemu)</span>
-  <span><span class="dot" style="background:var(--iot)"></span>Enhet / IoT</span>
+<h1>🏠 Homelab — tjenester &amp; nettverk <span style="color:var(--lan)">10.0.0.0/24</span></h1>
+<div class="sub">Intern startside · Proxmox-kluster «CyberCluster» · OPNsense pc7 (brannmur)</div>
+<div class="meta">Verifisert 6. okt 2026 av Hermes (CT157). Kilder: OPNsense-ARP (48 enheter) · Proxmox-API (4 noder, CPU fra <code>/nodes/*/status</code>, 19 gjester) · levende docker-inventar i hver CT · Komodo (33 stacker). «Inaktiv» = finnes fysisk, men er av.</div>
+
+<!-- ============ SERVICE-OVERSIKT ============ -->
+<h3 class="sec">📋 Serviceoversikt</h3>
+<table>
+  <thead><tr><th>Tjeneste</th><th>Gjest</th><th>Adresse</th><th>Merknad</th></tr></thead>
+  <tbody>
+    <tr class="section-row"><td colspan="4">pve (pc8) · N150 · 10.0.0.102</td></tr>
+    <tr><td><a href="http://10.0.0.7:8123/">Home Assistant</a></td><td><span class="tag tag-vm">VM</span>homeassistant 100</td><td class="ip">10.0.0.7:8123</td><td>Smarthus · 1834 enheter</td></tr>
+    <tr><td><a href="http://10.0.0.117:9120/">Komodo core</a></td><td><span class="tag tag-ct">CT</span>Komodo-core 102</td><td class="ip">10.0.0.117:9120</td><td>Orkestrator</td></tr>
+    <tr><td><a href="http://10.0.0.117:8001/">NetBox</a></td><td><span class="tag tag-ct">CT</span>Komodo-core 102</td><td class="ip">10.0.0.117:8001</td><td>IPAM/DCIM</td></tr>
+    <tr><td><a href="http://10.0.0.115:8080/admin/">Pi-hole</a></td><td><span class="tag tag-ct">CT</span>pihole-pc8 115</td><td class="ip">10.0.0.115:8080</td><td>DNS1</td></tr>
+    <tr><td>Komodo-periphery</td><td><span class="tag tag-ct">CT</span>pc8-ct110-node 110</td><td class="ip">10.0.0.129</td><td>Agenthost</td></tr>
+
+    <tr class="section-row"><td colspan="4">pc6 · Core 3 N355 · 10.0.0.120 (nesten alle containere)</td></tr>
+    <tr><td><a href="http://10.0.0.101/">Unraid-Tower</a></td><td><span class="tag tag-vm">VM</span>Unraid 101</td><td class="ip">10.0.0.101</td><td>Lagring · Netdata :19999</td></tr>
+    <tr><td><a href="http://10.0.0.119:5678/">n8n</a></td><td><span class="tag tag-ct">CT</span>ct103 103</td><td class="ip">10.0.0.119:5678</td><td>Automasjon</td></tr>
+    <tr><td><a href="http://10.0.0.119:3080/">Open WebUI</a></td><td><span class="tag tag-ct">CT</span>ct103 103</td><td class="ip">10.0.0.119:3080</td><td>LLM-chat</td></tr>
+    <tr><td><a href="http://10.0.0.119:8099/">Gjeld-app</a></td><td><span class="tag tag-ct">CT</span>ct103 103</td><td class="ip">10.0.0.119:8099</td><td>Gjeld/økonomi</td></tr>
+    <tr><td><a href="http://10.0.0.124:5216/">MySpeed</a></td><td><span class="tag tag-ct">CT</span>ct104 104</td><td class="ip">10.0.0.124:5216</td><td>Hastidstest</td></tr>
+    <tr><td><a href="http://10.0.0.124:8888/">DiskSpeed</a></td><td><span class="tag tag-ct">CT</span>ct104 104</td><td class="ip">10.0.0.124:8888</td><td>Disk-bench</td></tr>
+    <tr><td><a href="http://10.0.0.124:5800/">QDirStat</a></td><td><span class="tag tag-ct">CT</span>ct104 104</td><td class="ip">10.0.0.124:5800</td><td>Treemap media</td></tr>
+    <tr><td><a href="http://10.0.0.124:8081/">MeTube</a></td><td><span class="tag tag-ct">CT</span>ct104 104</td><td class="ip">10.0.0.124:8081</td><td>YouTube-NDL</td></tr>
+    <tr><td><a href="http://10.0.0.124:8945/">Pinchflat</a></td><td><span class="tag tag-ct">CT</span>ct104 104</td><td class="ip">10.0.0.124:8945</td><td>YouTube-kanal</td></tr>
+    <tr><td><a href="http://10.0.0.128:3009/">Homepage</a></td><td><span class="tag tag-ct">CT</span>ct109 109</td><td class="ip">10.0.0.128:3009</td><td>Hoved-dashbord</td></tr>
+    <tr><td>Glance / Dashy / Heimdall</td><td><span class="tag tag-ct">CT</span>ct109 109</td><td class="ip">:3010/:3011/:3012</td><td>Launchers</td></tr>
+    <tr><td><a href="http://10.0.0.128:3000/">Grafana</a></td><td><span class="tag tag-ct">CT</span>ct109 109</td><td class="ip">10.0.0.128:3000</td><td>Visualisering</td></tr>
+    <tr><td><a href="http://10.0.0.128:3001/">Uptime Kuma</a></td><td><span class="tag tag-ct">CT</span>ct109 109</td><td class="ip">10.0.0.128:3001</td><td>Uptime</td></tr>
+    <tr><td><a href="http://10.0.0.128:8765/">Speedtest Tracker</a></td><td><span class="tag tag-ct">CT</span>ct109 109</td><td class="ip">10.0.0.128:8765</td><td>—</td></tr>
+    <tr><td>Prometheus / Alertmanager</td><td><span class="tag tag-ct">CT</span>ct109 109</td><td class="ip">:9090/:9093</td><td>Metrikker/varsel</td></tr>
+    <tr><td>Nettkart (denne siden)</td><td><span class="tag tag-ct">CT</span>ct109 109</td><td class="ip">10.0.0.128:3020</td><td>nginx</td></tr>
+    <tr><td>Sonarr·Radarr·Prowlarr·Readarr·Bazarr·Cleanuparr</td><td><span class="tag tag-ct">CT</span>ct109 109</td><td class="ip">8989·7878·9696·8787·6767·11011</td><td>*arr-stack</td></tr>
+    <tr><td>Deluge·Seerr·Audiobookshelf·Podgrab·Grovemap·FlareSolverr</td><td><span class="tag tag-ct">CT</span>ct109 109</td><td class="ip">8112·5055·13378·8081·8080·8191</td><td>Nedlasting/media</td></tr>
+    <tr><td>Crafty · Dockctl</td><td><span class="tag tag-ct">CT</span>ct109 109</td><td class="ip">:8000/:3015</td><td>Minecraft / docker-kontroll</td></tr>
+    <tr><td><a href="http://10.0.0.150:8096/">Emby</a></td><td><span class="tag tag-ct">CT</span>emby 151</td><td class="ip">10.0.0.150:8096</td><td>Media · WAN-fwd 8096</td></tr>
+    <tr><td>FileBrowser / Krusader / DoubleCommander</td><td><span class="tag tag-ct">CT</span>emby 151</td><td class="ip">:8097/:8098/:8099</td><td>Filbehandling</td></tr>
+    <tr><td><a href="http://10.0.0.150:8005/">Tunarr</a></td><td><span class="tag tag-ct">CT</span>emby 151</td><td class="ip">10.0.0.150:8005</td><td>Live TV</td></tr>
+    <tr><td>Roon</td><td><span class="tag tag-ct">CT</span>ct152 152</td><td class="ip">10.0.0.125</td><td><span class="bad">Stoppet</span></td></tr>
+    <tr><td><a href="http://10.0.0.127:2283/">Immich</a></td><td><span class="tag tag-ct">CT</span>ct153 153</td><td class="ip">10.0.0.127:2283</td><td>Album</td></tr>
+    <tr><td><a href="http://10.0.0.131:8000/">Paperless-ngx</a></td><td><span class="tag tag-ct">CT</span>ct154 154</td><td class="ip">10.0.0.131:8000</td><td>Dokument</td></tr>
+    <tr><td><a href="https://10.0.0.132:8443/">UniFi Network</a></td><td><span class="tag tag-ct">CT</span>ct155 155</td><td class="ip">10.0.0.132:8443</td><td>Controller</td></tr>
+    <tr><td><a href="http://10.0.0.134:26000/">iVentoy</a></td><td><span class="tag tag-ct">CT</span>ct111 111</td><td class="ip">10.0.0.134:26000</td><td>PXE/ISO</td></tr>
+    <tr><td><a href="http://10.0.0.135:9119/">Hermes agent</a></td><td><span class="tag tag-ct">CT</span>ct157 157</td><td class="ip">10.0.0.135:9119</td><td>Dette systemet · audit :9118</td></tr>
+
+    <tr class="section-row"><td colspan="4">pc9 · N100 · 10.0.0.103</td></tr>
+    <tr><td><a href="http://10.0.0.122:8005/">Tunarr</a></td><td><span class="tag tag-ct">CT</span>komodo-pc9 106</td><td class="ip">10.0.0.122:8005</td><td>Worker</td></tr>
+    <tr><td><a href="http://10.0.0.116:8080/admin/">Pi-hole</a></td><td><span class="tag tag-ct">CT</span>pihole-pc9 116</td><td class="ip">10.0.0.116:8080</td><td>DNS2</td></tr>
+
+    <tr class="section-row"><td colspan="4">pc1 · Ryzen 9 3900X · 10.0.0.112</td></tr>
+    <tr><td><a href="http://10.0.0.133:11434/">Ollama</a></td><td><span class="tag tag-ct">CT</span>ct156 156</td><td class="ip">10.0.0.133:11434</td><td><span class="bad">Nede</span> GPU-driver</td></tr>
+    <tr><td>Browser-pool</td><td><span class="tag tag-ct">CT</span>ct158 158</td><td class="ip">10.0.0.158:3001-3005</td><td>5 nettlesere</td></tr>
+  </tbody>
+</table>
+
+<!-- ============ FYSISK HARDWARE ============ -->
+<h3 class="sec">🏠 Fysisk maskinvare</h3>
+<div class="enhet-row">
+  <div class="enhet"><div class="e-nm">pc1 Gaming Far <span class="tag tag-aktiv">aktiv</span></div><div class="e-role">Stue · W11 + Proxmox</div><div class="e-spec">Ryzen 9 3900X · RTX 3070 · 8 GB</div><div class="e-ip">10.0.0.112</div></div>
+  <div class="enhet"><div class="e-nm">pc3 Mac Mini <span class="tag tag-aktiv">aktiv</span></div><div class="e-role">Stue · hoved-PC</div><div class="e-spec">Apple M1 · 8 GB</div><div class="e-ip">klient</div></div>
+  <div class="enhet"><div class="e-nm">pc6 Tower <span class="tag tag-aktiv">aktiv</span></div><div class="e-role">Bod · Proxmox</div><div class="e-spec">Core 3 N355 · 32 GB</div><div class="e-ip">10.0.0.120</div></div>
+  <div class="enhet"><div class="e-nm">pc7 Minipc <span class="tag tag-aktiv">aktiv</span></div><div class="e-role">Bod · OPNsense</div><div class="e-spec">N150 · 16 GB · 4x 2.5G</div><div class="e-ip">10.0.0.1</div></div>
+  <div class="enhet"><div class="e-nm">pc8 Minipc <span class="tag tag-aktiv">aktiv</span></div><div class="e-role">Stue · Proxmox-master</div><div class="e-spec">N150 · 16 GB</div><div class="e-ip">10.0.0.102</div></div>
+  <div class="enhet"><div class="e-nm">pc9 Minipc <span class="tag tag-aktiv">aktiv</span></div><div class="e-role">Stue · Proxmox</div><div class="e-spec">N100 · 16 GB</div><div class="e-ip">10.0.0.103</div></div>
+  <div class="enhet inactive"><div class="e-nm">pc2 Gaming Far <span class="tag tag-inaktiv">inaktiv</span></div><div class="e-role">Stue · gammel</div><div class="e-spec">i7-4790K · RTX 3070</div><div class="e-ip">av</div></div>
+  <div class="enhet inactive"><div class="e-nm">pc10 Reserve <span class="tag tag-inaktiv">inaktiv</span></div><div class="e-role">Far</div><div class="e-spec">R7 5700X · RTX 3070</div><div class="e-ip">av</div></div>
+  <div class="enhet"><div class="e-nm">pc4 Gaming Sønn <span class="tag tag-aktiv">aktiv</span></div><div class="e-role">Soverom 2</div><div class="e-spec">R7 5800X · RTX 3060 Ti</div><div class="e-ip">klient</div></div>
+  <div class="enhet"><div class="e-nm">Apple TV <span class="tag tag-aktiv">aktiv</span></div><div class="e-role">Stue · Home-hub</div><div class="e-spec">4K · HomeKit</div><div class="e-ip">kablet</div></div>
+  <div class="enhet"><div class="e-nm">PlayStation 5 <span class="tag tag-aktiv">aktiv</span></div><div class="e-role">Soverom 2</div><div class="e-spec">Zen 2 · RDNA 2</div><div class="e-ip">10.0.0.18</div></div>
 </div>
 
-<!-- WAN -->
+<!-- ============ NETTVERKSKART ============ -->
+<h3 class="sec">🗺️ Nettverkskart</h3>
 <div class="band wan">
   <div class="band-title"><span class="bar"></span>Internett — WAN · VLAN 101 · igc1</div>
   <div class="band-body">
-    <div class="linkbox">
-      <div class="id">NextGenTel Fiber · 750</div>
-      <div class="nm">ONT</div>
-      <div class="ip">89.10.228.222/23 · gw 89.10.228.1<br>WAN-DHCP · ~0.5 min/dag flaps (fysisk)</div>
-    </div>
+    <div class="linkbox"><div class="id">NextGenTel Fiber</div><div class="nm">ONT · bod</div><div class="ip">89.10.228.222/23</div></div>
     <div style="align-self:center;color:var(--dim);font-size:16px">◄– fiber –►</div>
-    <div class="linkbox core">
-      <div class="id">OPNsense · bare-metal</div>
-      <div class="nm">pc7 · Router/Firewall</div>
-      <div class="ip">LAN 10.0.0.1 · igc0 · fq_codel<br>igc1 WAN · Kea DHCP · Unbound DNS</div>
-    </div>
+    <div class="linkbox core"><div class="id">OPNsense</div><div class="nm">pc7 · brannmur</div><div class="ip">10.0.0.1 · igc0 LAN · igc1 WAN · Kea · Unbound</div></div>
   </div>
 </div>
-
-<!-- Switch -->
 <div class="band">
-  <div class="band-title"><span class="bar"></span>Switch-lag — LAN 10.0.0.0/24 · Kea DHCP pool .2–.99</div>
+  <div class="band-title"><span class="bar"></span>Switch-lag — LAN 10.0.0.0/24 · Kea .2–.99</div>
   <div class="band-body">
-    <div class="linkbox"><div class="id">Switch L2 · bod</div><div class="nm">Flex Mini 2.5G</div><div class="ip">STP priority 4096</div></div>
-    <div class="linkbox"><div class="id">Switch L2 · stue</div><div class="nm">EdgeSwitch 8 150W</div><div class="ip">Arc/Amp/PC-kabler</div></div>
-    <div class="linkbox"><div class="id">WAP · gang</div><div class="nm">UniFi AC Pro</div><div class="ip">10.0.0.22 · 78:8a:20</div></div>
+    <div class="linkbox"><div class="id">Switch · bod</div><div class="nm">Flex Mini 2.5G</div><div class="ip">STP 4096</div></div>
+    <div class="linkbox"><div class="id">Switch · stue</div><div class="nm">EdgeSwitch 8 150W</div><div class="ip">Apple TV/Arc/Amp/PC</div></div>
+    <div class="linkbox"><div class="id">WAP · gang</div><div class="nm">UniFi AC Pro</div><div class="ip">10.0.0.22</div></div>
+    <div class="linkbox"><div class="id">WAP · plan</div><div class="nm">UniFi U7 Pro</div><div class="ip">skal kjøpes</div></div>
   </div>
 </div>
-
-<!-- Proxmox -->
 <div class="proxmox">
-  <div class="px-head">◈ Proxmox-kluster «CyberCluster» — 4 noder, 19 gjester</div>
+  <div class="px-head">◈ Proxmox-kluster — 4 noder, 19 gjester</div>
   <div class="node-row">
-
     <div class="node">
-      <div class="n-title">pve (pc8)</div>
-      <div class="n-ip">10.0.0.102 · 16 GB · master · Tailscale 100.126.80.67</div>
-      <div class="guest"><span class="g"><span class="vt gv">VM</span><b>homeassistant</b> · 100</span><span class="ip">10.0.0.7:8123</span></div>
-      <div class="svc-list"><i>Home Assistant</i> · smarthus + push-varsel · 1834 enheter</div>
-      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>Komodo-core</b> · 102</span><span class="ip">10.0.0.117</span></div>
-      <div class="svc-list"><i>Komodo</i> :9120 · <i>NetBox</i> :8001 · komodo-core/ferretdb/postgres/periphery · netbox-app/postgres/redis/worker</div>
-      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>pihole-pc8</b> · 115</span><span class="ip">10.0.0.115:8080</span></div>
-      <div class="svc-list"><i>Pi-hole v6</i> · DNS1 · :53</div>
-      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>pc8-ct110-node</b> · 110</span><span class="ip">10.0.0.129</span></div>
-      <div class="svc-list">Komodo-periphery (ingen stabel)</div>
+      <div class="n-title">pve (pc8) · N150</div><div class="n-ip">10.0.0.102 · 16 GB · master</div>
+      <div class="guest"><span class="g"><span class="vt gv">VM</span><b>homeassistant</b> 100</span><span class="ip">10.0.0.7</span></div>
+      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>Komodo-core</b> 102</span><span class="ip">10.0.0.117</span></div>
+      <div class="svc-list"><i>Komodo</i>:9120 · <i>NetBox</i>:8001 · step-ca</div>
+      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>pihole-pc8</b> 115</span><span class="ip">10.0.0.115</span></div>
+      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct110-node</b> 110</span><span class="ip">10.0.0.129</span></div>
     </div>
-
     <div class="node">
-      <div class="n-title">pc6</div>
-      <div class="n-ip">10.0.0.120 · 32 GB · N355 · QuickSync · Docker-vert (nesten alt)</div>
-      <div class="guest"><span class="g"><span class="vt gv">VM</span><b>Unraid-Tower</b> · 101</span><span class="ip">10.0.0.101</span></div>
-      <div class="svc-list"><i>Netdata</i> :19999 · Docker+lagring → flyttes · Valheim UDP 2456-58 · lavprior Q</div>
-      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct103-node</b> · 103</span><span class="ip">10.0.0.119</span></div>
-      <div class="svc-list"><i>n8n</i> :5678 · <i>Open WebUI</i> :3080 · <i>gjeld-app</i> :8099 (+ gjeld-db)</div>
-      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct104</b> · 104</span><span class="ip">10.0.0.124</span></div>
-      <div class="svc-list"><i>MySpeed</i> :5216 · <i>DiskSpeed</i> :8888 · <i>QDirStat</i> :5800 · <i>MeTube</i> :8081 · <i>Pinchflat</i> :8945</div>
-      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct109-node</b> · 109</span><span class="ip">10.0.0.128</span></div>
-      <div class="svc-list"><i>*arr:</i> Sonarr:8989 Radarr:7878 Prowlarr:9696 Readarr:8787 Bazarr:6767 Cleanuparr:11011 · <i>Deluge</i>:8112 · <i>Seerr</i>:5055 · <i>Audiobookshelf</i>:13378 · <i>Podgrab</i>:8081 · <i>Grovemap</i>:8080 · <i>Flaresolverr</i>:8191</div>
-      <div class="svc-list"><i>Dash:</i> Homepage:3009 Glance:3010 Dashy:3011 Heimdall:3012 Grafana:3000 Uptime-Kuma:3001 Speedtest:8765 · <i>Prometheus</i>:9090 <i>Alertmanager</i>:9093 · <i>Nettkart</i>:3020 · <i>Dockctl</i>:3015 · <i>Crafty</i>:8000</div>
-      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>emby-pc6</b> · 151</span><span class="ip">10.0.0.150</span></div>
-      <div class="svc-list"><i>Emby</i> :8096 (WAN-fwd) · <i>FileBrowser</i> :8097 · <i>Krusader</i> :8098 · <i>DoubleCommander</i> :8099 · <i>Tunarr</i> :8005</div>
-      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct152-roon</b> · 152</span><span class="ip">10.0.0.125</span></div>
-      <div class="svc-list"><i>Roon</i> · <mark>stoppet</mark> (loop-historikk)</div>
-      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct153-immich</b> · 153</span><span class="ip">10.0.0.127:2283</span></div>
-      <div class="svc-list"><i>Immich</i> · server/ml/postgres/redis</div>
-      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct154-paperless</b> · 154</span><span class="ip">10.0.0.131:8000</span></div>
-      <div class="svc-list"><i>Paperless-ngx</i> · webserver/tika/gotenberg/db/broker</div>
-      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct155-unifi</b> · 155</span><span class="ip">10.0.0.132:8443</span></div>
-      <div class="svc-list"><i>UniFi Network</i> · controller</div>
-      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct111-iventoy</b> · 111</span><span class="ip">10.0.0.134:26000</span></div>
-      <div class="svc-list"><i>iVentoy</i> · PXE/ISO</div>
-      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct157-hermes</b> · 157</span><span class="ip">10.0.0.135</span></div>
-      <div class="svc-list"><i>Hermes dash</i> :9119 · <i>audit-api</i> :9118 · dette systemet</div>
+      <div class="n-title">pc6 · Core 3 N355</div><div class="n-ip">10.0.0.120 · 32 GB · QuickSync</div>
+      <div class="guest"><span class="g"><span class="vt gv">VM</span><b>Unraid</b> 101</span><span class="ip">10.0.0.101</span></div>
+      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct103</b> 103</span><span class="ip">10.0.0.119</span></div>
+      <div class="svc-list"><i>n8n</i> · <i>Open WebUI</i> · <i>gjeld-app</i></div>
+      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct104</b> 104</span><span class="ip">10.0.0.124</span></div>
+      <div class="svc-list">MySpeed·DiskSpeed·QDirStat·MeTube·Pinchflat</div>
+      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct109</b> 109</span><span class="ip">10.0.0.128</span></div>
+      <div class="svc-list">*arr · dashbord · Prometheus · nettkart · dockctl</div>
+      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>emby-pc6</b> 151</span><span class="ip">10.0.0.150</span></div>
+      <div class="svc-list">Emby·FileBrowser·Krusader·DoubleCommander·Tunarr</div>
+      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct152</b> 152</span><span class="ip">10.0.0.125</span></div>
+      <div class="svc-list">Roon · <mark>stoppet</mark></div>
+      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct153 Immich</b> 153</span><span class="ip">10.0.0.127</span></div>
+      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct154 Paperless</b> 154</span><span class="ip">10.0.0.131</span></div>
+      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct155 UniFi</b> 155</span><span class="ip">10.0.0.132</span></div>
+      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct111 iVentoy</b> 111</span><span class="ip">10.0.0.134</span></div>
+      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct157 Hermes</b> 157</span><span class="ip">10.0.0.135</span></div>
     </div>
-
     <div class="node">
-      <div class="n-title">pc9</div>
-      <div class="n-ip">10.0.0.103 · 16 GB · N100 · 1 GbE</div>
-      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>komodo-pc9</b> · 106</span><span class="ip">10.0.0.122</span></div>
-      <div class="svc-list"><i>Tunarr</i> :8005 · worker</div>
-      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>pihole-pc9</b> · 116</span><span class="ip">10.0.0.116:8080</span></div>
-      <div class="svc-list"><i>Pi-hole v6</i> · DNS2 · :53</div>
+      <div class="n-title">pc9 · N100</div><div class="n-ip">10.0.0.103 · 16 GB</div>
+      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>komodo-pc9</b> 106</span><span class="ip">10.0.0.122</span></div>
+      <div class="svc-list">Tunarr</div>
+      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>pihole-pc9</b> 116</span><span class="ip">10.0.0.116</span></div>
+      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>CT107</b></span><span class="ip">finnes ikke</span></div>
+      <div class="svc-list"><mark>slettet</mark> (verifisert)</div>
     </div>
-
     <div class="node">
-      <div class="n-title">pc1</div>
-      <div class="n-ip">10.0.0.112 · 8 GB · 3900X · RTX 3070 · dual-boot Win11</div>
-      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct156-ollama</b> · 156</span><span class="ip">10.0.0.133:11434</span></div>
-      <div class="svc-list"><span class="status-note">NEDE</span> qwen3:4b · GPU/driver-issue</div>
-      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct158-browsers</b> · 158</span><span class="ip">10.0.0.158</span></div>
-      <div class="svc-list"><i>Browser-pool</i> · firefox:3001 · chromium:3002 · msedge:3003 · opera:3004 · brave:3005</div>
+      <div class="n-title">pc1 · Ryzen 9 3900X</div><div class="n-ip">10.0.0.112 · 8 GB · RTX 3070 · W11</div>
+      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct156-ollama</b> 156</span><span class="ip">10.0.0.133</span></div>
+      <div class="svc-list"><span class="bad">Nede</span></div>
+      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct158-browsers</b> 158</span><span class="ip">10.0.0.158</span></div>
+      <div class="svc-list">5 nettlesere (3001-3005)</div>
     </div>
-
   </div>
 </div>
 
-<!-- Forward + DNS -->
-<h3 class="sec">Portforward &amp; DNS</h3>
-<div class="grid">
-  <div class="band" style="margin-bottom:0"><div class="band-body">
-    <div class="linkbox"><div class="id">TCP</div><div class="nm">8096 → Emby</div><div class="ip">10.0.0.150 · aktiv · <mark>fjern: bruk VPN</mark></div></div>
-    <div class="linkbox"><div class="id">UDP</div><div class="nm">2456-2458 → Valheim</div><div class="ip">10.0.0.101 · lukket (ikke startet)</div></div>
-  </div></div>
-  <div class="band" style="margin-bottom:0"><div class="band-body" style="gap:10px">
-    <div class="linkbox" style="min-width:130px"><div class="id">DNS1</div><div class="nm">Pi-hole</div><div class="ip">10.0.0.115</div></div>
-    <div class="linkbox" style="min-width:130px"><div class="id">DNS2</div><div class="nm">Pi-hole</div><div class="ip">10.0.0.116</div></div>
-    <div class="linkbox" style="min-width:130px"><div class="id">Recursor</div><div class="nm">Unbound</div><div class="ip">10.0.0.1:53 · lan.local</div></div>
-    <div class="linkbox" style="min-width:130px"><div class="id">DHCP</div><div class="nm">Kea</div><div class="ip">10.0.0.1 · pool .2–.99</div></div>
-  </div></div>
-</div>
-
-<!-- IoT -->
-<h3 class="sec">Enheter &amp; IoT — målt via OPNsense-ARP (48 stk, 6. okt)</h3>
+<h3 class="sec">📡 Enheter &amp; IoT — OPNsense-ARP (48 stk, 6. okt)</h3>
 <div class="band"><div class="band-body" style="flex-direction:column">
-  <div style="font-size:14.5px;color:var(--muted);margin-bottom:7px">Sonos ×8 · Google/Nest ×4 · Apple ×3 · ESP ×6 · Philips Hue · Ubiquiti · Sony/Dreame/Xiaomi</div>
+  <div style="font-size:14.5px;color:var(--muted);margin-bottom:7px">Sonos ×7 · Google/Nest ×5 · Apple ×3 · ESP ×5 · Hue · Ubiquiti · Dreame · Xiaomi · PS5</div>
   <div class="iot-wrap" id="iot"></div>
 </div></div>
 
-<footer>Generert 6. okt 2026 av Hermes (CT157) — data fra OPNsense ARP/live, Proxmox docker-inventar (alle 4 noder), Komodo (32 stacker) og Homepage.</footer>
+<div class="note">
+<b>Verifiserte avvik fra krav/vedlegg (6. okt):</b><br>
+• <b>Sonos:</b> ARP viser 7 (.2/.12/.13/.15/.16/.19/.46), ikke 8. Arc-surround med Sonos One front/side + lampen: enkelte One-høyttalere kan være offline/trådløse nå og telles ikke i ARP. Legges til statisk hvis ønsket.<br>
+• <b>ESP ×5</b> i ARP (EspControl lys .8, EspControl media .86, EspMedia 10.1″ .48 + .5/.10/.27). Den store 10.1″-skjermen (media-player-d395ce) er <b>.48</b> — på kartet.<br>
+• <b>CT107 emby-backup</b> finnes <b>ikke</b> — verifisert slettet i Proxmox og Komodo.<br>
+• <b>«pc1-ct103-node»</b>: navnet er misvisende — CT103 ligger fysisk på <b>pc6</b> (vmid 103).
+</div>
+
+<footer>Generert 6. okt 2026 av Hermes (CT157) · data: OPNsense ARP, Proxmox API (noder/CPU/gjester/docker), Komodo (33 stacker), vedleggets maskinvare. Nedtonet = finnes men av.</footer>
 
 <script>
 const iot = {
  "10.0.0.2":"Sonos","10.0.0.12":"Sonos B","10.0.0.13":"Sonos","10.0.0.15":"Sonos","10.0.0.16":"Sonos S","10.0.0.19":"Sonos R","10.0.0.46":"Sonos Lampe",
  "10.0.0.4":"Google/Nest","10.0.0.21":"Google","10.0.0.24":"Google","10.0.0.30":"Nest","10.0.0.52":"Google",
- "10.0.0.5":"ESP · Espressif","10.0.0.8":"ESPControl lys","10.0.0.10":"ESP","10.0.0.27":"ESP","10.0.0.48":"EspMedia 10.1″","10.0.0.86":"ESPControl media",
+ "10.0.0.5":"ESP","10.0.0.8":"ESPControl lys","10.0.0.10":"ESP","10.0.0.27":"ESP","10.0.0.48":"EspMedia 10.1″","10.0.0.86":"ESPControl media",
  "10.0.0.11":"Apple","10.0.0.20":"Apple","10.0.0.84":"Apple",
- "10.0.0.9":"Hue Bridge","10.0.0.18":"PS5 (sov2)","10.0.0.22":"UniFi AC Pro","10.0.0.25":"Dreame","10.0.0.28":"Xiaomi",
+ "10.0.0.9":"Hue Bridge","10.0.0.18":"PS5","10.0.0.22":"UniFi AC Pro","10.0.0.25":"Dreame","10.0.0.28":"Xiaomi",
  "10.0.0.14":"(virtuell)","10.0.0.23":"(virtuell)","10.0.0.36":"(virtuell)","10.0.0.45":"(virtuell)"
 };
 const macs = {"10.0.0.2":"78:28:ca:15:6b:80","10.0.0.12":"78:28:ca:b5:e0:6a","10.0.0.13":"38:42:0b:2b:6b:ce","10.0.0.15":"48:a6:b8:b0:88:62","10.0.0.16":"78:28:ca:80:48:54","10.0.0.19":"48:a6:b8:f4:b4:64","10.0.0.46":"78:28:ca:17:bc:92","10.0.0.4":"ac:67:84:0e:3e:86","10.0.0.21":"d8:eb:46:96:de:3e","10.0.0.24":"d8:eb:46:7a:3d:92","10.0.0.30":"ac:67:84:1a:0d:a5","10.0.0.52":"ac:67:84:23:2b:14","10.0.0.5":"ec:da:3b:93:d8:f6","10.0.0.8":"28:84:85:85:fd:30","10.0.0.10":"94:b5:55:20:3e:88","10.0.0.27":"48:27:e2:0f:5f:ac","10.0.0.48":"10:20:ba:f3:c7:48","10.0.0.86":"1c:db:d4:76:da:34","10.0.0.11":"64:0c:91:b1:54:e3","10.0.0.20":"4c:20:b8:a8:52:d6","10.0.0.84":"84:8c:8d:e2:d7:f0","10.0.0.9":"ec:b5:fa:12:10:17","10.0.0.18":"0c:70:43:4d:95:3b","10.0.0.22":"78:8a:20:d0:87:21","10.0.0.25":"70:c9:32:bf:bb:d6","10.0.0.28":"5c:e5:0c:a3:36:8d"};
