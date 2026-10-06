@@ -19,3 +19,12 @@ scrape_configs:
     scrape_interval: 30s
     static_configs:
       - targets: ['10.0.0.135:9120']
+
+  - job_name: 'unraid-storage'
+    # Unraid (Tower) disk/fillbruk fra Unraid GraphQL, servert av samme eksportør
+    # (homelab_metrics_exporter.py på CT157). Metrikker: unraid_array_*,
+    # unraid_device_* (disk/cache) og unraid_share_*. Lytt egen jobb så dashbord
+    # og alert-regler kan filtrere på job="unraid-storage".
+    scrape_interval: 60s
+    static_configs:
+      - targets: ['10.0.0.135:9120']

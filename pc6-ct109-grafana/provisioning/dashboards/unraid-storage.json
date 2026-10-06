@@ -1,0 +1,138 @@
+{
+  "uid": "unraid-storage",
+  "title": "Unraid – Lagring (Tower)",
+  "tags": ["unraid", "storage"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "1m",
+  "time": { "from": "now-24h", "to": "now" },
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Array brukt",
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "refId": "A", "expr": "unraid_array_used_bytes", "instant": true }],
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "green", "value": null }, { "color": "yellow", "value": 85 },
+            { "color": "red", "value": 95 } ] },
+          "unit": "deckbytes" },
+        "overrides": []
+      },
+      "options": { "colorMode": "value", "graphMode": "area", "justifyMode": "auto",
+        "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } }
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Array ledig",
+      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "refId": "A", "expr": "unraid_array_free_bytes", "instant": true }],
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "green", "value": null }, { "color": "red", "value": 1 } ] },
+          "unit": "deckbytes" },
+        "overrides": []
+      },
+      "options": { "colorMode": "value", "graphMode": "none", "justifyMode": "auto",
+        "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false } }
+    },
+    {
+      "id": 3,
+      "type": "gauge",
+      "title": "Array fyllingsgrad",
+      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "refId": "A",
+        "expr": "unraid_array_used_bytes / (unraid_array_used_bytes + unraid_array_free_bytes) * 100",
+        "instant": true }],
+      "fieldConfig": {
+        "defaults": { "unit": "percent", "min": 0, "max": 100,
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "green", "value": null }, { "color": "yellow", "value": 85 },
+            { "color": "red", "value": 95 } ] },
+          "color": { "mode": "thresholds" } },
+        "overrides": []
+      },
+      "options": { "showThresholdLabels": false, "showThresholdMarkers": true }
+    },
+    {
+      "id": 4,
+      "type": "bargauge",
+      "title": "Disk – brukt per enhet (GiB)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "refId": "A", "format": "table",
+        "expr": "unraid_device_used_bytes / 1073741824",
+        "legendFormat": "{{kind}} {{name}}" }],
+      "fieldConfig": {
+        "defaults": { "unit": "decdbytes",
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "green", "value": null }, { "color": "yellow", "value": 80 },
+            { "color": "red", "value": 90 } ] } },
+        "overrides": []
+      },
+      "options": { "orientation": "horizontal", "displayMode": "gradient",
+        "showUnfilled": true }
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Array – brukt og ledig over tid (TiB)",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        { "refId": "A", "expr": "unraid_array_used_bytes / 1099511627776", "legendFormat": "brukt" },
+        { "refId": "B", "expr": "unraid_array_free_bytes / 1099511627776", "legendFormat": "ledig" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "decdbytes",
+        "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null } ] } },
+        "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" },
+        "tooltip": { "mode": "multi" } }
+    },
+    {
+      "id": 6,
+      "type": "bargauge",
+      "title": "Share – brukt pr. share (GiB)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "refId": "A", "format": "table",
+        "expr": "unraid_share_used_bytes / 1073741824",
+        "legendFormat": "{{name}}" }],
+      "fieldConfig": {
+        "defaults": { "unit": "decdbytes",
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "green", "value": null }, { "color": "yellow", "value": 80 },
+            { "color": "red", "value": 90 } ] } },
+        "overrides": []
+      },
+      "options": { "orientation": "horizontal", "displayMode": "gradient", "showUnfilled": true }
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Fyllingsgrad array (%)",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "refId": "A",
+        "expr": "unraid_array_used_bytes / (unraid_array_used_bytes + unraid_array_free_bytes) * 100",
+        "legendFormat": "fyllingsgrad" }],
+      "fieldConfig": { "defaults": { "unit": "percent", "min": 0, "max": 100,
+        "thresholds": { "mode": "absolute", "steps": [
+          { "color": "green", "value": null }, { "color": "yellow", "value": 85 },
+          { "color": "red", "value": 95 } ] } },
+        "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" },
+        "tooltip": { "mode": "multi" } }
+    }
+  ]
+}
