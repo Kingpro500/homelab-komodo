@@ -4,13 +4,33 @@ services:
     container_name: homepage
     restart: unless-stopped
     ports:
-      - 3000:3000
-    volumes:
-      - homepage_config:/app/config
+      - "3009:3000"
     environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Europe/Oslo
+      HOMEPAGE_ALLOWED_HOSTS: 10.0.0.128:3009
+    volumes:
+      # GitOps: the whole config directory comes from the cloned repo, read-only.
+      # Mount the DIRECTORY, not the individual file. `git pull` replaces files
+      # with a new inode, so a single-file bind mount keeps serving the old
+      # content until the container is recreated by hand, and `compose up` does
+      # not recreate when the compose file itself is unchanged.
+      - ../homepage/config:/app/config:ro
+      # Read-only docker socket: gives Homepage live container status (server: ct109).
+      - /var/run/docker.sock:/var/run/docker.sock:ro
 
-volumes:
-  homepage_config:
+  # dockctl — homemade start/stop/restart panel for all CT109 containers.
+  # Talk to the docker.sock directly; requires CONTROL_TOKEN (set in the
+  # Komodo stack environment, never committed). Fail-closed: without the token
+  # the container won't start (see ${CONTROL_TOKEN:?...} below).
+  dockctl:
+    image: node:22-alpine
+    container_name: dockctl
+    restart: unless-stopped
+    ports:
+      - "3015:3015"
+    environment:
+      CONTROL_PORT: "3015"
+      CONTROL_TOKEN: ${CONTROL_TOKEN:?set CONTROL_TOKEN in the Komodo stack env}
+    volumes:
+      - ../homepage/dockctl/server.js:/app/server.js:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: ["node", "/app/server.js"]

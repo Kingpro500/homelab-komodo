@@ -137,6 +137,12 @@
           type: uptimekuma
           url: http://10.0.0.128:3001
           version: 1
+    - Docker-kontroll:
+        icon: mdi:docker
+        href: http://10.0.0.128:3015/
+        description: 10.0.0.128:3015 · CT109 · start/stop/restart alle containere
+        server: ct109
+        container: dockctl
     - Grafana CT109:
         icon: grafana.png
         href: http://10.0.0.128:3000/
