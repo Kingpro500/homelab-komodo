@@ -26,6 +26,7 @@ older note that it was skipped. Verified 6 Oct 2026: `homelab-overview` and
 |---|---|---|---|
 | Homelab – Ressurser | `homelab-overview` | Prometheus 30s | Per-gjest CPU/RAM/disk fra Proxmox |
 | Unraid – Lagring (Tower) | `unraid-storage` | Prometheus 60s (job `unraid-storage`) | Array/disks/caches/shares fylling fra Unraid GraphQL |
+| Proxmox – Ressurser per maskin | `proxmox-guests` | Prometheus 30s | Velg maskin (nedtrekk `$maskin`) → CPU/RAM/disk hver for seg + oversiktstabell alle gjester |
 
 Recreate the container after adding a dashboard JSON — `docker kill --signal=HUP`
 does NOT pick up new files (bind mount holds the old inode until recreate):
