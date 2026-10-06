@@ -1,0 +1,26 @@
+# qDirStat — pc6 CT104
+# Treemap-graf over diskbruk (QDirStat) som leser Unraid via NFS.
+# Bruker jlesage-bildet: web-GUI på port 5800, leser filer direkte
+# (ikke Unraid API — det er read-only).
+services:
+  qdirstat:
+    image: jlesage/qdirstat:latest
+    container_name: qdirstat
+    ports:
+      - "5800:5800"
+    environment:
+      TZ: "${TZ:-Europe/Oslo}"
+      LANG: "nb_NO.UTF-8"
+      # Bare lesing: holder filsystemet intakt, treemap-skann trygt.
+      WEB_FILE_MANAGER: "0"
+      # Ikke auto-scan på start — la brukeren velge mappe i GUI for å unngå
+      # en dyr full-skann av hele mediebiblioteket ved hver restart.
+      # QDIRSTAT_STARTUP_SCAN_FOLDER: "/media"
+    volumes:
+      - "/media:/media:ro"
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
