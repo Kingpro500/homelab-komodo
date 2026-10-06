@@ -34,7 +34,6 @@ services:
       - "${FILEBROWSER_CONFIG_PATH:-/opt/filebrowser}:/config"
       - "${FILEBROWSER_MEDIA_PATH:-/media}:/srv"
     command:
-      - /filebrowser
       - --address
       - 0.0.0.0
       - --port
