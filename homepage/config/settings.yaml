@@ -4,6 +4,7 @@ maxGroupColumns: 4
 useEqualHeights: true
 fullWidth: true
 disableCollapse: true
+showStats: true
 layout:
   Homelab:
     style: row

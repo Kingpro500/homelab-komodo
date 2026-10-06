@@ -1,28 +1,43 @@
 ---
 # Current homelab services. Descriptions include container and Proxmox node.
 # This file intentionally has no API keys or other credentials.
+#
+# CT109 services (10.0.0.128) carry `server: ct109` + `container: <name>`.
+# Homepage shares CT109's docker.sock, so each such tile shows live
+# running/stopped status and expands to CPU/RAM/network on click.
+# References: https://gethomepage.dev/configs/services/ (Docker Integration).
 
 - Homelab:
     - Homepage:
         icon: homepage.png
         href: http://10.0.0.128:3009/
         description: 10.0.0.128:3009 · CT109 · pc6
+        server: ct109
+        container: homepage
     - Glance:
         icon: si:glance
         href: http://10.0.0.128:3010/
         description: 10.0.0.128:3010 · CT109 · pc6 · status og containere
+        server: ct109
+        container: glance
     - Dashy:
         icon: mdi:view-dashboard
         href: http://10.0.0.128:3011/
         description: 10.0.0.128:3011 · CT109 · pc6 · lenker
+        server: ct109
+        container: dashy
     - Heimdall:
         icon: mdi:rocket-launch
         href: http://10.0.0.128:3012/
         description: 10.0.0.128:3012 · CT109 · pc6 · launcher
+        server: ct109
+        container: heimdall
     - Crafty:
         icon: mdi:gamepad-variant
         href: https://10.0.0.128:8000/
         description: 10.0.0.128:8000 · CT109 · pc6 · Minecraft · selvsignert sertifikat
+        server: ct109
+        container: crafty
     - Komodo:
         icon: komodo.png
         href: http://10.0.0.117:9120/
@@ -88,6 +103,8 @@
         icon: grafana.png
         href: http://10.0.0.128:3000/
         description: 10.0.0.128:3000 · CT109 · pc6 · visualisering
+        server: ct109
+        container: grafana
 
 - Monitoring:
     - Netdata Cloud:
@@ -114,6 +131,8 @@
         icon: uptime-kuma.png
         href: http://10.0.0.128:3001/
         description: 10.0.0.128:3001 · CT109 · pc6
+        server: ct109
+        container: uptime-kuma
         widget:
           type: uptimekuma
           url: http://10.0.0.128:3001
@@ -122,10 +141,14 @@
         icon: grafana.png
         href: http://10.0.0.128:3000/
         description: 10.0.0.128:3000 · CT109 · pc6
+        server: ct109
+        container: grafana
     - Speedtest Tracker:
         icon: speedtest-tracker.png
         href: http://10.0.0.128:8765/
         description: 10.0.0.128:8765 · CT109 · pc6
+        server: ct109
+        container: speedtest-tracker
     - MySpeed:
         icon: mdi-speedometer
         href: http://10.0.0.124:5216/
@@ -158,6 +181,8 @@
         icon: seerr.png
         href: http://10.0.0.128:5055/
         description: 10.0.0.128:5055 · CT109 · pc6 · requests
+        server: ct109
+        container: seerr
     - MeTube:
         icon: metube.png
         href: http://10.0.0.124:8081/
@@ -170,46 +195,62 @@
         icon: sonarr.png
         href: http://10.0.0.128:8989/
         description: 10.0.0.128:8989 · CT109 · pc6
+        server: ct109
+        container: sonarr
     - Radarr:
         icon: radarr.png
         href: http://10.0.0.128:7878/
         description: 10.0.0.128:7878 · CT109 · pc6
+        server: ct109
+        container: radarr
     - Prowlarr:
         icon: prowlarr.png
         href: http://10.0.0.128:9696/
         description: 10.0.0.128:9696 · CT109 · pc6
+        server: ct109
+        container: prowlarr
     - Readarr:
         icon: readarr.png
         href: http://10.0.0.128:8787/
         description: 10.0.0.128:8787 · CT109 · pc6
+        server: ct109
+        container: readarr
     - Bazarr:
         icon: bazarr.png
         href: http://10.0.0.128:6767/
         description: 10.0.0.128:6767 · CT109 · pc6
+        server: ct109
+        container: bazarr
     - Cleanuparr:
         icon: mdi:delete-sweep
         href: http://10.0.0.128:11011/
         description: 10.0.0.128:11011 · CT109 · pc6 · rydder *Arr-køer
-    - Tunarr:
-        icon: mdi:video-input-component
-        href: http://10.0.0.128:8005/
-        description: 10.0.0.128:8005 · CT109 · pc6 · TV-kanaler fra Emby
+        server: ct109
+        container: cleanuparr
     - Audiobookshelf:
         icon: audiobookshelf.png
         href: http://10.0.0.128:13378/
         description: 10.0.0.128:13378 · CT109 · pc6
+        server: ct109
+        container: audiobookshelf
     - Deluge:
         icon: deluge.png
         href: http://10.0.0.128:8112/
         description: 10.0.0.128:8112 · CT109 · pc6
+        server: ct109
+        container: deluge
     - Podgrab:
         icon: podgrab.png
         href: http://10.0.0.128:8081/
         description: 10.0.0.128:8081 · CT109 · pc6
+        server: ct109
+        container: podgrab
     - Grovemap:
         icon: mdi-map
         href: http://10.0.0.128:8080/
         description: 10.0.0.128:8080 · CT109 · pc6
+        server: ct109
+        container: grovemap
     - Emby:
         icon: emby.png
         href: http://10.0.0.150:8096/
