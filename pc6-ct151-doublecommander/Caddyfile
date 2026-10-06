@@ -1,8 +1,0 @@
-# Serve Double Commander (internal nginx on :3000) over HTTPS with a local
-# self-signed cert. Browser shows a "not secure" warning -> click through.
-# Internal CA cert lives in the caddy-data volume, so it is stable across
-# restarts (no cert churn on every deploy).
-https://10.0.0.150:8099 {
-	tls internal
-	reverse_proxy doublecommander:3000
-}

@@ -3,8 +3,8 @@
 # Modern open-source twin-pane file manager (Chrome/Firefox-flavored UI) over
 # the Unraid media NFS share, in the browser. The linuxserver/Selkies image
 # refuses plain HTTP from a LAN IP (WebRTC needs a secure context), so this
-# stack puts a small Caddy reverse proxy in front that terminates TLS with an
-# internal (self-signed) cert on port 8099. The browser shows a "not secure"
+# stack puts a small nginx reverse proxy in front that terminates TLS with a
+# fixed self-signed cert on port 8099 (works regardless of SNI). The browser shows a "not secure"
 # warning on first connect — click through. Krusader (8098) is the plain-HTTP
 # twin-pane alternative.
 #
@@ -32,7 +32,7 @@ services:
       PUID: "99"
       PGID: "100"
       TZ: "${TZ:-Europe/Oslo}"
-      # Selkies is served as plain HTTP internally; Caddy provides HTTPS outside.
+      # Selkies is served as plain HTTP internally; the nginx proxy provides TLS outside.
       SELKIES_ENABLE_HTTPS: "false"
     volumes:
       - "${DOUBLE_COMMANDER_CONFIG_PATH:-/opt/doublecommander}:/config"
@@ -43,15 +43,16 @@ services:
         max-size: "10m"
         max-file: "3"
 
-  caddy:
-    image: caddy:2-alpine
+  nginx-proxy:
+    image: nginx:alpine
     container_name: dc-proxy
     restart: unless-stopped
     ports:
       - "8099:8099"
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy-data:/data
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      # self-signed cert generated on CT 151 (openssl, SAN IP:10.0.0.150)
+      - "${DOUBLE_COMMANDER_CERTS_PATH:-/opt/doublecommander/certs}:/etc/nginx/certs:ro"
     depends_on:
       - doublecommander
     logging:
@@ -59,6 +60,3 @@ services:
       options:
         max-size: "5m"
         max-file: "3"
-
-volumes:
-  caddy-data:
