@@ -1,0 +1,57 @@
+---
+# Driftsrapport fra alle LXC-CT-er i CyberCluster.
+# Read-only og skjermet mot `pct exec`-quoting-fella: det samlende scriptet
+# `scripts/drift-info.sh` kopieres til noden, pct-pushes inn i hver CT og
+# kjøres der. Ingen av de driftskritiske kommandoene er skrevet inline.
+#
+# NB: `pct exec` forkaster shell-quoting (kjent fallgrue), derfor brukes et
+# skikkelig script-fil i stedet for sh -c med komplekse kommandoer.
+#
+# Kjøring:
+#   ansible-playbook -i inventory/ssh.yml playbooks/driftsrapport.yml
+#   ansible-playbook -i inventory/ssh.yml playbooks/driftsrapport.yml --limit pc6
+- name: Driftsrapport fra alle CT-er
+  hosts: proxmox_ssh
+  gather_facts: false
+  become: false
+  tasks:
+    - name: List LXC-CT-er på {{ inventory_hostname }}
+      ansible.builtin.command: pct list
+      register: pct_list
+      changed_when: false
+
+    - name: Bygg liste over CT-id-er (kolonne 1)
+      ansible.builtin.set_fact:
+        ct_ids: "{{ pct_list.stdout_lines[1:] | map('regex_replace', '^\\s*(\\d+)\\s+.*', '\\1') | select('search', '\\d+') | list }}"
+      changed_when: false
+
+    - name: Kopier rapportscipt til noden
+      ansible.builtin.copy:
+        src: ../scripts/drift-info.sh
+        dest: /tmp/drift-info.sh
+        mode: "0755"
+      changed_when: false
+
+    - name: pct-push rapportscipt inn i hver CT
+      ansible.builtin.command: pct push {{ item }} /tmp/drift-info.sh /tmp/drift-info.sh --perms 0755
+      loop: "{{ ct_ids }}"
+      changed_when: false
+
+    - name: Samle driftinfo per CT
+      ansible.builtin.command: pct exec {{ item }} -- /tmp/drift-info.sh
+      loop: "{{ ct_ids }}"
+      register: ct_status
+      changed_when: false
+      ignore_errors: true
+
+    - name: Presentation per CT
+      ansible.builtin.debug:
+        msg: "[{{ inventory_hostname }}] CT {{ item.item }}: {{ (item.stdout | default('(feil)')).split('\n') | join(' | ') }}"
+      loop: "{{ ct_status.results }}"
+      ignore_errors: true
+
+    - name: Rens rapportscipt fra noden
+      ansible.builtin.file:
+        path: /tmp/drift-info.sh
+        state: absent
+      changed_when: false

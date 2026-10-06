@@ -1,0 +1,65 @@
+---
+# Deploy/oppdater av én Docker-stack i én LXC-CT.
+# Kjører via SSH til Proxmox-noden som root, pct-pusher et script inn i CT-en,
+# og kjører det der (git pull -> compose config -q -> pull -> up -d).
+#
+# NB: Dette er en WRITE-aksjon mot en kjørende tjeneste. Kunn tjeneste-nedetid
+# under container-recreate. Kjør kun mot stakker du har godkjent.
+#
+# Eksempel:
+#   ansible-playbook -i inventory/ssh.yml \
+#     playbooks/deploy_stack.yml \
+#     -e ct=109 \
+#     -e stack_dir=/opt/komodo/stacks/pc6-ct109-homepage/pc6-ct109-homepage
+#   (valgfritt) -e compose_cmd="docker-compose"   # for v1-CT-er
+#
+# For en TØRRKJØRING som bare validerer (ingen endringer):
+#   ... -e dry_run=true
+- name: Deploy/oppdater Docker-stack i CT
+  hosts: "{{ node | default('pc6') }}"
+  gather_facts: false
+  become: false
+  vars:
+    dry_run: false
+    compose_cmd: ""          # settes hvis man vil tvinge v1/v2
+  tasks:
+    - name: Sjekk at ct og stack_dir er gitt
+      ansible.builtin.assert:
+        that:
+          - ct is defined
+          - stack_dir is defined
+        fail_msg: "Du må gi -e ct=<vmid> og -e stack_dir=<sti-inne-i-CT>"
+
+    - name: Vis modus
+      ansible.builtin.debug:
+        msg: "{{ 'TØRRKJØRING (dry_run=true) — ingen endringer' if dry_run | bool else 'REELT DEPLOE (dry_run=false)' }} — ct={{ ct }}, stack_dir={{ stack_dir }}"
+
+    - name: Lag lokalt script + overfør til noden
+      ansible.builtin.copy:
+        src: ../scripts/deploy-stack.sh
+        dest: /tmp/deploy-stack.sh
+        mode: "0755"
+      register: script_copied
+
+    - name: pct-push script inn i CT-en
+      ansible.builtin.command: pct push {{ ct }} /tmp/deploy-stack.sh /tmp/deploy-stack.sh --perms 0755
+      when: not (dry_run | bool)
+
+    - name: Kjør deploy-scriptet inne i CT-en
+      ansible.builtin.shell:
+        cmd: >-
+          pct exec {{ ct }} -- /tmp/deploy-stack.sh
+          {{ stack_dir }}{% if compose_cmd %} {{ compose_cmd }}{% endif %}
+      register: deploy
+      when: not (dry_run | bool)
+      changed_when: true
+
+    - name: Vis deploy-output
+      ansible.builtin.debug:
+        var: deploy.stdout_lines
+      when: not (dry_run | bool)
+
+    - name: "Tørrkjøring: validerer bare (ingen endring)"
+      ansible.builtin.debug:
+        msg: "dry_run=true — ville pushe+kjøre deploy-stack.sh i CT {{ ct }} på {{ stack_dir }}. Ingen endringer gjort."
+      when: dry_run | bool
