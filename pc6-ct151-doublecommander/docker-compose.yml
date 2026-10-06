@@ -32,6 +32,9 @@ services:
       PUID: "99"
       PGID: "100"
       TZ: "${TZ:-Europe/Oslo}"
+      # Selkies web gateway demands HTTPS by default; disable so the UI works
+      # over plain HTTP from the LAN (port 8099).
+      SELKIES_ENABLE_HTTPS: "false"
     volumes:
       - "${DOUBLE_COMMANDER_CONFIG_PATH:-/opt/doublecommander}:/config"
       - "${DOUBLE_COMMANDER_MEDIA_PATH:-/media}:/media"
