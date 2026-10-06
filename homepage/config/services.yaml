@@ -228,11 +228,11 @@
     - iVentoy:
         icon: mdi-server-network
         href: http://10.0.0.134:26000/
-        description: 10.0.0.134:26000 · CT111 · pc6
+        description: 10.0.0.134:26000 · CT111 · pc9
     - UniFi Network:
         icon: unifi.png
         href: https://10.0.0.132:8443/
-        description: 10.0.0.132:8443 · CT155 · pc6
+        description: 10.0.0.132:8443 · CT155 · pc9
     - Browser-pool:
         icon: mdi-web
         href: http://10.0.0.158:3001/
@@ -346,8 +346,8 @@
     - Immich:
         icon: immich.png
         href: http://10.0.0.127:2283/
-        description: 10.0.0.127:2283 · CT153 · pc6
+        description: 10.0.0.127:2283 · CT153 · pc9
     - Paperless-ngx:
         icon: paperless-ngx.png
         href: http://10.0.0.131:8000/
-        description: 10.0.0.131:8000 · CT154 · pc6
+        description: 10.0.0.131:8000 · CT154 · pc9

@@ -10,8 +10,11 @@ GPU-en. Ingen nåværende oppgave avhenger av pc1-veien.
 
 | Workload | Destination | Status | Notes |
 | --- | --- | --- | --- |
-| iVentoy | To be chosen | Planned | New dedicated service; identify existing media and network requirements first. |
-| UniFi Network Application | Kjører på pc6 CT155 | **Uavklart** | Verifisert 4. okt: CT155 `pc6-ct155-unifi` kjører på `10.0.0.132:8443` (tittel «unifi network»). Men det finnes **ingen Komodo-stack** for den, så den er ikke Komodo-administrert. Tidligere plan sa pc9, egen CT. Avgjør om pc6 beholdes eller flyttes, og legg den under Komodo. |
+| iVentoy | pc9 CT111 | Done | Moved from pc6 6. okt 2026. Runs Komodo-managed at 10.0.0.134:26000. |
+| UniFi Network Application | pc9 CT155 | **Done (moved 6. okt)** | CT155 `pc6-ct155-unifi` moved from pc6 to pc9; runs at 10.0.0.132:8443. Komodo-name still `pc6-ct155-unifi` (unchanged), not Komodo-managed (manual stack). |
+| Paperless | pc9 CT154 | **Done (6. okt)** | Moved from pc6. 10.0.0.131:8000. n8n integration unaffected (over network). |
+| Roon | pc9 CT152 | **Done (6. okt)** | Moved from pc6, started. 10.0.0.125. Mounts /music + /backup from Tower-media. |
+| Immich | pc9 CT153 | **Done (6. okt)** | Moved from pc6. 10.0.0.127:2283, /dev/dri passthrough + /photos (Tower-photos NFS). |
 | Uptime Kuma | pc6 CT 109 | Done | Running through Komodo. Review stale Tower-based monitors separately. |
 | Homepage | pc6 CT 109 | Done | Running through Komodo. `services.yaml` er GitOps-mountet read-only fra `homepage/config/`. |
 | Speedtest Tracker | pc6 CT 109 | Done | Running through Komodo. |
