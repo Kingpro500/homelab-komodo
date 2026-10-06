@@ -1,0 +1,26 @@
+# Static website: internal network map + any static HTML.
+#
+# Serves files from ../docs/network-map (the network map) as a lightweight
+# internal-only web page on 10.0.0.128:3020. Deployed through Komodo on the
+# pc6-ct109-node server.
+#
+# Repo layout matters for the bind mount: `git pull` clones the whole repo to
+# /opt/komodo/stacks/pc6-ct109-web/, and this compose file lives in
+# run_directory pc6-ct109-web, so `../docs/network-map` resolves to the repo's
+# docs/network-map directory. Add more static HTML by dropping files there.
+#
+# NOTE: nginx serves whatever is in the mounted dir as-is. Keep this stack
+# LAN-only (it already is: no WAN port-forward).
+services:
+  nettkart:
+    image: nginx:alpine
+    container_name: nettkart
+    restart: unless-stopped
+    ports:
+      - "3020:80"
+    volumes:
+      # The whole repo is cloned next to this directory; mount the network map
+      # read-only. A small config makes nettverkskart.html the index so the
+      # root URL serves the map directly.
+      - ../docs/network-map:/usr/share/nginx/html:ro
+      - ./default.conf:/etc/nginx/conf.d/default.conf:ro
