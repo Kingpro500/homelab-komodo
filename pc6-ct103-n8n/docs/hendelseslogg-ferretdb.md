@@ -108,6 +108,20 @@ kjører men får *ingen* data (tom utgang) — ser ut som suksess men skriver
 ingenting. Rettet for `res`-workflowen; verifisert: Alertmanager-hendelse landet
 i FerretDB med `source=alertmanager`.
 
+### Vakt-script på CT157 logger også inn (via `log_event.py`)
+
+`~/.hermes/scripts/log_event.py` er en best-effort POST til `/webhook/events`.
+Kalt fra (6. okt 2026):
+
+- **`service_watch.py`** — logger hvert **fresh** problem (etter `down_repeat=2`),
+  takket i `build()`. Ikke suppressed-tellinger, så loggen holdes ren.
+- **`opnsense_wan_watch.py`** — `wan-down` / `wan-unstable` ved terskel.
+- **`opnsense_arp_watch.py`** — `arp-conflict` per IP.
+
+`log_event()` svelger feil (aldri krasj vakt-scriptet). Nøkkel-args: `source`,
+`type`, `severity` (info/warning/critical), `title`, `message`, `host`,
+`details`. Verifisert: ARP-konflikt og testhendelse landet i FerretDB.
+
 ## Avhengigheter
 
 | Avhengighet | Verdi |
