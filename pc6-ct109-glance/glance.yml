@@ -37,6 +37,20 @@ pages:
                 shortcut: "!pve"
                 url: https://10.0.0.102:8006/
 
+          - type: http
+            title: OpenRouter Spend
+            url: http://localhost:9119/openrouter/spend
+            cache: 5m
+            fields:
+              - title: Total Cost
+                label: total_cost
+                color: "#FF6B6B"
+              - title: Requests
+                label: total_requests
+                color: "#4ECDC4"
+              - title: Models
+                label: models
+
       - size: full
         widgets:
           - type: monitor
