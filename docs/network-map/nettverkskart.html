@@ -88,6 +88,16 @@ footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-
 .sw-btn{margin-left:8px;font-size:11px;padding:1px 8px;border-radius:10px;border:1px solid var(--border);background:var(--panel2);color:var(--text);cursor:pointer}
 .sw-btn:hover{border-color:var(--svc)}
 .sw-btn.busy{opacity:.5;cursor:wait}
+.sw-ctl{margin-left:8px;white-space:nowrap}
+/* Node-ressurskort (CPU/RAM/disk per fysisk maskin) */
+.nr-card{flex:1 1 220px;min-width:210px;background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:10px 12px}
+.nr-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;font-size:13.5px}
+.nr-ip{font-size:11px;color:var(--dim)}
+.nr-row{display:flex;align-items:center;gap:8px;margin:3px 0;font-size:11.5px}
+.nr-lab{width:38px;color:var(--dim);flex:none}
+.nr-bar{flex:1;height:7px;background:#1a2432;border-radius:5px;overflow:hidden}
+.nr-fill{height:100%;border-radius:5px}
+.nr-val{width:150px;text-align:right;color:var(--dim);flex:none}
 </style>
 </head>
 <body>
@@ -98,6 +108,7 @@ footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-
 
 <!-- ============ SERVICE-OVERSIKT ============ -->
 <h3 class="sec">📋 Serviceoversikt</h3>
+<div id="node-resources" style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px"></div>
 <table>
   <thead><tr><th>Tjeneste</th><th>Gjest</th><th>Adresse</th><th>Merknad</th></tr></thead>
   <tbody>
@@ -293,8 +304,7 @@ offline.forEach(o=>{
 (function(){
   var STATUS_URL = "http://10.0.0.135:9118/status";
   var CTRL_URL   = "http://10.0.0.135:9118/control";
-  // vmid per kontrollerbar tjeneste (pc9 CT-er)
-  var CTRL = {111:["iVentoy"],152:["Roon"],153:["Immich"],154:["Paperless-ngx"],155:["UniFi Network"]};
+  var NODES_URL = "http://10.0.0.135:9118/nodes";
   var meta = document.getElementById("sw-meta");
   var tokInput = document.getElementById("sw-token");
   var tokSave  = document.getElementById("sw-token-save");
@@ -313,7 +323,6 @@ offline.forEach(o=>{
 
   function setName(row, name){
     var label = row.cells && row.cells[0] ? row.cells[0].textContent.trim() : "";
-    // matcher tjenestenavn fra /status mot rad-merknad/-tjeneste, unormalt
     var n = name.toLowerCase();
     return label.toLowerCase().includes(n) || n.includes(label.split(" ")[0].toLowerCase());
   }
@@ -325,61 +334,129 @@ offline.forEach(o=>{
     return d;
   }
 
-  function addBtns(row, vmid, name){
+  // Legg av/på-knapp på en tjenesterad for angitt node/vmid.
+  function addBtns(row, node, vmid, running){
     var cell = row.cells && row.cells[row.cells.length-1];
     if(!cell) return;
+    var wrap = document.createElement("span");
+    wrap.className = "sw-ctl";
+    wrap.setAttribute("data-node", node);
+    wrap.setAttribute("data-vmid", vmid);
     var on = document.createElement("button");
     on.className = "sw-btn"; on.textContent = "▶ på";
+    on.style.display = running ? "none" : "";
     var off = document.createElement("button");
     off.className = "sw-btn"; off.textContent = "■ av";
+    off.style.display = running ? "" : "none";
     [on,off].forEach(function(b){
       b.addEventListener("click", function(){
         var action = b === on ? "on" : "off";
         b.classList.add("busy");
         fetch(CTRL_URL, {method:"POST", headers:{"Content-Type":"application/json",
           "Authorization":"Bearer "+token()},
-          body: JSON.stringify({vmid:vmid, action:action})})
+          body: JSON.stringify({vmid:vmid, action:action, node:node})})
           .then(function(r){return r.json()})
           .then(function(j){
-            if(j && j.ok){ setTimeout(live, 1500); }
-            else { tokMsg.textContent = (j && j.error) || "feil"; setTimeout(function(){tokMsg.textContent="";},4000); }
+            if(j && j.ok){ setTimeout(refresh, 1200); }
+            else { tokMsg.textContent = (j && j.error) || "feil"; setTimeout(function(){tokMsg.textContent="";},5000); }
           })
           .catch(function(e){ tokMsg.textContent="kontroll feilet"; })
           .finally(function(){ b.classList.remove("busy"); });
       });
     });
-    var wrap = document.createElement("span");
     wrap.appendChild(on); wrap.appendChild(off);
     cell.appendChild(wrap);
   }
 
-  function live(){
+  function bar(label, val, max, unit, color){
+    var pct = max ? Math.min(100, Math.round(val/max*100)) : 0;
+    return '<div class="nr-row"><span class="nr-lab">'+label+'</span>'+
+      '<div class="nr-bar"><div class="nr-fill" style="width:'+pct+'%;background:'+color+'"></div></div>'+
+      '<span class="nr-val">'+val+unit+' / '+max+unit+' ('+pct+'%)</span></div>';
+  }
+
+  function renderNodes(nodes){
+    var box = document.getElementById("node-resources");
+    box.innerHTML = "";
+    (nodes||[]).forEach(function(n){
+      var card = document.createElement("div");
+      card.className = "nr-card";
+      var mem = (n.mem_used||0)/1073741824, memT=(n.mem_total||0)/1073741824;
+      var dis = (n.disk_used||0)/1073741824, disT=(n.disk_total||0)/1073741824;
+      // finn aktiv/stopped i denne nodens gjester for sammendrag
+      var run = (n.vms||[]).filter(function(v){return v.status==="running"}).length;
+      card.innerHTML = '<div class="nr-head"><b>'+n.name+'</b><span class="nr-ip">'+n.ip+
+        ' · '+run+'/'+(n.vms||[]).length+' kjører · CPU '+n.cpu_pct+'%</span></div>'+
+        bar("RAM", mem.toFixed(1), memT.toFixed(1), " GB", "#3a86ff")+
+        bar("Disk", dis.toFixed(1), disT.toFixed(1), " GB", "#9d4edd");
+      box.appendChild(card);
+    });
+  }
+
+  // bygg oppslag node -> vmid -> {running, protected} fra /nodes
+  var guestLookup = {};
+  function buildLookup(nodes){
+    guestLookup = {};
+    (nodes||[]).forEach(function(n){
+      (n.vms||[]).forEach(function(v){
+        guestLookup[v.vmid] = {node:n.node, running: v.status==="running", protected: !!v.protected};
+      });
+    });
+  }
+
+  function refresh(){
     meta.textContent = "henter…";
     fetch(STATUS_URL).then(function(r){return r.json()}).then(function(d){
       var services = d.services || [];
       var up = services.filter(function(s){return s.up}).length;
       meta.textContent = up + "/" + services.length + " oppe · " + d.generated_at;
-      // tokens: hvis ny verdi, sett knappe-etikett
-      var rows = document.querySelectorAll("#servicemap-controlrow ~ tr:not(.section-row)");
-      // reset gamle markeringer (fjern prikker + knapper fra forrige kjøring)
+      return fetch(NODES_URL).then(function(r){return r.json()});
+    }).then(function(nd){
+      buildLookup(nd);
+      renderNodes(nd.nodes);
+      // fjern gamle prikker/knapper fra forrige refresh (unngå duplikat)
+      document.querySelectorAll(".sw-dot, .sw-ctl, .sw-btn[data-gen]").forEach(function(e){ e.remove(); });
+      var currentSection = "";
+      var rows = document.querySelectorAll("#servicemap-controlrow ~ tr");
       rows.forEach(function(r){
-        var old = r.querySelectorAll(".sw-dot, .sw-btn, [data-sw]");
-        old.forEach(function(e){ e.remove(); });
-      });
-      rows.forEach(function(r){
+        if(r.classList.contains("section-row")){
+          currentSection = (r.textContent||"").toLowerCase();
+          return;
+        }
+        // Fjern prikker lagt til av forrige kjøring (markere med data-gen)
         var cell0 = r.cells && r.cells[0]; if(!cell0) return;
-        var t = cell0.textContent.trim();
-        services.forEach(function(s){
-          if(setName(r, s.name)){
-            cell0.appendChild(dot(s.up));
-          }
+        cell0.querySelectorAll(".sw-dot").forEach(function(e){ e.remove(); });
+        var guestCell = r.cells && r.cells[1] ? r.cells[1].textContent : "";
+        // vmid = siste tall i gjest-cellen ("CT</span>ct103 103" -> 103)
+        var m = (guestCell||"").match(/(\d+)\D*$/);
+        var vmid = m ? parseInt(m[1],10) : null;
+        // node fra seksjonen vi står i
+        var node = /(pve|pc[1698])/.test(currentSection) ? (currentSection.match(/(pve|pc[1698])/)||[])[1] : null;
+        var g = vmid != null ? guestLookup[vmid] : null;
+        // status-prikker
+        if(services) services.forEach(function(s){
+          if(setName(r, s.name)) cell0.appendChild(dot(s.up));
         });
-        // av/på for kontrollerbare
-        Object.keys(CTRL).forEach(function(vmid){
-          if(CTRL[vmid].some(function(n){ return t.toLowerCase().indexOf(n.toLowerCase()) !== -1; })){
-            addBtns(r, parseInt(vmid), CTRL[vmid][0]);
+        // av/på-knapp: kun hvis gjest finnes på en node OG ikke er beskyttet
+        if(g && !g.protected){
+          addBtns(r, g.node, vmid, g.running);
+        } else if(g && g.protected && !g.running){
+          // beskyttet men nede -> vis bare "på" (oppstart er trygt)
+          var cell = r.cells && r.cells[r.cells.length-1];
+          if(cell && token()){
+            var b = document.createElement("button");
+            b.className="sw-btn"; b.textContent="▶ på";
+            b.addEventListener("click", function(){
+              fetch(CTRL_URL,{method:"POST",headers:{"Content-Type":"application/json",
+                "Authorization":"Bearer "+token()},
+                body:JSON.stringify({vmid:vmid,action:"on",node:g.node})})
+                .then(function(x){return x.json()}).then(function(j){
+                  if(j&&j.ok){setTimeout(refresh,1200);} else {tokMsg.textContent=(j&&j.error)||"feil";setTimeout(function(){tokMsg.textContent="";},5000);}
+                });
+            });
+            cell.appendChild(b);
           }
-        });
+        }
       });
       if(!token()){ tokMsg.textContent = "Skriv inn token og trykk Lagre for å bruke av/på-knappene"; }
       else { tokMsg.textContent = ""; }
@@ -387,8 +464,8 @@ offline.forEach(o=>{
       meta.textContent = "status utilgjengelig (" + e + ")";
     });
   }
-  live();
-  setInterval(live, 15000);
+  refresh();
+  setInterval(refresh, 15000);
 })();
 </script>
 </body>
