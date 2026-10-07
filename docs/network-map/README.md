@@ -45,3 +45,28 @@ vei (uten ny node):
 
 Siden gethomepage kun gir *status* (ikke start/stopp), bruk `dockctl`
 (`10.0.0.128:3015`) for å få containeren opp hvis den ikke starter selv.
+
+## Levende tjenestestatus + av/på-knapper (6. okt 2026)
+
+Siden er statisk HTML men henter levende status fra `homelab-audit` på CT157
+(`10.0.0.135:9118`), cross-origin med CORS aktivert server-side:
+
+| Sti | Auth | Beskrivelse |
+|---|---|---|
+| `GET /status` | nei | `{"services":[{"name","host","port","up"}],...}` — TCP-prober parallelt, kun tjenestene i `servicemap_status.SERVICES` (bare dem vi bruker). |
+| `POST /control` | ja (Bearer `AUDIT_TOKEN`) | Body `{"vmid":153,"action":"on\|off"}` — kjører `pct start/stop` på pc9 via SSH fra CT157. Tillatte vmider: 111,152,153,154,155. |
+
+Kode på CT157 (`~/.hermes/scripts/`): `servicemap_status.py`,
+`servicemap_control.py` (VMID-mapping), og rutene + CORS i
+`homelab_audit_server.py`. Restart av service: `systemctl --user restart homelab-audit`.
+
+Av/på-knappene i nettleseren krever `AUDIT_TOKEN` i `localStorage`:
+
+```js
+localStorage.setItem("homelab_audit_token", "<AUDIT_TOKEN fra ~/.hermes/.env>")
+```
+
+**iVentoy (111), Immich (153), Paperless (154), UniFi (155) på pc9 er bevisst
+stoppet** for å spare ressurser — de brukes ikke for tiden. Det er
+normaltilstanden; status-siden viser dem røde. Start dem via av/på-knappen
+eller `pct start <vmid>` når du trenger dem.
