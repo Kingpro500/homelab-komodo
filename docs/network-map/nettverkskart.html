@@ -104,7 +104,12 @@ footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-
     <tr id="servicemap-controlrow"><td colspan="4" style="background:#161e27;font-size:13px;padding:8px 10px">
       <span class="sw-toggle">◉ levende status</span>
       <span id="sw-meta" style="color:var(--dim)">henter…</span>
-      <span style="float:right;color:var(--dim)" id="sw-note">Av/på-knapper krever AUDIT-token (sett i localStorage)</span>
+      <span style="float:right;color:var(--dim);margin-left:10px">
+        <label for="sw-token" style="font-size:12px">AUDIT-token</label>
+        <input id="sw-token" type="password" placeholder="…" style="width:120px;background:#0d1320;border:1px solid var(--border);color:var(--text);font-size:12px;padding:1px 5px"/>
+        <button id="sw-token-save" class="sw-btn" style="padding:1px 10px">Lagre</button>
+        <span id="sw-token-msg" style="font-size:12px;color:var(--dim)"></span>
+      </span>
     </td></tr>
     <tr class="section-row"><td colspan="4">pve (pc8) · N150 · 10.0.0.102</td></tr>
     <tr><td><a href="http://10.0.0.7:8123/">Home Assistant</a></td><td><span class="tag tag-vm">VM</span>homeassistant 100</td><td class="ip">10.0.0.7:8123</td><td>Smarthus · 1834 enheter</td></tr>
@@ -291,9 +296,20 @@ offline.forEach(o=>{
   // vmid per kontrollerbar tjeneste (pc9 CT-er)
   var CTRL = {111:["iVentoy"],152:["Roon"],153:["Immich"],154:["Paperless-ngx"],155:["UniFi Network"]};
   var meta = document.getElementById("sw-meta");
-  var note = document.getElementById("sw-note");
+  var tokInput = document.getElementById("sw-token");
+  var tokSave  = document.getElementById("sw-token-save");
+  var tokMsg   = document.getElementById("sw-token-msg");
 
   function token(){ return localStorage.getItem("homelab_audit_token") || ""; }
+
+  // Prefill token-feltet fra localStorage
+  if(token()){ tokInput.value = token(); }
+  tokSave.addEventListener("click", function(){
+    var v = tokInput.value.trim();
+    if(!v){ localStorage.removeItem("homelab_audit_token"); tokMsg.textContent = "fjernet"; }
+    else { localStorage.setItem("homelab_audit_token", v); tokMsg.textContent = "✓ lagret"; }
+    setTimeout(function(){ tokMsg.textContent=""; }, 3000);
+  });
 
   function setName(row, name){
     var label = row.cells && row.cells[0] ? row.cells[0].textContent.trim() : "";
@@ -326,9 +342,9 @@ offline.forEach(o=>{
           .then(function(r){return r.json()})
           .then(function(j){
             if(j && j.ok){ setTimeout(live, 1500); }
-            else { note.textContent = (j && j.error) || "feil"; setTimeout(function(){note.textContent="";},4000); }
+            else { tokMsg.textContent = (j && j.error) || "feil"; setTimeout(function(){tokMsg.textContent="";},4000); }
           })
-          .catch(function(e){ note.textContent="kontroll feilet"; })
+          .catch(function(e){ tokMsg.textContent="kontroll feilet"; })
           .finally(function(){ b.classList.remove("busy"); });
       });
     });
@@ -365,8 +381,8 @@ offline.forEach(o=>{
           }
         });
       });
-      if(!token()){ note.textContent = "Av/på krever token: localStorage.homelab_audit_token = AUDIT_TOKEN (DevTools)"; }
-      else { note.textContent = ""; }
+      if(!token()){ tokMsg.textContent = "Skriv inn token og trykk Lagre for å bruke av/på-knappene"; }
+      else { tokMsg.textContent = ""; }
     }).catch(function(e){
       meta.textContent = "status utilgjengelig (" + e + ")";
     });
