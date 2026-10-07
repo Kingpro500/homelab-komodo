@@ -339,16 +339,36 @@
         description: 10.0.0.122:8005 · CT106 · pc9 · independent worker
     - Plex (CT107):
         icon: mdi:play
-        href: http://10.0.0.160:32400/
+        href: http://10.0.0.160:32400/web/
         description: 10.0.0.160:32400 · CT107 · pc6 · flyttet fra Unraid · stoppet, autostart av
     - Jellyfin (CT107):
         icon: mdi:movie-open
-        href: http://10.0.0.160:8096/
-        description: 10.0.0.160:8096 · CT107 · pc6 · flyttet fra Unraid · stoppet, autostart av
-    - Legacy-dockere (CT108):
-        icon: mdi:docker
-        href: http://10.0.0.161/
-        description: 10.0.0.161 · CT108 · pc6 · iPXE-buildweb·netbootxyz·code-server·Flame·4get·Linkding·moni·Cloudflared·Valheim · manuell docker, stoppet
+        href: http://10.0.0.160:8099/
+        description: 10.0.0.160:8099 · CT107 · pc6 · flyttet fra Unraid · stoppet, autostart av
+    - netbootxyz (CT108):
+        icon: mdi:server-network
+        href: http://10.0.0.161:8080/
+        description: 10.0.0.161:8080 · CT108 · pc6 · nettinstallasjon/boot · stoppet
+    - iPXE-buildweb (CT108):
+        icon: mdi:network-outline
+        href: http://10.0.0.161:8081/
+        description: 10.0.0.161:8081 · CT108 · pc6 · iPXE-meny · stoppet
+    - OpenVSCode (CT108):
+        icon: mdi:code-tags
+        href: http://10.0.0.161:3008/
+        description: 10.0.0.161:3008 · CT108 · pc6 · VS Code i nettleser · stoppet
+    - Flame (CT108):
+        icon: mdi:fire
+        href: http://10.0.0.161:5030/
+        description: 10.0.0.161:5030 · CT108 · pc6 · applanser · stoppet
+    - 4get (CT108):
+        icon: mdi:magnify
+        href: http://10.0.0.161:280/
+        description: 10.0.0.161:280 · CT108 · pc6 · meta-søk · stoppet
+    - Linkding (CT108):
+        icon: mdi:bookmark-multiple
+        href: http://10.0.0.161:9090/
+        description: 10.0.0.161:9090 · CT108 · pc6 · bokmerker · stoppet
     - Sonos:
         icon: sonos.png
         href: https://play.sonos.com/

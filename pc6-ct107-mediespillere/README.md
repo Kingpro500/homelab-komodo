@@ -11,7 +11,7 @@
 | Tjeneste | Type | Standard-port | Status |
 |---|---|---|---|
 | Plex | media-server | 32400 | kopiert og testet |
-| Jellyfin | media-server | 8096 | data/konfig kopiert, ikke grundig testet (avventer bruker) |
+| Jellyfin | media-server | 8099 | data/konfig kopiert, ikke grundig testet (avventer bruker) |
 
 ## Bakgrunn
 
@@ -28,6 +28,6 @@ ikke kommer opp uregistrert etter en node-omstart.
 
 ```sh
 pct start 107          # på pc6
-# Plex:   http://10.0.0.160:32400
-# Jellyfin: http://10.0.0.160:8096
+# Plex:   http://10.0.0.160:32400/web
+# Jellyfin: http://10.0.0.160:8099
 ```
