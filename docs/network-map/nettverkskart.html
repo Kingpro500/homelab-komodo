@@ -413,7 +413,7 @@ offline.forEach(o=>{
       meta.textContent = up + "/" + services.length + " oppe · " + d.generated_at;
       return fetch(NODES_URL).then(function(r){return r.json()});
     }).then(function(nd){
-      buildLookup(nd);
+      buildLookup(nd.nodes);
       renderNodes(nd.nodes);
       // fjern gamle prikker/knapper fra forrige refresh (unngå duplikat)
       document.querySelectorAll(".sw-dot, .sw-ctl, .sw-btn[data-gen]").forEach(function(e){ e.remove(); });
