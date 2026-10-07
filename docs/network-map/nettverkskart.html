@@ -405,9 +405,10 @@ offline.forEach(o=>{
   }
 
   function refresh(){
+    var services = [];
     meta.textContent = "henter…";
     fetch(STATUS_URL).then(function(r){return r.json()}).then(function(d){
-      var services = d.services || [];
+      services = d.services || [];
       var up = services.filter(function(s){return s.up}).length;
       meta.textContent = up + "/" + services.length + " oppe · " + d.generated_at;
       return fetch(NODES_URL).then(function(r){return r.json()});
