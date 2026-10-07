@@ -58,11 +58,11 @@
     - pc6:
         icon: proxmox.png
         href: https://10.0.0.120:8006/
-        description: 10.0.0.120:8006 · Proxmox · Docker, n8n og Hermes
+        description: 10.0.0.120:8006 · Proxmox · Docker, n8n og Hermes · (avlastet 6. okt)
     - pc9:
         icon: proxmox.png
         href: https://10.0.0.103:8006/
-        description: 10.0.0.103:8006 · Proxmox
+        description: 10.0.0.103:8006 · Proxmox · avlastning, iVentoy/UniFi/Paperless/Roon/Immich · 2.5G USB
     - pve (pc8):
         icon: proxmox.png
         href: https://10.0.0.102:8006/
