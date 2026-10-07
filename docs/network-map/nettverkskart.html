@@ -321,12 +321,6 @@ offline.forEach(o=>{
     setTimeout(function(){ tokMsg.textContent=""; }, 3000);
   });
 
-  function setName(row, name){
-    var label = row.cells && row.cells[0] ? row.cells[0].textContent.trim() : "";
-    var n = name.toLowerCase();
-    return label.toLowerCase().includes(n) || n.includes(label.split(" ")[0].toLowerCase());
-  }
-
   function dot(up){
     var d = document.createElement("span");
     d.className = "sw-dot " + (up ? "up" : "down");
@@ -434,10 +428,9 @@ offline.forEach(o=>{
         // node fra seksjonen vi står i
         var node = /(pve|pc[1698])/.test(currentSection) ? (currentSection.match(/(pve|pc[1698])/)||[])[1] : null;
         var g = vmid != null ? guestLookup[vmid] : null;
-        // status-prikker
-        if(services) services.forEach(function(s){
-          if(setName(r, s.name)) cell0.appendChild(dot(s.up));
-        });
+        // ETT status-punkt per rad, fra gjestens faktiske kjørestatus
+        // (running=grønn, stopped=rød) — NDTET og konsekvent, en prikk alltid.
+        cell0.appendChild(dot(g ? g.running : false));
         // av/på-knapp: kun hvis gjest finnes på en node OG ikke er beskyttet
         if(g && !g.protected){
           addBtns(r, g.node, vmid, g.running);
