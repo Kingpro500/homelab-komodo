@@ -139,6 +139,8 @@ footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-
     <tr><td><a href="http://10.0.0.124:5800/">QDirStat</a></td><td><span class="tag tag-ct">CT</span>ct104 104</td><td class="ip">10.0.0.124:5800</td><td>Treemap media</td></tr>
     <tr><td><a href="http://10.0.0.124:8081/">MeTube</a></td><td><span class="tag tag-ct">CT</span>ct104 104</td><td class="ip">10.0.0.124:8081</td><td>YouTube-NDL</td></tr>
     <tr><td><a href="http://10.0.0.124:8945/">Pinchflat</a></td><td><span class="tag tag-ct">CT</span>ct104 104</td><td class="ip">10.0.0.124:8945</td><td>YouTube-kanal</td></tr>
+    <tr><td>Plex · Jellyfin <small style="color:var(--dim)">(flyttet fra Unraid)</small></td><td><span class="tag tag-ct">CT</span>ct107 107</td><td class="ip">10.0.0.160 · <span class="bad">stoppet</span></td><td>Plex 32400 · Jellyfin 8096 · midlertidig, autostart av</td></tr>
+    <tr><td>Legacy-dockere <small style="color:var(--dim)">(flyttet fra Unraid)</small></td><td><span class="tag tag-ct">CT</span>ct108 108</td><td class="ip">10.0.0.161 · <span class="bad">stoppet</span></td><td>iPXE-buildweb · netbootxyz · openvscode-server · Flame · 4get · Linkding · Unraid-moni · Cloudflared · Valheim</td></tr>
     <tr><td><a href="http://10.0.0.128:3009/">Homepage</a></td><td><span class="tag tag-ct">CT</span>ct109 109</td><td class="ip">10.0.0.128:3009</td><td>Hoved-dashbord</td></tr>
     <tr><td>Glance / Dashy / Heimdall</td><td><span class="tag tag-ct">CT</span>ct109 109</td><td class="ip">:3010/:3011/:3012</td><td>Launchers</td></tr>
     <tr><td><a href="http://10.0.0.128:3000/">Grafana</a></td><td><span class="tag tag-ct">CT</span>ct109 109</td><td class="ip">10.0.0.128:3000</td><td>Visualisering</td></tr>
@@ -157,7 +159,7 @@ footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-
     <tr class="section-row"><td colspan="4">pc9 · N100 · 10.0.0.103</td></tr>
     <tr><td><a href="http://10.0.0.122:8005/">Tunarr</a></td><td><span class="tag tag-ct">CT</span>komodo-pc9 106</td><td class="ip">10.0.0.122:8005</td><td>Worker</td></tr>
     <tr><td><a href="http://10.0.0.116:8080/admin/">Pi-hole</a></td><td><span class="tag tag-ct">CT</span>pihole-pc9 116</td><td class="ip">10.0.0.116:8080</td><td>DNS2</td></tr>
-    <tr><td>Roon</td><td><span class="tag tag-ct">CT</span>ct152 152</td><td class="ip">10.0.0.125</td><td><span class="bad">Stoppet</span></td></tr>
+    <tr><td>Roon</td><td><span class="tag tag-ct">CT</span>ct152 152</td><td class="ip">10.0.0.125</td><td>Musikkserver</td></tr>
     <tr><td><a href="http://10.0.0.127:2283/">Immich</a></td><td><span class="tag tag-ct">CT</span>ct153 153</td><td class="ip">10.0.0.127:2283</td><td>Album</td></tr>
     <tr><td><a href="http://10.0.0.131:8000/">Paperless-ngx</a></td><td><span class="tag tag-ct">CT</span>ct154 154</td><td class="ip">10.0.0.131:8000</td><td>Dokument</td></tr>
     <tr><td><a href="https://10.0.0.132:8443/">UniFi Network</a></td><td><span class="tag tag-ct">CT</span>ct155 155</td><td class="ip">10.0.0.132:8443</td><td>Controller</td></tr>
@@ -222,6 +224,10 @@ footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-
       <div class="svc-list"><i>n8n</i> · <i>Open WebUI</i> · <i>gjeld-app</i></div>
       <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct104</b> 104</span><span class="ip">10.0.0.124</span></div>
       <div class="svc-list">MySpeed·DiskSpeed·QDirStat·MeTube·Pinchflat</div>
+      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct107 media <span style="color:var(--danger)">(fra Unraid)</span></b> 107</span><span class="ip">10.0.0.160 · <mark>stop</mark></span></div>
+      <div class="svc-list">Plex · Jellyfin — midlertidig</div>
+      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct108 legacy <span style="color:var(--danger)">(fra Unraid)</span></b> 108</span><span class="ip">10.0.0.161 · <mark>stop</mark></span></div>
+      <div class="svc-list">iPXE-buildweb·netbootxyz·code-server·Flame·4get·Linkding·moni·Cloudflared·Valheim</div>
       <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct109</b> 109</span><span class="ip">10.0.0.128</span></div>
       <div class="svc-list">*arr · dashbord · Prometheus · nettkart · dockctl</div>
       <div class="guest"><span class="g"><span class="vt gt">CT</span><b>emby-pc6</b> 151</span><span class="ip">10.0.0.150</span></div>
@@ -233,10 +239,8 @@ footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-
       <div class="guest"><span class="g"><span class="vt gt">CT</span><b>komodo-pc9</b> 106</span><span class="ip">10.0.0.122</span></div>
       <div class="svc-list">Tunarr</div>
       <div class="guest"><span class="g"><span class="vt gt">CT</span><b>pihole-pc9</b> 116</span><span class="ip">10.0.0.116</span></div>
-      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>CT107</b></span><span class="ip">finnes ikke</span></div>
-      <div class="svc-list"><mark>slettet</mark> (verifisert)</div>
       <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct152</b> 152</span><span class="ip">10.0.0.125</span></div>
-      <div class="svc-list">Roon · <mark>stoppet</mark></div>
+      <div class="svc-list">Roon</div>
       <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct153 Immich</b> 153</span><span class="ip">10.0.0.127</span></div>
       <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct154 Paperless</b> 154</span><span class="ip">10.0.0.131</span></div>
       <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct155 UniFi</b> 155</span><span class="ip">10.0.0.132</span></div>
