@@ -109,6 +109,9 @@ footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-
 .g-vmid{font-family:monospace;font-size:11.5px;color:var(--dim)}
 .g-type{font-size:11.5px;color:var(--dim)}
 .g-svc{font-size:12px;color:var(--muted)}
+.g-svc a{color:var(--svc)}
+.g-port{color:var(--ct);font-size:10.5px}
+.g-sep{color:var(--dim)}
 .g-prot{color:var(--danger);font-size:10.5px;text-transform:uppercase;border:1px solid var(--danger);border-radius:8px;padding:0 5px}
 .g-ctl{white-space:nowrap;text-align:right}
 </style>
@@ -287,17 +290,37 @@ offline.forEach(o=>{
     setTimeout(function(){ tokMsg.textContent=""; }, 3000);
   });
 
-  // Tjenester per vmid (for gjest-kolonne "tjenester"). Vi utvider med /status
-  // der navn matcher; basen er vedlikeholdt i Homepage-serviceoversikt.
+  // Tjenester per vmid: liste av [navn, port, https(0/1)]. IP hentes fra
+  // /nodes-svaret; tjenestekolonnen blir klikkbare linker med porter.
   var SVC = {
-    100:"Home Assistant", 102:"Komodo · NetBox · step-ca", 110:"Komodo-periphery",
-    115:"Pi-hole", 101:"Unraid (lagring)",
-    103:"n8n · Open WebUI · Gjeld-app", 104:"MySpeed · DiskSpeed · QDirStat · MeTube · Pinchflat",
-    107:"Plex · Jellyfin", 108:"netbootxyz · iPXE · code-server · Flame · 4get · Linkding · Valheim-data",
-    109:"Homepage · *arr · Grafana · Kuma · Seerr · nettkart · m.fl.",
-    151:"Emby · FileBrowser · Krusader · DoubleCommander · Tunarr", 157:"Hermes agent",
-    106:"Tunarr (worker)", 116:"Pi-hole", 152:"Roon", 153:"Immich", 154:"Paperless-ngx",
-    155:"UniFi Network", 111:"iVentoy", 156:"Ollama", 158:"Browser-pool"
+    100: [["Home Assistant",8123,0]],
+    102: [["Komodo",9120,0],["NetBox",8001,0],["step-ca",9000,1]],
+    110: [["Komodo-periphery agent",null,0]],
+    115: [["Pi-hole",8080,0]],
+    101: [["Unraid",80,0],["Netdata",19999,0]],
+    103: [["n8n",5678,0],["Open WebUI",3080,0],["Gjeld-app",8099,0]],
+    104: [["MySpeed",5216,0],["DiskSpeed",8888,0],["QDirStat",5800,0],["MeTube",8081,0],["Pinchflat",8945,0]],
+    107: [["Plex",32400,0],["Jellyfin",8099,0]],
+    108: [["netbootxyz",8080,0],["iPXE-buildweb",8081,0],["code-server",3008,0],["Flame",5030,0],["4get",280,0],["Linkding",9090,0]],
+    109: [["Homepage",3009,0],["Glance",3010,0],["Dashy",3011,0],["Heimdall",3012,0],
+           ["Grafana",3000,0],["Uptime Kuma",3001,0],["Speedtest",8765,0],
+           ["Prometheus",9090,0],["Alertmanager",9093,0],["Nettkart",3020,0],
+           ["Sonarr",8989,0],["Radarr",7878,0],["Prowlarr",9696,0],["Readarr",8787,0],
+           ["Bazarr",6767,0],["Cleanuparr",11011,0],["Deluge",8112,0],["Seerr",5055,0],
+           ["Audiobookshelf",13378,0],["Podgrab",8081,0],["Grovemap",8080,0],
+           ["FlareSolverr",8191,0],["Crafty",8000,1],["Dockctl",3015,0]],
+    151: [["Emby",8096,0],["FileBrowser",8097,0],["Krusader",8098,0],["Double Commander",8099,1],["Tunarr",8005,0]],
+    157: [["Hermes agent",9119,0],["audit API",9118,0]],
+    106: [["Tunarr",8005,0]],
+    116: [["Pi-hole",8080,0]],
+    152: [["Roon",null,0]],
+    153: [["Immich",2283,0]],
+    154: [["Paperless-ngx",8000,0]],
+    155: [["UniFi Network",8443,1]],
+    111: [["iVentoy",26000,0]],
+    156: [["Ollama",11434,0]],
+    158: [["Browser-pool",3001,0]],
+    105: [["CT105 mediespillere",null,0]]
   };
 
   function bar(label, val, max, unit, color){
@@ -324,6 +347,20 @@ offline.forEach(o=>{
     });
   }
 
+  // Bygg klikkbare tjeneste-lenker med porter for en gjest. "ip" er gjestens IP.
+  function svcLinks(v){
+    var list = SVC[v.vmid];
+    if(!list) return v.name || ("gjest " + v.vmid);
+    var parts = list.map(function(s){
+      var navn = s[0], port = s[1], https = s[2];
+      if(!port) return navn;
+      var scheme = https ? "https" : "http";
+      var host = v.ip || ("10.0.0." + v.vmid);
+      return '<a href="'+scheme+'://'+host+':'+port+'/">'+navn+'</a><span class="g-port">:'+port+'</span>';
+    });
+    return parts.join('<span class="g-sep"> · </span>');
+  }
+
   function renderSvc(nodes){
     var box = document.getElementById("svc-table");
     if(!box) return;
@@ -348,7 +385,7 @@ offline.forEach(o=>{
           '<td class="g-name">'+(v.name||("gjest "+v.vmid))+' <span class="g-vmid">'+v.vmid+'</span>'+prot+'</td>'+
           '<td class="g-type">'+v.type+'</td>'+
           '<td class="ip">'+(v.ip||"–")+'</td>'+
-          '<td class="g-svc">'+(SVC[v.vmid]||v.name||"")+'</td>'+
+          '<td class="g-svc">'+(svcLinks(v))+'</td>'+
           '<td class="g-ctl"></td></tr>';
       });
       out += '</tbody></table></div>';
