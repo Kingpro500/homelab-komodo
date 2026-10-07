@@ -98,6 +98,18 @@ footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-
 .nr-bar{flex:1;height:7px;background:#1a2432;border-radius:5px;overflow:hidden}
 .nr-fill{height:100%;border-radius:5px}
 .nr-val{width:150px;text-align:right;color:var(--dim);flex:none}
+/* CT/VM-oversikt (levende) */
+.g-node{border:1px solid var(--border);border-radius:10px;background:var(--panel);padding:12px 14px;margin-bottom:12px}
+.g-node-title{font-weight:700;font-size:14.5px;margin-bottom:6px}
+.g-node-ip{font-family:monospace;font-size:12.5px;color:var(--dim)}
+.g-table{width:100%;border-collapse:collapse;font-size:13px}
+.g-table th{text-align:left;color:var(--muted);font-size:11px;text-transform:uppercase;border-bottom:1px solid var(--border);padding:4px 8px}
+.g-table td{border-bottom:1px solid var(--border);padding:5px 8px}
+.g-name{font-weight:600}
+.g-vmid{font-family:monospace;font-size:11.5px;color:var(--dim)}
+.g-type{font-size:11.5px;color:var(--dim)}
+.g-prot{color:var(--danger);font-size:10.5px;text-transform:uppercase;border:1px solid var(--danger);border-radius:8px;padding:0 5px}
+.g-ctl{white-space:nowrap;text-align:right}
 </style>
 </head>
 <body>
@@ -170,6 +182,10 @@ footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-
     <tr><td>Browser-pool</td><td><span class="tag tag-ct">CT</span>ct158 158</td><td class="ip">10.0.0.158:3001-3005</td><td>5 nettlesere</td></tr>
   </tbody>
 </table>
+
+<!-- ============ CT-OVERSIKT (levende, fra /nodes) ============ -->
+<h3 class="sec">🗂️ Gjester &amp; containere <span style="color:var(--dim);font-size:11px">— levende, en rad per CT/VM</span></h3>
+<div id="guests"></div>
 
 <!-- ============ FYSISK HARDWARE ============ -->
 <h3 class="sec">🏠 Fysisk maskinvare</h3>
@@ -402,6 +418,52 @@ offline.forEach(o=>{
     });
   }
 
+  // Lag levende CT/VM-oversikt: én rad per gjest med IP, statuslys og av/på-knapp.
+  function renderGuests(nodes){
+    var box = document.getElementById("guests");
+    if(!box) return;
+    var out = "";
+    (nodes||[]).forEach(function(n){
+      var memGb = (n.mem_used||0)/1073741824;
+      out += '<div class="g-node"><div class="g-node-title">'+n.name+' <span class="g-node-ip">'+n.ip+
+        ' · CPU '+n.cpu_pct+'% · RAM '+memGb.toFixed(1)+' GB</span></div>'+
+        '<table class="g-table"><thead><tr><th></th><th>Gjest</th><th>Type</th><th>IP</th><th></th></tr></thead><tbody>';
+      (n.vms||[]).forEach(function(v){
+        var up = v.status === "running";
+        var tip = up ? "oppe" : "nede/av";
+        var prot = v.protected ? ' <span class="g-prot">låst</span>' : "";
+        out += '<tr><td><span class="sw-dot '+(up?"up":"down")+'" title="'+tip+'"></span></td>'+
+          '<td class="g-name">'+(v.name||("gjest "+v.vmid))+' <span class="g-vmid">'+v.vmid+'</span>'+prot+'</td>'+
+          '<td class="g-type">'+v.type+'</td>'+
+          '<td class="ip">'+((v.ip||"–"))+'</td>'+
+          '<td class="g-ctl"></td></tr>';
+      });
+      out += '</tbody></table></div>';
+    });
+    box.innerHTML = out;
+    // legg av/på-knapper på hver rad sin kontroll-celle; beskyttet viser bare "på" hvis nede
+    box.querySelectorAll(".g-ctl").forEach(function(cell){
+      var vmid = parseInt(cell.closest("tr").querySelector(".g-vmid").textContent, 10);
+      var g = guestLookup[vmid];
+      if(!g) return;
+      if(!g.protected){
+        addBtns(cell.closest("tr"), g.node, vmid, g.running);
+      } else if(!g.running && token()){
+        var b = document.createElement("button");
+        b.className="sw-btn"; b.textContent="▶ på";
+        b.addEventListener("click", function(){
+          fetch(CTRL_URL,{method:"POST",headers:{"Content-Type":"application/json",
+            "Authorization":"Bearer "+token()},
+            body:JSON.stringify({vmid:vmid,action:"on",node:g.node})})
+            .then(function(x){return x.json()}).then(function(j){
+              if(j&&j.ok){setTimeout(refresh,1200);} else {tokMsg.textContent=(j&&j.error)||"feil";setTimeout(function(){tokMsg.textContent="";},5000);}
+            });
+        });
+        cell.appendChild(b);
+      }
+    });
+  }
+
   function refresh(){
     var services = [];
     meta.textContent = "henter…";
@@ -412,9 +474,10 @@ offline.forEach(o=>{
       return fetch(NODES_URL).then(function(r){return r.json()});
     }).then(function(nd){
       buildLookup(nd.nodes);
-      renderNodes(nd.nodes);
-      // fjern gamle prikker/knapper fra forrige refresh (unngå duplikat)
+      // Fjern gamle prikker/knapper fra FORRIGE refresh (før vi tegner på nytt)
       document.querySelectorAll(".sw-dot, .sw-ctl, .sw-btn[data-gen]").forEach(function(e){ e.remove(); });
+      renderNodes(nd.nodes);
+      renderGuests(nd.nodes);
       var currentSection = "";
       var rows = document.querySelectorAll("#servicemap-controlrow ~ tr");
       rows.forEach(function(r){
