@@ -2,11 +2,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Nettverkskart — versjonshistorikk</title>
 <style>
-:root{--bg:#0f172a;--panel:#15202e;--panel2:#1a2433;--border:#2a3547;--muted:#8aa0b4;--dim:#5d6b7a;--prox:#e86f51;--lan:#4fd6c8;--ct:#7aa2f7}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--muted);font-family:system-ui,sans-serif;padding:28px;max-width:680px;margin:0 auto}
+:root{--bg:#0f172a;--panel:#15202e;--border:#2a3547;--muted:#8aa0b4;--dim:#5d6b7a;--prox:#e86f51;--lan:#4fd6c8;--ct:#7aa2f7}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--muted);font-family:system-ui,sans-serif;padding:28px;max-width:760px;margin:0 auto}
 h1{font-size:1.25rem;color:var(--prox);display:flex;justify-content:space-between;align-items:center}
 a{color:var(--ct);text-decoration:none}
 .top{font-size:12.5px;color:var(--dim)}.top a{color:var(--prox)}
+.bad{color:var(--prox);font-weight:700;font-size:12.5px}
 table{width:100%;border-collapse:collapse;margin-top:18px;background:var(--panel);border-radius:10px;overflow:hidden}
 th,td{text-align:left;padding:11px 13px;border-bottom:1px solid var(--border)}
 tr:last-child td{border-bottom:none}
@@ -16,13 +17,17 @@ p{font-size:13px;color:var(--dim);line-height:1.7}
 </style></head><body>
 <div class="top"><a href="../">← tilbake til nettverkskart</a></div>
 <h1>📜 Nettverkskart — versjonshistorikk</h1>
-<p>Hver nye versjon av nettverkskartet (<code>nettverkskart.html</code>) arkiveres her
-permanent slik at ingenting forsvinner. Klikk på en gammel versjon for å se den.</p>
+<p>Versjonsskjema: <span class="bad">baseversjon.desimal</span>. Vi ligger på
+<code>2</code>; <b>hver minste endring</b> hever sub-versjonen med 0.001
+(<code>2.001</code>, <code>2.002</code>, …). Ved store omskrivinger hopper vi til
+neste baseversjon (<code>3</code>, …). Hver versjon arkiveres <b>permanent</b> her
+— ingenting slettes. Klikk en gammel versjon for å se den.</p>
 <table>
-  <thead><tr><th>Versjon</th><th>Dato</th><th>Endring</th><th>Lenke</th></tr></thead>
+  <thead><tr><th>Versjon</th><th>Endring</th><th>Lenke</th></tr></thead>
   <tbody>
-    <tr><td class="v">v2</td><td>8. okt 2026</td><td>Live RAM/CPU på de fire maskinkortene (fra /nodes); versjonsnummer + historikk-lenke øverst til høyre.</td><td><a href="../nettverkskart.html">nåværende</a></td></tr>
-    <tr><td class="v">v1</td><td>8. okt 2026</td><td>Tilstanden før: statiske maskinkort uten levende bruk.</td><td><a href="v1/nettverkskart.html">åpne v1 →</a></td></tr>
+    <tr><td class="v">2.001</td><td class="cur">Slått sammen «Levende tjenester &amp; gjester» inn i «📋 Serviceoversikt — alle tjenester»: én tabell med Statuslys (grønn/rød) + Strøm (▶/■) + token-felt; Node-sammendraget viser også CPU-bjelke.</td><td><a href="../nettverkskart.html">nåværende</a></td></tr>
+    <tr><td class="v">2</td><td>Node-sammendrag (fire maskiner, CPU/RAM/Disk) gjenopprettet; separat «Levende tjenester &amp; gjester»-seksjon med lys + av/på + token; versjonslenke øverst til høyre.</td><td><a href="v2/nettverkskart.html">åpne 2 →</a></td></tr>
+    <tr><td class="v">1</td><td>Statisk oversikt uten levende data (referansen).</td><td><a href="v1/nettverkskart.html">åpne 1 →</a></td></tr>
   </tbody>
 </table>
 </body></html>

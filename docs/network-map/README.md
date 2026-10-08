@@ -17,10 +17,12 @@ de fire maskinene (pc1 · Gaming, pc6 · Tower, pc9 · Minipc, pc8 · pve) med
   eller erstatte innholdet med noe annet. Du kan legge til elementer i tillegg.
 - Kommentaren i HTML-en rett over `#node-resources` er også der av denne grunn.
 
-**Versjonering:** Hver endring av `nettverkskart.html` = ny versjon. Arkiver
-forrige versjon til `versions/vNN/` og oppdater `versions/index.html`. Topp-
-høyre på siden viser versjonsnummeret, og `versions/` er indeksen med klikkbare
-gamle versjoner. Aldri slett gamle versjoner.
+**Versjonering:** Skjema = **`baseversjon.desimal`**. Vi ligger på base `2`; hver
+minste endring hever sub-versjonen med 0.001 (`2.001`, `2.002`, …); ved store
+omskrivinger hopper vi til neste baseversjon (`3`, …). Arkiver forrige versjon
+til `versions/vNN/` og oppdater `versions/index.html`. Topp-høyre på siden viser
+versjonsnummeret, og `versions/` er indeksen med klikkbare gamle versjoner. Aldri
+slett gamle versjoner.
 
 ## ⚠️ Vedlikeholdsregler — LES FØR DU ENDRER
 
