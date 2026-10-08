@@ -121,7 +121,7 @@ footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-
   <button id="sw-token-save" class="sw-btn">Lagre</button><button id="tok-edit" class="sw-btn" title="endre token" style="display:none">✎</button>
   <span id="sw-token-msg" style="color:var(--lan);font-size:11px"></span>
   <span style="color:var(--dim);font-size:11px" id="sw-meta"></span>
-  <span style="color:var(--muted);margin-left:6px">📜 versjon <b>2.007</b> · <a href="versions/">historikk</a></span>
+  <span style="color:var(--muted);margin-left:6px">📜 versjon <b>2.006</b> · <a href="versions/">historikk</a></span>
 </div>
 
 <h1>🏠 Homelab — tjenester &amp; nettverk <span style="color:var(--lan)">10.0.0.0/24</span></h1>
@@ -457,14 +457,5 @@ offline.forEach(o=>{
   setInterval(refresh,15000);
 })();
 </script>
-<div class="rules-foot" style="width:100%;margin-top:20px;padding:12px 14px;border-top:1px solid var(--border);font-size:11.5px;color:var(--muted);line-height:1.6">
-  <b style="color:var(--text);font-size:12.5px">&#128299; Regler for denne siden (homelab-komodo · docs/network-map)</b><br>
-  &#8226; <b>ALLE endringer lagres i EGEN versjon</b>, selv om det bare er én ting som endres &mdash; tilfeldige AI-boter glemmer dette hele tiden. Trykk p&aring; versjonsnummeret &ouml;verst til h&oslash;yre for historikken og lagringsm&#229;ten.<br>
-  &#8226; P&aring; <b>hver versjon</b> m&aring; det noteres i <code>versions/index.html</code> <b>hva som faktisk endret seg</b> (oppsummering av endringene), og forrige versjon flyttes til <code>versions/vNNN/</code> s&aring; den aldri slettes.<br>
-  &#8226; Node-sammendraget &oslash;verst (fire maskiner med CPU/RAM/Disk + gr&oslash;nne str&oslash;m-tall) er <b>P&#197;LAGT</b> og m&aring; aldri fjernes &mdash; det hentes fra CT157 <code>/nodes</code>. Se «&#11014; P&#197;LAGT» i README.<br>
-  &#8226; Statuslys + av/p&aring;-knapper: POST <code>/control</code> p&aring; CT157 med <code>AUDIT_TOKEN</code>; token lagres i nettleserens localStorage (feltet skjules etter lagring, trykk &#9998; for &aring; endre).<br>
-  &#8226; Videostr&oslash;mmer telles fra CT157 <code>/streams</code> (Tunarr + Emby) &mdash; det er de store gr&oslash;nne tallene p&aring; maskinkortene.<br>
-  &#8226; Hele regelsettet ligger i repoet <code>homelab-komodo</code> &rarr; <code>docs/network-map/README.md</code> (vedlikehold), og serverlogikken i <code>~/.hermes/scripts/servicemap_*.py</code> p&aring; CT157.
-</div>
 </body>
 </html>
