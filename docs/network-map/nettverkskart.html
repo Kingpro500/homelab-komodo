@@ -22,7 +22,6 @@ a{color:var(--svc);text-decoration:none}
 a:hover{text-decoration:underline}
 h3.sec{font-size:16px;color:var(--muted);margin:30px 0 14px;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border);padding-bottom:6px}
 
-/* Service table */
 table{width:100%;border-collapse:collapse;font-size:14px;margin-bottom:10px}
 th{text-align:left;color:var(--muted);font-size:12.5px;text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid var(--border);padding:8px 10px}
 td{border-bottom:1px solid var(--border);padding:8px 10px;vertical-align:top}
@@ -32,9 +31,9 @@ tr:hover td{background:#1a232e}
 .tag{display:inline-block;font-size:11px;font-weight:700;text-transform:uppercase;padding:2px 7px;border-radius:10px;margin-right:6px}
 .tag-ct{background:#7aa2f71a;color:var(--ct)}
 .tag-vm{background:#9d7bf71a;color:var(--vm)}
+.tag-node{background:#e86f5122;color:var(--prox)}
 .bad{color:var(--danger);font-weight:700;text-transform:uppercase;font-size:11.5px}
 
-/* hardware */
 .enhet-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
 .enhet{border:1px solid var(--border);border-radius:9px;background:var(--panel2);padding:12px 14px}
 .enhet .e-nm{font-weight:700;font-size:15.5px}
@@ -45,7 +44,6 @@ tr:hover td{background:#1a232e}
 .tag-aktiv{background:#34c88a22;color:#34c88a}
 .tag-inaktiv{background:#5d6b7a33;color:#aeb9c6}
 
-/* map */
 .band{border:1px solid var(--border);border-radius:10px;background:var(--panel);padding:16px;margin-bottom:16px}
 .band-title{font-size:13px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:14px;display:flex;align-items:center;gap:9px}
 .band-title .bar{width:3px;height:17px;border-radius:2px;background:var(--lan)}
@@ -63,89 +61,98 @@ tr:hover td{background:#1a232e}
 .node{border:1px solid var(--border);border-radius:9px;background:var(--panel2);padding:13px}
 .node .n-title{font-weight:700;font-size:16px}
 .node .n-ip{font-family:monospace;font-size:14px;color:var(--muted);margin:4px 0 11px}
-.guest{border-top:1px dashed var(--border);padding:8px 0 4px;display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
-.guest .g{font-size:15px}
+.guest{border-top:1px dashed var(--border);padding:6px 0 3px;display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.guest .g{font-size:14.5px}
 .guest .g b{font-weight:600}
 .guest .g .vt{font-size:11.5px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;margin-right:6px}
 .gt{background:#7aa2f71a;color:var(--ct);border-radius:3px;padding:1px 5px}
 .gv{background:#9d7bf71a;color:var(--vm);border-radius:3px;padding:1px 5px}
-.guest .ip{margin-left:auto;font-family:monospace;font-size:13.5px;color:var(--ct);white-space:nowrap}
-.svc-list{font-size:13.5px;color:var(--muted);margin:2px 0 7px 5px;line-height:1.6}
+.guest .ip{margin-left:auto;font-family:monospace;font-size:12.5px;color:var(--ct);white-space:nowrap}
+.svc-list{font-size:12.5px;color:var(--muted);margin:2px 0 7px 5px;line-height:1.6}
 .svc-list i{color:var(--svc);font-style:normal}
+.off{opacity:.55}
 .iot-wrap{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
 .iot{border:1px solid var(--border);border-radius:7px;background:var(--panel2);padding:9px 11px;font-size:14px}
 .iot .i-nm{font-weight:600;color:#f2c879}
 .iot .i-ip{font-family:monospace;font-size:13px;color:var(--muted)}
 .iot .i-m{font-size:11.5px;color:var(--dim);font-family:monospace}
 mark{background:transparent;color:var(--danger);font-weight:700}
-.note{font-size:13.5px;color:var(--dim);line-height:1.7;max-width:860px;margin-top:14px}
+.note{font-size:13.5px;color:var(--dim);line-height:1.7;max-width:880px;margin-top:14px}
 .note b{color:var(--muted)}
 footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-top:1px solid var(--border);padding-top:16px}
-/* Levende tjenestestatus + av/på-knapper */
-.sw-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-left:7px;vertical-align:middle}
-.sw-dot.up{background:#34c88a;box-shadow:0 0 5px #34c88a}
-.sw-dot.down{background:#f05a5a;box-shadow:0 0 5px #f05a5a}
-.sw-btn{margin-left:8px;font-size:11px;padding:1px 8px;border-radius:10px;border:1px solid var(--border);background:var(--panel2);color:var(--text);cursor:pointer}
-.sw-btn:hover{border-color:var(--svc)}
-.sw-btn.busy{opacity:.5;cursor:wait}
-.sw-ctl{margin-left:8px;white-space:nowrap}
-/* Node-ressurskort (CPU/RAM/disk per fysisk maskin) */
-.nr-card{flex:1 1 220px;min-width:210px;background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:10px 12px}
-.nr-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;font-size:13.5px}
-.nr-ip{font-size:11px;color:var(--dim)}
-.nr-row{display:flex;align-items:center;gap:8px;margin:3px 0;font-size:11.5px}
-.nr-lab{width:38px;color:var(--dim);flex:none}
-.nr-bar{flex:1;height:7px;background:#1a2432;border-radius:5px;overflow:hidden}
-.nr-fill{height:100%;border-radius:5px}
-.nr-val{width:150px;text-align:right;color:var(--dim);flex:none}
-/* CT/VM-oversikt (levende) */
-.g-node{border:1px solid var(--border);border-radius:10px;background:var(--panel);padding:12px 14px;margin-bottom:12px}
-.g-node-title{font-weight:700;font-size:14.5px;margin-bottom:6px}
-.g-node-ip{font-family:monospace;font-size:12.5px;color:var(--dim)}
-.g-table{width:100%;border-collapse:collapse;font-size:13px}
-.g-table th{text-align:left;color:var(--muted);font-size:11px;text-transform:uppercase;border-bottom:1px solid var(--border);padding:4px 8px}
-.g-table td{border-bottom:1px solid var(--border);padding:5px 8px}
-.g-name{font-weight:600}
-.g-vmid{font-family:monospace;font-size:11.5px;color:var(--dim)}
-.g-type{font-size:11.5px;color:var(--dim)}
-.g-svc{font-size:12px;color:var(--muted)}
-.g-svc a{color:var(--svc)}
-.g-port{color:var(--ct);font-size:10.5px}
-.g-sep{color:var(--dim)}
-.g-prot{color:var(--danger);font-size:10.5px;text-transform:uppercase;border:1px solid var(--danger);border-radius:8px;padding:0 5px}
-.g-ctl{white-space:nowrap;text-align:right}
 </style>
 </head>
 <body>
 
 <h1>🏠 Homelab — tjenester &amp; nettverk <span style="color:var(--lan)">10.0.0.0/24</span></h1>
 <div class="sub">Intern startside · Proxmox-kluster «CyberCluster» · OPNsense pc7 (brannmur)</div>
-<div class="meta">Verifisert 6. okt 2026 av Hermes (CT157). Kilder: OPNsense-ARP (48 enheter) · Proxmox-API (4 noder, CPU fra <code>/nodes/*/status</code>, 19 gjester) · levende docker-inventar i hver CT · Komodo (33 stacker). «Inaktiv» = finnes fysisk, men er av.</div>
+<div class="meta">Verifisert 6. okt 2026 av Hermes (CT157). Kilder: OPNsense-ARP (48 enheter) · Proxmox-API (4 noder, CPU fra <code>/nodes/*/status</code>, gjester + IP fra config) · levende docker-inventar i hver CT · Komodo. «Inaktiv/stoppet» = finnes, men er av. CT-er merket <mark>stoppet</mark> er nede med vilje (arkivert fra Tower/Unraid) og kommer opp igjen ved behov.</div>
 
 <!-- ============ SERVICE-OVERSIKT ============ -->
-<h3 class="sec">📋 Serviceoversikt — en rad per CT/VM <span style="color:var(--dim);font-size:11px">· levende fra Proxmox</span></h3>
-<div id="node-resources" style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px"></div>
-<div id="servicemap-controlrow" style="background:#161e27;font-size:13px;padding:8px 10px;border:1px solid var(--border);border-radius:8px;margin-bottom:8px">
-  <span class="sw-toggle">◉ levende status</span>
-  <span id="sw-meta" style="color:var(--dim)">henter…</span>
-  <span style="float:right;color:var(--dim);margin-left:10px">
-    <label for="sw-token" style="font-size:12px">AUDIT-token</label>
-    <input id="sw-token" type="password" placeholder="…" style="width:120px;background:#0d1320;border:1px solid var(--border);color:var(--text);font-size:12px;padding:1px 5px"/>
-    <button id="sw-token-save" class="sw-btn" style="padding:1px 10px">Lagre</button>
-    <span id="sw-token-msg" style="font-size:12px;color:var(--dim)"></span>
-  </span>
-</div>
-<div id="svc-table"></div>
+<h3 class="sec">📋 Serviceoversikt — alle tjenester</h3>
+<table>
+  <thead><tr><th>Tjeneste</th><th>Gjest</th><th>Adresse</th><th>Merknad</th></tr></thead>
+  <tbody>
+    <tr class="section-row"><td colspan="4"><span class="tag tag-node">pve</span> pc8 · N150 · 10.0.0.102</td></tr>
+    <tr><td><a href="http://10.0.0.7:8123/">Home Assistant</a></td><td><span class="tag tag-vm">VM</span>homeassistant 100</td><td class="ip">10.0.0.7:8123</td><td>Smarthus · 1834 enheter</td></tr>
+    <tr><td><a href="http://10.0.0.117:9120/">Komodo core</a></td><td><span class="tag tag-ct">CT</span>Komodo-core 102</td><td class="ip">10.0.0.117</td><td>Komodo :9120 · NetBox :8001 · step-CA :9000</td></tr>
+    <tr><td><a href="http://10.0.0.115:8080/admin/">Pi-hole</a></td><td><span class="tag tag-ct">CT</span>pihole-pc8 115</td><td class="ip">10.0.0.115:8080</td><td>DNS1</td></tr>
+    <tr><td>Komodo-periphery</td><td><span class="tag tag-ct">CT</span>ct110-node 110</td><td class="ip">10.0.0.129</td><td>Agenthost</td></tr>
+
+    <tr class="section-row"><td colspan="4"><span class="tag tag-node">pc6</span> Core 3 N355 · 10.0.0.120 · QuickSync</td></tr>
+    <tr><td><a href="http://10.0.0.101/">Unraid-Tower</a></td><td><span class="tag tag-vm">VM</span>Unraid 101</td><td class="ip">10.0.0.101</td><td>Lagring · Netdata :19999</td></tr>
+    <tr><td><a href="http://10.0.0.119:5678/">n8n</a></td><td><span class="tag tag-ct">CT</span>ct103 103</td><td class="ip">10.0.0.119:5678</td><td>Automasjon</td></tr>
+    <tr><td><a href="http://10.0.0.119:3080/">Open WebUI</a></td><td><span class="tag tag-ct">CT</span>ct103 103</td><td class="ip">10.0.0.119:3080</td><td>LLM-chat</td></tr>
+    <tr><td><a href="http://10.0.0.119:8099/">Gjeld-app</a></td><td><span class="tag tag-ct">CT</span>ct103 103</td><td class="ip">10.0.0.119:8099</td><td>Gjeld/økonomi</td></tr>
+    <tr><td>n8n-ferretdb / gjeld-db</td><td><span class="tag tag-ct">CT</span>ct103 103</td><td class="ip">10.0.0.119</td><td>DB-er (ferretdb + postgres)</td></tr>
+    <tr><td><a href="http://10.0.0.124:5216/">MySpeed</a></td><td><span class="tag tag-ct">CT</span>ct104 104</td><td class="ip">10.0.0.124:5216</td><td class="off"><mark>stoppet</mark> · hast-test</td></tr>
+    <tr><td><a href="http://10.0.0.124:8888/">DiskSpeed</a></td><td><span class="tag tag-ct">CT</span>ct104 104</td><td class="ip">10.0.0.124:8888</td><td class="off"><mark>stoppet</mark> · disk-bench</td></tr>
+    <tr><td>QDirStat · MeTube · Pinchflat</td><td><span class="tag tag-ct">CT</span>ct104 104</td><td class="ip">:5800·:8081·:8945</td><td class="off"><mark>stoppet</mark> · media-verktøy</td></tr>
+    <tr><td>Plex / Jellyfin (arkiv)</td><td><span class="tag tag-ct">CT</span>ct107-mediespillere-gammel 107</td><td class="ip">10.0.0.160</td><td class="off"><mark>stoppet</mark> · flyttet fra Tower</td></tr>
+    <tr><td>iPXE · netbootxyz · code · Flame · 4get · Linkding</td><td><span class="tag tag-ct">CT</span>ct108-legacy-dockere-gammel 108</td><td class="ip">10.0.0.161</td><td class="off"><mark>stoppet</mark> · arkivert fra Tower</td></tr>
+    <tr><td>Audiobookshelf / ngrok (arkiv)</td><td><span class="tag tag-ct">CT</span>ct159-abs-ngrok-gammel 159</td><td class="ip">10.0.0.162</td><td class="off"><mark>stoppet</mark> · oppsett arkivert</td></tr>
+    <tr><td>Lancache (arkiv)</td><td><span class="tag tag-ct">CT</span>ct160-lancache-gammel 160</td><td class="ip">10.0.0.163</td><td class="off"><mark>stoppet</mark> · oppsett arkivert</td></tr>
+    <tr><td><a href="http://10.0.0.128:3009/">Homepage</a></td><td><span class="tag tag-ct">CT</span>ct109 109</td><td class="ip">10.0.0.128:3009</td><td>Hoved-dashbord</td></tr>
+    <tr><td>Glance / Dashy / Heimdall</td><td><span class="tag tag-ct">CT</span>ct109 109</td><td class="ip">:3010/:3011/:3012</td><td>Launchers</td></tr>
+    <tr><td><a href="http://10.0.0.128:3000/">Grafana</a></td><td><span class="tag tag-ct">CT</span>ct109 109</td><td class="ip">10.0.0.128:3000</td><td>Visualisering</td></tr>
+    <tr><td><a href="http://10.0.0.128:3001/">Uptime Kuma</a></td><td><span class="tag tag-ct">CT</span>ct109 109</td><td class="ip">10.0.0.128:3001</td><td>Uptime</td></tr>
+    <tr><td><a href="http://10.0.0.128:8765/">Speedtest Tracker</a></td><td><span class="tag tag-ct">CT</span>ct109 109</td><td class="ip">10.0.0.128:8765</td><td>—</td></tr>
+    <tr><td>Prometheus / Alertmanager</td><td><span class="tag tag-ct">CT</span>ct109 109</td><td class="ip">:9090/:9093</td><td>Metrikker/varsel</td></tr>
+    <tr><td>Nettkart (denne siden)</td><td><span class="tag tag-ct">CT</span>ct109 109</td><td class="ip">10.0.0.128:3020</td><td>nginx</td></tr>
+    <tr><td>Sonarr·Radarr·Prowlarr·Readarr·Bazarr·Cleanuparr</td><td><span class="tag tag-ct">CT</span>ct109 109</td><td class="ip">8989·7878·9696·8787·6767·11011</td><td>*arr-stack</td></tr>
+    <tr><td>Deluge·Seerr·Audiobookshelf·Podgrab·Grovemap·FlareSolverr</td><td><span class="tag tag-ct">CT</span>ct109 109</td><td class="ip">8112·5055·13378·8081·8080·8191</td><td>Nedlasting/media</td></tr>
+    <tr><td>Crafty · Dockctl</td><td><span class="tag tag-ct">CT</span>ct109 109</td><td class="ip">:8000/:3015</td><td>Minecraft / docker-kontroll</td></tr>
+    <tr><td><a href="http://10.0.0.128:3030/">Udleje-app</a></td><td><span class="tag tag-ct">CT</span>ct109 109</td><td class="ip">10.0.0.128:3030</td><td>Leie/utleie (+ udleje-db)</td></tr>
+    <tr><td><a href="http://10.0.0.150:8096/">Emby</a></td><td><span class="tag tag-ct">CT</span>emby-pc6 151</td><td class="ip">10.0.0.150:8096</td><td>Media · WAN-fwd 8096</td></tr>
+    <tr><td>FileBrowser / Krusader / DoubleCommander</td><td><span class="tag tag-ct">CT</span>emby-pc6 151</td><td class="ip">:8097/:8098/:8099</td><td>Filbehandling Unraid</td></tr>
+    <tr><td><a href="http://10.0.0.150:8005/">Tunarr</a></td><td><span class="tag tag-ct">CT</span>emby-pc6 151</td><td class="ip">10.0.0.150:8005</td><td>Live TV</td></tr>
+    <tr><td><a href="http://10.0.0.135:9119/">Hermes agent</a></td><td><span class="tag tag-ct">CT</span>ct157 157</td><td class="ip">10.0.0.135:9119</td><td>Dette systemet · audit :9118</td></tr>
+
+    <tr class="section-row"><td colspan="4"><span class="tag tag-node">pc9</span> N100 · 10.0.0.103</td></tr>
+    <tr><td><a href="http://10.0.0.122:8005/">Tunarr</a></td><td><span class="tag tag-ct">CT</span>pc9-ct106-tunarr 106</td><td class="ip">10.0.0.122:8005</td><td>Dedikert Tunarr · worker</td></tr>
+    <tr><td><a href="http://10.0.0.116:8080/admin/">Pi-hole</a></td><td><span class="tag tag-ct">CT</span>pihole-pc9 116</td><td class="ip">10.0.0.116:8080</td><td>DNS2</td></tr>
+    <tr><td>Roon</td><td><span class="tag tag-ct">CT</span>ct152-roon 152</td><td class="ip">10.0.0.125</td><td>Musikk-server</td></tr>
+    <tr><td><a href="http://10.0.0.127:2283/">Immich</a></td><td><span class="tag tag-ct">CT</span>ct153-immich 153</td><td class="ip">10.0.0.127:2283</td><td class="off"><mark>stoppet</mark> · album</td></tr>
+    <tr><td><a href="http://10.0.0.131:8000/">Paperless-ngx</a></td><td><span class="tag tag-ct">CT</span>ct154-paperless 154</td><td class="ip">10.0.0.131:8000</td><td class="off"><mark>stoppet</mark> · dokument</td></tr>
+    <tr><td><a href="https://10.0.0.132:8443/">UniFi Network</a></td><td><span class="tag tag-ct">CT</span>ct155-unifi 155</td><td class="ip">10.0.0.132:8443</td><td>Controller</td></tr>
+    <tr><td><a href="http://10.0.0.134:26000/">iVentoy</a></td><td><span class="tag tag-ct">CT</span>ct111-iventoy 111</td><td class="ip">10.0.0.134:26000</td><td class="off"><mark>stoppet</mark> · PXE/ISO</td></tr>
+
+    <tr class="section-row"><td colspan="4"><span class="tag tag-node">pc1</span> Ryzen 9 3900X · 10.0.0.112</td></tr>
+    <tr><td><a href="http://10.0.0.159/">Mediespiller</a></td><td><span class="tag tag-ct">CT</span>ct105-mediespiller 105</td><td class="ip">10.0.0.159</td><td class="off"><mark>stoppet</mark></td></tr>
+    <tr><td><a href="http://10.0.0.133:11434/">Ollama</a></td><td><span class="tag tag-ct">CT</span>ct156-ollama 156</td><td class="ip">10.0.0.133:11434</td><td class="off"><mark>stoppet</mark> · GPU-driver</td></tr>
+    <tr><td>Browser-pool</td><td><span class="tag tag-ct">CT</span>ct158-browsers 158</td><td class="ip">10.0.0.158:3001-3005</td><td class="off"><mark>stoppet</mark> · 5 nettlesere</td></tr>
+  </tbody>
+</table>
 
 <!-- ============ FYSISK HARDWARE ============ -->
 <h3 class="sec">🏠 Fysisk maskinvare</h3>
 <div class="enhet-row">
   <div class="enhet"><div class="e-nm">pc1 Gaming Far <span class="tag tag-aktiv">aktiv</span></div><div class="e-role">Stue · W11 + Proxmox</div><div class="e-spec">Ryzen 9 3900X · RTX 3070 · 8 GB</div><div class="e-ip">10.0.0.112</div></div>
   <div class="enhet"><div class="e-nm">pc3 Mac Mini <span class="tag tag-aktiv">aktiv</span></div><div class="e-role">Stue · hoved-PC</div><div class="e-spec">Apple M1 · 8 GB</div><div class="e-ip">klient</div></div>
-  <div class="enhet"><div class="e-nm">pc6 Tower <span class="tag tag-aktiv">aktiv</span></div><div class="e-role">Bod · Proxmox</div><div class="e-spec">Core 3 N355 · 32 GB</div><div class="e-ip">10.0.0.120</div></div>
-  <div class="enhet"><div class="e-nm">pc7 Minipc <span class="tag tag-aktiv">aktiv</span></div><div class="e-role">Bod · OPNsense</div><div class="e-spec">N150 · 16 GB · 4x 2.5G</div><div class="e-ip">10.0.0.1</div></div>
-  <div class="enhet"><div class="e-nm">pc8 Minipc <span class="tag tag-aktiv">aktiv</span></div><div class="e-role">Stue · Proxmox-master</div><div class="e-spec">N150 · 16 GB · 4x 2.5G (1 port død, PCI viser 3)</div><div class="e-ip">10.0.0.102</div></div>
-  <div class="enhet"><div class="e-nm">pc9 Minipc <span class="tag tag-aktiv">aktiv</span></div><div class="e-role">Stue · Proxmox</div><div class="e-spec">N100 · 16 GB · uplink 2.5G USB</div><div class="e-ip">10.0.0.103</div></div>
+  <div class="enhet"><div class="e-nm">pc6 Tower <span class="tag tag-aktiv">aktiv</span></div><div class="e-role">Bod · Proxmox</div><div class="e-spec">Core 3 N355 · 32 GB · QuickSync</div><div class="e-ip">10.0.0.120</div></div>
+  <div class="enhet"><div class="e-nm">pc7 Minipc <span class="tag tag-aktiv">aktiv</span></div><div class="e-role">Bod · OPNsense-router</div><div class="e-spec">N150 · 16 GB · 4x 2.5G</div><div class="e-ip">10.0.0.1</div></div>
+  <div class="enhet"><div class="e-nm">pc8 Minipc <span class="tag tag-aktiv">aktiv</span></div><div class="e-role">Stue · Proxmox-master</div><div class="e-spec">N150 · 16 GB</div><div class="e-ip">10.0.0.102</div></div>
+  <div class="enhet"><div class="e-nm">pc9 Minipc <span class="tag tag-aktiv">aktiv</span></div><div class="e-role">Stue · Proxmox</div><div class="e-spec">N100 · 16 GB</div><div class="e-ip">10.0.0.103</div></div>
   <div class="enhet inactive"><div class="e-nm">pc2 Gaming Far <span class="tag tag-inaktiv">inaktiv</span></div><div class="e-role">Stue · gammel</div><div class="e-spec">i7-4790K · RTX 3070</div><div class="e-ip">av</div></div>
   <div class="enhet inactive"><div class="e-nm">pc10 Reserve <span class="tag tag-inaktiv">inaktiv</span></div><div class="e-role">Far</div><div class="e-spec">R7 5700X · RTX 3070</div><div class="e-ip">av</div></div>
   <div class="enhet"><div class="e-nm">pc4 Gaming Sønn <span class="tag tag-aktiv">aktiv</span></div><div class="e-role">Soverom 2</div><div class="e-spec">R7 5800X · RTX 3060 Ti</div><div class="e-ip">klient</div></div>
@@ -173,14 +180,15 @@ footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-
   </div>
 </div>
 <div class="proxmox">
-  <div class="px-head">◈ Proxmox-kluster — 4 noder, 19 gjester</div>
+  <div class="px-head">◈ Proxmox-kluster — 4 noder · verifisert 6. okt</div>
   <div class="node-row">
     <div class="node">
       <div class="n-title">pve (pc8) · N150</div><div class="n-ip">10.0.0.102 · 16 GB · master</div>
       <div class="guest"><span class="g"><span class="vt gv">VM</span><b>homeassistant</b> 100</span><span class="ip">10.0.0.7</span></div>
       <div class="guest"><span class="g"><span class="vt gt">CT</span><b>Komodo-core</b> 102</span><span class="ip">10.0.0.117</span></div>
-      <div class="svc-list"><i>Komodo</i>:9120 · <i>NetBox</i>:8001 · step-ca</div>
+      <div class="svc-list"><i>Komodo</i>:9120 · <i>NetBox</i>:8001 · <i>step-CA</i>:9000</div>
       <div class="guest"><span class="g"><span class="vt gt">CT</span><b>pihole-pc8</b> 115</span><span class="ip">10.0.0.115</span></div>
+      <div class="svc-list">DNS1</div>
       <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct110-node</b> 110</span><span class="ip">10.0.0.129</span></div>
     </div>
     <div class="node">
@@ -188,59 +196,62 @@ footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-
       <div class="guest"><span class="g"><span class="vt gv">VM</span><b>Unraid</b> 101</span><span class="ip">10.0.0.101</span></div>
       <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct103</b> 103</span><span class="ip">10.0.0.119</span></div>
       <div class="svc-list"><i>n8n</i> · <i>Open WebUI</i> · <i>gjeld-app</i></div>
-      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct104</b> 104</span><span class="ip">10.0.0.124</span></div>
-      <div class="svc-list">MySpeed·DiskSpeed·QDirStat·MeTube·Pinchflat</div>
-      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct107 media <span style="color:var(--danger)">(fra Unraid)</span></b> 107</span><span class="ip">10.0.0.160 · <mark>stop</mark></span></div>
-      <div class="svc-list">Plex · Jellyfin — midlertidig</div>
-      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct108 legacy <span style="color:var(--danger)">(fra Unraid)</span></b> 108</span><span class="ip">10.0.0.161 · <mark>stop</mark></span></div>
-      <div class="svc-list">iPXE-buildweb·netbootxyz·code-server·Flame·4get·Linkding·moni·Cloudflared·Valheim</div>
+      <div class="guest off"><span class="g"><span class="vt gt">CT</span><b>ct104</b> 104</span><span class="ip">10.0.0.124</span></div>
+      <div class="svc-list"><mark>stoppet</mark></div>
+      <div class="guest off"><span class="g"><span class="vt gt">CT</span><b>ct107 mediespiller-gammel</b> 107</span><span class="ip">10.0.0.160</span></div>
+      <div class="svc-list"><mark>stoppet</mark> · Plex/Jellyfin (fra Tower)</div>
+      <div class="guest off"><span class="g"><span class="vt gt">CT</span><b>ct108 legacy-gammel</b> 108</span><span class="ip">10.0.0.161</span></div>
+      <div class="svc-list"><mark>stoppet</mark> · gamle dockere (fra Tower)</div>
+      <div class="guest off"><span class="g"><span class="vt gt">CT</span><b>ct159 abs-ngrok-gammel</b> 159</span><span class="ip">10.0.0.162</span></div>
+      <div class="guest off"><span class="g"><span class="vt gt">CT</span><b>ct160 lancache-gammel</b> 160</span><span class="ip">10.0.0.163</span></div>
       <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct109</b> 109</span><span class="ip">10.0.0.128</span></div>
-      <div class="svc-list">*arr · dashbord · Prometheus · nettkart · dockctl</div>
+      <div class="svc-list">*arr · dashbord · Prometheus · nettkart · udleje · dockctl</div>
       <div class="guest"><span class="g"><span class="vt gt">CT</span><b>emby-pc6</b> 151</span><span class="ip">10.0.0.150</span></div>
       <div class="svc-list">Emby·FileBrowser·Krusader·DoubleCommander·Tunarr</div>
       <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct157 Hermes</b> 157</span><span class="ip">10.0.0.135</span></div>
     </div>
     <div class="node">
       <div class="n-title">pc9 · N100</div><div class="n-ip">10.0.0.103 · 16 GB</div>
-      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>komodo-pc9</b> 106</span><span class="ip">10.0.0.122</span></div>
+      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>pc9-ct106-tunarr</b> 106</span><span class="ip">10.0.0.122</span></div>
       <div class="svc-list">Tunarr</div>
       <div class="guest"><span class="g"><span class="vt gt">CT</span><b>pihole-pc9</b> 116</span><span class="ip">10.0.0.116</span></div>
-      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct152</b> 152</span><span class="ip">10.0.0.125</span></div>
-      <div class="svc-list">Roon</div>
-      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct153 Immich</b> 153</span><span class="ip">10.0.0.127</span></div>
-      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct154 Paperless</b> 154</span><span class="ip">10.0.0.131</span></div>
-      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct155 UniFi</b> 155</span><span class="ip">10.0.0.132</span></div>
-      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct111 iVentoy</b> 111</span><span class="ip">10.0.0.134</span></div>
+      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct152-roon</b> 152</span><span class="ip">10.0.0.125</span></div>
+      <div class="guest off"><span class="g"><span class="vt gt">CT</span><b>ct153 immich</b> 153</span><span class="ip">10.0.0.127</span></div>
+      <div class="guest off"><span class="g"><span class="vt gt">CT</span><b>ct154 paperless</b> 154</span><span class="ip">10.0.0.131</span></div>
+      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct155 unifi</b> 155</span><span class="ip">10.0.0.132</span></div>
+      <div class="guest off"><span class="g"><span class="vt gt">CT</span><b>ct111 iventoy</b> 111</span><span class="ip">10.0.0.134</span></div>
     </div>
     <div class="node">
       <div class="n-title">pc1 · Ryzen 9 3900X</div><div class="n-ip">10.0.0.112 · 8 GB · RTX 3070 · W11</div>
-      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct156-ollama</b> 156</span><span class="ip">10.0.0.133</span></div>
-      <div class="svc-list"><span class="bad">Nede</span></div>
-      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct158-browsers</b> 158</span><span class="ip">10.0.0.158</span></div>
+      <div class="guest off"><span class="g"><span class="vt gt">CT</span><b>ct105 mediespiller</b> 105</span><span class="ip">10.0.0.159</span></div>
+      <div class="guest off"><span class="g"><span class="vt gt">CT</span><b>ct156 ollama</b> 156</span><span class="ip">10.0.0.133</span></div>
+      <div class="svc-list"><mark>stoppet</mark> · GPU-driver</div>
+      <div class="guest off"><span class="g"><span class="vt gt">CT</span><b>ct158 browsers</b> 158</span><span class="ip">10.0.0.158</span></div>
       <div class="svc-list">5 nettlesere (3001-3005)</div>
     </div>
   </div>
 </div>
 
+<!-- ============ IOT ============ -->
 <h3 class="sec">📡 Enheter &amp; IoT — OPNsense-ARP (48 stk, 6. okt)</h3>
 <div class="band"><div class="band-body" style="flex-direction:column">
   <div style="font-size:14.5px;color:var(--muted);margin-bottom:7px">Sonos ×7 (i ARP) · Google/Nest ×5 · Apple ×3 · ESP ×5 · Hue · Ubiquiti · Dreame · Xiaomi · PS5</div>
   <div class="iot-wrap" id="iot"></div>
   <div style="margin-top:12px;border-top:1px dashed var(--border);padding-top:10px">
-    <div style="font-size:13px;color:var(--muted);margin-bottom:6px"><b style="color:var(--iot)">Sonos One — offline/uten strøm (legges til permanent, ARP-verifiseres senere)</b></div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:6px"><b style="color:var(--iot)">Sonos One — offline/uten strøm (legges til permanent, rettes når online)</b></div>
     <div class="iot-wrap" id="iot-offline"></div>
   </div>
 </div></div>
 
 <div class="note">
-<b>Verifiserte avvik fra krav/vedlegg (6. okt):</b><br>
-• <b>Sonos:</b> ARP viser 7 (.2/.12/.13/.15/.16/.19/.46), ikke 8. De to Sonos One (front/side i Arc-surround) i tillegg er lagt til som <b>offline</b> (uten strøm nå) under rutenettet; rett dem når de er online. Totalt 9 Sonos-enheter.<br>
-• <b>ESP ×5</b> i ARP (EspControl lys .8, EspControl media .86, EspMedia 10.1″ .48 + .5/.10/.27). Den store 10.1″-skjermen (media-player-d395ce) er <b>.48</b> — på kartet.<br>
-• <b>CT107 emby-backup</b> finnes <b>ikke</b> — verifisert slettet i Proxmox og Komodo.<br>
-• <b>«pc1-ct103-node»</b>: navnet er misvisende — CT103 ligger fysisk på <b>pc6</b> (vmid 103).
+<b>Verifiserte fakta (6. okt):</b><br>
+• <b>Gjesteplassering</b> hentet levende fra Proxmox: ct152-155 &amp; ct111 ligger nå på <b>pc9</b>; ct104/107/108/159/160 på <b>pc6</b>; ct105/156/158 på <b>pc1</b>.<br>
+• <b>ct107/108/159/160</b> er arkiverte legacy-CT-er fra Unraid/Tower, stoppet med vilje — kommer opp ved behov (bl.a. Plex/Jellyfin, Lancache).<br>
+• <b>Sonos:</b> ARP viser 7; de to Sonos One (Arc-surround) er lagt til som offline nedenfor. Totalt 9.<br>
+• <b>ESP ×5</b> i ARP inkl. EspMedia 10.1″ på <b>.48</b>.
 </div>
 
-<footer>Generert 6. okt 2026 av Hermes (CT157) · data: OPNsense ARP, Proxmox API (noder/CPU/gjester/docker), Komodo (33 stacker), vedleggets maskinvare. Nedtonet = finnes men av.</footer>
+<footer>Generert 6. okt 2026 av Hermes (CT157) · data: OPNsense ARP, Proxmox API (noder/CPU/gjester/IP/docker), Komodo. Nedtonet/stoppet = finnes men er av.</footer>
 
 <script>
 const iot = {
@@ -269,202 +280,6 @@ offline.forEach(o=>{
   d.style.borderStyle='dashed'; d.style.opacity='.75';
   elo.appendChild(d);
 });
-
-/* ===== Levende serviceoversikt — én rad per CT/VM (10.0.0.135:9118) ===== */
-(function(){
-  var STATUS_URL = "http://10.0.0.135:9118/status";
-  var CTRL_URL   = "http://10.0.0.135:9118/control";
-  var NODES_URL = "http://10.0.0.135:9118/nodes";
-  var meta = document.getElementById("sw-meta");
-  var tokInput = document.getElementById("sw-token");
-  var tokSave  = document.getElementById("sw-token-save");
-  var tokMsg   = document.getElementById("sw-token-msg");
-
-  function token(){ return localStorage.getItem("homelab_audit_token") || ""; }
-
-  if(token()){ tokInput.value = token(); }
-  tokSave.addEventListener("click", function(){
-    var v = tokInput.value.trim();
-    if(!v){ localStorage.removeItem("homelab_audit_token"); tokMsg.textContent = "fjernet"; }
-    else { localStorage.setItem("homelab_audit_token", v); tokMsg.textContent = "✓ lagret"; }
-    setTimeout(function(){ tokMsg.textContent=""; }, 3000);
-  });
-
-  // Tjenester per vmid: liste av [navn, port, https(0/1)]. IP hentes fra
-  // /nodes-svaret; tjenestekolonnen blir klikkbare linker med porter.
-  var SVC = {
-    100: [["Home Assistant",8123,0]],
-    102: [["Komodo",9120,0],["NetBox",8001,0],["step-ca",9000,1]],
-    110: [["Komodo-periphery agent",null,0]],
-    115: [["Pi-hole",8080,0]],
-    101: [["Unraid",80,0],["Netdata",19999,0]],
-    103: [["n8n",5678,0],["Open WebUI",3080,0],["Gjeld-app",8099,0]],
-    104: [["MySpeed",5216,0],["DiskSpeed",8888,0],["QDirStat",5800,0],["MeTube",8081,0],["Pinchflat",8945,0]],
-    107: [["Plex",32400,0],["Jellyfin",8099,0]],
-    108: [["netbootxyz",8080,0],["iPXE-buildweb",8081,0],["code-server",3008,0],["Flame",5030,0],["4get",280,0],["Linkding",9090,0]],
-    109: [["Homepage",3009,0],["Glance",3010,0],["Dashy",3011,0],["Heimdall",3012,0],
-           ["Grafana",3000,0],["Uptime Kuma",3001,0],["Speedtest",8765,0],
-           ["Prometheus",9090,0],["Alertmanager",9093,0],["Nettkart",3020,0],
-           ["Sonarr",8989,0],["Radarr",7878,0],["Prowlarr",9696,0],["Readarr",8787,0],
-           ["Bazarr",6767,0],["Cleanuparr",11011,0],["Deluge",8112,0],["Seerr",5055,0],
-           ["Audiobookshelf",13378,0],["Podgrab",8081,0],["Grovemap",8080,0],
-           ["FlareSolverr",8191,0],["Crafty",8000,1],["Dockctl",3015,0]],
-    151: [["Emby",8096,0],["FileBrowser",8097,0],["Krusader",8098,0],["Double Commander",8099,1],["Tunarr",8005,0]],
-    157: [["Hermes agent",9119,0],["audit API",9118,0]],
-    106: [["Tunarr",8005,0]],
-    116: [["Pi-hole",8080,0]],
-    152: [["Roon",null,0]],
-    153: [["Immich",2283,0]],
-    154: [["Paperless-ngx",8000,0]],
-    155: [["UniFi Network",8443,1]],
-    111: [["iVentoy",26000,0]],
-    156: [["Ollama",11434,0]],
-    158: [["Browser-pool",3001,0]],
-    105: [["CT105 mediespillere",null,0]]
-  };
-
-  function bar(label, val, max, unit, color){
-    var pct = max ? Math.min(100, Math.round(val/max*100)) : 0;
-    return '<div class="nr-row"><span class="nr-lab">'+label+'</span>'+
-      '<div class="nr-bar"><div class="nr-fill" style="width:'+pct+'%;background:'+color+'"></div></div>'+
-      '<span class="nr-val">'+val+unit+' / '+max+unit+' ('+pct+'%)</span></div>';
-  }
-
-  function renderNodes(nodes){
-    var box = document.getElementById("node-resources");
-    box.innerHTML = "";
-    (nodes||[]).forEach(function(n){
-      var card = document.createElement("div");
-      card.className = "nr-card";
-      var mem = (n.mem_used||0)/1073741824, memT=(n.mem_total||0)/1073741824;
-      var dis = (n.disk_used||0)/1073741824, disT=(n.disk_total||0)/1073741824;
-      var run = (n.vms||[]).filter(function(v){return v.status==="running"}).length;
-      card.innerHTML = '<div class="nr-head"><b>'+n.name+'</b><span class="nr-ip">'+n.ip+
-        ' · '+run+'/'+(n.vms||[]).length+' kjører · CPU '+n.cpu_pct+'%</span></div>'+
-        bar("RAM", mem.toFixed(1), memT.toFixed(1), " GB", "#3a86ff")+
-        bar("Disk", dis.toFixed(1), disT.toFixed(1), " GB", "#9d4edd");
-      box.appendChild(card);
-    });
-  }
-
-  // Bygg klikkbare tjeneste-lenker med porter for en gjest. "ip" er gjestens IP.
-  function svcLinks(v){
-    var list = SVC[v.vmid];
-    if(!list) return v.name || ("gjest " + v.vmid);
-    var parts = list.map(function(s){
-      var navn = s[0], port = s[1], https = s[2];
-      if(!port) return navn;
-      var scheme = https ? "https" : "http";
-      var host = v.ip || ("10.0.0." + v.vmid);
-      return '<a href="'+scheme+'://'+host+':'+port+'/">'+navn+'</a><span class="g-port">:'+port+'</span>';
-    });
-    return parts.join('<span class="g-sep"> · </span>');
-  }
-
-  function renderSvc(nodes){
-    var box = document.getElementById("svc-table");
-    if(!box) return;
-    var guest = {};
-    (nodes||[]).forEach(function(n){
-      (n.vms||[]).forEach(function(v){
-        guest[v.vmid] = {node:n.node, running: v.status==="running", protected: !!v.protected, lookup: v};
-      });
-    });
-    var out = "";
-    (nodes||[]).forEach(function(n){
-      var memGb = (n.mem_used||0)/1073741824;
-      out += '<div class="g-node"><div class="g-node-title">'+n.name+' <span class="g-node-ip">'+n.ip+
-        ' · CPU '+n.cpu_pct+'% · RAM '+memGb.toFixed(1)+' GB</span></div>';
-      out += '<table class="g-table"><thead><tr><th></th><th>Gjest</th><th>Type</th><th>IP</th><th>Tjenester</th><th>Strøm</th></tr></thead><tbody>';
-      (n.vms||[]).forEach(function(v){
-        var up = v.status === "running";
-        var tip = up ? "oppe" : "nede/av";
-        var prot = v.protected ? ' <span class="g-prot">låst</span>' : "";
-        out += '<tr class="g-row" data-node="'+n.node+'" data-vmid="'+v.vmid+'">'+
-          '<td><span class="sw-dot '+(up?"up":"down")+'" title="'+tip+'"></span></td>'+
-          '<td class="g-name">'+(v.name||("gjest "+v.vmid))+' <span class="g-vmid">'+v.vmid+'</span>'+prot+'</td>'+
-          '<td class="g-type">'+v.type+'</td>'+
-          '<td class="ip">'+(v.ip||"–")+'</td>'+
-          '<td class="g-svc">'+(svcLinks(v))+'</td>'+
-          '<td class="g-ctl"></td></tr>';
-      });
-      out += '</tbody></table></div>';
-    });
-    box.innerHTML = out;
-    // Av/på-knapper på hver rad
-    document.querySelectorAll("#svc-table .g-row").forEach(function(tr){
-      var vmid = parseInt(tr.getAttribute("data-vmid"),10);
-      var node = tr.getAttribute("data-node");
-      var g = guest[vmid];
-      if(!g) return;
-      var running = g.running;
-      if(!g.protected){
-        addBtns(tr, node, vmid, running);
-      } else if(!running && token()){
-        var cell = tr.querySelector(".g-ctl");
-        var b = document.createElement("button");
-        b.className="sw-btn"; b.textContent="▶ på";
-        b.addEventListener("click", function(){
-          fetch(CTRL_URL,{method:"POST",headers:{"Content-Type":"application/json",
-            "Authorization":"Bearer "+token()},
-            body:JSON.stringify({vmid:vmid,action:"on",node:node})})
-            .then(function(x){return x.json()}).then(function(j){
-              if(j&&j.ok){setTimeout(refresh,1200);} else {tokMsg.textContent=(j&&j.error)||"feil";setTimeout(function(){tokMsg.textContent="";},5000);}
-            });
-        });
-        cell && cell.appendChild(b);
-      }
-    });
-  }
-
-  // Legg ▶ på / ■ av i siste celle i rad-objektet (HTMLTableRowElement.cells)
-  function addBtns(row, node, vmid, running){
-    var cell = row.cells && row.cells[row.cells.length-1];
-    if(!cell) return;
-    var on = document.createElement("button");
-    on.className = "sw-btn"; on.textContent = "▶ på";
-    on.style.display = running ? "none" : "";
-    var off = document.createElement("button");
-    off.className = "sw-btn"; off.textContent = "■ av";
-    off.style.display = running ? "" : "none";
-    [on,off].forEach(function(b){
-      b.addEventListener("click", function(){
-        var action = b === on ? "on" : "off";
-        b.classList.add("busy");
-        fetch(CTRL_URL, {method:"POST", headers:{"Content-Type":"application/json",
-          "Authorization":"Bearer "+token()},
-          body: JSON.stringify({vmid:vmid, action:action, node:node})})
-          .then(function(r){return r.json()})
-          .then(function(j){
-            if(j && j.ok){ setTimeout(refresh, 1200); }
-            else { tokMsg.textContent = (j && j.error) || "feil"; setTimeout(function(){tokMsg.textContent="";},5000); }
-          })
-          .catch(function(e){ tokMsg.textContent="kontroll feilet"; })
-          .finally(function(){ b.classList.remove("busy"); });
-      });
-    });
-    cell.appendChild(on); cell.appendChild(off);
-  }
-
-  function refresh(){
-    meta.textContent = "henter…";
-    fetch(STATUS_URL).then(function(r){return r.json()}).then(function(d){
-      var services = d.services || [];
-      var up = services.filter(function(s){return s.up}).length;
-      meta.textContent = up + "/" + services.length + " oppe · " + d.generated_at;
-      return fetch(NODES_URL).then(function(r){return r.json()});
-    }).then(function(nd){
-      renderNodes(nd.nodes);
-      renderSvc(nd.nodes);
-      if(!token()){ tokMsg.textContent = "Skriv inn token og trykk Lagre for å bruke av/på-knappene"; }
-      else { tokMsg.textContent = ""; }
-    }).catch(function(e){
-      meta.textContent = "status utilgjengelig (" + e + ")";
-    });
-  }
-  refresh();
-  setInterval(refresh, 15000);
-})();
 </script>
 </body>
 </html>
