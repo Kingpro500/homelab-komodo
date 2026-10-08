@@ -1,8 +1,9 @@
 {
   "name": "Nettverksovervaakning",
-  "description": "EKSPORTERT UTEN HEMMELIGHETER. Erstatt REDACTED_AUDIT_TOKEN og REDACTED_HASS_TOKEN før import. Se docs/*.md i pc6-ct103-n8n.",
+  "description": "Nettverksovervaakning - timerapport og dagsrapport.",
   "nodes": [
     {
+      "id": "34eaba4d-a539-490f-b250-b1106d19a9c3",
       "name": "Hver time",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
@@ -19,10 +20,10 @@
             }
           ]
         }
-      },
-      "id": "34eaba4d-a539-490f-b250-b1106d19a9c3"
+      }
     },
     {
+      "id": "bcbdb39c-7598-401f-b97e-d3185d6e8495",
       "name": "Hent nettverksstatus",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -50,10 +51,10 @@
             }
           ]
         }
-      },
-      "id": "bcbdb39c-7598-401f-b97e-d3185d6e8495"
+      }
     },
     {
+      "id": "f69184e5-6548-4b30-89a8-fe3153a4d094",
       "name": "Er det nye problemer?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -84,10 +85,10 @@
           "combinator": "and"
         },
         "options": {}
-      },
-      "id": "f69184e5-6548-4b30-89a8-fe3153a4d094"
+      }
     },
     {
+      "id": "f4053967-d426-4972-93aa-7e36cfc59b59",
       "name": "Push nytt nettverksproblem",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -118,10 +119,10 @@
             }
           ]
         }
-      },
-      "id": "f4053967-d426-4972-93aa-7e36cfc59b59"
+      }
     },
     {
+      "id": "183f33e6-912e-4e91-8610-1d369906e5e0",
       "name": "Hver dag 08:00",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
@@ -139,10 +140,10 @@
             }
           ]
         }
-      },
-      "id": "183f33e6-912e-4e91-8610-1d369906e5e0"
+      }
     },
     {
+      "id": "0ba6601f-1752-49bc-a4b6-55499b38c266",
       "name": "Hent full nettverksrapport",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -170,10 +171,10 @@
             }
           ]
         }
-      },
-      "id": "0ba6601f-1752-49bc-a4b6-55499b38c266"
+      }
     },
     {
+      "id": "9f04554a-d5cf-4e8d-ad72-14be642be1dd",
       "name": "Formater rapport",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -182,11 +183,11 @@
         160
       ],
       "parameters": {
-        "jsCode": "const d = $json;\nconst lan = d.lan || {};\nconst wan = d.wan || {};\nconst flaps = lan.flaps_24h || {};\nlet m = 'Tjenester: ' + d.services_up + '/' + d.services_total + '\\n';\nm += 'WAN: ' + (wan.wan_outages_1h || 0) + ' hopp siste time, '\n     + Math.round(wan.wan_downtime_s_1h || 0) + ' sek nede\\n';\nm += 'LAN: ' + (lan.hosts || 0) + ' enheter';\nif (lan.conflicts && Object.keys(lan.conflicts).length) {\n  m += ', ' + Object.keys(lan.conflicts).length + ' ARP-konflikt'; }\nm += '\\nFysiske hopp siste døgn: '\n     + (Object.keys(flaps).length ? Object.entries(flaps).map(([k,v]) => k + '=' + v).join(', ') : 'ingen') + '\\n';\nm += 'Port-counters (CRC/drops): ikke tilgjengelig via OPNsense-API\\n';\nif (d.services_down && d.services_down.length) {\n  m += '\\nNede: ' + d.services_down.join(', ') + '\\n'; }\nif (d.problems && d.problems.length) {\n  m += '\\nAktive problemer:\\n' + d.problems.map(p => '- [' + p.sev + '] ' + p.text).join('\\n') + '\\n'; }\nelse { m += '\\nIngen aktive problemer.\\n'; }\nreturn [{ json: { tittel: d.all_clear ? 'Nettverk: alt OK' : 'Nettverk: ' + d.problems.length + ' problemer', rapport: m } }];"
-      },
-      "id": "9f04554a-d5cf-4e8d-ad72-14be642be1dd"
+        "jsCode": "const d = $json;\nconst lan = d.lan || {};\nconst wan = d.wan || {};\nconst flaps = lan.flaps_24h || {};\nlet m = 'Tjenester: ' + d.services_up + '/' + d.services_total + '\\n';\nm += 'WAN: ' + (wan.wan_outages_1h || 0) + ' hopp siste time, '\n     + Math.round(wan.wan_downtime_s_1h || 0) + ' sek nede\\n';\nm += 'LAN: ' + (lan.hosts || 0) + ' enheter';\nif (lan.conflicts && Object.keys(lan.conflicts).length) {\n  m += ', ' + Object.keys(lan.conflicts).length + ' ARP-konflikt'; }\nm += '\\nFysiske hopp siste døgn: '\n     + (Object.keys(flaps).length ? Object.entries(flaps).map(([k,v]) => k + '=' + v).join(', ') : 'ingen') + '\\n';\nm += 'WAN-flaps siste doegn (klokketime): '\n     + (lan.flaps_hour_24h && lan.flaps_hour_24h.length ? lan.flaps_hour_24h.join('  ') : 'ingen') + '\\n';\nm += 'Port-counters (CRC/drops): ikke tilgjengelig via OPNsense-API\\n';\nif (d.services_down && d.services_down.length) {\n  m += '\\nNede: ' + d.services_down.join(', ') + '\\n'; }\nif (d.problems && d.problems.length) {\n  m += '\\nAktive problemer:\\n' + d.problems.map(p => '- [' + p.sev + '] ' + p.text).join('\\n') + '\\n'; }\nelse { m += '\\nIngen aktive problemer.\\n'; }\nreturn [{ json: { tittel: d.all_clear ? 'Nettverk: alt OK' : 'Nettverk: ' + d.problems.length + ' problemer', rapport: m } }];"
+      }
     },
     {
+      "id": "75595220-9ea1-40d4-8fe1-9f84f75f97ec",
       "name": "Push dagsrapport nettverk",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -217,8 +218,7 @@
             }
           ]
         }
-      },
-      "id": "75595220-9ea1-40d4-8fe1-9f84f75f97ec"
+      }
     }
   ],
   "connections": {

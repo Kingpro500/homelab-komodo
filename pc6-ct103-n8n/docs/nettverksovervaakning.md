@@ -49,6 +49,7 @@ Tjenester: 11/11
 WAN: N hopp siste time, N sek nede
 LAN: N enheter, M ARP-konflikt
 Fysiske hopp siste døgn: igc0=0, igc1=N
+WAN-flaps siste døgn (klokketime): 04:1 15:2 17:3
 Port-counters (CRC/drops): ikke tilgjengelig via OPNsense-API
 [aktive problemer eller "Ingen aktive problemer."]
 ```
