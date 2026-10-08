@@ -9,25 +9,25 @@
 
 - Homelab:
     - Homepage:
-        icon: homepage.png
+        icon: di:homepage
         href: http://10.0.0.128:3009/
         description: 10.0.0.128:3009 · CT109 · pc6
         server: ct109
         container: homepage
     - Glance:
-        icon: si:glance
+        icon: di:glance
         href: http://10.0.0.128:3010/
         description: 10.0.0.128:3010 · CT109 · pc6 · status og containere
         server: ct109
         container: glance
     - Dashy:
-        icon: mdi:view-dashboard
+        icon: di:dashy
         href: http://10.0.0.128:3011/
         description: 10.0.0.128:3011 · CT109 · pc6 · lenker
         server: ct109
         container: dashy
     - Heimdall:
-        icon: mdi:rocket-launch
+        icon: di:heimdall
         href: http://10.0.0.128:3012/
         description: 10.0.0.128:3012 · CT109 · pc6 · launcher
         server: ct109
@@ -39,54 +39,54 @@
         server: ct109
         container: crafty
     - Komodo:
-        icon: komodo.png
+        icon: di:komodo
         href: http://10.0.0.117:9120/
         description: 10.0.0.117:9120 · CT102 · pve (pc8)
     - OPNsense:
-        icon: opnsense.png
+        icon: di:opnsense
         href: http://10.0.0.1/
         description: 10.0.0.1:80 · Router / firewall
     - Home Assistant:
-        icon: home-assistant.png
+        icon: di:home-assistant
         href: http://10.0.0.7:8123/
         description: 10.0.0.7:8123 · VM100 · pve (pc8) · smarthus
 - Proxmox:
     - pc1:
-        icon: proxmox.png
+        icon: di:proxmox
         href: https://10.0.0.112:8006/
         description: 10.0.0.112:8006 · Proxmox · dual boot, CT156 Ollama (CPU)
     - pc6:
-        icon: proxmox.png
+        icon: di:proxmox
         href: https://10.0.0.120:8006/
         description: 10.0.0.120:8006 · Proxmox · Docker, n8n og Hermes · (avlastet 6. okt)
     - pc9:
-        icon: proxmox.png
+        icon: di:proxmox
         href: https://10.0.0.103:8006/
         description: 10.0.0.103:8006 · Proxmox · avlastning, iVentoy/UniFi/Paperless/Roon/Immich · 2.5G USB
     - pve (pc8):
-        icon: proxmox.png
+        icon: di:proxmox
         href: https://10.0.0.102:8006/
         description: 10.0.0.102:8006 · Proxmox master · HA, Komodo core
     - Unraid Tower:
-        icon: unraid.png
+        icon: di:unraid
         href: http://10.0.0.101/
         description: 10.0.0.101:80 · VM101 · pc6 · Docker og lagring
 
 - AI & Automation:
     - n8n:
-        icon: n8n.png
+        icon: di:n8n
         href: http://10.0.0.119:5678/
         description: 10.0.0.119:5678 · CT103 · pc6
     - Open WebUI:
-        icon: open-webui.png
+        icon: di:open-webui
         href: http://10.0.0.119:3080/
         description: 10.0.0.119:3080 · CT103 · pc6 · OpenRouter-chat
     - Ollama:
-        icon: ollama.png
+        icon: di:ollama
         href: http://10.0.0.133:11434/
         description: 10.0.0.133:11434 · CT156 · pc1 · qwen3:4b API
     - Hermes Agent:
-        icon: mdi-robot
+        icon: di:hermes
         href: http://10.0.0.135:9119/chat?profile=default
         description: 10.0.0.135:9119 · CT157 · pc6 · chat
     - Gjeld:
@@ -113,11 +113,11 @@
         href: https://10.0.0.117:9000/
         description: 10.0.0.117:9000 · CT102 · pve (pc8) · intern CA/ACME
     - NetBox:
-        icon: netbox.png
+        icon: di:netbox
         href: http://10.0.0.117:8001/
         description: 10.0.0.117:8001 · CT102 · pve (pc8) · IPAM/DCIM
     - Grafana:
-        icon: grafana.png
+        icon: di:grafana
         href: http://10.0.0.128:3000/
         description: 10.0.0.128:3000 · CT109 · pc6 · visualisering
         server: ct109
@@ -131,27 +131,27 @@
 
 - Monitoring:
     - Netdata Cloud:
-        icon: si:netdata
+        icon: di:netdata
         href: https://app.netdata.cloud/spaces/rogerlillefoss-space/rooms/all-nodes/overview
         description: Netdata Cloud · alle noder · fra internett · krever innlogging
     - Netdata Tower:
-        icon: si:netdata
+        icon: di:netdata
         href: http://10.0.0.101:19999/
         description: 10.0.0.101:19999 · VM101 · Unraid Tower · 16 GB
     - Netdata pc6:
-        icon: si:netdata
+        icon: di:netdata
         href: http://10.0.0.120:19999/
         description: 10.0.0.120:19999 · Proxmox pc6 · 32 GB
     - Netdata pve:
-        icon: si:netdata
+        icon: di:netdata
         href: http://10.0.0.102:19999/
         description: 10.0.0.102:19999 · Proxmox master · 16 GB
     - Netdata pc9:
-        icon: si:netdata
+        icon: di:netdata
         href: http://10.0.0.103:19999/
         description: 10.0.0.103:19999 · Proxmox pc9 · 16 GB
     - Uptime Kuma:
-        icon: uptime-kuma.png
+        icon: di:uptime-kuma
         href: http://10.0.0.128:3001/
         description: 10.0.0.128:3001 · CT109 · pc6
         server: ct109
@@ -167,13 +167,13 @@
         server: ct109
         container: dockctl
     - Grafana CT109:
-        icon: grafana.png
+        icon: di:grafana
         href: http://10.0.0.128:3000/
         description: 10.0.0.128:3000 · CT109 · pc6
         server: ct109
         container: grafana
     - Speedtest Tracker:
-        icon: speedtest-tracker.png
+        icon: di:speedtest-tracker
         href: http://10.0.0.128:8765/
         description: 10.0.0.128:8765 · CT109 · pc6 · automatisert hver time
         server: ct109
@@ -201,7 +201,7 @@
         server: ct109
         container: flaresolverr
     - MySpeed:
-        icon: mdi-speedometer
+        icon: di:myspeed
         href: http://10.0.0.124:5216/
         description: 10.0.0.124:5216 · CT104 · pc6
         widget:
@@ -218,11 +218,11 @@
 
 - Network & Utilities:
     - Pi-hole pc8:
-        icon: pi-hole.png
+        icon: di:pi-hole
         href: http://10.0.0.115:8080/admin/
         description: 10.0.0.115:8080 · CT115 · pve (pc8)
     - Pi-hole pc9:
-        icon: pi-hole.png
+        icon: di:pi-hole
         href: http://10.0.0.116:8080/admin/
         description: 10.0.0.116:8080 · CT116 · pc9
     - iVentoy:
@@ -230,7 +230,7 @@
         href: http://10.0.0.134:26000/
         description: 10.0.0.134:26000 · CT111 · pc9
     - UniFi Network:
-        icon: unifi.png
+        icon: di:unifi
         href: https://10.0.0.132:8443/
         description: 10.0.0.132:8443 · CT155 · pc9
     - Browser-pool:
@@ -240,69 +240,69 @@
 
 - Media & Downloads:
     - Seerr:
-        icon: seerr.png
+        icon: di:seerr
         href: http://10.0.0.128:5055/
         description: 10.0.0.128:5055 · CT109 · pc6 · requests
         server: ct109
         container: seerr
     - MeTube:
-        icon: metube.png
+        icon: di:metube
         href: http://10.0.0.124:8081/
         description: 10.0.0.124:8081 · CT104 · pc6
     - Pinchflat:
-        icon: pinchflat.png
+        icon: di:pinchflat
         href: http://10.0.0.124:8945/
         description: 10.0.0.124:8945 · CT104 · pc6
     - Sonarr:
-        icon: sonarr.png
+        icon: di:sonarr
         href: http://10.0.0.128:8989/
         description: 10.0.0.128:8989 · CT109 · pc6
         server: ct109
         container: sonarr
     - Radarr:
-        icon: radarr.png
+        icon: di:radarr
         href: http://10.0.0.128:7878/
         description: 10.0.0.128:7878 · CT109 · pc6
         server: ct109
         container: radarr
     - Prowlarr:
-        icon: prowlarr.png
+        icon: di:prowlarr
         href: http://10.0.0.128:9696/
         description: 10.0.0.128:9696 · CT109 · pc6
         server: ct109
         container: prowlarr
     - Readarr:
-        icon: readarr.png
+        icon: di:readarr
         href: http://10.0.0.128:8787/
         description: 10.0.0.128:8787 · CT109 · pc6
         server: ct109
         container: readarr
     - Bazarr:
-        icon: bazarr.png
+        icon: di:bazarr
         href: http://10.0.0.128:6767/
         description: 10.0.0.128:6767 · CT109 · pc6
         server: ct109
         container: bazarr
     - Cleanuparr:
-        icon: mdi:delete-sweep
+        icon: di:cleanuparr
         href: http://10.0.0.128:11011/
         description: 10.0.0.128:11011 · CT109 · pc6 · rydder *Arr-køer
         server: ct109
         container: cleanuparr
     - Audiobookshelf:
-        icon: audiobookshelf.png
+        icon: di:audiobookshelf
         href: http://10.0.0.128:13378/
         description: 10.0.0.128:13378 · CT109 · pc6
         server: ct109
         container: audiobookshelf
     - Deluge:
-        icon: deluge.png
+        icon: di:deluge
         href: http://10.0.0.128:8112/
         description: 10.0.0.128:8112 · CT109 · pc6
         server: ct109
         container: deluge
     - Podgrab:
-        icon: podgrab.png
+        icon: di:podgrab
         href: http://10.0.0.128:8081/
         description: 10.0.0.128:8081 · CT109 · pc6
         server: ct109
@@ -314,7 +314,7 @@
         server: ct109
         container: grovemap
     - Emby:
-        icon: emby.png
+        icon: di:emby
         href: http://10.0.0.150:8096/
         description: 10.0.0.150:8096 · CT151 · pc6
     - FileBrowser:
@@ -330,11 +330,11 @@
         href: https://10.0.0.150:8099/
         description: 10.0.0.150:8099 · CT151 · pc6 · moderne twin-pane filbehandler (HTTPS/selfsigned)
     - Tunarr:
-        icon: mdi-television-classic
+        icon: di:tunarr
         href: http://10.0.0.150:8005/
         description: 10.0.0.150:8005 · CT151 · pc6 · Live TV
     - Tunarr pc9:
-        icon: mdi-television-classic
+        icon: di:tunarr
         href: http://10.0.0.122:8005/
         description: 10.0.0.122:8005 · CT106 · pc9 · independent worker
     - Plex (CT107):
@@ -370,16 +370,16 @@
         href: http://10.0.0.161:9090/
         description: 10.0.0.161:9090 · CT108 · pc6 · bokmerker · stoppet
     - Sonos:
-        icon: sonos.png
+        icon: di:sonos
         href: https://play.sonos.com/
         description: play.sonos.com · musikk og rom
 
 - Photos & Documents:
     - Immich:
-        icon: immich.png
+        icon: di:immich
         href: http://10.0.0.127:2283/
         description: 10.0.0.127:2283 · CT153 · pc9
     - Paperless-ngx:
-        icon: paperless-ngx.png
+        icon: di:paperless-ngx
         href: http://10.0.0.131:8000/
         description: 10.0.0.131:8000 · CT154 · pc9
