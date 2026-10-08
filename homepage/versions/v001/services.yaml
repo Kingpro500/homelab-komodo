@@ -239,14 +239,6 @@
         description: 10.0.0.158 · CT158 · pc1 · firefox:3001 chromium:3002 msedge:3003 opera:3004 brave:3005
 
 - Media & Downloads:
-    - Plex (PC1):
-        icon: plex.png
-        href: http://10.0.0.159:32400/web
-        description: 10.0.0.159:32400 · CT105 · pc1 · midlertidig flyttet fra Tower
-    - Jellyfin (PC1):
-        icon: jellyfin.png
-        href: http://10.0.0.159:8099/
-        description: 10.0.0.159:8099 · CT105 · pc1 · midlertidig flyttet fra Tower
     - Seerr:
         icon: di:seerr
         href: http://10.0.0.128:5055/
@@ -344,10 +336,7 @@
     - Tunarr pc9:
         icon: di:tunarr
         href: http://10.0.0.122:8005/
-    - Tunarr pc9:
-        icon: di:tunarr
-        href: http://10.0.0.122:8005/
-        description: 10.0.0.122:8005 · CT106 · pc9-ct106-tunarr · dedikert Tunarr · autostart av
+        description: 10.0.0.122:8005 · CT106 · pc9 · independent worker
     - Plex (CT107):
         icon: mdi:play
         href: http://10.0.0.160:32400/web/
@@ -383,9 +372,6 @@
     - Sonos:
         icon: di:sonos
         href: https://play.sonos.com/
-    - Sonos:
-        icon: di:sonos
-        href: https://play.sonos.com/
         description: play.sonos.com · musikk og rom
 
 - Photos & Documents:
@@ -397,58 +383,3 @@
         icon: di:paperless-ngx
         href: http://10.0.0.131:8000/
         description: 10.0.0.131:8000 · CT154 · pc9
-
-- Gamle tjenester (stoppet):
-    - Jellyfin gammel:
-        icon: jellyfin.png
-        href: http://10.0.0.160:8099/
-        description: CT107 · pc6 · data migrert · test utsatt
-    - Plex gammel:
-        icon: plex.png
-        href: http://10.0.0.160:32400/web/
-        description: CT107 · pc6 · data migrert · testet OK før stopp
-    - iPXE Buildweb gammel:
-        icon: mdi:network-outline
-        href: http://10.0.0.161:8081/
-        description: CT108 · pc6 · arkivert · stoppet
-    - netbootxyz gammel:
-        icon: mdi:server-network
-        href: http://10.0.0.161:8080/
-        description: CT108 · pc6 · arkivert · stoppet
-    - OpenVSCode Server gammel:
-        icon: vscode.png
-        href: http://10.0.0.161:3008/
-        description: CT108 · pc6 · arkivert · stoppet
-    - Flame gammel:
-        icon: mdi:fire
-        href: http://10.0.0.161:5030/
-        description: CT108 · pc6 · arkivert · stoppet
-    - 4get gammel:
-        icon: mdi:magnify
-        href: http://10.0.0.161:280/
-        description: CT108 · pc6 · arkivert · stoppet
-    - Linkding gammel:
-        icon: linkding.png
-        href: http://10.0.0.161:9090/
-        description: CT108 · pc6 · arkivert · stoppet
-    - Valheim gammel:
-        icon: mdi:axe
-        description: CT108 · pc6 · data gjenopprettet · stoppet
-    - Cloudflared Tunnel gammel:
-        icon: cloudflare.png
-        description: CT108 · pc6 · tunnelarkiv · stoppet
-    - Audiobookshelf gammel:
-        icon: audiobookshelf.png
-        description: CT159 · pc6 · oppsett arkivert, ingen gammel appdata · stoppet
-    - ngrok gammel:
-        icon: mdi:tunnel
-        description: CT159 · pc6 · tunneloppsett arkivert · stoppet
-    - Lancache gammel:
-        icon: mdi:package-variant-closed
-        description: CT160 · pc6 · cache-oppsett arkivert · stoppet
-    - Lancache DNS gammel:
-        icon: mdi:dns
-        description: CT160 · pc6 · DNS-oppsett arkivert · stoppet
-    - Unraid Monitoring API gammel:
-        icon: mdi:chart-line
-        description: CT108 · pc6 · krever Tower-vertstilgang · stoppet

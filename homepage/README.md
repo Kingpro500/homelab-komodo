@@ -3,6 +3,14 @@
 Homepage (gethomepage.dev) — homelab-dashbordet på `10.0.0.128:3009`, pluss en
 liten kontroll-API (`dockctl`) for å starte/stoppe/restarte containere.
 
+## Versjonshistorikk (pålagt arkirv)
+
+**Gamle versjoner av Homepage-config-en lagres permanent i
+[`versions/`](versions/) — slett aldri.** `versions/VERSIONS.md` er indeksen med
+lenker til hver versjon (`v001`, `v002`, …). Ny config-endring → ny versjon
+(snapshot av `config/` + rad i VERSIONS.md). Dette er vedlikeholdsregelen for
+denne stacken (se `versions/VERSIONS.md`).
+
 ## Tjenester
 
 | Container | Havn | Rolle |
@@ -56,28 +64,19 @@ det interaktive LAN-kartet (`docs/network-map/`), servert av `pc6-ct109-web`
 dokumentert i [`docs/network-map/README.md`](../docs/network-map/README.md) og
 `pc6-ct109-web/README.md`.**
 
-## Proxmox-node CPU/RAM (widget)
+## Proxmox-nodeene øverst
 
-De fire node-kortene (pc1/pc6/pc9/pve) har hver en `type: proxmox`-widget som
-viser nodens CPU/RAM/vm/lxc via:
+«Proxmox»-gruppa (pc1, pc6, pc9, pve(pc8), Unraid Tower) ligger **øverst** i
+dashbordet — de fire maskinene i én rad (4 kolonner). Hver er en ren tile
+(ikon + lenke til node-UI-et + beskrivelse) med live docker-status der noden
+kjører CT109.
 
-```yaml
-        widget:
-          type: proxmox
-          url: https://<node-ip>:8006
-          username: ${PROXMOX_TOKEN_ID}
-          password: ${PROXMOX_SECRET}
-          node: <pc1|pc6|pc9|pve>
-```
-
-**Viktig:** gethomepage-proxmox-widgeten autentiserer **kun via HTTP Basic**
-(`username@pam!tokenid` + secret). `~/.hermes/.env`-token-en
-(`hermes@pve!monitor`) virker **bare** via `PVEAPIToken`-headeren og gir derfor
-**401** i widgeten — den kan ikke brukes her. For å få kortene til å vise data:
-opprett en egen read-only Proxmox-bruker/-token som støtter Basic-auth og sett
-`PROXMOX_TOKEN_ID` / `PROXMOX_SECRET` i Komodo (`pc6-ct109-homepage` →
-miljøvariabler), så redeploy. Uten dem viser kortene bare «ingen data» (homepage
-deployer uansett — variablene er valgfrie).
+**Node-CPU/RAM-retur er PREPET (utsettes):** gethomepage-proxmox-widgeten
+autentiserer kun via HTTP Basic, men `~/.hermes/.env`-token-en (`hermes@pve!monitor`)
+virker bare via `PVEAPIToken`-headeren → 401 i widgeten. Legg til et
+Basic-kompatibelt read-only Proxmox-token (`PROXMOX_TOKEN_ID`/`PROXMOX_SECRET` i
+Komodo → redeploy) og legg `type: proxmox`-widgeten tilbake på kortene (mønster
+er i git-historikken / CHANGELOG).
 
 ## Live status (nativt)
 
