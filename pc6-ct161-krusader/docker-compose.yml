@@ -1,0 +1,38 @@
+# Krusader web file manager — dedicated CT pc6-ct161-krusader (10.0.0.142:8098)
+#
+# Krusader (KDE twin-pane) lives in its own privileged CT on pc6 so the user can
+# start/stop the whole thing from Proxmox. It mounts the Unraid media NFS via
+# `mp0: /mnt/pve/Tower-media,mp=/media` on CT 161.
+#
+# Self-managed with docker compose in the CT (not a Komodo stack): CT start runs
+# docker, the `restart: unless-stopped` policy starts Krusader; CT stop kills it.
+# The compose file lives in the CT at /opt/krusader/docker-compose.yml and is
+# mirrored here for documentation. `docker compose up -d` in /opt/krusader.
+#
+# Runs as root inside the container; Unraid NFS root_squash maps that to uid 99
+# (nobody), so moved/created files keep the media share's owner.
+#
+# Deploy/debug:
+#   pct exec 161 -- bash -c 'cd /opt/krusader && docker compose up -d'
+#   pct exec 161 -- docker logs -f krusader
+#
+# Web UI: http://10.0.0.142:8098
+services:
+  krusader:
+    image: jlesage/krusader:latest
+    container_name: krusader
+    restart: unless-stopped
+    ports:
+      - "8098:5800"                 # web UI (noVNC)
+    environment:
+      TZ: "Europe/Oslo"
+      DISPLAY_WIDTH: "1920"
+      DISPLAY_HEIGHT: "1080"
+    volumes:
+      - /opt/krusader:/config
+      - /media:/media
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

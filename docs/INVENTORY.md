@@ -30,7 +30,8 @@ on pc6, pc8 or pc9. n8n used to violate this; it moved to CT 103 on pc6.
 | pc6 | 108 lxc | `pc6-ct108-legacy-dockere-gammel` | 10.0.0.161 | 1.5G | 40G | no (autostart av) | 0 | `pc6-ct108-legacy-dockere` | iPXE-buildweb, netbootxyz, openvscode-server, Flame, 4get, Linkding, unraid-moni, cloudflared, Valheim-data. Flyttet fra Unraid-Docker; manuell docker, midlertidig |
 | pc6 | 109 lxc | **`pc6-ct109-node`** | 10.0.0.128 | 4G | 32G | yes | 12 | `pc6-ct109-docker` | Shared Docker node: arr stack, Grafana, Homepage, Kuma, Seerr, Speedtest, Deluge, Audiobookshelf, Grovemap, Glance, Dashy, Heimdall |
 | pc9 | 111 lxc | `pc6-ct111-iventoy` | 10.0.0.134 | 1G | 16G | yes | 1 | | iVentoy PXE boot (moved from pc6). WebUI :26000 |
-| pc6 | 151 lxc | **`emby-pc6`** | 10.0.0.150 | 8G | 256G | yes | 2 | `pc6-ct151-emby` | Active Emby + Krusader (web twin-pane file manager over Unraid media NFS). Transcoding should use the N355 iGPU |
+| pc6 | 151 lxc | **`emby-pc6`** | 10.0.0.150 | 8G | 256G | yes | 1 | `pc6-ct151-emby` | Active Emby. Transcoding should use the N355 iGPU |
+| pc6 | 161 lxc | `pc6-ct161-krusader` | 10.0.0.142 | 2G | 16G | yes | 1 | | Dedicated Krusader (web twin-pane file manager over Unraid media NFS). Privileged, debian-13, start/stop-able CT. Self-managed docker compose (not Komodo) |
 | pc9 | 152 lxc | `pc6-ct152-roon` | 10.0.0.125 | 2G | 32G | yes | 1 | | Roon server (moved from pc6). Startup via 9330. Gemountet /music + /backup |
 | pc9 | 153 lxc | `pc6-ct153-immich` | 10.0.0.127 | 4G | 64G | yes | 1 | | Photo library (moved from pc6). USB-dongle på Flex Mini 2.5G; iGPU /dev/dri passthrough |
 | pc9 | 154 lxc | `pc6-ct154-paperless` | 10.0.0.131 | 2G | 64G | yes | 1 | | Documents and scanning (moved from pc6) |

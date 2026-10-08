@@ -327,8 +327,8 @@
         description: 10.0.0.150:8096 · CT151 · pc6
     - Krusader:
         icon: mdi-folder-multiple
-        href: http://10.0.0.150:8098/
-        description: 10.0.0.150:8098 · CT151 · pc6 · KDE Krusader over Unraid media
+        href: http://10.0.0.142:8098/
+        description: 10.0.0.142:8098 · CT161 · pc6 · KDE Krusader over Unraid media
     - Tunarr:
         icon: di:tunarr
         href: http://10.0.0.150:8005/
