@@ -10,6 +10,52 @@ liten kontroll-API (`dockctl`) for å starte/stoppe/restarte containere.
 | `homepage` | 3009→3000 | Hoved-dashbordet |
 | `dockctl` | 3015 | Start/stop/restart-panel for alle CT109-containere |
 
+## Config-filene (hvor hva bor)
+
+`config/` monteres read-only inn i `/app/config`. Alt er GitOps fra dette repoet.
+
+| Fil | Innhold |
+|---|---|
+| `services.yaml` | Grupper og tiles; hver tile = navn, `icon`, `href`, `description`, ev. `server`+`container` (live status) og `widget`. |
+| `settings.yaml` | App-innstillinger: `title` («Smarthus»), `headerStyle: clean`, `maxGroupColumns`, `useEqualHeights`, `fullWidth`, `disableCollapse`, `showStats: true`, og `layout` (row/columns per gruppe). |
+| `docker.yaml` | Docker-serveren `ct109` (`socket: /var/run/docker.sock`) som gir live status. |
+| `widgets.yaml` | Globale info-widgets: `resources` (CPU/RAM/disk) + `search` (duckduckgo, åpent i ny fane). |
+| `bookmarks.yaml` | Hurtiglenker i toppraden (Nettverkskart, Github, Reddit, YouTube). |
+| `custom.css` / `custom.js` | Må **finnes** i `config/` (lese-only mount). Uten dem klarer ikke Homepage å opprette skeleton-en sin, feiler med EROFS og går i restart-loop med exit 1 — fikset 6. okt. Kun kommentarer, ingen overrides. |
+
+## Ikoner (di: / si: / mdi:)
+
+**Homepage-bildet har TOM `/app/public/icons` (0 ikoner).** Lokale `icon: x.png`
+viser derfor ødelagte/blanke tiles. Alle ikoner må bruke CDN-prefiks:
+`di:` (dashboard-icons, rikeste sett), `si:` (Simple Icons, kun brand-logo) eller
+`mdi:` (Material). Begge CDN-ene nås fra LAN-et (`cdn.jsdelivr.net`,
+`api.iconify.design`) og er verifisert 200.
+
+I `services.yaml` bruker vi **verifisert `di:`** for alle tjenester som har den
+(sonarr, radarr, emby, grafana, netbox, proxmox, dashy, heimdall, hermes,
+netdata, tunarr, cleanuparr, myspeed …), og `mdi:`/`si:` som reserve der `di:`
+mangler (crafty, grovemap, diskspeed, iventoy, openrouter …).
+
+## Widgets i bruk
+
+Per-tile-`widget:`-blokker (8 mellomrom under `description`):
+
+| Tjeneste | Widget | Merknad |
+|---|---|---|
+| Uptime Kuma | `type: uptimekuma` | `url` .128:3001, `version: 1` |
+| Speedtest Tracker | `type: speedtest` | `version: 1`, `url` .128:8765, ingen nøkkel |
+| MySpeed | `type: myspeed` | `url` .124:5216, ingen nøkkel |
+| OpenRouter Spend | `type: customapi` | henter `total_cost` fra CT157:9118 hvert 300 s |
+
+## Nettverkskart
+
+Tilen «Nettverkskart» (`.128:3020`) peker på den interne websiden som serverer
+det interaktive LAN-kartet (`docs/network-map/`), servert av `pc6-ct109-web`
+(nginx). Kartet henter levende tjenestestatus + av/på-knapper fra
+`homelab-audit` (CT157:9118). **Hele metoden, data-kildene og token-oppsettet er
+dokumentert i [`docs/network-map/README.md`](../docs/network-map/README.md) og
+`pc6-ct109-web/README.md`.**
+
 ## Live status (nativt)
 
 Homepage deler CT109s `docker.sock` (read-only). Hver CT109-tjeneste i
