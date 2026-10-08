@@ -80,14 +80,9 @@ mark{background:transparent;color:var(--danger);font-weight:700}
 .note{font-size:13.5px;color:var(--dim);line-height:1.7;max-width:880px;margin-top:14px}
 .note b{color:var(--muted)}
 footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-top:1px solid var(--border);padding-top:16px}
-.node .n-use{font-family:ui-monospace,monospace;font-size:13.5px;color:var(--lan);font-weight:600;margin:2px 0 9px}
-.hist{position:fixed;top:9px;right:12px;z-index:50;background:var(--panel2);border:1px solid var(--border);border-radius:9px;padding:6px 11px;font-size:12.5px;color:var(--muted);box-shadow:0 1px 4px rgba(0,0,0,.35)}
-.hist b{color:var(--prox)}
-.hist a{color:var(--prox);font-weight:700;text-decoration:none}
 </style>
 </head>
 <body>
-<div class="hist">📜 versjon <b>v2</b> · <a href="versions/">historikk</a></div>
 
 <h1>🏠 Homelab — tjenester &amp; nettverk <span style="color:var(--lan)">10.0.0.0/24</span></h1>
 <div class="sub">Intern startside · Proxmox-kluster «CyberCluster» · OPNsense pc7 (brannmur)</div>
@@ -189,7 +184,6 @@ footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-
   <div class="node-row">
     <div class="node">
       <div class="n-title">pve (pc8) · N150</div><div class="n-ip">10.0.0.102 · 16 GB · master</div>
-      <div class="n-use" data-node="pve">—</div>
       <div class="guest"><span class="g"><span class="vt gv">VM</span><b>homeassistant</b> 100</span><span class="ip">10.0.0.7</span></div>
       <div class="guest"><span class="g"><span class="vt gt">CT</span><b>Komodo-core</b> 102</span><span class="ip">10.0.0.117</span></div>
       <div class="svc-list"><i>Komodo</i>:9120 · <i>NetBox</i>:8001 · <i>step-CA</i>:9000</div>
@@ -199,7 +193,6 @@ footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-
     </div>
     <div class="node">
       <div class="n-title">pc6 · Core 3 N355</div><div class="n-ip">10.0.0.120 · 32 GB · QuickSync</div>
-      <div class="n-use" data-node="pc6">—</div>
       <div class="guest"><span class="g"><span class="vt gv">VM</span><b>Unraid</b> 101</span><span class="ip">10.0.0.101</span></div>
       <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct103</b> 103</span><span class="ip">10.0.0.119</span></div>
       <div class="svc-list"><i>n8n</i> · <i>Open WebUI</i> · <i>gjeld-app</i></div>
@@ -219,7 +212,6 @@ footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-
     </div>
     <div class="node">
       <div class="n-title">pc9 · N100</div><div class="n-ip">10.0.0.103 · 16 GB</div>
-      <div class="n-use" data-node="pc9">—</div>
       <div class="guest"><span class="g"><span class="vt gt">CT</span><b>pc9-ct106-tunarr</b> 106</span><span class="ip">10.0.0.122</span></div>
       <div class="svc-list">Tunarr</div>
       <div class="guest"><span class="g"><span class="vt gt">CT</span><b>pihole-pc9</b> 116</span><span class="ip">10.0.0.116</span></div>
@@ -231,7 +223,6 @@ footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-
     </div>
     <div class="node">
       <div class="n-title">pc1 · Ryzen 9 3900X</div><div class="n-ip">10.0.0.112 · 8 GB · RTX 3070 · W11</div>
-      <div class="n-use" data-node="pc1">—</div>
       <div class="guest off"><span class="g"><span class="vt gt">CT</span><b>ct105 mediespiller</b> 105</span><span class="ip">10.0.0.159</span></div>
       <div class="guest off"><span class="g"><span class="vt gt">CT</span><b>ct156 ollama</b> 156</span><span class="ip">10.0.0.133</span></div>
       <div class="svc-list"><mark>stoppet</mark> · GPU-driver</div>
@@ -289,25 +280,6 @@ offline.forEach(o=>{
   d.style.borderStyle='dashed'; d.style.opacity='.75';
   elo.appendChild(d);
 });
-</script>
-<script>
-(function(){
-  var api='http://10.0.0.135:9118/nodes';
-  function gb(x){return x/1073741824;}
-  async function load(){
-    try{
-      var r=await fetch(api,{headers:{'Accept':'application/json'}}); if(!r.ok) throw 0;
-      var d=await r.json();
-      document.querySelectorAll('.node .n-use').forEach(function(el){
-        var n=(d.nodes||[]).find(function(x){return x.node===el.dataset.node;});
-        if(!n||!n.mem_total){el.textContent='—';return;}
-        var mp=n.mem_total?100*n.mem_used/n.mem_total:0;
-        el.textContent='RAM '+gb(n.mem_used).toFixed(1)+'/'+gb(n.mem_total).toFixed(0)+' GiB ('+Math.round(mp)+'%) · CPU '+Math.round(n.cpu_pct)+'%';
-      });
-    }catch(e){}
-  }
-  load(); setInterval(load,15000);
-})();
 </script>
 </body>
 </html>
