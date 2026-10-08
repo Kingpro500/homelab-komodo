@@ -58,11 +58,11 @@
     - pc6:
         icon: proxmox.png
         href: https://10.0.0.120:8006/
-        description: 10.0.0.120:8006 · Proxmox · Docker, n8n og Hermes
+        description: 10.0.0.120:8006 · Proxmox · Docker, n8n og Hermes · (avlastet 6. okt)
     - pc9:
         icon: proxmox.png
         href: https://10.0.0.103:8006/
-        description: 10.0.0.103:8006 · Proxmox
+        description: 10.0.0.103:8006 · Proxmox · avlastning, iVentoy/UniFi/Paperless/Roon/Immich · 2.5G USB
     - pve (pc8):
         icon: proxmox.png
         href: https://10.0.0.102:8006/
@@ -175,9 +175,13 @@
     - Speedtest Tracker:
         icon: speedtest-tracker.png
         href: http://10.0.0.128:8765/
-        description: 10.0.0.128:8765 · CT109 · pc6
+        description: 10.0.0.128:8765 · CT109 · pc6 · automatisert hver time
         server: ct109
         container: speedtest-tracker
+        widget:
+          type: speedtest
+          url: http://10.0.0.128:8765
+          version: 1
     - Prometheus:
         icon: si:prometheus
         href: http://10.0.0.128:9090/
@@ -200,6 +204,9 @@
         icon: mdi-speedometer
         href: http://10.0.0.124:5216/
         description: 10.0.0.124:5216 · CT104 · pc6
+        widget:
+          type: myspeed
+          url: http://10.0.0.124:5216
     - DiskSpeed:
         icon: mdi-harddisk
         href: http://10.0.0.124:8888/
@@ -221,25 +228,17 @@
     - iVentoy:
         icon: mdi-server-network
         href: http://10.0.0.134:26000/
-        description: 10.0.0.134:26000 · CT111 · pc6
+        description: 10.0.0.134:26000 · CT111 · pc9
     - UniFi Network:
         icon: unifi.png
         href: https://10.0.0.132:8443/
-        description: 10.0.0.132:8443 · CT155 · pc6
+        description: 10.0.0.132:8443 · CT155 · pc9
     - Browser-pool:
         icon: mdi-web
         href: http://10.0.0.158:3001/
         description: 10.0.0.158 · CT158 · pc1 · firefox:3001 chromium:3002 msedge:3003 opera:3004 brave:3005
 
 - Media & Downloads:
-    - Plex (PC1):
-        icon: plex.png
-        href: http://10.0.0.159:32400/web
-        description: 10.0.0.159:32400 · CT105 · pc1 · midlertidig flyttet fra Tower
-    - Jellyfin (PC1):
-        icon: jellyfin.png
-        href: http://10.0.0.159:8099/
-        description: 10.0.0.159:8099 · CT105 · pc1 · midlertidig flyttet fra Tower
     - Seerr:
         icon: seerr.png
         href: http://10.0.0.128:5055/
@@ -347,11 +346,11 @@
     - Immich:
         icon: immich.png
         href: http://10.0.0.127:2283/
-        description: 10.0.0.127:2283 · CT153 · pc6
+        description: 10.0.0.127:2283 · CT153 · pc9
     - Paperless-ngx:
         icon: paperless-ngx.png
         href: http://10.0.0.131:8000/
-        description: 10.0.0.131:8000 · CT154 · pc6
+        description: 10.0.0.131:8000 · CT154 · pc9
 
 - Gamle tjenester (stoppet):
     - Jellyfin gammel:

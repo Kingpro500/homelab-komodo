@@ -4,7 +4,7 @@ Interaktivt nettverkskart over hele homelab-et. Frittstående HTML (ingen ekster
 avhengigheter, fungerer offline) — åpne `nettverkskart.html` i en nettleser,
 eller host den som en intern webside (se nedenfor).
 
-## Data (sist generert 6. okt 2026)
+## Data (sist generert 8. okt 2026)
 
 Kartet bygges fra levende kilder, ikke fra et håndskrevet notat:
 

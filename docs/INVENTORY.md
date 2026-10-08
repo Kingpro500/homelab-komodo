@@ -22,9 +22,12 @@ on pc6, pc8 or pc9. n8n used to violate this; it moved to CT 103 on pc6.
 | Node | VM | Current name | IP | RAM | Disk | Docker | Stacks | Proposed name | Notes |
 |---|---|---|---|---|---|---|---|---|---|
 | pc1 | 156 lxc | `pc1-ct156-ollama` | 10.0.0.133 | 3G | 32G | yes | 1 | | Local LLM. **Runs on CPU**: no GPU is passed through, `/api/ps` is empty, and a short reply takes ~9 s |
+| pc1 | 105 lxc | `pc1-ct105-mediespillere` | 10.0.0.159 | 2G | 20G | yes | 1 | | Temporary Jellyfin + Plex migration from Tower. Tower media is mounted read-only; CT has autostart disabled and remains shut down when unused. |
 | pc6 | 101 qemu | `Unraid-Tower` | 10.0.0.101 | 15G | — | no (VM) | 0 | | Docker in a VM. 31 of 32 containers stopped. **Holds the only GPU passthrough in the cluster** |
 | pc6 | 103 lxc | `pc1-ct103-node` | 10.0.0.119 | 4G | 32G | yes | 2 | `pc6-ct103-node` | n8n and Open WebUI. **Names differ:** the Proxmox guest name and `hostname` in the LXC config are still `pc1-ct103-node`, but Periphery now reports `pc6-ct103-node`. That mismatch is what kept the server red; the agent was renamed, not the guest. Renaming the guest in Proxmox is still pending |
 | pc6 | 104 lxc | **`pc6`** | 10.0.0.124 | 4G | 32G | yes | 1 | `pc6-ct104-media-downloaders` | MeTube, Pinchflat, MySpeed, DiskSpeed |
+| pc6 | 107 lxc | `pc6-ct107-mediespillere-gammel` | 10.0.0.160 | 2G | 64G | yes | 1 | | Plex og Jellyfin arkivert fra Tower. Stoppet; autostart av. |
+| pc6 | 108 lxc | `pc6-ct108-legacy-dockere-gammel` | 10.0.0.161 | 1.5G | 40G | yes | 1 | | iPXE, netbootxyz, OpenVSCode, Flame, 4get, Linkding, Cloudflared og Valheim arkivert fra Tower. Stoppet; autostart av. |
 | pc6 | 109 lxc | **`pc6-ct109-node`** | 10.0.0.128 | 4G | 32G | yes | 12 | `pc6-ct109-docker` | Shared Docker node: arr stack, Grafana, Homepage, Kuma, Seerr, Speedtest, Deluge, Audiobookshelf, Grovemap, Glance, Dashy, Heimdall |
 | pc6 | 111 lxc | `pc6-ct111-iventoy` | 10.0.0.134 | 1G | 16G | yes | 1 | | iVentoy PXE boot |
 | pc6 | 151 lxc | **`emby-pc6`** | 10.0.0.150 | 8G | 256G | yes | 2 | `pc6-ct151-emby` | Active Emby + FileBrowser (web file manager over Unraid media NFS). Transcoding should use the N355 iGPU |
@@ -33,7 +36,9 @@ on pc6, pc8 or pc9. n8n used to violate this; it moved to CT 103 on pc6.
 | pc6 | 154 lxc | `pc6-ct154-paperless` | 10.0.0.131 | 4G | 64G | yes | 1 | | Documents and scanning |
 | pc6 | 155 lxc | `pc6-ct155-unifi` | 10.0.0.132 | 2G | 16G | yes | 1 | | UniFi Network Controller |
 | pc6 | 157 lxc | `pc6-ct157-hermes` | 10.0.0.135 | 4G | 32G | yes | 0 | | Hermes agent. Gateway, cron jobs, watchdogs. Runs no Komodo stacks |
-| pc9 | 106 lxc | **`komodo-pc9`** | 10.0.0.122 | 4G | 16G | yes | 0 | `pc9-ct106-node` | Periphery agent, no stacks |
+| pc6 | 159 lxc | `pc6-ct159-audiobookshelf-ngrok-gammel` | 10.0.0.162 | 1G | 8G | no | 0 | | Audiobookshelf- og ngrok-oppsett arkivert fra Tower. Stoppet; autostart av. |
+| pc6 | 160 lxc | `pc6-ct160-lancache-gammel` | 10.0.0.163 | 1G | 8G | no | 0 | | Lancache- og Lancache-DNS-oppsett arkivert fra Tower. Stoppet; autostart av. |
+| pc9 | 106 lxc | **`pc9-ct106-tunarr`** | 10.0.0.122 | 4G | 19G | yes | 1 | | Dedicated Tunarr CT; autostart disabled |
 | pc9 | 108 lxc | **`docker-test`** | 10.0.0.130 | 1G | 8G | yes | 0 | *delete* | **Unused.** No stacks, not in Homepage, not mentioned anywhere. 1 GB RAM for nothing |
 | pc9 | 116 lxc | `pihole-pc9` | 10.0.0.116 | 1G | 8G | yes | 1 | | Pi-hole DNS, upstream Unbound |
 | pve | 100 qemu | `homeassistant` | 10.0.0.7 | 9G | — | no (VM) | 0 | | Home Assistant, a VM not a container. 1834 entities |

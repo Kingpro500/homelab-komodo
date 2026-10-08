@@ -1,0 +1,34 @@
+services:
+  plex:
+    image: binhex/arch-plex
+    container_name: binhex-plex
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      PUID: "99"
+      PGID: "100"
+      UMASK: "000"
+      TZ: America/Los_Angeles
+      TRANS_DIR: /config/transcode
+      NVIDIA_VISIBLE_DEVICES: ""
+      NVIDIA_DRIVER_CAPABILITIES: all
+    volumes:
+      - /opt/media-players/plex/config:/config
+      - /media:/media:ro
+
+  jellyfin:
+    image: binhex/arch-jellyfin
+    container_name: binhex-jellyfin
+    restart: unless-stopped
+    ports:
+      - "8099:8096"
+    environment:
+      PUID: "99"
+      PGID: "100"
+      UMASK: "000"
+      TZ: America/Los_Angeles
+      SHARED_NETWORK: "no"
+    volumes:
+      - /opt/media-players/jellyfin/config:/config
+      - /media:/media:ro
+      - /opt/media-players/jellyfin/shared:/shared
