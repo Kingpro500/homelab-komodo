@@ -1,6 +1,14 @@
 ---
 # For configuration options and examples, please see:
 # https://gethomepage.dev/configs/bookmarks
+#
+# Bookmarkene vises i toppraden på Homepage.
+
+- Hurtiglenker:
+    - Nettverkskart:
+        - abbr: NK
+          icon: mdi:sitemap
+          href: http://10.0.0.128:3020/
 
 - Developer:
     - Github:
