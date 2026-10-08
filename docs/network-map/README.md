@@ -106,6 +106,7 @@ Siden er statisk HTML men henter levende status fra `homelab-audit` på CT157
 | `GET /status` | nei | `{"services":[{"name","host","port","up"}],...}` — TCP-prober parallelt. |
 | `POST /control` | ja (Bearer `AUDIT_TOKEN`) | `{"vmid":153,"action":"on\|off"}` — `pct start/stop`. Tillatte vmider: 111,152,153,154,155. |
 | `GET /nodes` | nei | gjester per node (brukes for ressurskort/tabell). |
+| `GET /streams` | nei | `{"streams":{"pc6":N,"pc9":M},"total":T}` — aktive Tunarr-videostrømmer (`/api/sessions`) pr. node, vises som stort grønt tall på node-kortene. (Emby-playback krever Emby-API-nøkkel som ikke finnes — legg til i `servicemap_streams.py` når den gjøres tilgjengelig.) |
 
 Kode på CT157 (`~/.hermes/scripts/`): `servicemap_status.py`,
 `servicemap_control.py` (VMID-mapping), rutene + CORS i

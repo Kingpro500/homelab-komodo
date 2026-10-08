@@ -84,8 +84,7 @@ footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-
 .hist b{color:var(--prox)}
 .hist a{color:var(--prox);font-weight:700;text-decoration:none}
 /* Node-ressurskort (CPU/RAM/disk per fysisk maskin) — PÅLAGT, må ikke fjernes */
-.nr-card{flex:1 1 220px;min-width:210px;background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;position:relative}
-.nr-ss{position:absolute;top:4px;right:9px;font-size:28px;font-weight:800;color:#2ecc71;line-height:1;text-shadow:0 1px 3px rgba(0,0,0,.45)}
+.nr-card{flex:1 1 220px;min-width:210px;background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:10px 12px}
 .nr-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;font-size:13.5px}
 .nr-ip{font-size:11px;color:var(--dim)}
 .nr-row{display:flex;align-items:center;gap:8px;margin:3px 0;font-size:11.5px}
@@ -114,7 +113,7 @@ footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-
 </style>
 </head>
 <body>
-<div class="hist">📜 versjon <b>2.002</b> · <a href="versions/">historikk</a></div>
+<div class="hist">📜 versjon <b>2.001</b> · <a href="versions/">historikk</a></div>
 
 <h1>🏠 Homelab — tjenester &amp; nettverk <span style="color:var(--lan)">10.0.0.0/24</span></h1>
 <div class="sub">Intern startside · Proxmox-kluster «CyberCluster» · OPNsense pc7 (brannmur)</div>
@@ -346,7 +345,7 @@ offline.forEach(o=>{
     return '<div class="nr-row"><span class="nr-lab">'+label+'</span><div class="nr-bar"><div class="nr-fill" style="width:'+pct+'%;background:'+color+'"></div></div><span class="nr-val">'+val+unit+' / '+max+unit+' ('+pct+'%)</span></div>';
   }
   /* NODE-SAMMENDRAGET (node-resources) — PÅLAGT, skal IKKE fjernes. */
-  function renderNodes(nodes,streams){
+  function renderNodes(nodes){
     var box=document.getElementById("node-resources"); if(!box) return;
     box.innerHTML="";
     (nodes||[]).forEach(function(n){
@@ -354,10 +353,8 @@ offline.forEach(o=>{
       var mem=(n.mem_used||0)/1073741824, memT=(n.mem_total||0)/1073741824;
       var dis=(n.disk_used||0)/1073741824, disT=(n.disk_total||0)/1073741824;
       var run=(n.vms||[]).filter(function(v){return v.status==="running"}).length;
-      var st=(streams&&streams[n.node])||0;
       card.innerHTML='<div class="nr-head"><b>'+esc(n.name)+'</b><span class="nr-ip">'+esc(n.ip)+
         ' \u00b7 '+run+'/'+(n.vms||[]).length+' kj\u00f8rer</span></div>'+
-        (st>0 ? '<span class="nr-ss" title="aktive videostr\u00f8mmer (Tunarr)">'+st+'</span>' : '')+
         bar("CPU",(n.cpu_pct||0).toFixed(1),100,"%","#e86f51")+
         bar("RAM",mem.toFixed(1),memT.toFixed(1)," GB","#3a86ff")+
         bar("Disk",dis.toFixed(1),disT.toFixed(1)," GB","#9d4edd");
@@ -402,15 +399,8 @@ offline.forEach(o=>{
   function refresh(){
     meta.textContent="henter\u2026";
     fetch(NODES_URL,{headers:{'Accept':'application/json'}})
-      .then(function(r){return r.json()})
-      .then(function(d){
-        return Promise.all([Promise.resolve(d),
-          fetch("http://10.0.0.135:9118/streams",{headers:{'Accept':'application/json'}})
-            .then(function(r){return r.json()}).catch(function(){return {streams:{}}})]);
-      })
-      .then(function(arr){
-        var d=arr[0], st=((arr[1]&&arr[1].streams)||{});
-        renderNodes(d.nodes||[], st);
+      .then(function(r){return r.json()}).then(function(d){
+        renderNodes(d.nodes||[]);
         fillStaticRows(d.nodes||[]);
         meta.textContent=(d.nodes||[]).length+" noder";
         if(!token()){ tokMsg.textContent="Skriv inn token og trykk Lagre for \u00e5 bruke av/p\u00e5-knappene"; }
