@@ -55,18 +55,42 @@
         icon: di:proxmox
         href: https://10.0.0.112:8006/
         description: 10.0.0.112:8006 · Proxmox · dual boot, CT156 Ollama (CPU)
+        widget:
+          type: proxmox
+          url: https://10.0.0.112:8006
+          username: ${PROXMOX_TOKEN_ID}
+          password: ${PROXMOX_SECRET}
+          node: pc1
     - pc6:
         icon: di:proxmox
         href: https://10.0.0.120:8006/
         description: 10.0.0.120:8006 · Proxmox · Docker, n8n og Hermes · (avlastet 6. okt)
+        widget:
+          type: proxmox
+          url: https://10.0.0.120:8006
+          username: ${PROXMOX_TOKEN_ID}
+          password: ${PROXMOX_SECRET}
+          node: pc6
     - pc9:
         icon: di:proxmox
         href: https://10.0.0.103:8006/
         description: 10.0.0.103:8006 · Proxmox · avlastning, iVentoy/UniFi/Paperless/Roon/Immich · 2.5G USB
+        widget:
+          type: proxmox
+          url: https://10.0.0.103:8006
+          username: ${PROXMOX_TOKEN_ID}
+          password: ${PROXMOX_SECRET}
+          node: pc9
     - pve (pc8):
         icon: di:proxmox
         href: https://10.0.0.102:8006/
         description: 10.0.0.102:8006 · Proxmox master · HA, Komodo core
+        widget:
+          type: proxmox
+          url: https://10.0.0.102:8006
+          username: ${PROXMOX_TOKEN_ID}
+          password: ${PROXMOX_SECRET}
+          node: pve
     - Unraid Tower:
         icon: di:unraid
         href: http://10.0.0.101/

@@ -7,6 +7,12 @@ services:
       - "3009:3000"
     environment:
       HOMEPAGE_ALLOWED_HOSTS: 10.0.0.128:3009
+      # Proxmox API-credentials for proxmox-widgetene (pc1/pc6/pc9/pve — node-CPU/RAM).
+      # Valgfritt: uten dem viser nodes-kortene ingen data (og homepage deployer uansett).
+      # Sett i Komodo stack-miljøet, aldri i git. Krever en Basic-auth-kapabel
+      # read-only Proxmox-bruker/token (se homepage/README.md).
+      PROXMOX_TOKEN_ID: ${PROXMOX_TOKEN_ID:-}
+      PROXMOX_SECRET: ${PROXMOX_SECRET:-}
     volumes:
       # GitOps: the whole config directory comes from the cloned repo, read-only.
       # Mount the DIRECTORY, not the individual file. `git pull` replaces files
