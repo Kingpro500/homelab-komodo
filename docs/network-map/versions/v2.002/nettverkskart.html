@@ -85,9 +85,7 @@ footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-
 .hist a{color:var(--prox);font-weight:700;text-decoration:none}
 /* Node-ressurskort (CPU/RAM/disk per fysisk maskin) — PÅLAGT, må ikke fjernes */
 .nr-card{flex:1 1 220px;min-width:210px;background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;position:relative}
-.nr-ss{display:flex;align-items:baseline;justify-content:center;gap:6px;margin:2px 0 2px}
-.nr-ss span{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px}
-.nr-ss b{font-size:26px;font-weight:800;color:#2ecc71;line-height:1;text-shadow:0 1px 3px rgba(0,0,0,.45)}
+.nr-ss{position:absolute;top:4px;right:9px;font-size:28px;font-weight:800;color:#2ecc71;line-height:1;text-shadow:0 1px 3px rgba(0,0,0,.45)}
 .nr-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;font-size:13.5px}
 .nr-ip{font-size:11px;color:var(--dim)}
 .nr-row{display:flex;align-items:center;gap:8px;margin:3px 0;font-size:11.5px}
@@ -116,7 +114,7 @@ footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-
 </style>
 </head>
 <body>
-<div class="hist">📜 versjon <b>2.003</b> · <a href="versions/">historikk</a></div>
+<div class="hist">📜 versjon <b>2.002</b> · <a href="versions/">historikk</a></div>
 
 <h1>🏠 Homelab — tjenester &amp; nettverk <span style="color:var(--lan)">10.0.0.0/24</span></h1>
 <div class="sub">Intern startside · Proxmox-kluster «CyberCluster» · OPNsense pc7 (brannmur)</div>
@@ -359,7 +357,7 @@ offline.forEach(o=>{
       var st=(streams&&streams[n.node])||0;
       card.innerHTML='<div class="nr-head"><b>'+esc(n.name)+'</b><span class="nr-ip">'+esc(n.ip)+
         ' \u00b7 '+run+'/'+(n.vms||[]).length+' kj\u00f8rer</span></div>'+
-        (st>0 ? '<div class="nr-ss"><span>streams</span><b>'+st+'</b></div>' : '')+
+        (st>0 ? '<span class="nr-ss" title="aktive videostr\u00f8mmer (Tunarr)">'+st+'</span>' : '')+
         bar("CPU",(n.cpu_pct||0).toFixed(1),100,"%","#e86f51")+
         bar("RAM",mem.toFixed(1),memT.toFixed(1)," GB","#3a86ff")+
         bar("Disk",dis.toFixed(1),disT.toFixed(1)," GB","#9d4edd");
