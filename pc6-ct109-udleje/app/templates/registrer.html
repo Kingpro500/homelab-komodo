@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Opret udlejerkonto{% endblock %}
+{% block content %}
+<div class="smal">
+  <h1>Bliv udlejer hos os</h1>
+  <p class="muted">Opret en konto, så kan du lægge dine boliger ind med billeder, priser og beskrivelse.</p>
+  <form method="post">
+    <input type="hidden" name="csrf" value="{{ g.csrf }}">
+    <input type="text" name="navn" placeholder="Fulde navn / firma" required>
+    <input type="email" name="email" placeholder="E-mail" required>
+    <input type="tel" name="telefon" placeholder="Telefon">
+    <input type="password" name="password" placeholder="Adgangskode (min. 8 tegn)" required>
+    <button type="submit">Opret konto</button>
+  </form>
+  <p class="muted"><a href="{{ url_for('login') }}">Allerede konto? Log ind</a></p>
+</div>
+{% endblock %}

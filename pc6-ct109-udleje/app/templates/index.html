@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Søg boliger til leje{% endblock %}
+{% block content %}
+<section class="hero">
+  <h1>Find din næste bolig</h1>
+  <p>Huse og lejligheder til leje i hele Danmark — formidlet direkte fra udlejer.</p>
+  <form class="search" method="get" action="{{ url_for('index') }}">
+    <input type="text" name="kommune" placeholder="Kommune eller by" value="{{ f.get('kommune','') }}">
+    <select name="type">
+      <option value="">Alle typer</option>
+      <option value="hus" {{ 'selected' if f.get('type')=='hus' }}>Hus</option>
+      <option value="lejlighed" {{ 'selected' if f.get('type')=='lejlighed' }}>Lejlighed</option>
+      <option value="andet" {{ 'selected' if f.get('type')=='andet' }}>Andet</option>
+    </select>
+    <input type="number" name="max_pris" placeholder="Max husleje/md" value="{{ f.get('max_pris','') }}">
+    <input type="number" name="min_vaerelser" placeholder="Min. værelser" value="{{ f.get('min_vaerelser','') }}">
+    <select name="sorter">
+      <option value="nyeste" {{ 'selected' if f.get('sorter','nyeste')=='nyeste' }}>Nyeste</option>
+      <option value="pris_lav" {{ 'selected' if f.get('sorter')=='pris_lav' }}>Pris lav→høj</option>
+      <option value="pris_høj" {{ 'selected' if f.get('sorter')=='pris_høj' }}>Pris høj→lav</option>
+    </select>
+    <button type="submit">Søg</button>
+  </form>
+</section>
+
+<section class="grid">
+  {% for b in boliger %}
+    <a class="card" href="{{ url_for('bolig_side', b_id=b.id) }}">
+      {% if b.hovedbillede %}
+        <img src="{{ url_for('uploads', filnavn=b.hovedbillede.filnavn) }}" alt="{{ b.overskrift }}" loading="lazy">
+      {% else %}
+        <div class="card-ph">Intet billede</div>
+      {% endif %}
+      <div class="card-body">
+        <h3>{{ b.overskrift }}</h3>
+        <p class="muted">{{ b.by or b.kommune or 'Danmark' }} · {{ b.boligtype }} · {{ b.areal_m2 }} m² · {{ b.vaerelser }} værelser</p>
+        <p class="pris">{{ b.husleje_vis }}/md</p>
+      </div>
+    </a>
+  {% else %}
+    <p class="none">Ingen boliger matcher dit søg. Prøv at udvide kriterierne.</p>
+  {% endfor %}
+</section>
+{% endblock %}

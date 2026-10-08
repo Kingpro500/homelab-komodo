@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Admin{% endblock %}
+{% block content %}
+<h1>Admin</h1>
+
+<h2>Boliger ({{ boliger|length }})</h2>
+<table class="tabel">
+  <tr><th>ID</th><th>Overskrift</th><th>Udlejer</th><th>Status</th><th>Handling</th></tr>
+  {% for b in boliger %}
+    <tr>
+      <td>{{ b.id }}</td>
+      <td><a href="{{ url_for('bolig_side', b_id=b.id) if b.status=='aktiv' else '#' }}">{{ b.overskrift }}</a></td>
+      <td>{{ b.ejer.navn }}</td>
+      <td><span class="status {{ b.status }}">{{ status_label(b.status) }}</span></td>
+      <td>
+        <form class="inline" method="post" action="{{ url_for('admin_status', b_id=b.id) }}">
+          <input type="hidden" name="csrf" value="{{ g.csrf }}">
+          <select name="status">
+            {% for s, label in status_items %}
+              <option value="{{ s }}" {{ 'selected' if b.status==s }}>{{ label }}</option>
+            {% endfor %}
+          </select>
+          <button class="btn sm" type="submit">Sæt</button>
+        </form>
+      </td>
+    </tr>
+  {% else %}
+    <tr><td colspan="5" class="none">Ingen boliger.</td></tr>
+  {% endfor %}
+</table>
+
+<h2>Brugere ({{ brugere|length }})</h2>
+<table class="tabel">
+  <tr><th>Navn</th><th>E-mail</th><th>Rolle</th><th>Aktiv</th><th>Handling</th></tr>
+  {% for u in brugere %}
+    <tr>
+      <td>{{ u.navn }}</td>
+      <td>{{ u.email }}</td>
+      <td>{{ u.rolle }}</td>
+      <td>{{ 'Ja' if u.aktiv else 'Nej' }}</td>
+      <td>
+        {% if u.id != g.bruger.id %}
+          <form class="inline" method="post" action="{{ url_for('admin_bruger_toggle', u_id=u.id) }}">
+            <input type="hidden" name="csrf" value="{{ g.csrf }}">
+            <button class="btn sm {{ 'fare' if u.aktiv else '' }}" type="submit">
+              {{ 'Deaktiver' if u.aktiv else 'Aktiver' }}
+            </button>
+          </form>
+        {% endif %}
+      </td>
+    </tr>
+  {% else %}
+    <tr><td colspan="5" class="none">Ingen brugere.</td></tr>
+  {% endfor %}
+</table>
+{% endblock %}

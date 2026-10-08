@@ -1,7 +1,6 @@
 {
   "id": "kALMQJZ2VgJLSOHp",
   "name": "Homelab-ressurs-alarmer",
-  "description": "Webhook mottar Prometheus/Alertmanager-alarmer og sender leser vennlig varsel til telefon",
   "active": true,
   "nodes": [
     {
@@ -47,6 +46,27 @@
         },
         "options": {}
       }
+    },
+    {
+      "id": "res-log",
+      "name": "Logg hendelse",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        660,
+        600
+      ],
+      "parameters": {
+        "url": "http://10.0.0.119:5678/webhook/events",
+        "method": "POST",
+        "authentication": "none",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ source: ($json.body && $json.body.job) || 'alertmanager', host: (($json.body && $json.body.alerts && $json.body.alerts[0] && $json.body.alerts[0].labels && $json.body.alerts[0].labels.node) || ''), ...(($json.body || {})) }) }}",
+        "options": {
+          "timeout": 30000
+        }
+      }
     }
   ],
   "connections": {
@@ -55,6 +75,11 @@
         [
           {
             "node": "Send til telefon",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Logg hendelse",
             "type": "main",
             "index": 0
           }

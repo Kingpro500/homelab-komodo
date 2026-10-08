@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}{{ bolig.overskrift }}{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+{% endblock %}
+{% block content %}
+<nav class="crumbs"><a href="{{ url_for('index') }}">← Tilbage til søgning</a></nav>
+
+<h1 class="bolig-titel">{{ bolig.overskrift }}</h1>
+<p class="muted">{{ bolig.adresse }}{% if bolig.postnr %} · {{ bolig.postnr }}{% endif %} {{ bolig.by }}{% if bolig.kommune %} · {{ bolig.kommune }} kommune{% endif %}</p>
+
+<div class="bolig-layout">
+  <div class="bolig-main">
+    <div class="galleri">
+      {% for billede in bolig.billeder %}
+        <img src="{{ url_for('uploads', filnavn=billede.filnavn) }}" alt="{{ bolig.overskrift }}" {% if loop.index > 1 %}class="thumb"{% endif %}>
+      {% else %}
+        <div class="card-ph big">Intet billede</div>
+      {% endfor %}
+    </div>
+
+    <h2>Om boligen</h2>
+    <p class="beskrivelse">{{ bolig.beskrivelse or 'Ingen beskrivelse endnu.' }}</p>
+
+    {% if bolig.har_kort %}
+      <h2>Beliggenhed</h2>
+      <div id="kort" style="height:280px"></div>
+    {% endif %}
+  </div>
+
+  <aside class="bolig-side">
+    <div class="prisboks">
+      <p class="pris stor">{{ bolig.husleje_vis }}<span class="muted">/måned</span></p>
+      <table class="fakta">
+        <tr><td>Type</td><td>{{ bolig.boligtype }}</td></tr>
+        <tr><td>Areal</td><td>{{ bolig.areal_m2 }} m²</td></tr>
+        <tr><td>Værelser</td><td>{{ bolig.vaerelser }}</td></tr>
+        <tr><td>Møbleret</td><td>{{ 'Ja' if bolig.moebleret else 'Nej' }}</td></tr>
+        <tr><td>Depositum</td><td>{{ bolig.depositum_vis }}</td></tr>
+        <tr><td>Forudbetalt</td><td>{{ bolig.forudbetalt_vis }}</td></tr>
+        {% if bolig.ledig_fra %}<tr><td>Ledig fra</td><td>{{ bolig.ledig_fra.strftime('%d.%m.%Y') }}</td></tr>{% endif %}
+      </table>
+    </div>
+
+    <div class="henvend">
+      <h2>Vis interesse</h2>
+      <p class="muted">Skriv til udlejer — vi videresender din henvendelse. Ingen betaling før du selv kontakter udlejer direkte.</p>
+      <form method="post" action="{{ url_for('henvendelse', b_id=bolig.id) }}">
+        <input type="hidden" name="csrf" value="{{ g.csrf }}">
+        <input type="text" name="navn" placeholder="Dit navn" required>
+        <input type="email" name="email" placeholder="Din e-mail" required>
+        <input type="tel" name="telefon" placeholder="Telefon (valgfrit)">
+        <textarea name="besked" rows="4" placeholder="Din besked til udlejer"></textarea>
+        <button type="submit">Send henvendelse</button>
+      </form>
+    </div>
+  </aside>
+</div>
+{% endblock %}
+{% block scripts %}
+{% if bolig.har_kort %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  var kort = L.map('kort').setView([{{ bolig.latitude }}, {{ bolig.longitude }}], 13);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap'
+  }).addTo(kort);
+  L.marker([{{ bolig.latitude }}, {{ bolig.longitude }}]).addTo(kort);
+</script>
+{% endif %}
+{% endblock %}

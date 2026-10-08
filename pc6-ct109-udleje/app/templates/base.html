@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="da">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}BoligUdlejning{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <header class="top">
+    <div class="top-inner">
+      <a class="brand" href="{{ url_for('index') }}">🏠 BoligUdlejning</a>
+      <nav class="nav">
+        <a href="{{ url_for('index') }}">Søg boliger</a>
+        {% if g.bruger %}
+          {% if g.bruger.er_admin() %}<a href="{{ url_for('admin') }}">Admin</a>{% endif %}
+          <a href="{{ url_for('portal') }}">Min portal</a>
+          <form class="inline" method="post" action="{{ url_for('logout') }}">
+            <input type="hidden" name="csrf" value="{{ g.csrf }}">
+            <button class="link-btn" type="submit">Log ud</button>
+          </form>
+        {% else %}
+          <a href="{{ url_for('login') }}">Log ind / bliv udlejer</a>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    {% with msgs = get_flashed_messages(with_categories=true) %}
+      {% for kat, msg in msgs %}
+        <div class="flash {{ kat }}">{{ msg }}</div>
+      {% endfor %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="foot">
+    <div class="wrap foot-inner">
+      <span>BoligUdlejning — formidling af hus- og lejlighedsudlejning i Danmark.</span>
+      <span><a href="{{ url_for('om') }}">Om og vilkår</a></span>
+    </div>
+  </footer>
+</body>
+</html>

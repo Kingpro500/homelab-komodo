@@ -1,47 +1,96 @@
 # Nettverkskart — Homelab 10.0.0.0/24
 
-Interaktivt nettverkskart over hele homelab-et. Frittstående HTML (ingen eksterne
-avhengigheter, fungerer offline) — åpne `nettverkskart.html` i en nettleser,
-eller host den som en intern webside (se nedenfor).
+Frittstående startside (HTML) over hele homelab-et. Åpne `nettverkskart.html`
+eller se den live på **http://10.0.0.128:3020/** (nginx i `pc6-ct109-web`).
+
+## ⚠️ Vedlikeholdsregler — LES FØR DU ENDRER
 
 ## Data (sist generert 8. okt 2026)
 
-Kartet bygges fra levende kilder, ikke fra et håndskrevet notat:
+Dette dokumentet har blitt ødelagt flere ganger av AI-er som har:
+- flyttet gjester til feil node og påstått ting som ikke stemmer;
+- erstattet den pålitelige statiske oversikten med én stor JS-tabell som
+  faller ut når et endepunkt er nede;
+- markert reelle tjenester som «finnes ikke» eller omvendt.
 
-| Kilde | Hva |
-|---|---|
-| OPNsense `get_arp` | 48 enheter på LAN, med MAC + produsent |
-| Proxmox API (`cluster/resources` + gjest-konfig) | 19 VM/CT med faktiske IP-er |
-| Homepage `services.yaml` | tjenestebeholdningen |
-| OPNsense config.xml / konfig-notat | switch-lag, WAN, portforward, DNS-kjede |
+Vær derfor nøye med dette:
+
+1. **Sjekk levende data FØR du skriver noe.** Kilden er sannheten, ikke det som
+   står i fila:
+   - Gjester + IP + hvilken node: Proxmox
+     `GET /api2/json/cluster/resources?type=vm` + gjestens `config`
+     (token-en i `~/.hermes/.env` på CT157).
+   - CPU-modell: `GET /api2/json/nodes/<node>/status` -> `cpuinfo.model`.
+   - Kjører/stoppet: `info.status` = `running`/`stopped`. For containere,
+     bekreft med `docker ps` i CT-en via `pct exec`.
+2. **Behold den statiske service-oversikten og datamaskin-oversikten.** De er
+   hovedinnholdet. Du kan legge til ekstra, men ikke fjerne dem.
+3. **En stoppet gjest betyr ikke at den ikke finnes.** Mange CT-er er stoppet
+   med vilje (arkiverte legacy fra Unraid/Tower, eller sparing). Ikke slett dem.
+4. **Når du legger til en enhet:** legg den i den statiske tabellen (riktig
+   node), i nettverkskart-seksjonen og eventuelt IoT-lista — med IP og node
+   hentet fra Proxmox/ARP.
+5. **Forklar avvik** (motsier Proxmox/ARP) i kommentarfeltet nederst i fila i
+   stedet for bare å «fikse» uten kilde.
+
+## Nåværende gjestetilstand (verifisert 6. okt 2026)
+
+| Node | kjører | stoppet/arkivert |
+|---|---|---|
+| pve (pc8) N150 | VM100 HA, CT102 Komodo/NetBox/step-CA, CT115 pihole, CT110 periphery | — |
+| pc6 N355 | VM101 Unraid, CT103 n8n/OWU/gjeld, CT109 *arr/dash/nettkart/udleje, CT151 emby, CT157 hermes | CT104, CT107 mediespillere, CT108 legacy, CT159 abs-ngrok, CT160 lancache |
+| pc9 N100 | CT106 tunarr, CT116 pihole, CT152 roon, CT155 uniFi | CT111 iventoy, CT153 immich, CT154 paperless |
+| pc1 3900X | — | CT105 mediespiller, CT156 ollama, CT158 browsers |
+
+**Merk:** ct107/108/159/160 er arkiverte legacy-CT-er fra Unraid/Tower, stoppet
+med vilje. De kommer opp ved behov — slett dem ikke.
+
+## CPU-er (live fra Proxmox /nodes/*/status)
+
+- pc7 (OPNsense) = N150, pc8 (pve) = N150, pc9 = N100, pc6 = **Core 3 N355**,
+  pc1 = Ryzen 9 3900X, pc3 = Apple M1, pc4 = Ryzen 7 5800X; pc2/pc10 inaktive.
+
+## Verdier å ikke lure seg på
+
+- Sonos: ARP viser 7; de to Sonos One (Arc-surround) er lagt inn som offline.
+- ESP: 5 i ARP. EspMedia 10.1″ = **10.0.0.48**, EspControl lys = .8, media = .86.
+- Portforwards: Emby 8096 → 10.0.0.150 (aktiv), Valheim UDP 2456-58 (lukket).
+- DNS-kjede: klient → Pi-hole (.115/.116) → Unbound (10.0.0.1) → internett.
 
 ## Hvordan regenerere
 
 ```sh
-ssh root@10.0.0.102   # eller en node i klusteret
-# 1. Hent ARP fra OPNsense (les, skriv-token ikke nødvendig)
+ssh root@10.0.0.120   # pc6, eller en node i klusteret
+# 1. ARP fra OPNsense (les)
 curl -sk -u "$OPNSENSE_API_KEY:$OPNSENSE_API_SECRET" \
   -X POST "$OPNSENSE_URL/api/diagnostics/interface/get_arp" -d '{}'
-# 2. Hent gjesteliste med IP-konfig fra Proxmox
-#    (scriptene ~/.hermes/scripts/proxmox_guests.py i CT157 dekker dette)
+# 2. Gjester + IP: Proxmox cluster/resources + gjeste-config
+#    (~/.hermes/scripts/proxmox_guests.py i CT157)
 ```
-
-Kartet er en HTML-skisse; oppdater datafeltene og gjesteblokkene ved store
-endringer. Vedlikeholdes av Hermes (CT157).
 
 ## Hvordan hoste som intern webside
 
-Homelab-et kjører allerede en statisk webside-server kapabelt i CT109. Enkleste
-vei (uten ny node):
+nginx i `pc6-ct109-web`-stacken serverer `docs/network-map/` read-only på
+`10.0.0.128:3020`. Etter endring: commit + push, og `git pull`/`git reset --hard
+origin/main` i `/opt/komodo/stacks/pc6-ct109-web` på pc6 (CT109 kjøres via
+`pct exec 109 -- sh <script>`). Tile «Nettverkskart» i Homepage peker hit.
 
-1. **Nginx i CT109 den eksisterende dockeren** — legg en liten `nginx:alpine`
-   container i `pc6-ct109-node`-stacken (eller en egen `pc6-ct109-web`-stack),
-   mount denne mappa som `:/usr/share/nginx/html:ro`, publiser en port (f.eks.
-   `10.0.0.128:3020`).
-2. Eller **del gjennom FileBrowser** (allerede oppe på `10.0.0.150:8097`) — kopier
-   mappa til `/media` og les HTML derfra.
-3. Legg en tile i `homepage/config/services.yaml` pekende på den nye porten,
-   slik at kartet er klikkbart fra dashbordet.
+## Levende tjenestestatus + av/på-knapper (6. okt 2026)
 
-Siden gethomepage kun gir *status* (ikke start/stopp), bruk `dockctl`
-(`10.0.0.128:3015`) for å få containeren opp hvis den ikke starter selv.
+Siden er statisk HTML men henter levende status fra `homelab-audit` på CT157
+(`10.0.0.135:9118`), cross-origin med CORS server-side:
+
+| Sti | Auth | Beskrivelse |
+|---|---|---|
+| `GET /status` | nei | `{"services":[{"name","host","port","up"}],...}` — TCP-prober parallelt. |
+| `POST /control` | ja (Bearer `AUDIT_TOKEN`) | `{"vmid":153,"action":"on\|off"}` — `pct start/stop`. Tillatte vmider: 111,152,153,154,155. |
+| `GET /nodes` | nei | gjester per node (brukes for ressurskort/tabell). |
+
+Kode på CT157 (`~/.hermes/scripts/`): `servicemap_status.py`,
+`servicemap_control.py` (VMID-mapping), rutene + CORS i
+`homelab_audit_server.py`. Restart: `systemctl --user restart homelab-audit`.
+
+Av/på-knappene krever `AUDIT_TOKEN`:
+```js
+localStorage.setItem("homelab_audit_token", "<AUDIT_TOKEN fra ~/.hermes/.env>")
+```

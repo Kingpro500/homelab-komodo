@@ -1,0 +1,135 @@
+:root {
+  --fg: #1c2430;
+  --muted: #5b6b7b;
+  --accent: #0f766e;
+  --accent2: #115e59;
+  --bg: #f6f8fa;
+  --card: #ffffff;
+  --border: #e2e8f0;
+  --fare: #b91c1c;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: var(--fg);
+  background: var(--bg);
+  line-height: 1.5;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.top { background: var(--card); border-bottom: 1px solid var(--border); }
+.top-inner {
+  max-width: 1100px; margin: 0 auto; padding: 12px 20px;
+  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+}
+.brand { font-weight: 700; font-size: 1.15rem; color: var(--fg); }
+.nav { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+
+.wrap { max-width: 1100px; margin: 0 auto; padding: 24px 20px; }
+.foot { border-top: 1px solid var(--border); background: var(--card); margin-top: 40px; }
+.foot-inner { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding-top: 16px; padding-bottom: 16px; font-size: 0.85rem; color: var(--muted); }
+
+.flash { padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; }
+.flash.succes { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
+.flash.advarsel { background: #fffbeb; color: #92400e; border: 1px solid #fde68a; }
+
+h1 { font-size: 1.6rem; }
+h2 { font-size: 1.15rem; margin-top: 28px; }
+.muted { color: var(--muted); }
+.none { padding: 24px; background: var(--card); border: 1px dashed var(--border); border-radius: 8px; }
+
+/* --- søg --- */
+.hero { background: linear-gradient(135deg, var(--accent2), var(--accent)); color: #fff; border-radius: 14px; padding: 32px; margin-bottom: 24px; }
+.hero h1 { margin-top: 0; }
+.hero p { opacity: 0.92; }
+.search { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.search input, .search select, .search button {
+  padding: 10px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.4);
+  font-size: 0.95rem;
+}
+.search input, .search select { background: #fff; min-width: 140px; flex: 1; }
+.search button { background: #fff; color: var(--accent2); font-weight: 600; cursor: pointer; }
+
+/* --- kort --- */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 18px; }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; color: var(--fg); transition: transform 0.08s, box-shadow 0.08s; }
+.card:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.08); text-decoration: none; }
+.card img { width: 100%; height: 170px; object-fit: cover; display: block; }
+.card-ph { height: 170px; background: #eef2f6; display: flex; align-items: center; justify-content: center; color: var(--muted); }
+.card-body { padding: 14px; }
+.card-body h3 { margin: 0 0 4px; font-size: 1.05rem; }
+.pris { color: var(--accent); font-weight: 700; font-size: 1.1rem; margin: 6px 0 0; }
+
+/* --- bolig-detalje --- */
+.crumbs { margin-bottom: 8px; font-size: 0.9rem; }
+.bolig-titel { margin: 4px 0 2px; }
+.bolig-layout { display: grid; grid-template-columns: 1fr 340px; gap: 24px; margin-top: 20px; }
+@media (max-width: 800px) { .bolig-layout { grid-template-columns: 1fr; } }
+.galleri img { width: 100%; border-radius: 12px; max-height: 460px; object-fit: cover; }
+.galleri img.thumb { margin-top: 10px; max-height: 130px; width: auto; display: inline-block; margin-right: 8px; }
+.card-ph.big { height: 300px; }
+.beskrivelse { white-space: pre-line; }
+.bolig-side .prisboks { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
+.pris.stor { font-size: 1.5rem; }
+.fakta { width: 100%; border-collapse: collapse; margin-top: 8px; }
+.fakta td { padding: 6px 0; border-bottom: 1px solid var(--border); }
+.fakta td:first-child { color: var(--muted); }
+.henvend { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px; margin-top: 16px; }
+.henvend h2 { margin-top: 0; }
+
+/* --- formularer --- */
+form { display: flex; flex-direction: column; gap: 12px; }
+input, select, textarea {
+  padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.95rem; font-family: inherit; width: 100%;
+}
+button {
+  padding: 10px 16px; border: none; border-radius: 8px; background: var(--accent); color: #fff;
+  font-weight: 600; cursor: pointer; font-size: 0.95rem;
+}
+button:hover { background: var(--accent2); }
+label { display: flex; flex-direction: column; gap: 4px; font-weight: 600; }
+label.check { flex-direction: row; align-items: center; gap: 8px; font-weight: 400; }
+.form-stor h2 { border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 700px) { .grid2 { grid-template-columns: 1fr; } }
+.smal { max-width: 420px; }
+.smal form, .search form { }
+.inline { display: inline-flex; flex-direction: row; gap: 6px; }
+.link-btn { background: none; color: var(--accent); padding: 0; font-weight: 400; }
+.link-btn:hover { text-decoration: underline; background: none; }
+
+/* --- portal --- */
+.portal-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.btn { background: var(--accent); color: #fff; padding: 8px 14px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; }
+.btn:hover { background: var(--accent2); text-decoration: none; }
+.btn.sm { padding: 6px 10px; font-size: 0.8rem; }
+.btn.fare { background: var(--fare); }
+.portal-row {
+  display: flex; gap: 14px; align-items: center; background: var(--card);
+  border: 1px solid var(--border); border-radius: 12px; padding: 12px; margin-bottom: 10px; flex-wrap: wrap;
+}
+.mini { width: 80px; height: 56px; object-fit: cover; border-radius: 8px; }
+.mini.ph { background: #eef2f6; display: flex; align-items: center; justify-content: center; color: var(--muted); }
+.portal-info { flex: 1; display: flex; flex-direction: column; }
+.portal-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.status { font-weight: 600; font-size: 0.8rem; padding: 2px 8px; border-radius: 999px; }
+.status.udkast { background: #fef3c7; color: #92400e; }
+.status.aktiv { background: #dcfce7; color: #166534; }
+.status.udlejet { background: #e2e8f0; color: #334155; }
+.status.afvist { background: #fee2e2; color: #991b1b; }
+
+.billede-liste { display: flex; gap: 10px; flex-wrap: wrap; }
+.billede-item { border: 1px solid var(--border); border-radius: 8px; padding: 8px; background: var(--card); }
+.billede-item img { width: 120px; height: 90px; object-fit: cover; border-radius: 6px; display: block; margin-bottom: 6px; }
+
+.henvendelse { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin-bottom: 10px; }
+.henvendelse.ulaest { border-left: 4px solid var(--accent); }
+.henv-top { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+
+/* --- tabel --- */
+.tabel { width: 100%; border-collapse: collapse; background: var(--card); border-radius: 12px; overflow: hidden; }
+.tabel th, .tabel td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); font-size: 0.92rem; }
+.tabel th { background: #f1f5f9; }
+.tabel select { width: auto; padding: 6px; }

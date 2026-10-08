@@ -1,0 +1,43 @@
+# Udlejning — formidlingsportal (MVP)
+#
+# Kører på CT109 (10.0.0.128) på pc6 via Komodo, stack pc6-ct109-udleje.
+# Adresse: http://10.0.0.128:3030
+#
+# Alle hemmeligheder sættes i Komodo Stack Environment. Repoet indeholder
+# kun .env.example (gitignored .env).
+
+services:
+  db:
+    image: docker.io/library/postgres:16-alpine
+    container_name: udleje-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: udleje
+      POSTGRES_USER: udleje
+      POSTGRES_PASSWORD: "${UDLEJE_DB_PASSWORD:?Set a secret in Komodo}"
+    volumes:
+      - "${UDLEJE_POSTGRES_PATH:?Set in Komodo}:/var/lib/postgresql/data"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U udleje -d udleje"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    container_name: udleje-app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "3030:8080"
+    environment:
+      SECRET_KEY: "${UDLEJE_SECRET_KEY:?Set a secret in Komodo}"
+      DATABASE_URL: "postgresql+psycopg://udleje:${UDLEJE_DB_PASSWORD:?Set a secret in Komodo}@db:5432/udleje"
+      UPLOAD_FOLDER: /data/uploads
+      ADMIN_EMAIL: "${UDLEJE_ADMIN_EMAIL:-admin@udleje.local}"
+      ADMIN_PASSWORD: "${UDLEJE_ADMIN_PASSWORD:?Set a secret in Komodo}"
+      TZ: Europe/Copenhagen
+    volumes:
+      - "${UDLEJE_DATA_PATH:?Set in Komodo}:/data"

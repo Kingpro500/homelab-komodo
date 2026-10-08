@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Rediger bolig' if bolig else 'Ny bolig' }}{% endblock %}
+{% block content %}
+<h1>{{ 'Rediger bolig' if bolig else 'Ny bolig' }}</h1>
+<p class="muted">Felter med * er påkrævet. Boligen vises offentligt, når admin har godkendt den.</p>
+
+<form method="post" enctype="multipart/form-data" class="form-stor">
+  <input type="hidden" name="csrf" value="{{ g.csrf }}">
+
+  <h2>Grundlæggende</h2>
+  <label>Overskrift * <input type="text" name="overskrift" value="{{ bolig.overskrift if bolig else '' }}" required></label>
+  <label>Boligtype
+    <select name="boligtype">
+      <option value="lejlighed" {{ 'selected' if bolig and bolig.boligtype=='lejlighed' }}>Lejlighed</option>
+      <option value="hus" {{ 'selected' if bolig and bolig.boligtype=='hus' }}>Hus</option>
+      <option value="andet" {{ 'selected' if bolig and bolig.boligtype=='andet' }}>Andet</option>
+    </select>
+  </label>
+  <label>Beskrivelse <textarea name="beskrivelse" rows="8">{{ bolig.beskrivelse if bolig else '' }}</textarea></label>
+
+  <h2>Beliggenhed</h2>
+  <div class="grid2">
+    <label>Adresse <input type="text" name="adresse" value="{{ bolig.adresse if bolig else '' }}"></label>
+    <label>Postnr. <input type="text" name="postnr" value="{{ bolig.postnr if bolig else '' }}"></label>
+    <label>By <input type="text" name="by" value="{{ bolig.by if bolig else '' }}"></label>
+    <label>Kommune * <input type="text" name="kommune" value="{{ bolig.kommune if bolig else '' }}" required></label>
+    <label>Breddegrad (til kort) <input type="text" name="latitude" value="{{ bolig.latitude if bolig else '' }}" placeholder="fx 55.6761"></label>
+    <label>Længdegrad (til kort) <input type="text" name="longitude" value="{{ bolig.longitude if bolig else '' }}" placeholder="fx 12.5683"></label>
+  </div>
+
+  <h2>Økonomi og størrelse</h2>
+  <div class="grid2">
+    <label>Husleje pr. måned (DKK) * <input type="text" name="husleje" value="{{ bolig.husleje_pr_maaned if bolig else '' }}" required></label>
+    <label>Depositum (DKK) <input type="text" name="depositum" value="{{ bolig.depositum if bolig else '' }}"></label>
+    <label>Forudbetalt (DKK) <input type="text" name="forudbetalt" value="{{ bolig.forudbetalt if bolig else '' }}"></label>
+    <label>Ledig fra <input type="date" name="ledig_fra" value="{{ bolig.ledig_fra if bolig else '' }}"></label>
+    <label>Areal (m²) <input type="number" name="areal_m2" value="{{ bolig.areal_m2 if bolig else '' }}"></label>
+    <label>Værelser <input type="number" name="vaerelser" value="{{ bolig.vaerelser if bolig else '' }}"></label>
+  </div>
+  <label class="check"><input type="checkbox" name="moebleret" {% if bolig and bolig.moebleret %}checked{% endif %}> Møbleret</label>
+
+  <h2>Billeder</h2>
+  {% if bolig and bolig.billeder %}
+    <div class="billede-liste">
+      {% for billede in bolig.billeder %}
+        <div class="billede-item">
+          <img src="{{ url_for('uploads', filnavn=billede.filnavn) }}" alt="">
+          <form class="inline" method="post" action="{{ url_for('slet_billede', b_id=bolig.id, bi_id=billede.id) }}">
+            <input type="hidden" name="csrf" value="{{ g.csrf }}">
+            <button class="btn sm fare" type="submit">Fjern</button>
+          </form>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+  <label>Tilføj billeder (jpg/png/webp, max ~8 MB hver, flere kan vælges)
+    <input type="file" name="billeder" multiple accept=".jpg,.jpeg,.png,.webp">
+  </label>
+
+  <button type="submit">Gem {{ 'ændringer' if bolig else 'bolig' }}</button>
+</form>
+{% endblock %}

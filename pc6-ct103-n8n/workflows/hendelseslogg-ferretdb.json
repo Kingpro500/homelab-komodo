@@ -1,0 +1,85 @@
+{
+  "id": "mUJE2QbmK08wAlys",
+  "name": "Hendelseslogg - FerretDB",
+  "active": true,
+  "nodes": [
+    {
+      "id": "h1",
+      "name": "Webhook hendelser",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        300
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "events",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "webhookId": "f4004edf-f420-48f5-a3e1-b3b260dc4ae7"
+    },
+    {
+      "id": "h2",
+      "name": "Normaliser hendelse",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const b = $json.body || (typeof $json === 'object' && !('headers' in $json) ? $json : {});\n// Vi normaliserer til et fast hendelsesdokument. Feltet 'body' kan ha alarmer\n// (Alertmanager) eller være rådata fra andre kilder. Trekker ut det vi kan.\nconst map = (o) => typeof o === 'string' ? o : (o ? JSON.stringify(o) : '');\nconst out = {\n  source: String(b.source || b.job || $json.source || 'ukjent'),\n  type: String(b.type || b.alertname || b.status || (b.alerts && b.alerts[0] && b.alerts[0].labels && b.alerts[0].labels.alertname) || 'hendelse'),\n  severity: String(b.severity || (b.alerts && b.alerts[0] && b.alerts[0].labels && b.alerts[0].labels.severity) || 'info'),\n  title: String(b.title || (b.alerts && b.alerts[0] && b.alerts[0].annotations && b.alerts[0].annotations.summary) || ''),\n  message: String(b.message || b.msg || (b.alerts && b.alerts[0] && b.alerts[0].annotations && b.alerts[0].annotations.description) || ''),\n  host: String(b.host || b.instance || $json.host || ''),\n  at: new Date().toISOString(),\n  details: map(b)\n};\nreturn [{ json: out }];"
+      }
+    },
+    {
+      "id": "h3",
+      "name": "Lagre i FerretDB",
+      "type": "n8n-nodes-base.mongoDb",
+      "typeVersion": 2,
+      "position": [
+        480,
+        300
+      ],
+      "parameters": {
+        "operation": "insert",
+        "collection": "events",
+        "fields": "source,type,severity,title,message,host,at,details"
+      },
+      "credentials": {
+        "mongoDb": {
+          "id": "DuHCLSpNcLkuIP3L",
+          "name": "FerretDB homelab_events"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook hendelser": {
+      "main": [
+        [
+          {
+            "node": "Normaliser hendelse",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normaliser hendelse": {
+      "main": [
+        [
+          {
+            "node": "Lagre i FerretDB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
