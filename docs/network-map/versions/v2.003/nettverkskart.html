@@ -116,13 +116,7 @@ footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-
 </style>
 </head>
 <body>
-<div class="hist" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;white-space:nowrap">
-  <input type="password" id="sw-token" placeholder="token" style="width:110px;background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:4px 8px;color:var(--text)" name="audit_token" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-1p-ignore data-lpignore="true" data-form-type="other">
-  <button id="sw-token-save" class="sw-btn">Lagre</button>
-  <span id="sw-token-msg" style="color:var(--lan);font-size:11px"></span>
-  <span style="color:var(--dim);font-size:11px" id="sw-meta"></span>
-  <span style="color:var(--muted);margin-left:6px">📜 versjon <b>2.004</b> · <a href="versions/">historikk</a></span>
-</div>
+<div class="hist">📜 versjon <b>2.003</b> · <a href="versions/">historikk</a></div>
 
 <h1>🏠 Homelab — tjenester &amp; nettverk <span style="color:var(--lan)">10.0.0.0/24</span></h1>
 <div class="sub">Intern startside · Proxmox-kluster «CyberCluster» · OPNsense pc7 (brannmur)</div>
@@ -134,6 +128,12 @@ footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-
 <!-- ⛔ NODE-SAMMENDRAGET over (fire maskiner med CPU/RAM/disk) er PÅLAGT og må IKKE fjernes. Det gjenopprettes fra /nodes. Se docs/network-map/README.md. -->
 <div id="node-resources" style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px"></div>
 
+<div id="cs-ctrl" style="font-size:13px;color:var(--muted);margin:8px 0 10px"><b>Autentisering (av/på):</b>
+  <input type="password" id="sw-token" placeholder="homelab_audit_token" style="width:230px;background:var(--panel)" autocomplete="off">
+  <button id="sw-token-save" class="sw-btn">Lagre token</button>
+  <span id="sw-token-msg" style="color:var(--lan);font-size:12px"></span>
+  <span id="sw-meta" style="color:var(--dim);font-size:12px;margin-left:8px"></span>
+</div>
 <table id="svc-table">
   <thead><tr><th>Tjeneste</th><th>Gjest</th><th>Adresse</th><th>Merknad</th><th>Status</th><th>Strøm</th></tr></thead>
   <tbody>
