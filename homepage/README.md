@@ -56,6 +56,29 @@ det interaktive LAN-kartet (`docs/network-map/`), servert av `pc6-ct109-web`
 dokumentert i [`docs/network-map/README.md`](../docs/network-map/README.md) og
 `pc6-ct109-web/README.md`.**
 
+## Proxmox-node CPU/RAM (widget)
+
+De fire node-kortene (pc1/pc6/pc9/pve) har hver en `type: proxmox`-widget som
+viser nodens CPU/RAM/vm/lxc via:
+
+```yaml
+        widget:
+          type: proxmox
+          url: https://<node-ip>:8006
+          username: ${PROXMOX_TOKEN_ID}
+          password: ${PROXMOX_SECRET}
+          node: <pc1|pc6|pc9|pve>
+```
+
+**Viktig:** gethomepage-proxmox-widgeten autentiserer **kun via HTTP Basic**
+(`username@pam!tokenid` + secret). `~/.hermes/.env`-token-en
+(`hermes@pve!monitor`) virker **bare** via `PVEAPIToken`-headeren og gir derfor
+**401** i widgeten — den kan ikke brukes her. For å få kortene til å vise data:
+opprett en egen read-only Proxmox-bruker/-token som støtter Basic-auth og sett
+`PROXMOX_TOKEN_ID` / `PROXMOX_SECRET` i Komodo (`pc6-ct109-homepage` →
+miljøvariabler), så redeploy. Uten dem viser kortene bare «ingen data» (homepage
+deployer uansett — variablene er valgfrie).
+
 ## Live status (nativt)
 
 Homepage deler CT109s `docker.sock` (read-only). Hver CT109-tjeneste i
