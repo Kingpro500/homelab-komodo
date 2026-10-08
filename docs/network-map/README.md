@@ -3,6 +3,25 @@
 Frittstående startside (HTML) over hele homelab-et. Åpne `nettverkskart.html`
 eller se den live på **http://10.0.0.128:3020/** (nginx i `pc6-ct109-web`).
 
+## ⛔ PÅLAGT: NODE-SAMMENDRAGET + VERSJONERING — MÅ IKKE FJERNES
+
+**Det finnes ETT element som er beskyttet uten unntak:** node-sammendraget —
+de fire maskinene (pc1 · Gaming, pc6 · Tower, pc9 · Minipc, pc8 · pve) med
+**CPU, RAM og Disk** øverst i «📋 Serviceoversikt». Det er `#node-resources` i
+`nettverkskart.html` og fylles live fra `GET http://10.0.0.135:9118/nodes`.
+
+- Det ble **fjernet én gang** (commit `acac5cc`, «gjenopprett statisk oversikt»)
+  og er siden gjenopprettet. **Gjenopplever du å se det forsvunnet, gjenopprett
+  det umiddelbart fra `/nodes` — ikke «rydd» det bort.**
+- **Du må ALDRI**: fjerne `#node-resources`, `.nr-card`-CSS-en, `renderNodes()`,
+  eller erstatte innholdet med noe annet. Du kan legge til elementer i tillegg.
+- Kommentaren i HTML-en rett over `#node-resources` er også der av denne grunn.
+
+**Versjonering:** Hver endring av `nettverkskart.html` = ny versjon. Arkiver
+forrige versjon til `versions/vNN/` og oppdater `versions/index.html`. Topp-
+høyre på siden viser versjonsnummeret, og `versions/` er indeksen med klikkbare
+gamle versjoner. Aldri slett gamle versjoner.
+
 ## ⚠️ Vedlikeholdsregler — LES FØR DU ENDRER
 
 ## Data (sist generert 8. okt 2026)
