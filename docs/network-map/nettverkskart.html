@@ -130,11 +130,11 @@ footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-
   <button id="sw-token-save" class="sw-btn">Lagre</button><button id="tok-edit" class="sw-btn" title="endre token" style="display:none">✎</button>
   <span id="sw-token-msg" style="color:var(--lan);font-size:11px"></span>
   <span style="color:var(--dim);font-size:11px" id="sw-meta"></span>
-  <span style="color:var(--muted);margin-left:6px">📜 versjon <b>2.016</b> · <a href="versions/">historikk</a></span>
+  <span style="color:var(--muted);margin-left:6px">📜 versjon <b>2.017</b> · <a href="versions/">historikk</a></span>
 </div>
 
 <h1>🏠 Homelab — tjenester &amp; nettverk <span style="color:var(--lan)">10.0.0.0/24</span></h1>
-<div class="note" style="border:1px solid var(--lan);padding:10px 12px;margin:10px 0;color:var(--text)"><b>Endringsnotat v2.016</b> · Alle CT-er og VM-er er navngitt vertsuavhengig som ct&lt;id&gt;-rolle / vm&lt;id&gt;-rolle. Tjenestelistene for CT103, CT104, CT109 og CT151 er kontrollert direkte mot Docker-status 9. okt. CT112 (Open WebUI, Gjeld og DiskSpeed), CT113 (Udleje) og CT114 (dashboardene) er stoppede arkiv-CT-er uten autostart. NetBox og step-CA er urørt. CT111/CT153 står fortsatt på PC9 fordi lokale bind-mounts må flyttes planlagt.</div>
+<div class="note" style="border:1px solid var(--lan);padding:10px 12px;margin:10px 0;color:var(--text)"><b>Endringsnotat v2.017</b> · Alle CT-er og VM-er er navngitt vertsuavhengig som ct&lt;id&gt;-rolle / vm&lt;id&gt;-rolle. Tjenestelistene for CT103, CT104, CT109 og CT151 er kontrollert direkte mot Docker-status 9. okt. CT112 (Open WebUI, Gjeld og DiskSpeed), CT113 (Udleje) og CT114 (dashboardene) er stoppede arkiv-CT-er uten autostart. NetBox og step-CA er urørt. CT111/CT153 står fortsatt på PC9 fordi lokale bind-mounts må flyttes planlagt.</div>
 
 <div class="sub">Intern startside · Proxmox-kluster «CyberCluster» · OPNsense pc7 (brannmur)</div>
 <div class="meta">Verifisert 9. okt 2026 mot Proxmox og Docker. Kilder: OPNsense-ARP (48 enheter) · Proxmox-API (4 noder, CPU fra <code>/nodes/*/status</code>, gjester + IP fra config) · levende docker-inventar i hver CT · Komodo. «Inaktiv/» = finnes, men er av. CT-er merket er nede med vilje (arkivert fra Tower/Unraid) og kommer opp igjen ved behov.</div>
@@ -200,11 +200,7 @@ footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-
 <tr><td><a href="http://10.0.0.166:3012/">Heimdall</a></td><td class="ip"><a href="http://10.0.0.166:3012/">10.0.0.166:3012/</a></td><td class="off">launcher · stoppet · autostart av</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
 <tr><td><a href="http://10.0.0.166:3000/">Grafana</a></td><td class="ip"><a href="http://10.0.0.166:3000/">10.0.0.166:3000/</a></td><td class="off">visualisering · stoppet · autostart av</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
 </tbody></table></div></td></tr>
-<tr class="vm-frame-row"><td colspan="6"><div class="vm-frame" data-vmid="107">
-<div class="vm-h"><span class="tag tag-ct">CT</span>ct107-mediespillere-gammel 107</div>
-<table class="svc"><thead><tr><th>Tjeneste</th><th>Adresse</th><th>Merknad</th><th>Status</th><th>Strøm</th></tr></thead><tbody>
-<tr><td>Plex / Jellyfin (arkiv)</td><td class="ip"><a href="http://10.0.0.160/">10.0.0.160</a></td><td class="off">flyttet fra Tower</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-</tbody></table></div></td></tr>
+<tr class="vm-frame-row"><td colspan="6"><div class="vm-frame" data-vmid="107"><div class="vm-h"><span class="tag tag-ct">CT</span>ct107-mediespillere-gammel 107</div><table class="svc"><thead><tr><th>Tjeneste</th><th>Adresse</th><th>Merknad</th><th>Status</th><th>Strøm</th></tr></thead><tbody><tr><td>Jellyfin</td><td class="ip"><a href="http://10.0.0.160:8099/">10.0.0.160:8099/</a></td><td class="off">arkiv · stoppet · autostart av</td><td class="st-wrap"></td><td class="g-ctl"></td></tr><tr><td>Plex</td><td class="ip"><a href="http://10.0.0.160:32400/">10.0.0.160:32400/</a></td><td class="off">arkiv · stoppet · autostart av</td><td class="st-wrap"></td><td class="g-ctl"></td></tr></tbody></table></div></td></tr>
 <tr class="vm-frame-row"><td colspan="6"><div class="vm-frame" data-vmid="108">
 <div class="vm-h"><span class="tag tag-ct">CT</span>ct108-legacy-dockere-gammel 108</div>
 <table class="svc"><thead><tr><th>Tjeneste</th><th>Adresse</th><th>Merknad</th><th>Status</th><th>Strøm</th></tr></thead><tbody>
@@ -215,11 +211,7 @@ footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-
 <tr><td>4get <span class="off"></span></td><td class="ip"><a href="http://10.0.0.161/">10.0.0.161</a></td><td>arkivert fra Tower</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
 <tr><td>Linkding <span class="off"></span></td><td class="ip"><a href="http://10.0.0.161/">10.0.0.161</a></td><td>arkivert fra Tower</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
 </tbody></table></div></td></tr>
-<tr class="vm-frame-row"><td colspan="6"><div class="vm-frame" data-vmid="159">
-<div class="vm-h"><span class="tag tag-ct">CT</span>ct159-abs-ngrok-gammel 159</div>
-<table class="svc"><thead><tr><th>Tjeneste</th><th>Adresse</th><th>Merknad</th><th>Status</th><th>Strøm</th></tr></thead><tbody>
-<tr><td>Audiobookshelf / ngrok (arkiv)</td><td class="ip"><a href="http://10.0.0.162/">10.0.0.162</a></td><td class="off">oppsett arkivert</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-</tbody></table></div></td></tr>
+<tr class="vm-frame-row"><td colspan="6"><div class="vm-frame" data-vmid="159"><div class="vm-h"><span class="tag tag-ct">CT</span>ct159-audiobookshelf-ngrok-gammel 159</div><table class="svc"><thead><tr><th>Tjeneste</th><th>Adresse</th><th>Merknad</th><th>Status</th><th>Strøm</th></tr></thead><tbody><tr><td>Audiobookshelf</td><td class="ip"><a href="http://10.0.0.162:13378/">10.0.0.162:13378/</a></td><td class="off">arkiv · stoppet · autostart av</td><td class="st-wrap"></td><td class="g-ctl"></td></tr><tr><td>ngrok</td><td class="ip"><a href="http://10.0.0.162/">10.0.0.162/</a></td><td class="off">arkiv · stoppet · autostart av</td><td class="st-wrap"></td><td class="g-ctl"></td></tr></tbody></table></div></td></tr>
 <tr class="vm-frame-row"><td colspan="6"><div class="vm-frame" data-vmid="160">
 <div class="vm-h"><span class="tag tag-ct">CT</span>ct160-lancache-gammel 160</div>
 <table class="svc"><thead><tr><th>Tjeneste</th><th>Adresse</th><th>Merknad</th><th>Status</th><th>Strøm</th></tr></thead><tbody>
