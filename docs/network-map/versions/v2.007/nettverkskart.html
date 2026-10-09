@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Homelab — tjenesteoversikt &amp; nettverkskart · 10.0.0.0/24</title>
-
 <style>
 :root{
   --bg:#0b0f14; --panel:#141a22; --panel2:#1a222d; --border:#2a3542;
@@ -72,11 +71,11 @@ tr:hover td{background:#1a232e}
 .svc-list{font-size:12.5px;color:var(--muted);margin:2px 0 7px 5px;line-height:1.6}
 .svc-list i{color:var(--svc);font-style:normal}
 .off{opacity:.55}
-.iot-wrap{display:grid;grid-template-columns:repeat(auto-fill,minmax(122px,1fr));gap:6px}
-.iot{border:1px solid var(--border);border-radius:6px;background:var(--panel2);padding:5px 8px;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.iot .i-nm{font-weight:600;color:#f2c879;font-size:12.5px}
-.iot .i-ip{font-family:monospace;font-size:11px;color:var(--muted)}
-.iot .i-m{font-size:10px;color:var(--dim);font-family:monospace}
+.iot-wrap{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
+.iot{border:1px solid var(--border);border-radius:7px;background:var(--panel2);padding:9px 11px;font-size:14px}
+.iot .i-nm{font-weight:600;color:#f2c879}
+.iot .i-ip{font-family:monospace;font-size:13px;color:var(--muted)}
+.iot .i-m{font-size:11.5px;color:var(--dim);font-family:monospace}
 mark{background:transparent;color:var(--danger);font-weight:700}
 .note{font-size:13.5px;color:var(--dim);line-height:1.7;max-width:880px;margin-top:14px}
 .note b{color:var(--muted)}
@@ -114,12 +113,6 @@ footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-
 .g-type{font-size:11.5px;color:var(--dim)}
 .g-prot{color:var(--danger);font-size:10.5px;text-transform:uppercase;border:1px solid var(--danger);border-radius:8px;padding:0 5px}
 .g-ctl{white-space:nowrap;text-align:right}
-
-.vm-frame{border:1px solid var(--border);border-radius:9px;margin:8px 0;overflow:hidden;background:var(--panel)}
-.vm-h{padding:6px 11px;background:var(--panel2);font-weight:700;font-size:13.5px;border-bottom:1px solid var(--border)}
-.vm-frame table.svc{width:100%;border-collapse:collapse}
-.vm-frame table.svc th{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;text-align:left;padding:4px 11px;background:var(--bg)}
-.vm-frame table.svc td{padding:5px 11px;font-size:13.5px;border-top:1px solid var(--border)}
 </style>
 </head>
 <body>
@@ -128,7 +121,7 @@ footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-
   <button id="sw-token-save" class="sw-btn">Lagre</button><button id="tok-edit" class="sw-btn" title="endre token" style="display:none">✎</button>
   <span id="sw-token-msg" style="color:var(--lan);font-size:11px"></span>
   <span style="color:var(--dim);font-size:11px" id="sw-meta"></span>
-  <span style="color:var(--muted);margin-left:6px">📜 versjon <b>2.008</b> · <a href="versions/">historikk</a></span>
+  <span style="color:var(--muted);margin-left:6px">📜 versjon <b>2.007</b> · <a href="versions/">historikk</a></span>
 </div>
 
 <h1>🏠 Homelab — tjenester &amp; nettverk <span style="color:var(--lan)">10.0.0.0/24</span></h1>
@@ -140,177 +133,85 @@ footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-
 <div class="meta" style="margin:-4px 0 10px;color:var(--dim);font-size:12px">◈ Node-ressurser (CPU/RAM/Disk) — fra <code>10.0.0.135:9118/nodes</code>, oppdateres hvert 15 s</div>
 <!-- ⛔ NODE-SAMMENDRAGET over (fire maskiner med CPU/RAM/disk) er PÅLAGT og må IKKE fjernes. Det gjenopprettes fra /nodes. Se docs/network-map/README.md. -->
 <div id="node-resources" style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px"></div>
+
 <table id="svc-table">
-<tbody>
-<tr><th>Tjeneste</th><th>Gjest</th><th>Adresse</th><th>Merknad</th><th>Status</th><th>Strøm</th></tr>
-<tr class="section-row"><td colspan="6"><span class="tag tag-node">pve</span> pc8 · N150 · 10.0.0.102</td></tr>
-<tr class="vm-frame-row"><td colspan="6"><div class="vm-frame" data-vmid="100">
-<div class="vm-h"><td><span class="tag tag-vm">VM</span>homeassistant 100</td></div>
-<table class="svc"><thead><tr><th>Tjeneste</th><th>Adresse</th><th>Merknad</th><th>Status</th><th>Strøm</th></tr></thead><tbody>
-<tr><td><a href="http://10.0.0.7:8123/">Home Assistant</a></td><td class="ip"><a href="http://10.0.0.7:8123/">10.0.0.7:8123</a></td><td>Smarthus · 1834 enheter</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-</tbody></table></div></td></tr>
-<tr class="vm-frame-row"><td colspan="6"><div class="vm-frame" data-vmid="102">
-<div class="vm-h"><td><span class="tag tag-ct">CT</span>Komodo-core 102</td></div>
-<table class="svc"><thead><tr><th>Tjeneste</th><th>Adresse</th><th>Merknad</th><th>Status</th><th>Strøm</th></tr></thead><tbody>
-<tr><td><a href="http://10.0.0.117:9120/">Komodo core</a></td><td class="ip"><a href="http://10.0.0.117:9120/">10.0.0.117:9120</a></td><td>Komodo-kontroll</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-<tr><td><a href="http://10.0.0.117:8001/">NetBox</a></td><td class="ip"><a href="http://10.0.0.117:8001/">10.0.0.117:8001</a></td><td>IPAM/DCIM</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-<tr><td><a href="https://10.0.0.117:9000/">step-CA</a></td><td class="ip"><a href="http://10.0.0.117:9000/">10.0.0.117:9000</a></td><td>intern CA/ACME</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-</tbody></table></div></td></tr>
-<tr class="vm-frame-row"><td colspan="6"><div class="vm-frame" data-vmid="115">
-<div class="vm-h"><td><span class="tag tag-ct">CT</span>pihole-pc8 115</td></div>
-<table class="svc"><thead><tr><th>Tjeneste</th><th>Adresse</th><th>Merknad</th><th>Status</th><th>Strøm</th></tr></thead><tbody>
-<tr><td><a href="http://10.0.0.115:8080/admin/">Pi-hole</a></td><td class="ip"><a href="http://10.0.0.115:8080/">10.0.0.115:8080</a></td><td>DNS1</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-</tbody></table></div></td></tr>
-<tr class="vm-frame-row"><td colspan="6"><div class="vm-frame" data-vmid="110">
-<div class="vm-h"><td><span class="tag tag-ct">CT</span>ct110-node 110</td></div>
-<table class="svc"><thead><tr><th>Tjeneste</th><th>Adresse</th><th>Merknad</th><th>Status</th><th>Strøm</th></tr></thead><tbody>
-<tr><td>Komodo-periphery</td><td class="ip"><a href="http://10.0.0.129/">10.0.0.129</a></td><td>Agenthost</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-</tbody></table></div></td></tr>
-<tr class="section-row"><td colspan="6"><span class="tag tag-node">pc6</span> Core 3 N355 · 10.0.0.120 · QuickSync</td></tr>
-<tr class="vm-frame-row"><td colspan="6"><div class="vm-frame" data-vmid="101">
-<div class="vm-h"><td><span class="tag tag-vm">VM</span>Unraid 101</td></div>
-<table class="svc"><thead><tr><th>Tjeneste</th><th>Adresse</th><th>Merknad</th><th>Status</th><th>Strøm</th></tr></thead><tbody>
-<tr><td><a href="http://10.0.0.101/">Unraid-Tower</a></td><td class="ip"><a href="http://10.0.0.101/">10.0.0.101</a></td><td>Lagring · Netdata :19999</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-</tbody></table></div></td></tr>
-<tr class="vm-frame-row"><td colspan="6"><div class="vm-frame" data-vmid="103">
-<div class="vm-h"><td><span class="tag tag-ct">CT</span>ct103 103</td></div>
-<table class="svc"><thead><tr><th>Tjeneste</th><th>Adresse</th><th>Merknad</th><th>Status</th><th>Strøm</th></tr></thead><tbody>
-<tr><td><a href="http://10.0.0.119:5678/">n8n</a></td><td class="ip"><a href="http://10.0.0.119:5678/">10.0.0.119:5678</a></td><td>Automasjon</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-<tr><td><a href="http://10.0.0.119:3080/">Open WebUI</a></td><td class="ip"><a href="http://10.0.0.119:3080/">10.0.0.119:3080</a></td><td>LLM-chat</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-<tr><td><a href="http://10.0.0.119:8099/">Gjeld-app</a></td><td class="ip"><a href="http://10.0.0.119:8099/">10.0.0.119:8099</a></td><td>Gjeld/økonomi</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-<tr><td>ferretdb (n8n-db)</td><td class="ip"><a href="http://10.0.0.119/">10.0.0.119</a></td><td>Mongo-komp.</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-<tr><td>gjeld-db (postgres)</td><td class="ip"><a href="http://10.0.0.119/">10.0.0.119</a></td><td>DB-gjeld</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-</tbody></table></div></td></tr>
-<tr class="vm-frame-row"><td colspan="6"><div class="vm-frame" data-vmid="104">
-<div class="vm-h"><td><span class="tag tag-ct">CT</span>ct104 104</td></div>
-<table class="svc"><thead><tr><th>Tjeneste</th><th>Adresse</th><th>Merknad</th><th>Status</th><th>Strøm</th></tr></thead><tbody>
-<tr><td><a href="http://10.0.0.124:5216/">MySpeed</a></td><td class="ip"><a href="http://10.0.0.124:5216/">10.0.0.124:5216</a></td><td class="off">hast-test</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-<tr><td><a href="http://10.0.0.124:8888/">DiskSpeed</a></td><td class="ip"><a href="http://10.0.0.124:8888/">10.0.0.124:8888</a></td><td class="off">disk-bench</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-<tr><td>QDirStat <span class="off"></span></td><td class="ip"><a href="http://10.0.0.124:5800/">10.0.0.124:5800</a></td><td>treemap</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-<tr><td>MeTube <span class="off"></span></td><td class="ip"><a href="http://10.0.0.124:8081/">10.0.0.124:8081</a></td><td>YouTube</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-<tr><td>Pinchflat <span class="off"></span></td><td class="ip"><a href="http://10.0.0.124:8945/">10.0.0.124:8945</a></td><td>kanalarkiv</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-</tbody></table></div></td></tr>
-<tr class="vm-frame-row"><td colspan="6"><div class="vm-frame" data-vmid="107">
-<div class="vm-h"><td><span class="tag tag-ct">CT</span>ct107-mediespillere-gammel 107</td></div>
-<table class="svc"><thead><tr><th>Tjeneste</th><th>Adresse</th><th>Merknad</th><th>Status</th><th>Strøm</th></tr></thead><tbody>
-<tr><td>Plex / Jellyfin (arkiv)</td><td class="ip"><a href="http://10.0.0.160/">10.0.0.160</a></td><td class="off">flyttet fra Tower</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-</tbody></table></div></td></tr>
-<tr class="vm-frame-row"><td colspan="6"><div class="vm-frame" data-vmid="108">
-<div class="vm-h"><td><span class="tag tag-ct">CT</span>ct108-legacy-dockere-gammel 108</td></div>
-<table class="svc"><thead><tr><th>Tjeneste</th><th>Adresse</th><th>Merknad</th><th>Status</th><th>Strøm</th></tr></thead><tbody>
-<tr><td>iPXE <span class="off"></span></td><td class="ip"><a href="http://10.0.0.161/">10.0.0.161</a></td><td>arkivert fra Tower</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-<tr><td>netbootxyz <span class="off"></span></td><td class="ip"><a href="http://10.0.0.161/">10.0.0.161</a></td><td>arkivert fra Tower</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-<tr><td>code-server <span class="off"></span></td><td class="ip"><a href="http://10.0.0.161/">10.0.0.161</a></td><td>arkivert fra Tower</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-<tr><td>Flame <span class="off"></span></td><td class="ip"><a href="http://10.0.0.161/">10.0.0.161</a></td><td>arkivert fra Tower</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-<tr><td>4get <span class="off"></span></td><td class="ip"><a href="http://10.0.0.161/">10.0.0.161</a></td><td>arkivert fra Tower</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-<tr><td>Linkding <span class="off"></span></td><td class="ip"><a href="http://10.0.0.161/">10.0.0.161</a></td><td>arkivert fra Tower</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-</tbody></table></div></td></tr>
-<tr class="vm-frame-row"><td colspan="6"><div class="vm-frame" data-vmid="159">
-<div class="vm-h"><td><span class="tag tag-ct">CT</span>ct159-abs-ngrok-gammel 159</td></div>
-<table class="svc"><thead><tr><th>Tjeneste</th><th>Adresse</th><th>Merknad</th><th>Status</th><th>Strøm</th></tr></thead><tbody>
-<tr><td>Audiobookshelf / ngrok (arkiv)</td><td class="ip"><a href="http://10.0.0.162/">10.0.0.162</a></td><td class="off">oppsett arkivert</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-</tbody></table></div></td></tr>
-<tr class="vm-frame-row"><td colspan="6"><div class="vm-frame" data-vmid="160">
-<div class="vm-h"><td><span class="tag tag-ct">CT</span>ct160-lancache-gammel 160</td></div>
-<table class="svc"><thead><tr><th>Tjeneste</th><th>Adresse</th><th>Merknad</th><th>Status</th><th>Strøm</th></tr></thead><tbody>
-<tr><td>Lancache (arkiv)</td><td class="ip"><a href="http://10.0.0.163/">10.0.0.163</a></td><td class="off">oppsett arkivert</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-</tbody></table></div></td></tr>
-<tr class="vm-frame-row"><td colspan="6"><div class="vm-frame" data-vmid="109">
-<div class="vm-h"><td><span class="tag tag-ct">CT</span>ct109 109</td></div>
-<table class="svc"><thead><tr><th>Tjeneste</th><th>Adresse</th><th>Merknad</th><th>Status</th><th>Strøm</th></tr></thead><tbody>
-<tr><td><a href="http://10.0.0.128:3009/">Homepage</a></td><td class="ip"><a href="http://10.0.0.128:3009/">10.0.0.128:3009</a></td><td>Hoved-dashbord</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-<tr><td>Glance</td><td class="ip"><a href="http://10.0.0.128:3010/">10.0.0.128:3010</a></td><td>launcher</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-<tr><td>Dashy</td><td class="ip"><a href="http://10.0.0.128:3011/">10.0.0.128:3011</a></td><td>launcher</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-<tr><td>Heimdall</td><td class="ip"><a href="http://10.0.0.128:3012/">10.0.0.128:3012</a></td><td>launcher</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-<tr><td><a href="http://10.0.0.128:3000/">Grafana</a></td><td class="ip"><a href="http://10.0.0.128:3000/">10.0.0.128:3000</a></td><td>Visualisering</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-<tr><td><a href="http://10.0.0.128:3001/">Uptime Kuma</a></td><td class="ip"><a href="http://10.0.0.128:3001/">10.0.0.128:3001</a></td><td>Uptime</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-<tr><td><a href="http://10.0.0.128:8765/">Speedtest Tracker</a></td><td class="ip"><a href="http://10.0.0.128:8765/">10.0.0.128:8765</a></td><td>—</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-<tr><td>Prometheus</td><td class="ip"><a href="http://10.0.0.128:9090/">10.0.0.128:9090</a></td><td>metrikker</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-<tr><td>Alertmanager</td><td class="ip"><a href="http://10.0.0.128:9093/">10.0.0.128:9093</a></td><td>varsel</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-<tr><td>Nettkart (denne siden)</td><td class="ip"><a href="http://10.0.0.128:3020/">10.0.0.128:3020</a></td><td>nginx</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-<tr><td><a href="http://10.0.0.128:8989/">Sonarr</a></td><td class="ip">8989</td><td>serier</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-<tr><td><a href="http://10.0.0.128:7878/">Radarr</a></td><td class="ip">7878</td><td>filmer</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-<tr><td><a href="http://10.0.0.128:9696/">Prowlarr</a></td><td class="ip">9696</td><td>indexer</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-<tr><td><a href="http://10.0.0.128:8787/">Readarr</a></td><td class="ip">8787</td><td>bøker</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-<tr><td><a href="http://10.0.0.128:6767/">Bazarr</a></td><td class="ip">6767</td><td>teksting</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-<tr><td><a href="http://10.0.0.128:11011/">Cleanuparr</a></td><td class="ip">11011</td><td>rydder</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-<tr><td>Deluge</td><td class="ip">8112</td><td>torrent</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-<tr><td><a href="http://10.0.0.128:5055/">Seerr</a></td><td class="ip">5055</td><td>requests</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-<tr><td>Audiobookshelf</td><td class="ip">13378</td><td>lydbøker</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-<tr><td>Podgrab</td><td class="ip">8081</td><td>podkast</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-<tr><td>Grovemap</td><td class="ip">8080</td><td>musikk</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-<tr><td>FlareSolverr</td><td class="ip">8191</td><td>cloudflare</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-<tr><td>Crafty</td><td class="ip"><a href="http://10.0.0.128:8000/">10.0.0.128:8000</a></td><td>Minecraft</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-<tr><td>Dockctl</td><td class="ip"><a href="http://10.0.0.128:3015/">10.0.0.128:3015</a></td><td>docker-kontroll</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-<tr><td><a href="http://10.0.0.128:3030/">Udleje-app</a></td><td class="ip"><a href="http://10.0.0.128:3030/">10.0.0.128:3030</a></td><td>Leie/utleie (+ udleje-db)</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-</tbody></table></div></td></tr>
-<tr class="vm-frame-row"><td colspan="6"><div class="vm-frame" data-vmid="151">
-<div class="vm-h"><td><span class="tag tag-ct">CT</span>emby-pc6 151</td></div>
-<table class="svc"><thead><tr><th>Tjeneste</th><th>Adresse</th><th>Merknad</th><th>Status</th><th>Strøm</th></tr></thead><tbody>
-<tr><td><a href="http://10.0.0.150:8096/">Emby</a></td><td class="ip"><a href="http://10.0.0.150:8096/">10.0.0.150:8096</a></td><td>Media · WAN-fwd 8096</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-<tr><td>FileBrowser</td><td class="ip"><a href="http://10.0.0.150:8097/">10.0.0.150:8097</a></td><td>filbehandler</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-<tr><td>Krusader</td><td class="ip"><a href="http://10.0.0.150:8098/">10.0.0.150:8098</a></td><td>KDE</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-<tr><td>Double Commander</td><td class="ip"><a href="http://10.0.0.150:8099/">10.0.0.150:8099</a></td><td>twin-pane</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-<tr><td><a href="http://10.0.0.150:8005/">Tunarr</a></td><td class="ip"><a href="http://10.0.0.150:8005/">10.0.0.150:8005</a></td><td>Live TV</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-</tbody></table></div></td></tr>
-<tr class="vm-frame-row"><td colspan="6"><div class="vm-frame" data-vmid="157">
-<div class="vm-h"><td><span class="tag tag-ct">CT</span>ct157 157</td></div>
-<table class="svc"><thead><tr><th>Tjeneste</th><th>Adresse</th><th>Merknad</th><th>Status</th><th>Strøm</th></tr></thead><tbody>
-<tr><td><a href="http://10.0.0.135:9119/">Hermes agent</a></td><td class="ip"><a href="http://10.0.0.135:9119/">10.0.0.135:9119</a></td><td>Dette systemet · audit :9118</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-</tbody></table></div></td></tr>
-<tr class="section-row"><td colspan="6"><span class="tag tag-node">pc9</span> N100 · 10.0.0.103</td></tr>
-<tr class="vm-frame-row"><td colspan="6"><div class="vm-frame" data-vmid="106">
-<div class="vm-h"><td><span class="tag tag-ct">CT</span>pc9-ct106-tunarr 106</td></div>
-<table class="svc"><thead><tr><th>Tjeneste</th><th>Adresse</th><th>Merknad</th><th>Status</th><th>Strøm</th></tr></thead><tbody>
-<tr><td><a href="http://10.0.0.122:8005/">Tunarr</a></td><td class="ip"><a href="http://10.0.0.122:8005/">10.0.0.122:8005</a></td><td>Dedikert Tunarr · worker</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-</tbody></table></div></td></tr>
-<tr class="vm-frame-row"><td colspan="6"><div class="vm-frame" data-vmid="116">
-<div class="vm-h"><td><span class="tag tag-ct">CT</span>pihole-pc9 116</td></div>
-<table class="svc"><thead><tr><th>Tjeneste</th><th>Adresse</th><th>Merknad</th><th>Status</th><th>Strøm</th></tr></thead><tbody>
-<tr><td><a href="http://10.0.0.116:8080/admin/">Pi-hole</a></td><td class="ip"><a href="http://10.0.0.116:8080/">10.0.0.116:8080</a></td><td>DNS2</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-</tbody></table></div></td></tr>
-<tr class="vm-frame-row"><td colspan="6"><div class="vm-frame" data-vmid="152">
-<div class="vm-h"><td><span class="tag tag-ct">CT</span>ct152-roon 152</td></div>
-<table class="svc"><thead><tr><th>Tjeneste</th><th>Adresse</th><th>Merknad</th><th>Status</th><th>Strøm</th></tr></thead><tbody>
-<tr><td>Roon</td><td class="ip"><a href="http://10.0.0.125/">10.0.0.125</a></td><td>Musikk-server</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-</tbody></table></div></td></tr>
-<tr class="vm-frame-row"><td colspan="6"><div class="vm-frame" data-vmid="153">
-<div class="vm-h"><td><span class="tag tag-ct">CT</span>ct153-immich 153</td></div>
-<table class="svc"><thead><tr><th>Tjeneste</th><th>Adresse</th><th>Merknad</th><th>Status</th><th>Strøm</th></tr></thead><tbody>
-<tr><td><a href="http://10.0.0.127:2283/">Immich</a></td><td class="ip"><a href="http://10.0.0.127:2283/">10.0.0.127:2283</a></td><td class="off">album</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-</tbody></table></div></td></tr>
-<tr class="vm-frame-row"><td colspan="6"><div class="vm-frame" data-vmid="154">
-<div class="vm-h"><td><span class="tag tag-ct">CT</span>ct154-paperless 154</td></div>
-<table class="svc"><thead><tr><th>Tjeneste</th><th>Adresse</th><th>Merknad</th><th>Status</th><th>Strøm</th></tr></thead><tbody>
-<tr><td><a href="http://10.0.0.131:8000/">Paperless-ngx</a></td><td class="ip"><a href="http://10.0.0.131:8000/">10.0.0.131:8000</a></td><td class="off">dokument</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-</tbody></table></div></td></tr>
-<tr class="vm-frame-row"><td colspan="6"><div class="vm-frame" data-vmid="155">
-<div class="vm-h"><td><span class="tag tag-ct">CT</span>ct155-unifi 155</td></div>
-<table class="svc"><thead><tr><th>Tjeneste</th><th>Adresse</th><th>Merknad</th><th>Status</th><th>Strøm</th></tr></thead><tbody>
-<tr><td><a href="https://10.0.0.132:8443/">UniFi Network</a></td><td class="ip"><a href="http://10.0.0.132:8443/">10.0.0.132:8443</a></td><td>Controller</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-</tbody></table></div></td></tr>
-<tr class="vm-frame-row"><td colspan="6"><div class="vm-frame" data-vmid="111">
-<div class="vm-h"><td><span class="tag tag-ct">CT</span>ct111-iventoy 111</td></div>
-<table class="svc"><thead><tr><th>Tjeneste</th><th>Adresse</th><th>Merknad</th><th>Status</th><th>Strøm</th></tr></thead><tbody>
-<tr><td><a href="http://10.0.0.134:26000/">iVentoy</a></td><td class="ip"><a href="http://10.0.0.134:26000/">10.0.0.134:26000</a></td><td class="off">PXE/ISO</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-</tbody></table></div></td></tr>
-<tr class="section-row"><td colspan="6"><span class="tag tag-node">pc1</span> Ryzen 9 3900X · 10.0.0.112</td></tr>
-<tr class="vm-frame-row"><td colspan="6"><div class="vm-frame" data-vmid="105">
-<div class="vm-h"><td><span class="tag tag-ct">CT</span>ct105-mediespiller 105</td></div>
-<table class="svc"><thead><tr><th>Tjeneste</th><th>Adresse</th><th>Merknad</th><th>Status</th><th>Strøm</th></tr></thead><tbody>
-<tr><td><a href="http://10.0.0.159/">Mediespiller</a></td><td class="ip"><a href="http://10.0.0.159/">10.0.0.159</a></td><td class="off"></td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-</tbody></table></div></td></tr>
-<tr class="vm-frame-row"><td colspan="6"><div class="vm-frame" data-vmid="156">
-<div class="vm-h"><td><span class="tag tag-ct">CT</span>ct156-ollama 156</td></div>
-<table class="svc"><thead><tr><th>Tjeneste</th><th>Adresse</th><th>Merknad</th><th>Status</th><th>Strøm</th></tr></thead><tbody>
-<tr><td><a href="http://10.0.0.133:11434/">Ollama</a></td><td class="ip"><a href="http://10.0.0.133:11434/">10.0.0.133:11434</a></td><td class="off">GPU-driver</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-</tbody></table></div></td></tr>
-<tr class="vm-frame-row"><td colspan="6"><div class="vm-frame" data-vmid="158">
-<div class="vm-h"><td><span class="tag tag-ct">CT</span>ct158-browsers 158</td></div>
-<table class="svc"><thead><tr><th>Tjeneste</th><th>Adresse</th><th>Merknad</th><th>Status</th><th>Strøm</th></tr></thead><tbody>
-<tr><td>Browser-pool</td><td class="ip"><a href="http://10.0.0.158:3001-3005/">10.0.0.158:3001-3005</a></td><td class="off">5 nettlesere</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-</tbody></table></div></td></tr>
-</tbody>
+  <thead><tr><th>Tjeneste</th><th>Gjest</th><th>Adresse</th><th>Merknad</th><th>Status</th><th>Strøm</th></tr></thead>
+  <tbody>
+    <tr class="section-row"><td colspan="6"><span class="tag tag-node">pve</span> pc8 · N150 · 10.0.0.102</td></tr>
+    <tr><td><a href="http://10.0.0.7:8123/">Home Assistant</a></td><td><span class="tag tag-vm">VM</span>homeassistant 100</td><td class="ip"><a href="http://10.0.0.7:8123/">10.0.0.7:8123</a></td><td>Smarthus · 1834 enheter</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td><a href="http://10.0.0.117:9120/">Komodo core</a></td><td><span class="tag tag-ct">CT</span>Komodo-core 102</td><td class="ip"><a href="http://10.0.0.117:9120/">10.0.0.117:9120</a></td><td>Komodo-kontroll</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td><a href="http://10.0.0.117:8001/">NetBox</a></td><td><span class="tag tag-ct">CT</span>Komodo-core 102</td><td class="ip"><a href="http://10.0.0.117:8001/">10.0.0.117:8001</a></td><td>IPAM/DCIM</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td><a href="https://10.0.0.117:9000/">step-CA</a></td><td><span class="tag tag-ct">CT</span>Komodo-core 102</td><td class="ip"><a href="http://10.0.0.117:9000/">10.0.0.117:9000</a></td><td>intern CA/ACME</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td><a href="http://10.0.0.115:8080/admin/">Pi-hole</a></td><td><span class="tag tag-ct">CT</span>pihole-pc8 115</td><td class="ip"><a href="http://10.0.0.115:8080/">10.0.0.115:8080</a></td><td>DNS1</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td>Komodo-periphery</td><td><span class="tag tag-ct">CT</span>ct110-node 110</td><td class="ip"><a href="http://10.0.0.129/">10.0.0.129</a></td><td>Agenthost</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+
+    <tr class="section-row"><td colspan="6"><span class="tag tag-node">pc6</span> Core 3 N355 · 10.0.0.120 · QuickSync</td></tr>
+    <tr><td><a href="http://10.0.0.101/">Unraid-Tower</a></td><td><span class="tag tag-vm">VM</span>Unraid 101</td><td class="ip"><a href="http://10.0.0.101/">10.0.0.101</a></td><td>Lagring · Netdata :19999</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td><a href="http://10.0.0.119:5678/">n8n</a></td><td><span class="tag tag-ct">CT</span>ct103 103</td><td class="ip"><a href="http://10.0.0.119:5678/">10.0.0.119:5678</a></td><td>Automasjon</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td><a href="http://10.0.0.119:3080/">Open WebUI</a></td><td><span class="tag tag-ct">CT</span>ct103 103</td><td class="ip"><a href="http://10.0.0.119:3080/">10.0.0.119:3080</a></td><td>LLM-chat</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td><a href="http://10.0.0.119:8099/">Gjeld-app</a></td><td><span class="tag tag-ct">CT</span>ct103 103</td><td class="ip"><a href="http://10.0.0.119:8099/">10.0.0.119:8099</a></td><td>Gjeld/økonomi</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td>ferretdb (n8n-db)</td><td><span class="tag tag-ct">CT</span>ct103 103</td><td class="ip"><a href="http://10.0.0.119/">10.0.0.119</a></td><td>Mongo-komp.</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td>gjeld-db (postgres)</td><td><span class="tag tag-ct">CT</span>ct103 103</td><td class="ip"><a href="http://10.0.0.119/">10.0.0.119</a></td><td>DB-gjeld</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td><a href="http://10.0.0.124:5216/">MySpeed</a></td><td><span class="tag tag-ct">CT</span>ct104 104</td><td class="ip"><a href="http://10.0.0.124:5216/">10.0.0.124:5216</a></td><td class="off">hast-test</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td><a href="http://10.0.0.124:8888/">DiskSpeed</a></td><td><span class="tag tag-ct">CT</span>ct104 104</td><td class="ip"><a href="http://10.0.0.124:8888/">10.0.0.124:8888</a></td><td class="off">disk-bench</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td>QDirStat <span class="off"></span></td><td><span class="tag tag-ct">CT</span>ct104 104</td><td class="ip"><a href="http://10.0.0.124:5800/">10.0.0.124:5800</a></td><td>treemap</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td>MeTube <span class="off"></span></td><td><span class="tag tag-ct">CT</span>ct104 104</td><td class="ip"><a href="http://10.0.0.124:8081/">10.0.0.124:8081</a></td><td>YouTube</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td>Pinchflat <span class="off"></span></td><td><span class="tag tag-ct">CT</span>ct104 104</td><td class="ip"><a href="http://10.0.0.124:8945/">10.0.0.124:8945</a></td><td>kanalarkiv</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td>Plex / Jellyfin (arkiv)</td><td><span class="tag tag-ct">CT</span>ct107-mediespillere-gammel 107</td><td class="ip"><a href="http://10.0.0.160/">10.0.0.160</a></td><td class="off">flyttet fra Tower</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td>iPXE <span class="off"></span></td><td><span class="tag tag-ct">CT</span>ct108-legacy-dockere-gammel 108</td><td class="ip"><a href="http://10.0.0.161/">10.0.0.161</a></td><td>arkivert fra Tower</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td>netbootxyz <span class="off"></span></td><td><span class="tag tag-ct">CT</span>ct108-legacy-dockere-gammel 108</td><td class="ip"><a href="http://10.0.0.161/">10.0.0.161</a></td><td>arkivert fra Tower</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td>code-server <span class="off"></span></td><td><span class="tag tag-ct">CT</span>ct108-legacy-dockere-gammel 108</td><td class="ip"><a href="http://10.0.0.161/">10.0.0.161</a></td><td>arkivert fra Tower</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td>Flame <span class="off"></span></td><td><span class="tag tag-ct">CT</span>ct108-legacy-dockere-gammel 108</td><td class="ip"><a href="http://10.0.0.161/">10.0.0.161</a></td><td>arkivert fra Tower</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td>4get <span class="off"></span></td><td><span class="tag tag-ct">CT</span>ct108-legacy-dockere-gammel 108</td><td class="ip"><a href="http://10.0.0.161/">10.0.0.161</a></td><td>arkivert fra Tower</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td>Linkding <span class="off"></span></td><td><span class="tag tag-ct">CT</span>ct108-legacy-dockere-gammel 108</td><td class="ip"><a href="http://10.0.0.161/">10.0.0.161</a></td><td>arkivert fra Tower</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td>Audiobookshelf / ngrok (arkiv)</td><td><span class="tag tag-ct">CT</span>ct159-abs-ngrok-gammel 159</td><td class="ip"><a href="http://10.0.0.162/">10.0.0.162</a></td><td class="off">oppsett arkivert</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td>Lancache (arkiv)</td><td><span class="tag tag-ct">CT</span>ct160-lancache-gammel 160</td><td class="ip"><a href="http://10.0.0.163/">10.0.0.163</a></td><td class="off">oppsett arkivert</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td><a href="http://10.0.0.128:3009/">Homepage</a></td><td><span class="tag tag-ct">CT</span>ct109 109</td><td class="ip"><a href="http://10.0.0.128:3009/">10.0.0.128:3009</a></td><td>Hoved-dashbord</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td>Glance</td><td><span class="tag tag-ct">CT</span>ct109 109</td><td class="ip"><a href="http://10.0.0.128:3010/">10.0.0.128:3010</a></td><td>launcher</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td>Dashy</td><td><span class="tag tag-ct">CT</span>ct109 109</td><td class="ip"><a href="http://10.0.0.128:3011/">10.0.0.128:3011</a></td><td>launcher</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td>Heimdall</td><td><span class="tag tag-ct">CT</span>ct109 109</td><td class="ip"><a href="http://10.0.0.128:3012/">10.0.0.128:3012</a></td><td>launcher</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td><a href="http://10.0.0.128:3000/">Grafana</a></td><td><span class="tag tag-ct">CT</span>ct109 109</td><td class="ip"><a href="http://10.0.0.128:3000/">10.0.0.128:3000</a></td><td>Visualisering</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td><a href="http://10.0.0.128:3001/">Uptime Kuma</a></td><td><span class="tag tag-ct">CT</span>ct109 109</td><td class="ip"><a href="http://10.0.0.128:3001/">10.0.0.128:3001</a></td><td>Uptime</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td><a href="http://10.0.0.128:8765/">Speedtest Tracker</a></td><td><span class="tag tag-ct">CT</span>ct109 109</td><td class="ip"><a href="http://10.0.0.128:8765/">10.0.0.128:8765</a></td><td>—</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td>Prometheus</td><td><span class="tag tag-ct">CT</span>ct109 109</td><td class="ip"><a href="http://10.0.0.128:9090/">10.0.0.128:9090</a></td><td>metrikker</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td>Alertmanager</td><td><span class="tag tag-ct">CT</span>ct109 109</td><td class="ip"><a href="http://10.0.0.128:9093/">10.0.0.128:9093</a></td><td>varsel</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td>Nettkart (denne siden)</td><td><span class="tag tag-ct">CT</span>ct109 109</td><td class="ip"><a href="http://10.0.0.128:3020/">10.0.0.128:3020</a></td><td>nginx</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td><a href="http://10.0.0.128:8989/">Sonarr</a></td><td><span class="tag tag-ct">CT</span>ct109 109</td><td class="ip">8989</td><td>serier</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td><a href="http://10.0.0.128:7878/">Radarr</a></td><td><span class="tag tag-ct">CT</span>ct109 109</td><td class="ip">7878</td><td>filmer</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td><a href="http://10.0.0.128:9696/">Prowlarr</a></td><td><span class="tag tag-ct">CT</span>ct109 109</td><td class="ip">9696</td><td>indexer</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td><a href="http://10.0.0.128:8787/">Readarr</a></td><td><span class="tag tag-ct">CT</span>ct109 109</td><td class="ip">8787</td><td>bøker</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td><a href="http://10.0.0.128:6767/">Bazarr</a></td><td><span class="tag tag-ct">CT</span>ct109 109</td><td class="ip">6767</td><td>teksting</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td><a href="http://10.0.0.128:11011/">Cleanuparr</a></td><td><span class="tag tag-ct">CT</span>ct109 109</td><td class="ip">11011</td><td>rydder</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td>Deluge</td><td><span class="tag tag-ct">CT</span>ct109 109</td><td class="ip">8112</td><td>torrent</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td><a href="http://10.0.0.128:5055/">Seerr</a></td><td><span class="tag tag-ct">CT</span>ct109 109</td><td class="ip">5055</td><td>requests</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td>Audiobookshelf</td><td><span class="tag tag-ct">CT</span>ct109 109</td><td class="ip">13378</td><td>lydbøker</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td>Podgrab</td><td><span class="tag tag-ct">CT</span>ct109 109</td><td class="ip">8081</td><td>podkast</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td>Grovemap</td><td><span class="tag tag-ct">CT</span>ct109 109</td><td class="ip">8080</td><td>musikk</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td>FlareSolverr</td><td><span class="tag tag-ct">CT</span>ct109 109</td><td class="ip">8191</td><td>cloudflare</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td>Crafty</td><td><span class="tag tag-ct">CT</span>ct109 109</td><td class="ip"><a href="http://10.0.0.128:8000/">10.0.0.128:8000</a></td><td>Minecraft</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td>Dockctl</td><td><span class="tag tag-ct">CT</span>ct109 109</td><td class="ip"><a href="http://10.0.0.128:3015/">10.0.0.128:3015</a></td><td>docker-kontroll</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td><a href="http://10.0.0.128:3030/">Udleje-app</a></td><td><span class="tag tag-ct">CT</span>ct109 109</td><td class="ip"><a href="http://10.0.0.128:3030/">10.0.0.128:3030</a></td><td>Leie/utleie (+ udleje-db)</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td><a href="http://10.0.0.150:8096/">Emby</a></td><td><span class="tag tag-ct">CT</span>emby-pc6 151</td><td class="ip"><a href="http://10.0.0.150:8096/">10.0.0.150:8096</a></td><td>Media · WAN-fwd 8096</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td>FileBrowser</td><td><span class="tag tag-ct">CT</span>emby-pc6 151</td><td class="ip"><a href="http://10.0.0.150:8097/">10.0.0.150:8097</a></td><td>filbehandler</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td>Krusader</td><td><span class="tag tag-ct">CT</span>emby-pc6 151</td><td class="ip"><a href="http://10.0.0.150:8098/">10.0.0.150:8098</a></td><td>KDE</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td>Double Commander</td><td><span class="tag tag-ct">CT</span>emby-pc6 151</td><td class="ip"><a href="http://10.0.0.150:8099/">10.0.0.150:8099</a></td><td>twin-pane</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td><a href="http://10.0.0.150:8005/">Tunarr</a></td><td><span class="tag tag-ct">CT</span>emby-pc6 151</td><td class="ip"><a href="http://10.0.0.150:8005/">10.0.0.150:8005</a></td><td>Live TV</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td><a href="http://10.0.0.135:9119/">Hermes agent</a></td><td><span class="tag tag-ct">CT</span>ct157 157</td><td class="ip"><a href="http://10.0.0.135:9119/">10.0.0.135:9119</a></td><td>Dette systemet · audit :9118</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+
+    <tr class="section-row"><td colspan="6"><span class="tag tag-node">pc9</span> N100 · 10.0.0.103</td></tr>
+    <tr><td><a href="http://10.0.0.122:8005/">Tunarr</a></td><td><span class="tag tag-ct">CT</span>pc9-ct106-tunarr 106</td><td class="ip"><a href="http://10.0.0.122:8005/">10.0.0.122:8005</a></td><td>Dedikert Tunarr · worker</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td><a href="http://10.0.0.116:8080/admin/">Pi-hole</a></td><td><span class="tag tag-ct">CT</span>pihole-pc9 116</td><td class="ip"><a href="http://10.0.0.116:8080/">10.0.0.116:8080</a></td><td>DNS2</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td>Roon</td><td><span class="tag tag-ct">CT</span>ct152-roon 152</td><td class="ip"><a href="http://10.0.0.125/">10.0.0.125</a></td><td>Musikk-server</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td><a href="http://10.0.0.127:2283/">Immich</a></td><td><span class="tag tag-ct">CT</span>ct153-immich 153</td><td class="ip"><a href="http://10.0.0.127:2283/">10.0.0.127:2283</a></td><td class="off">album</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td><a href="http://10.0.0.131:8000/">Paperless-ngx</a></td><td><span class="tag tag-ct">CT</span>ct154-paperless 154</td><td class="ip"><a href="http://10.0.0.131:8000/">10.0.0.131:8000</a></td><td class="off">dokument</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td><a href="https://10.0.0.132:8443/">UniFi Network</a></td><td><span class="tag tag-ct">CT</span>ct155-unifi 155</td><td class="ip"><a href="http://10.0.0.132:8443/">10.0.0.132:8443</a></td><td>Controller</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td><a href="http://10.0.0.134:26000/">iVentoy</a></td><td><span class="tag tag-ct">CT</span>ct111-iventoy 111</td><td class="ip"><a href="http://10.0.0.134:26000/">10.0.0.134:26000</a></td><td class="off">PXE/ISO</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+
+    <tr class="section-row"><td colspan="6"><span class="tag tag-node">pc1</span> Ryzen 9 3900X · 10.0.0.112</td></tr>
+    <tr><td><a href="http://10.0.0.159/">Mediespiller</a></td><td><span class="tag tag-ct">CT</span>ct105-mediespiller 105</td><td class="ip"><a href="http://10.0.0.159/">10.0.0.159</a></td><td class="off"></td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td><a href="http://10.0.0.133:11434/">Ollama</a></td><td><span class="tag tag-ct">CT</span>ct156-ollama 156</td><td class="ip"><a href="http://10.0.0.133:11434/">10.0.0.133:11434</a></td><td class="off">GPU-driver</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+    <tr><td>Browser-pool</td><td><span class="tag tag-ct">CT</span>ct158-browsers 158</td><td class="ip"><a href="http://10.0.0.158:3001-3005/">10.0.0.158:3001-3005</a></td><td class="off">5 nettlesere</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+  </tbody>
 </table>
 
 <!-- ============ FYSISK HARDWARE ============ -->
@@ -497,32 +398,34 @@ offline.forEach(o=>{
     });
   }
   function fillStaticRows(nodes){
+    var box=document.getElementById("svc-table"); if(!box) return;
     var guest={};
     (nodes||[]).forEach(function(n){ (n.vms||[]).forEach(function(v){ guest[v.vmid]={node:n.node,running:v.status==="running",protected:!!v.protected}; }); });
-    var frames=[].slice.call(document.querySelectorAll("#svc-table .vm-frame"));
-    frames.forEach(function(frame){
-      var vmid=parseInt(frame.getAttribute("data-vmid"),10)||0;
-      var g=guest[vmid];
-      var rows=[].slice.call(frame.querySelectorAll("table.svc tbody tr"));
-      rows.forEach(function(tr,idx){
-        var vmTd=tr.querySelector("td.st-wrap"), ctTd=tr.querySelector("td.g-ctl");
-        if(!vmTd||!ctTd) return;
-        if(!g){ vmTd.innerHTML=""; ctTd.innerHTML=""; return; }
-        vmTd.innerHTML='<span class="sw-dot '+(g.running?"up":"down")+'"></span>';
-        ctTd.innerHTML="";
-        if(idx>0) return;                       // én av/på-knapp per CT/VM (første rad)
-        if(g.protected){ if(!g.running && token()){ var b=document.createElement("button"); b.className="sw-btn"; b.textContent="\u25b6 p\u00e5"; b.addEventListener("click",function(){ctl(g.node,vmid,"on",b);}); ctTd.appendChild(b); } return; }
-        ["on","off"].forEach(function(act){
-          var b=document.createElement("button"); b.className="sw-btn";
-          b.textContent = act==="on" ? "\u25b6 p\u00e5" : "\u25a0 av";
-          if((act==="on")===g.running) b.style.display="none";
-          b.addEventListener("click",function(){ctl(g.node,vmid,act,b);});
-          ctTd.appendChild(b);
-        });
+    var rows=[].slice.call(box.querySelectorAll("tbody tr"));
+    var seenButton={};
+    rows.forEach(function(tr){
+      if(tr.className && String(tr.className).indexOf("section-row")>=0) return;
+      var tds=tr.querySelectorAll("td");
+      var gcell=tds[1], vmTd=tr.querySelector("td.st-wrap"), ctTd=tr.querySelector("td.g-ctl");
+      if(!vmTd||!ctTd) return;
+      var m = gcell ? /(\d+)\s*$/.exec((""+gcell.textContent).trim()) : null;
+      var vmid = m ? parseInt(m[1],10) : 0;
+      var g = vmid ? guest[vmid] : null;
+      if(!g){ vmTd.innerHTML=""; ctTd.innerHTML=""; return; }
+      vmTd.innerHTML='<span class="sw-dot '+(g.running?"up":"down")+'"></span>';
+      ctTd.innerHTML="";
+      if(g.protected){ if(!g.running && token()){ var b=document.createElement("button"); b.className="sw-btn"; b.textContent="\u25b6 p\u00e5"; b.addEventListener("click",function(){ctl(g.node,vmid,"on",b);}); ctTd.appendChild(b); } return; }
+      if(seenButton[vmid]) return;   // én av/på-knapp per CT uansett antall tjenester
+      seenButton[vmid]=true;
+      ["on","off"].forEach(function(act){
+        var b=document.createElement("button"); b.className="sw-btn";
+        b.textContent = act==="on" ? "\u25b6 p\u00e5" : "\u25a0 av";
+        if((act==="on")===g.running) b.style.display="none";
+        b.addEventListener("click",function(){ctl(g.node,vmid,act,b);});
+        ctTd.appendChild(b);
       });
     });
   }
-
   function ctl(node,vmid,action,b){
     if(b){b.classList.add("busy");}
     fetch(CTRL_URL,{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+token()},
