@@ -130,7 +130,7 @@ footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-
   <button id="sw-token-save" class="sw-btn">Lagre</button><button id="tok-edit" class="sw-btn" title="endre token" style="display:none">✎</button>
   <span id="sw-token-msg" style="color:var(--lan);font-size:11px"></span>
   <span style="color:var(--dim);font-size:11px" id="sw-meta"></span>
-  <span style="color:var(--muted);margin-left:6px">📜 versjon <b>2.021</b> · <a href="versions/">historikk</a></span>
+  <span style="color:var(--muted);margin-left:6px">📜 versjon <b>2.022</b> · <a href="versions/">historikk</a></span>
 </div>
 
 <h1>🏠 Homelab — tjenester &amp; nettverk <span style="color:var(--lan)">10.0.0.0/24</span></h1>
@@ -225,11 +225,7 @@ footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-
 <table class="svc"><thead><tr><th>Tjeneste</th><th>Adresse</th><th>Merknad</th><th>Status</th><th>Strøm</th></tr></thead><tbody>
 <tr><td><a href="http://10.0.0.122:8005/">Tunarr</a></td><td class="ip"><a href="http://10.0.0.122:8005/">10.0.0.122:8005</a></td><td>Dedikert Tunarr · worker</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
 </tbody></table></div></td></tr>
-<tr class="vm-frame-row"><td colspan="6"><div class="vm-frame" data-vmid="116">
-<div class="vm-h"><span class="tag tag-ct">CT</span>ct116-pihole 116</div>
-<table class="svc"><thead><tr><th>Tjeneste</th><th>Adresse</th><th>Merknad</th><th>Status</th><th>Strøm</th></tr></thead><tbody>
-<tr><td><a href="http://10.0.0.116:8080/admin/">Pi-hole</a></td><td class="ip"><a href="http://10.0.0.116:8080/">10.0.0.116:8080</a></td><td>DNS2</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-</tbody></table></div></td></tr>
+
 <tr class="vm-frame-row"><td colspan="6"><div class="vm-frame" data-vmid="152">
 <div class="vm-h"><span class="tag tag-ct">CT</span>ct152-roon 152</div>
 <table class="svc"><thead><tr><th>Tjeneste</th><th>Adresse</th><th>Merknad</th><th>Status</th><th>Strøm</th></tr></thead><tbody>
@@ -244,6 +240,11 @@ footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-
 <div class="vm-h"><span class="tag tag-ct">CT</span>ct105-mediespiller 105</div>
 <table class="svc"><thead><tr><th>Tjeneste</th><th>Adresse</th><th>Merknad</th><th>Status</th><th>Strøm</th></tr></thead><tbody>
 <tr><td><a href="http://10.0.0.159/">Mediespiller</a></td><td class="ip"><a href="http://10.0.0.159/">10.0.0.159</a></td><td class="off"></td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+</tbody></table></div></td></tr>
+<tr class="vm-frame-row"><td colspan="6"><div class="vm-frame" data-vmid="116">
+<div class="vm-h"><span class="tag tag-ct">CT</span>ct116-pihole 116</div>
+<table class="svc"><thead><tr><th>Tjeneste</th><th>Adresse</th><th>Merknad</th><th>Status</th><th>Strøm</th></tr></thead><tbody>
+<tr><td><a href="http://10.0.0.116:8080/admin/">Pi-hole</a></td><td class="ip"><a href="http://10.0.0.116:8080/">10.0.0.116:8080</a></td><td>DNS2</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
 </tbody></table></div></td></tr>
 <tr class="vm-frame-row"><td colspan="6"><div class="vm-frame" data-vmid="156">
 <div class="vm-h"><span class="tag tag-ct">CT</span>ct156-ollama 156</div>
@@ -366,7 +367,7 @@ footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-
 </div>
 
 
-<div class="note" style="border:1px solid var(--lan);padding:10px 12px;margin:10px 0;color:var(--text)"><b>Endringsnotat v2.017</b> · Alle CT-er og VM-er er navngitt vertsuavhengig som ct&lt;id&gt;-rolle / vm&lt;id&gt;-rolle. Tjenestelistene for CT103, CT104, CT109 og CT151 er kontrollert direkte mot Docker-status 9. okt. CT112 (Open WebUI, Gjeld og DiskSpeed), CT113 (Udleje) og CT114 (dashboardene) er stoppede arkiv-CT-er uten autostart. NetBox og step-CA er urørt. CT111 (iVentoy), CT115 (Pi-hole), CT153 (Immich), CT154 (Paperless) og CT155 (UniFi) er nå på PC6. CT110 er slettet. Midlertidige flyttebackup-er er verifisert og slettet.</div>
+<div class="note" style="border:1px solid var(--lan);padding:10px 12px;margin:10px 0;color:var(--text)"><b>Endringsnotat v2.017</b> · Alle CT-er og VM-er er navngitt vertsuavhengig som ct&lt;id&gt;-rolle / vm&lt;id&gt;-rolle. Tjenestelistene for CT103, CT104, CT109 og CT151 er kontrollert direkte mot Docker-status 9. okt. CT112 (Open WebUI, Gjeld og DiskSpeed), CT113 (Udleje) og CT114 (dashboardene) er stoppede arkiv-CT-er uten autostart. NetBox og step-CA er urørt. CT111 (iVentoy), CT115 (Pi-hole), CT153 (Immich), CT154 (Paperless) og CT155 (UniFi) er nå på PC6. CT110 er slettet. Midlertidige flyttebackup-er er verifisert og slettet. CT116 (Pi-hole/DNS2) er flyttet fra PC9 til PC1 og verifisert frisk.</div>
 <footer>Generert 9. okt 2026 · data: OPNsense ARP, Proxmox API (noder/CPU/gjester/IP/docker), Komodo. Nedtonet/= finnes men er av.</footer>
 
 <script>
