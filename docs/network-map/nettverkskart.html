@@ -130,7 +130,7 @@ footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-
   <button id="sw-token-save" class="sw-btn">Lagre</button><button id="tok-edit" class="sw-btn" title="endre token" style="display:none">✎</button>
   <span id="sw-token-msg" style="color:var(--lan);font-size:11px"></span>
   <span style="color:var(--dim);font-size:11px" id="sw-meta"></span>
-  <span style="color:var(--muted);margin-left:6px">📜 versjon <b>2.029</b> · <a href="versions/">historikk</a></span>
+  <span style="color:var(--muted);margin-left:6px">📜 versjon <b>2.030</b> · <a href="versions/">historikk</a></span>
 </div>
 
 <h1>🏠 Homelab — tjenester &amp; nettverk <span style="color:var(--lan)">10.0.0.0/24</span></h1>
@@ -502,6 +502,7 @@ offline.forEach(o=>{
   setInterval(refresh,15000);
 })();
 </script>
+<div class="note"><b>Endringsnotat v2.030 (12. okt 2026):</b> n8n-workflowen «Tower media NFS health and repair» er rettet. Hvert femte minutt tester den både skrivbarheten i MeTube sin faktiske nedlastingsmappe på <code>Tower-media</code> og MeTube sin HTTP-helse. Ved feil sendes varsel; automatisk remount/restart er bevisst ikke aktivert, siden <code>Tower-media</code> deles av flere CT-er.</div>
 <div class="rules-foot" style="width:100%;margin-top:20px;padding:12px 14px;border-top:1px solid var(--border);font-size:11.5px;color:var(--muted);line-height:1.6">
   <b style="color:var(--text);font-size:12.5px">&#128299; Regler for denne siden (homelab-komodo · docs/network-map)</b><br>
   &#8226; <b>ALLE endringer lagres i EGEN versjon</b>, selv om det bare er én ting som endres &mdash; tilfeldige AI-boter glemmer dette hele tiden. Trykk p&aring; versjonsnummeret &ouml;verst til h&oslash;yre for historikken og lagringsm&#229;ten.<br>
