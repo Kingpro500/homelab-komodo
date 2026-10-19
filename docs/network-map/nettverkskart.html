@@ -130,7 +130,7 @@ footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-
   <button id="sw-token-save" class="sw-btn">Lagre</button><button id="tok-edit" class="sw-btn" title="endre token" style="display:none">✎</button>
   <span id="sw-token-msg" style="color:var(--lan);font-size:11px"></span>
   <span style="color:var(--dim);font-size:11px" id="sw-meta"></span>
-  <span style="color:var(--muted);margin-left:6px">📜 versjon <b>2.034</b> · <a target="_blank" rel="noopener noreferrer" href="versions/">historikk</a></span>
+  <span style="color:var(--muted);margin-left:6px">📜 versjon <b>2.035</b> · <a target="_blank" rel="noopener noreferrer" href="versions/">historikk</a></span>
 </div>
 
 <h1>🏠 Homelab — tjenester &amp; nettverk <span style="color:var(--lan)">10.0.0.0/24</span></h1>
@@ -158,6 +158,11 @@ footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-
 <tr><td><a target="_blank" rel="noopener noreferrer" href="http://10.0.0.117:9120/">Komodo core</a></td><td class="ip"><a target="_blank" rel="noopener noreferrer" href="http://10.0.0.117:9120/">10.0.0.117:9120</a></td><td>Komodo-kontroll</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
 
 
+</tbody></table></div></td></tr>
+<tr class="vm-frame-row"><td colspan="6"><div class="vm-frame" data-vmid="163">
+<div class="vm-h"><span class="tag tag-ct">CT</span>ct163-pihole-reserve 163</div>
+<table class="svc"><thead><tr><th>Tjeneste</th><th>Adresse</th><th>Merknad</th><th>Status</th><th>Strøm</th></tr></thead><tbody>
+<tr><td><a target="_blank" rel="noopener noreferrer" href="http://10.0.0.118:8080/admin/">Pi-hole reserve</a></td><td class="ip"><a target="_blank" rel="noopener noreferrer" href="http://10.0.0.118:8080/admin/">10.0.0.118:8080</a></td><td>DNS-reserve · pve · autostart</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
 </tbody></table></div></td></tr>
 <tr class="vm-frame-row"><td colspan="6"><div class="vm-frame"><div class="vm-h"><span class="tag tag-node">NODE</span>pve Netdata</div><table class="svc"><thead><tr><th>Tjeneste</th><th>Adresse</th><th>Merknad</th><th>Status</th><th>Strøm</th></tr></thead><tbody><tr><td><a target="_blank" rel="noopener noreferrer" href="http://10.0.0.102:19999/">Netdata</a></td><td class="ip"><a target="_blank" rel="noopener noreferrer" href="http://10.0.0.102:19999/">10.0.0.102:19999</a></td><td>vertsmonitorering</td><td class="st-wrap"></td><td class="g-ctl"></td></tr></tbody></table></div></td></tr>
 
@@ -502,7 +507,7 @@ offline.forEach(o=>{
   setInterval(refresh,15000);
 })();
 </script>
-<div class="note"><b>Endringsnotat v2.034 (19. okt 2026):</b> Rekkefølgen på pve-, pc6- og pc9-oversiktene er sortert etter VMID. Vertens Netdata-rad står sist per node; Hermes er nå plassert som CT157 mellom CT155 og CT161.</div>
+<div class="note"><b>Endringsnotat v2.035 (19. okt 2026):</b> CT163 Pi-hole-reserve på pve er lagt til med 10.0.0.118:8080. Kea DHCP deler nå ut DNS-kjeden Pi-hole .115 (PC6), .118 (pve reserve) og .116 (PC1); Hermes overvåker alle tre og faller tilbake til Unbound (.1) dersom ingen svarer.</div>
 <div class="rules-foot" style="width:100%;margin-top:20px;padding:12px 14px;border-top:1px solid var(--border);font-size:11.5px;color:var(--muted);line-height:1.6">
   <b style="color:var(--text);font-size:12.5px">&#128299; Regler for denne siden (homelab-komodo · docs/network-map)</b><br>
   &#8226; <b>ALLE endringer lagres i EGEN versjon</b>, selv om det bare er én ting som endres &mdash; tilfeldige AI-boter glemmer dette hele tiden. Trykk p&aring; versjonsnummeret &ouml;verst til h&oslash;yre for historikken og lagringsm&#229;ten.<br>
