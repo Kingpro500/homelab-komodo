@@ -46,3 +46,17 @@ ikke kjøre `cp`, `git reset --hard`, eller synkronisere en lokal arbeidskopi.
 Før en Komodo-stack eller prosedyre opprettes må den verifiseres mot den
 eksisterende `nettkart`-containeren, slik at den ikke oppretter en konkurrerende
 container på port 3020.
+
+
+## Faste kartregler
+
+I tillegg til den kontrollerte deployen gjelder dette alltid:
+
+1. Arkiver forrige HTML i docs/network-map/versions/vX.XXX/ før kartets versjonsnummer økes.
+2. Oppdater versions/index.html med konkret endringsnotat for hver versjon.
+3. Verifiser node, VMID/CTID, kjørestatus, IP og port mot Proxmox/Docker før commit.
+4. Én CT/VM-boks skal ligge på riktig fysisk node. Flytt hele boksen, aldri en midlertidig oppsummeringstabell.
+5. Bruk én stor svart tjenesteboks per CT/VM; seks tjenester per rad på bred skjerm og to på smal skjerm.
+6. Tjenestenavnet skal være klikkbart direkte til IP:port. Ikke vis separat IP- eller merknadskolonne.
+7. Statuslys og av/på-kontroller beholdes inne i tjenesteboksen. Ikke fjern eller skjul st-wrap, g-ctl eller fillStaticRows().
+8. Feil rettes med en ny, høyere versjon. Aldri overskriv, slett, rull tilbake eller omgå publiseringsskriptet.

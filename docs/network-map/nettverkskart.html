@@ -122,6 +122,19 @@ footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-
 .vm-frame table.svc td{padding:4px 11px;font-size:13.5px;border-bottom:none;background:#05070a;color:var(--text)}
 .vm-frame table.svc tbody td:first-child{color:var(--ct);font-weight:600}
 .vm-frame table.svc tbody td:first-child a{color:var(--ct)}
+
+/* Fast tjenestedesign: én stor svart boks per CT/VM, seks tjenester per rad. */
+.vm-frame table.svc thead{display:none}
+.vm-frame table.svc tbody{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:3px 8px;padding:8px 10px;background:#05070a;border:1px solid var(--border);border-radius:6px}
+.vm-frame table.svc tbody tr{display:block;min-width:0;padding:1px 0}
+.vm-frame table.svc tbody td{display:none!important}
+.vm-frame table.svc tbody td:first-child{display:inline-block!important;padding:5px 8px!important;max-width:calc(100% - 62px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:transparent!important;vertical-align:middle}
+.vm-frame table.svc tbody td:first-child a{display:inline;overflow:hidden;text-overflow:ellipsis}
+.vm-frame table.svc tbody td.st-wrap{display:inline-block!important;padding:0!important;background:transparent!important;vertical-align:middle}
+.vm-frame table.svc tbody td.g-ctl{display:inline-block!important;padding:2px 4px 2px 0!important;background:transparent!important;vertical-align:middle}
+.vm-frame table.svc tbody td.g-ctl .sw-btn{font-size:10px;padding:2px 4px}
+@media(max-width:760px){.vm-frame table.svc tbody{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
 </style>
 </head>
 <body>
@@ -130,7 +143,7 @@ footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-
   <button id="sw-token-save" class="sw-btn">Lagre</button><button id="tok-edit" class="sw-btn" title="endre token" style="display:none">✎</button>
   <span id="sw-token-msg" style="color:var(--lan);font-size:11px"></span>
   <span style="color:var(--dim);font-size:11px" id="sw-meta"></span>
-  <span style="color:var(--muted);margin-left:6px">📜 versjon <b>2.046</b> · <a target="_blank" rel="noopener noreferrer" href="versions/">historikk</a></span>
+  <span style="color:var(--muted);margin-left:6px">📜 versjon <b>2.047</b> · <a target="_blank" rel="noopener noreferrer" href="versions/">historikk</a></span>
 </div>
 
 <h1>🏠 Homelab — tjenester &amp; nettverk <span style="color:var(--lan)">10.0.0.0/24</span></h1>
@@ -509,7 +522,10 @@ offline.forEach(o=>{
   setInterval(refresh,15000);
 })();
 </script>
-<div class="note"><b>Endringsnotat v2.046 (22. okt 2026):</b> Komplett layout er gjenopprettet etter feilpublisert v2.014. Alle gjeste-ID-er er kontrollert mot Proxmox etter renummereringen 21. okt; TubeArchivist, Linkding, Mealie, Grocy, IT-Tools, Dozzle, Scrutiny, Beszel, ErsatzTV og Watchtower er lagt inn etter Docker-kontroll.</div>
+<div class="note"><b>Endringsnotat v2.047 (22. okt 2026):</b> Seks-kolonne-designet er gjenopprettet: én stor svart tjenesteboks per CT/VM, klikkbare navn, og stabile statuslys/av-på-kontroller.  Komplett layout er gjenopprettet etter feilpublisert v2.014. Alle gjeste-ID-er er kontrollert mot Proxmox etter renummereringen 21. okt; TubeArchivist, Linkding, Mealie, Grocy, IT-Tools, Dozzle, Scrutiny, Beszel, ErsatzTV og Watchtower er lagt inn etter Docker-kontroll.</div>
+
+<div class="note" style="border:1px solid var(--svc);padding:10px 12px;margin:10px 0;color:var(--text)"><b>Publiseringsregler:</b> Endre bare Git-kilden. Arkiver forrige versjon, oppdater historikken, verifiser mot Proxmox/Docker, commit + push til main, og publiser med <code>/usr/local/sbin/deploy-network-map</code> fra repoet på CT120. Feil rettes alltid i en ny versjon. Full regel: <code>docs/network-map/PUBLISHING.md</code>.</div>
+
 <div class="rules-foot" style="width:100%;margin-top:20px;padding:12px 14px;border-top:1px solid var(--border);font-size:11.5px;color:var(--muted);line-height:1.6">
   <b style="color:var(--text);font-size:12.5px">&#128299; Regler for denne siden (homelab-komodo · docs/network-map)</b><br>
   &#8226; <b>ALLE endringer lagres i EGEN versjon</b>, selv om det bare er én ting som endres &mdash; tilfeldige AI-boter glemmer dette hele tiden. Trykk p&aring; versjonsnummeret &ouml;verst til h&oslash;yre for historikken og lagringsm&#229;ten.<br>
@@ -519,5 +535,19 @@ offline.forEach(o=>{
   &#8226; Videostr&oslash;mmer telles fra CT157 <code>/streams</code> (Tunarr + Emby) &mdash; det er de store gr&oslash;nne tallene p&aring; maskinkortene.<br>
   &#8226; Hele regelsettet ligger i repoet <code>homelab-komodo</code> &rarr; <code>docs/network-map/README.md</code> (vedlikehold), og serverlogikken i <code>~/.hermes/scripts/servicemap_*.py</code> p&aring; CT157.
 </div>
+
+<script>
+/* Gjør tjenestenavnet klikkbart når raden har en IP/URL. Ikke flytt statusfelt. */
+document.querySelectorAll(".vm-frame table.svc tbody tr").forEach(function(row){
+  var name=row.cells[0], address=row.cells[1];
+  if(!name || !address || name.querySelector("a")) return;
+  var link=address.querySelector("a"), url=link ? link.href : address.textContent.trim();
+  if(!url || !/^([a-z]+:\/\/)?[0-9]/i.test(url)) return;
+  if(!/^[a-z]+:\/\//i.test(url)) url="http://"+url;
+  var a=document.createElement("a"); a.href=url; a.target="_blank"; a.rel="noopener noreferrer";
+  a.innerHTML=name.innerHTML; name.replaceChildren(a);
+});
+</script>
+
 </body>
 </html>

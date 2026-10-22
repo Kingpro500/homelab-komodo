@@ -124,3 +124,7 @@ Av/på-knappene krever `AUDIT_TOKEN`:
 ```js
 localStorage.setItem("homelab_audit_token", "<AUDIT_TOKEN fra ~/.hermes/.env>")
 ```
+
+## Vedlikehold
+
+Følg PUBLISHING.md for den autoritative publiseringsprosessen.
