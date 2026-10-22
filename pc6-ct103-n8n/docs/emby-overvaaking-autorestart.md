@@ -58,6 +58,13 @@ siste omstartstid i `.emby_state.json`). Kalles rebooten for tidlig, returnerer
 endepunktet `{"ok": false, "cooldown": true, "cooldown_remaining_s": ...}` og
 n8n sender ikke en ny reboot.
 
+> Runtime-merknad: den aktive n8n-definisjonen har fortsatt eldre `CT151`-tekst
+> i enkelte varsel- og loggmeldinger. Dette er kosmetisk. Den autentiserte
+> statusveien er testet, og `emby_watch.py` på Hermes har `PCT_CT = "200"`, så
+> en faktisk restart går til CT200. Ikke importer workflowen med CLI bare for å
+> endre teksten; n8n i denne modusen kan ikke reaktivere CLI-importen. Endre og
+> lagre teksten i n8n-UI ved neste planlagte vedlikeholdsvindu.
+
 ## Varslingsmål
 
 iPhone via Home Assistant. `/notify`-endepunktet kaller `notify_ha.py` → HA →
