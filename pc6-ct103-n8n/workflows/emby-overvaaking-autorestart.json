@@ -146,7 +146,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ title: 'Emby er nede - sender reboot', message: 'Emby svarte ikke (prober: ' + $json.ok_probes + '/' + $json.probes + '). CT151 (pc6) rebootes naa.' }) }}",
+        "jsonBody": "={{ JSON.stringify({ title: 'Emby er nede - sender reboot', message: 'Emby svarte ikke (prober: ' + $json.ok_probes + '/' + $json.probes + '). CT200 (pc6) rebootes naa.' }) }}",
         "options": {
           "timeout": 30000
         }
@@ -235,7 +235,7 @@
         "authentication": "none",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ source:'emby', type:'nedetid', severity:'warning', title:'Emby nede', message:'Emby svarte ikke (prober '+$json.ok_probes+'/'+$json.probes+')', host:'emby-pc6 (CT151)', at: new Date().toISOString(), details: JSON.stringify($json) }) }}",
+        "jsonBody": "={{ JSON.stringify({ source:'emby', type:'nedetid', severity:'warning', title:'Emby nede', message:'Emby svarte ikke (prober '+$json.ok_probes+'/'+$json.probes+')', host:'emby-pc6 (CT200)', at: new Date().toISOString(), details: JSON.stringify($json) }) }}",
         "options": {
           "timeout": 30000
         }
@@ -256,7 +256,7 @@
         "authentication": "none",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ source:'emby', type:'tilbake', severity:'info', title:'Emby tilbake', message:'Emby svarer igjen (HTTP 200)', host:'emby-pc6 (CT151)', at: new Date().toISOString(), details: JSON.stringify($json) }) }}",
+        "jsonBody": "={{ JSON.stringify({ source:'emby', type:'tilbake', severity:'info', title:'Emby tilbake', message:'Emby svarer igjen (HTTP 200)', host:'emby-pc6 (CT200)', at: new Date().toISOString(), details: JSON.stringify($json) }) }}",
         "options": {
           "timeout": 30000
         }

@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+# Safe stale-NFS repair for PC9. Called only through n8n's forced SSH command.
+set -Eeuo pipefail
+
+readonly MOUNT=/mnt/pve/Tower-media
+readonly TUNARR_CT=106
+
+exec 9>/run/n8n-tower-media-repair.lock
+flock -n 9 || { echo 'tower-media: repair already running'; exit 0; }
+
+host_healthy() {
+  timeout 8 stat "$MOUNT" \
+    "$MOUNT/3 Folder Emby/James Bond" \
+    "$MOUNT/YouTube/shows/Adam Carolla" \
+    "$MOUNT/YouTube/shows/PowerfulJRE" \
+    "$MOUNT/YouTube/shows/AutoTopNL" \
+    "$MOUNT/YouTube/shows/Harry's garage" \
+    "$MOUNT/YouTube/shows/Theo Von" >/dev/null 2>&1
+}
+
+ct_healthy() {
+  local path
+  for path in /media/james-bond /media/adam-carolla /media/powerful-jre \
+              /media/autotopnl /media/harrys-garage /media/theo-von; do
+    timeout 12 pct exec "$TUNARR_CT" -- timeout 8 stat "$path" >/dev/null 2>&1 || return 1
+  done
+}
+
+# This host mount is shared with Roon. A host-level remount is deliberately not
+# automatic: it needs a controlled maintenance action rather than risking Roon.
+if ! host_healthy; then
+  echo 'tower-media: host mount unhealthy; no automatic remount on PC9'
+  exit 2
+fi
+
+if ! pct status "$TUNARR_CT" | grep -qx 'status: running'; then
+  echo "tower-media: Tunarr CT${TUNARR_CT} is not running"
+  exit 2
+fi
+
+if ct_healthy; then
+  echo 'tower-media: healthy'
+  exit 0
+fi
+
+echo "tower-media: stale bind mount; restarting Tunarr CT${TUNARR_CT}"
+pct reboot "$TUNARR_CT"
+sleep 20
+pct status "$TUNARR_CT" | grep -qx 'status: running' || {
+  echo "tower-media: restart failed for CT${TUNARR_CT}"
+  exit 1
+}
+echo "tower-media: repaired; restarted=${TUNARR_CT}"

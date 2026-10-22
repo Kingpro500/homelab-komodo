@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+# Safe stale-NFS repair for PC6. Called only through n8n's forced SSH command.
+# Emby is intentionally never stopped or restarted by this script.
+set -Eeuo pipefail
+
+readonly MOUNT=/mnt/pve/Tower-media
+readonly TUNARR_CT=250
+readonly SERVICES_CT=210
+readonly EMBY_CT=200
+
+exec 9>/run/n8n-tower-media-repair.lock
+flock -n 9 || { echo 'tower-media: repair already running'; exit 0; }
+
+host_healthy() {
+  timeout 8 stat "$MOUNT" "$MOUNT/3 Folder Emby" \
+    "$MOUNT/YouTube/shows/Theo Von" >/dev/null 2>&1
+}
+
+ct_path_healthy() {
+  local ct=$1 path=$2
+  timeout 12 pct exec "$ct" -- timeout 8 stat "$path" >/dev/null 2>&1
+}
+
+# A host-level unmount/remount would invalidate Emby's bind mount. Do not make
+# Emby availability worse automatically. n8n treats exit 2 as a critical alert.
+if ! host_healthy; then
+  echo "tower-media: host mount unhealthy; Emby CT${EMBY_CT} protected; no automatic remount"
+  exit 2
+fi
+
+stale=()
+if pct status "$TUNARR_CT" | grep -qx 'status: running' && ! ct_path_healthy "$TUNARR_CT" /media; then
+  stale+=("$TUNARR_CT")
+fi
+if pct status "$SERVICES_CT" | grep -qx 'status: running' && ! ct_path_healthy "$SERVICES_CT" /scan/media; then
+  stale+=("$SERVICES_CT")
+fi
+
+if ((${#stale[@]} == 0)); then
+  echo 'tower-media: healthy'
+  exit 0
+fi
+
+echo "tower-media: stale bind mount; restarting non-Emby CTs=${stale[*]}"
+for ct in "${stale[@]}"; do
+  pct reboot "$ct"
+done
+sleep 20
+for ct in "${stale[@]}"; do
+  pct status "$ct" | grep -qx 'status: running' || {
+    echo "tower-media: restart failed for CT${ct}"
+    exit 1
+  }
+done
+echo "tower-media: repaired; restarted=${stale[*]}; emby_ct=${EMBY_CT} untouched"

@@ -6,7 +6,7 @@
 
 ## Hva den gjør og hvorfor
 
-Overvåker Emby (10.0.0.150:8096, CT151 `emby-pc6` på pc6) kontinuerlig. Er
+Overvåker Emby (10.0.0.150:8096, CT200 `ct151-emby` på pc6) kontinuerlig. Er
 Emby utilgjengelig, varsler den iPhone **og** rebooter hele Emby-CT-en for å få
 tjenesten opp igjen — mer robust enn å bare starte containeren på nytt, siden en
 CT-reboot også rydder opp i alt som henger inne i CT-en.
@@ -47,7 +47,7 @@ auth). `/health` gir 404 og er derfor ubrukelig som sjekk — derfor bruker vi
 
 ## Reboot med cooldown
 
-`POST /emby/restart` rebooter CT151 med `pct reboot 151` (ikke bare
+`POST /emby/restart` rebooter CT200 med `pct reboot 200` (ikke bare
 `docker restart emby`). docker er `enabled` i CT-en, og Emby har
 `restartpolicy: unless-stopped`, så Emby (og tunarr) kommer opp automatisk etter
 boot — bekreftet ved testre volt 6. okt: begge oppe igjen på ~17 s.
@@ -70,7 +70,7 @@ iPhone via Home Assistant. `/notify`-endepunktet kaller `notify_ha.py` → HA �
 
 | Avhengighet | Verdi | Hvor den bor |
 |---|---|---|
-| Audit-token | Bearer / `X-Audit-Token` | `REDACTED_AUDIT_TOKEN` i eksporten; ekte verdi i `/home/hermes/.hermes/.env` på CT157 (`AUDIT_TOKEN`) |
+| Audit-token | Bearer / `X-Audit-Token` | Eksporten er redigert; runtime aksepterer n8n sin interne kompatibilitetstoken i tillegg til Hermes sin primære token. Begge ligger kun i `/home/hermes/.hermes/.env` på CT130. |
 | `homelab-audit`-server | 10.0.0.135:9118 | systemd-enhet `homelab-audit.service` på CT157 |
 | `emby_watch.py` | status()/restart() | `/home/hermes/.hermes/scripts/emby_watch.py` (importert av audit-serveren) |
 | SSH til pc6 | root@10.0.0.120, nøkkel `~/.ssh/id_ed25519_hermes` | kun på CT157, aldri i Git |
@@ -81,7 +81,7 @@ iPhone via Home Assistant. `/notify`-endepunktet kaller `notify_ha.py` → HA �
    `workflows/emby-overvaaking-autorestart.json`.
 2. De fire nodene som ringer `10.0.0.135:9118` (status, reboot, 2 × notify):
    sett `X-Audit-Token` til `REDACTED_AUDIT_TOKEN` → den ekte `AUDIT_TOKEN`-verdien
-   fra `.env` på CT157.
+   fra `.env` på CT130.
 3. Aktiver.
 
 ## Til å leke med (læring)
@@ -89,5 +89,5 @@ iPhone via Home Assistant. `/notify`-endepunktet kaller `notify_ha.py` → HA �
 - Bytt `secondsInterval: 60` til `300` for hvert 5. min.
 - Endre cooldownen i `emby_watch.py` (`RESTART_COOLDOWN_S`) hvis 15 min føles
   for kort/langt.
-- Vil du ikke reboote hele CT-en, bytt `pct reboot 151` til
-  `pct exec 151 -- docker restart emby` i `emby_watch.py`.
+- Vil du ikke reboote hele CT-en, bytt `pct reboot 200` til
+  `pct exec 200 -- docker restart emby` i `emby_watch.py`.

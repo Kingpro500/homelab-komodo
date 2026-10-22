@@ -1,92 +1,50 @@
 # Tower media NFS health and repair
 
-**Workflow-id:** `tower-media-nfs-health-repair`
-**Eksport:** `workflows/tower-media-nfs-health-repair.json`
-**Status:** aktiv (hvert 5. min)
+**Workflow:** `Tower media NFS health and repair`
 
-## Hva den overvåker og hvorfor
+**Interval:** hvert femte minutt
+**Formål:** oppdage en faktisk utilgjengelig NFS-/bind-mount, ikke bare at en
+mount ser montert ut.
 
-NFS-sharet `Tower-media` (`10.0.0.101:/mnt/user/media` → `/mnt/pve/Tower-media`)
-er montert med `hard`-opsjon på to Proxmox-noder. Et heng på NFS-serveren gjør
-at I/O blokkerer i flere minutter (`timeo=600`) i stedet for å feile raskt —
-typisk symptom på at Emby/medieavspilling fryser uten klar feilmelding.
+## Sikkerhetspolicy
 
-Workflowen sjekker derfor at mountet faktisk *responderer* (ikke bare at det er
-montert), og remonterer det hvis det har hengt seg.
+Emby er prioritet én. Automatikk skal derfor aldri stoppe, restarte eller
+remounte under Emby CT200. Dette er en bevisst endring etter at den gamle
+CT151-logikken ble foreldet under renummereringen.
 
-## Intervall og hva som utløser reparasjon
+n8n bruker en låst SSH-nøkkel. På begge Proxmox-nodene kan nøkkelen bare kjøre
+`/usr/local/sbin/n8n-tower-media-repair`; den kan ikke åpne shell, forwarde
+porter eller velge andre kommandoer.
 
-- **Hvert 5. min.** `scheduleTrigger` → SSH til begge nodene.
-- **Reparasjon** utløses kun når helsesjekken feiler. Friske mount gir
-  `tower-media: healthy` og ingen aksjon.
+## Runtime-skript
 
-## Hvordan det fungerer (arkitektur)
+| Node | Skriptet kontrollerer | Automatisk handling | Bevisst ikke automatisk |
+|---|---|---|---|
+| PC6 `10.0.0.120` | `/mnt/pve/Tower-media`, CT250 `/media`, CT210 `/scan/media` | Restarter CT250 og/eller CT210 ved stale bind mount når hostmounten er frisk | CT200/Emby, også ved hostmount-feil |
+| PC9 `10.0.0.103` | seks mapper under CT106 `/media/*` | Restarter CT106/Tunarr ved stale bind mount når hostmounten er frisk | Host-remount som kan påvirke Roon CT220 |
 
-N8n-noden `Check and repair Tower media` kjører **bare**:
+Hostmount-feil returnerer exit `2`. n8n sender da kritisk iPhone-varsel i stedet
+for å prøve en risikabel remount. Det gir en kontrollert vedlikeholdsoppgave
+heller enn at automatikk gjør Emby eller Roon mer utilgjengelig.
 
-```
-ssh -i /home/node/.n8n/ssh/tower_media_ed25519 root@10.0.0.120 \
- && ssh -i /home/node/.n8n/ssh/tower_media_ed25519 root@10.0.0.103
-```
+En frisk kontroll skriver bare `tower-media: healthy`; dette gir ikke varsling.
+`flock` hindrer overlappende reparasjoner.
 
-Dette er **ikke** en tom kommando. Nøkkelen er låst i `authorized_keys` på begge
-nodene med `command="/usr/local/sbin/n8n-tower-media-repair"` (pluss
-`no-port-forwarding,no-agent-forwarding,no-X11-forwarding,no-pty`). Hver SSH
-utløser altså det faste scriptet, uansett hva som står etter SSH.
+## Varsling
 
-Scriptet gjør i tur:
+Workflowen varsler iPhone via Home Assistant ved reparasjon eller feil. Uptime
+Kuma overvåker i tillegg Tunarrs reelle M3U-feeder. Det dekker to ulike feil:
 
-1. `flock` på `/run/n8n-tower-media-repair.lock` — ingen overlappende
-   reparasjoner.
-2. Helsesjekk: `timeout 8 stat /mnt/pve/Tower-media "/mnt/pve/Tower-media/3 Folder Emby"`.
-   Svarer det innen 8 s og mappa finnes → `healthy`, exit 0.
-3. Ved heng: noter hvilke avhengige CT-er som kjører, `pct shutdown --timeout 45`
-   (fallback `pct stop`), `umount -l`, remount NFSv4, verifiser på nytt
-   (exit 1 hvis fortsatt død), og `pct start` CT-ene igjen.
-4. Utskrift: `tower-media: repaired; restarted=<ct-liste>`.
-
-## Hvilke CT-er/tjenester den kan restarte
-
-| Node | CT-er/tjenester som stoppes ved remount |
-|---|---|
-| pc6 (`10.0.0.120`) | 104 (media-downloaders), 109 (arr-stack + grafana m.m.), 151 (Emby), 152 (Roon) |
-| pc9 (`10.0.0.103`) | 106 (periphery agent-node) |
-
-**Merk:** en reparasjon tar Emby (CT151) ned i den tiden remounten pågår — det
-er bevisst, fordi Emby leser fra nettopp dette mountet.
-
-## Varslingsmål
-
-`notify/mobile_app_1_iphone_r` (Home Assistant). Node `Only when repaired`
-filtrerer slik at push kun skjer når `exitCode != 0` **eller** utskriften
-inneholder `repaired;`. Friske kjøringer sender ingenting.
-
-## Avhengigheter
-
-| Avhengighet | Hvor den bor |
-|---|---|
-| SSH-nøkkel `tower_media_ed25519` (+ `.pub`) | n8n-containeren, `/home/node/.n8n/ssh/` — **ikke** i Git |
-| forced-command-script `n8n-tower-media-repair` | `/usr/local/sbin/` på **begge** nodene (pc6 + pc9) |
-| `authorized_keys` med `command=`-lås | `/root/.ssh/authorized_keys` på begge nodene |
-| HA long-lived token | Notify-nodens `Authorization`-header (`REDACTED_HASS_TOKEN` i eksporten) |
+- NFS-/bind-mount-feil oppdages av n8n på filsystemnivå.
+- Tunarr-feil som gjør Emby-feed ulesbar oppdages av Uptime Kuma.
 
 ## Gjenoppretting
 
-1. **Workflows → Import from File**, velg
-   `workflows/tower-media-nfs-health-repair.json`.
-2. I `Notify iPhone`-noden: sett `Authorization`-header til
-   `Bearer <reell HA-token>`.
-3. Sørg for at SSH-nøkkelen og forced-command-scriptet finnes på nodene (over) —
-   uten dem kjører bare `permission denied`, og reparasjonen skjer aldri.
-4. Aktiver.
+Kildeskriptene er versjonert som:
 
-## Kjente feil / merknader
+- `scripts/n8n-tower-media-repair-pc6`
+- `scripts/n8n-tower-media-repair-pc9`
 
-- **Live-ui-korrupsjon (funnet 5. okt):** i den kjørende workflowen er
-  `$json`-referansene i `Only when repaired` blitt strippet til `.stdout`,
-  `.error`, `.exitCode` — ugyldig JS som krasjer filteret, så push sendes aldri.
-  Eksportfilen ovenfor har korrekt `$json`-form. Den kjørende instansen bør
-  rettes tilbake til `$json.*` (eller re-importeres fra denne fila).
-- NFS-remount med `hard`-opsjon: hvis serveren er nede, blokkerer selve
-  `umount -l` + `mount` raskt; `stat`-sjekken med `timeout 8` er det som skiller
-  «heng» fra «midlertidig treg».
+Før skript byttes på en node skal den eksisterende `/usr/local/sbin`-filen
+kopieres tidsstemplet, og den nye filen skal valideres med `bash -n`. Test kun
+en frisk kontroll først. Ikke simuler stale mount på Emby.
