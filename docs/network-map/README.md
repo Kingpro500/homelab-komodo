@@ -1,7 +1,7 @@
 # Nettverkskart — Homelab 10.0.0.0/24
 
 Frittstående startside (HTML) over hele homelab-et. Åpne `nettverkskart.html`
-eller se den live på **http://10.0.0.128:3020/** (nginx i `pc6-ct109-web`).
+eller se den live på **http://10.0.0.124:3020/** (nginx i CT120 på PC6).
 
 ## ⛔ PÅLAGT: NODE-SAMMENDRAGET + VERSJONERING — MÅ IKKE FJERNES
 
@@ -17,12 +17,19 @@ de fire maskinene (pc1 · Gaming, pc6 · Tower, pc9 · Minipc, pc8 · pve) med
   eller erstatte innholdet med noe annet. Du kan legge til elementer i tillegg.
 - Kommentaren i HTML-en rett over `#node-resources` er også der av denne grunn.
 
-**Versjonering:** Skjema = **`baseversjon.desimal`**. Vi ligger på base `2`; hver
+**Versjonering og publisering:** Skjema = **`baseversjon.desimal`**. Vi ligger på base `2`; hver
 minste endring hever sub-versjonen med 0.001 (`2.001`, `2.002`, …); ved store
 omskrivinger hopper vi til neste baseversjon (`3`, …). Arkiver forrige versjon
 til `versions/vNN/` og oppdater `versions/index.html`. Topp-høyre på siden viser
-versjonsnummeret, og `versions/` er indeksen med klikkbare gamle versjoner. Aldri
-slett gamle versjoner.
+versjonsnummeret, og `versions/` er indeksen med klikkbare gamle versjoner.
+
+**Publiser straks etter en kontrollert endring.** Ikke bruk live-siden som en
+arbeidskopi og aldri rull tilbake en publisert versjon. Dersom noe er feil, lag
+en ny versjon som retter feilen. Den eneste publiseringskommandoen er
+`/usr/local/sbin/deploy-network-map` i CT120; den henter kun GitHub `main`,
+validerer den komplette kartstrukturen og nekter å publisere lavere versjon enn
+den som allerede er live. Den lagrer dessuten en lokal, datostemplet kopi før
+atomisk bytte av HTML-filen.
 
 ## ⚠️ Vedlikeholdsregler — LES FØR DU ENDRER
 
@@ -54,14 +61,14 @@ Vær derfor nøye med dette:
 5. **Forklar avvik** (motsier Proxmox/ARP) i kommentarfeltet nederst i fila i
    stedet for bare å «fikse» uten kilde.
 
-## Nåværende gjestetilstand (verifisert 6. okt 2026)
+## Nåværende gjestetilstand (verifisert 22. okt 2026)
 
 | Node | kjører | stoppet/arkivert |
 |---|---|---|
-| pve (pc8) N150 | VM100 HA, CT102 Komodo/NetBox/step-CA, CT115 pihole, CT110 periphery | — |
-| pc6 N355 | VM101 Unraid, CT103 n8n/OWU/gjeld, CT109 *arr/dash/nettkart/udleje, CT151 emby, CT157 hermes | CT104, CT107 mediespillere, CT108 legacy, CT159 abs-ngrok, CT160 lancache |
-| pc9 N100 | CT106 tunarr, CT116 pihole, CT152 roon, CT155 uniFi | CT111 iventoy, CT153 immich, CT154 paperless |
-| pc1 3900X | — | CT105 mediespiller, CT156 ollama, CT158 browsers |
+| pc8 N150 | VM100 Home Assistant | — |
+| pc6 N355 | VM201 Unraid, CT101 Pi-hole, CT115 UniFi, CT120 monitoring/nettkart, CT130 Hermes, CT200 Emby, CT210 tjenester, CT215 TubeArchivist, CT250 Tunarr, CT310 n8n, CT330 personlige tjenester, CT340 Krusader | CT108, CT140, CT202, CT230, CT235, CT240, CT320, CT390–392 |
+| pc9 N100 | CT103 Pi-hole reserve, CT106 Tunarr, CT110 Komodo Core, CT220 Roon | — |
+| pc1 3900X | CT102 Pi-hole | CT105 mediespiller, CT150 browsers, CT350 Ollama |
 
 **Merk:** ct107/108/159/160 er arkiverte legacy-CT-er fra Unraid/Tower, stoppet
 med vilje. De kommer opp ved behov — slett dem ikke.
@@ -91,10 +98,11 @@ curl -sk -u "$OPNSENSE_API_KEY:$OPNSENSE_API_SECRET" \
 
 ## Hvordan hoste som intern webside
 
-nginx i `pc6-ct109-web`-stacken serverer `docs/network-map/` read-only på
-`10.0.0.128:3020`. Etter endring: commit + push, og `git pull`/`git reset --hard
-origin/main` i `/opt/komodo/stacks/pc6-ct109-web` på pc6 (CT109 kjøres via
-`pct exec 109 -- sh <script>`). Tile «Nettverkskart» i Homepage peker hit.
+nginx i CT120 serverer `docs/network-map/` read-only på `10.0.0.124:3020`.
+Etter endring: arkiver forrige versjon, oppdater indeks, commit + push til
+GitHub `main`, og kjør `/usr/local/sbin/deploy-network-map` i CT120. Tile
+«Nettverkskart» i Homepage peker hit. Scriptet er den eneste tillatte måten å
+oppdatere den levende siden på.
 
 ## Levende tjenestestatus + av/på-knapper (6. okt 2026)
 
