@@ -1,0 +1,321 @@
+{
+  "name": "PC1 AI heng-vakt",
+  "description": null,
+  "nodes": [
+    {
+      "id": "7f6725b7-8db3-498e-b69b-656936a46b47",
+      "name": "Hvert minutt",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -900,
+        0
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "58dbaae9-af74-41b3-acbc-3b1f2d7560c8",
+      "name": "Les PC1-status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "continueOnFail": true,
+      "position": [
+        -650,
+        -120
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "http://10.0.0.135:9118/nodes",
+        "authentication": "none",
+        "options": {
+          "timeout": 10000,
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          },
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      }
+    },
+    {
+      "id": "e8819d00-2f5b-41ac-981a-8f0ec56ea340",
+      "name": "Test Ollama",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "continueOnFail": true,
+      "position": [
+        -650,
+        120
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "http://10.0.0.133:11434/api/version",
+        "authentication": "none",
+        "options": {
+          "timeout": 8000,
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "7962d942-fbc1-4d62-8285-c7e3e6f02c6c",
+      "name": "Samle status",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -350,
+        0
+      ],
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition"
+      }
+    },
+    {
+      "id": "7c3466f8-1996-4650-ad5b-d812a89fcc73",
+      "name": "Tre feil før restart",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -100,
+        0
+      ],
+      "parameters": {
+        "jsCode": "const sd=$getWorkflowStaticData('global'); const now=Date.now(); const a=$input.all().map(x=>x.json||{}); const n=a.find(x=>Array.isArray(x.nodes)); const o=a.find(x=>x.version==='0.35.0'); const pc=n&&n.nodes?.find(x=>x.node==='pc1'); const g=pc&&pc.vms?.find(x=>String(x.vmid)==='350'); if(!g||g.status!=='running'){sd.fail=0; return [{json:{restart:false,reason:'CT350 ikke running'}}]}; if(o){sd.fail=0; return [{json:{restart:false,reason:'Ollama OK'}}]}; sd.fail=(sd.fail||0)+1; if(sd.last && now-sd.last<1800000)return [{json:{restart:false,reason:'cooldown',fail:sd.fail}}]; if(sd.fail<3)return [{json:{restart:false,reason:'venter på 3 feil',fail:sd.fail}}]; sd.last=now; sd.fail=0; return [{json:{restart:true,node:'pc1',vmid:350,action:'off',reason:'Ollama utilgjengelig tre målinger'}}];"
+      }
+    },
+    {
+      "id": "e32dc84d-e3c7-41cf-82f8-80453b3f5aa5",
+      "name": "Restart nødvendig?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        150,
+        0
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "leftValue": "={{$json.restart}}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "6e9dd51a-a3d3-434a-987f-872edea9f371",
+      "name": "Stopp AI-CT",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        380,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://10.0.0.135:9118/control",
+        "authentication": "none",
+        "sendHeaders": true,
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{JSON.stringify({node:$json.node,vmid:$json.vmid,action:\"off\"})}}",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer REDACTED_AUDIT_TOKEN"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 60000
+        }
+      }
+    },
+    {
+      "id": "464d8e31-01b5-4aec-84d1-3b34c6ccb2a6",
+      "name": "Vent 20 sekunder",
+      "webhookId": "11f88343-6ba5-4a50-ae17-28713114e2bf",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        610,
+        0
+      ],
+      "parameters": {
+        "resume": "timeInterval",
+        "amount": 20,
+        "unit": "seconds"
+      }
+    },
+    {
+      "id": "0537527f-6a83-4762-b45b-26d205fddfb1",
+      "name": "Start AI-CT igjen",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        840,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://10.0.0.135:9118/control",
+        "authentication": "none",
+        "sendHeaders": true,
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{JSON.stringify({node:$json.node,vmid:$json.vmid,action:\"on\"})}}",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer REDACTED_AUDIT_TOKEN"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 60000
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Hvert minutt": {
+      "main": [
+        [
+          {
+            "node": "Les PC1-status",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Test Ollama",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Les PC1-status": {
+      "main": [
+        [
+          {
+            "node": "Samle status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Test Ollama": {
+      "main": [
+        [
+          {
+            "node": "Samle status",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Samle status": {
+      "main": [
+        [
+          {
+            "node": "Tre feil før restart",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tre feil før restart": {
+      "main": [
+        [
+          {
+            "node": "Restart nødvendig?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Restart nødvendig?": {
+      "main": [
+        [
+          {
+            "node": "Stopp AI-CT",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Stopp AI-CT": {
+      "main": [
+        [
+          {
+            "node": "Vent 20 sekunder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vent 20 sekunder": {
+      "main": [
+        [
+          {
+            "node": "Start AI-CT igjen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true,
+    "executionOrder": "v1",
+    "availableInMCP": false
+  }
+}
