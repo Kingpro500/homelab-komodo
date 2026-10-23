@@ -1,7 +1,7 @@
-# n8n on pc6 CT 103
+# n8n on pc6 CT 310
 
 - **Host:** pc6 (`10.0.0.120`)
-- **LXC:** `pc6-ct103-node`
+- **LXC:** CT310 (`ct103-n8n`; repository path retains historical CT103)
 - **IP:** `10.0.0.119`
 - **URL:** `http://10.0.0.119:5678`
 
@@ -40,10 +40,10 @@ running service.
 | Daglig homelab-diagnose | daglig 08:15 | [docs/daglig-homelab-diagnose.md](docs/daglig-homelab-diagnose.md) | [workflows/daglig-homelab-diagnose.json](workflows/daglig-homelab-diagnose.json) |
 | Nettverksovervaakning | time + daglig 08:00 | [docs/nettverksovervaakning.md](docs/nettverksovervaakning.md) | [workflows/nettverksovervaakning.json](workflows/nettverksovervaakning.json) |
 | Pi-hole DNS failover | hvert minutt | [docs/pihole-dns-failover.md](docs/pihole-dns-failover.md) | [workflows/pihole-dns-failover.json](workflows/pihole-dns-failover.json) |
-| Tower media NFS health and repair | hvert 5. min | [docs/tower-media-nfs-health-repair.md](docs/tower-media-nfs-health-repair.md) | [workflows/tower-media-nfs-health-repair.json](workflows/tower-media-nfs-health-repair.json) |
+| Media health – deep probes and guarded recovery | hvert 5. min; NFS + Emby-fil + begge Tunarr-videosegmenter | [docs/tower-media-nfs-health-repair.md](docs/tower-media-nfs-health-repair.md) | [workflows/tower-media-nfs-health-repair.json](workflows/tower-media-nfs-health-repair.json) |
 | WAN offentlig IP-vakt | hvert 6. time | [docs/wan-offentlig-ip-vakt.md](docs/wan-offentlig-ip-vakt.md) | [workflows/wan-offentlig-ip-vakt.json](workflows/wan-offentlig-ip-vakt.json) |
 | Lagring - full-fremskrivning | daglig 08:30 | [docs/lagring-full-fremskrivning.md](docs/lagring-full-fremskrivning.md) | [workflows/lagring-full-fremskrivning.json](workflows/lagring-full-fremskrivning.json) |
-| Emby - overvaaking og autorestart | hvert minutt | [docs/emby-overvaaking-autorestart.md](docs/emby-overvaaking-autorestart.md) | [workflows/emby-overvaaking-autorestart.json](workflows/emby-overvaaking-autorestart.json) |
+| Emby - overvaaking og autorestart (**deaktivert, supersedert av Media health**) | ingen; beholdt som historikk | [docs/emby-overvaaking-autorestart.md](docs/emby-overvaaking-autorestart.md) | [workflows/emby-overvaaking-autorestart.json](workflows/emby-overvaaking-autorestart.json) |
 | Homelab-ressurs-alarmer | Alertmanager webhook | [docs/homelab-ressurs-alarmer.md](docs/homelab-ressurs-alarmer.md) | [workflows/homelab-ressurs-alarmer.json](workflows/homelab-ressurs-alarmer.json) |
 | Hendelseslogg - FerretDB | webhook `/events` | [docs/hendelseslogg-ferretdb.md](docs/hendelseslogg-ferretdb.md) | [workflows/hendelseslogg-ferretdb.json](workflows/hendelseslogg-ferretdb.json) |
 

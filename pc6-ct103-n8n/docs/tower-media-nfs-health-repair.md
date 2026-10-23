@@ -1,50 +1,140 @@
-# Tower media NFS health and repair
+# Media health: dype prober og avgrenset gjenoppretting
 
-**Workflow:** `Tower media NFS health and repair`
+Deployet 23. oktober 2026. Workflow-ID: `tower-media-nfs-health-repair`.
+Aktiv hvert femte minutt. Tidligere Emby-workflow `dK3dJJIQ7smvUy9v` er **deaktivert**;
+den skal ikke reaktiveres parallelt. `emby_watch.py` beholdes som historisk/manuell
+API-adapter, men har ingen egen cron-reparasjon i Hermes-jobbregisteret.
 
-**Interval:** hvert femte minutt
-**Formål:** oppdage en faktisk utilgjengelig NFS-/bind-mount, ikke bare at en
-mount ser montert ut.
+## Faktisk kjede og eierskap
 
-## Sikkerhetspolicy
+n8n (CT310, .119:5678) → autentisert `POST http://10.0.0.135:9118/media/check`
+→ fast Python-adapter → **begrenset SSH-nøkkel** → pc6-runner.
+Adapteren godtar ingen VMID, kommando eller sti fra request-body.
+Nøkkelen `/home/hermes/.ssh/id_ed25519_media_recovery` har på pc6
+`restrict,from="10.0.0.135",command="/usr/local/sbin/n8n-tower-media-repair"`.
+SSH-kommandoen kan ikke overstyres av klienten. Ingen nøkler i Git eller n8n.
+Alle SSH-forbindelser verifiserer vertsnøkler. pc6→pc9 bruker klusterets
+betrodde RSA-oppføring, `HostKeyAlias=pc9` og
+`/etc/pve/nodes/pc9/ssh_known_hosts`; ingen blind nøkkelaksept.
 
-Emby er prioritet én. Automatikk skal derfor aldri stoppe, restarte eller
-remounte under Emby CT200. Dette er en bevisst endring etter at den gamle
-CT151-logikken ble foreldet under renummereringen.
+| Tjeneste | Node/VMID | Kontroll |
+|---|---|---|
+| Emby .150:8096 | pc6/200 | API med gyldig versjon, konkret mediefillesing i LXC og Emby-Docker `/mnt` |
+| Tunarr .123:8005 | pc6/250 | konkret mediefillesing + HLS-spilleliste → videosegment |
+| Tunarr .122:8005 | pc9/106 | konkret mediefillesing + HLS-spilleliste → videosegment |
 
-n8n bruker en låst SSH-nøkkel. På begge Proxmox-nodene kan nøkkelen bare kjøre
-`/usr/local/sbin/n8n-tower-media-repair`; den kan ikke åpne shell, forwarde
-porter eller velge andre kommandoer.
+Begge verter: `findmnt` må bekrefte NFS/NFS4-kilden
+`10.0.0.101:/mnt/user/media` på `/mnt/pve/Tower-media`. En avgrenset søking
+(maks 1000 katalogoppføringer, dybde 5, kun `3 Folder Emby/James Bond`)
+velger én eksisterende videofil og leser inntil 4096 byte. Ingen søking i hele NAS.
+Gjestene må lese samme fil. Tunarr velger første konfigurerte kanal og leser
+inntil 65536 byte av et faktisk segment med MPEG-TS/fMP4-signatur.
+Dette beviser **ikke alle kanaler**, undertekster eller Emby-klientavspilling;
+Emby testes med API og filåpning, ikke autentisert transkoding.
+Streaming kan opprette vanlig midlertidig Tunarr-transkodingscache; ingen
+probe oppretter, endrer eller sletter filer på mediedelingen.
 
-## Runtime-skript
+## Reparasjonspolicy
 
-| Node | Skriptet kontrollerer | Automatisk handling | Bevisst ikke automatisk |
-|---|---|---|---|
-| PC6 `10.0.0.120` | `/mnt/pve/Tower-media`, CT250 `/media`, CT210 `/scan/media` | Restarter CT250 og/eller CT210 ved stale bind mount når hostmounten er frisk | CT200/Emby, også ved hostmount-feil |
-| PC9 `10.0.0.103` | seks mapper under CT106 `/media/*` | Restarter CT106/Tunarr ved stale bind mount når hostmounten er frisk | Host-remount som kan påvirke Roon CT220 |
+- Tre påfølgende mislykkede kontroller før gjestereboot (normalt ca. 10–15 min).
+- Både node/VMID/navn/kjørestatus kontrolleres fra fersk Proxmox-inventar.
+  Flyttet, renummerert eller bevisst stoppet gjest gir **ingen** start/reboot.
+- Frisk NFS på gjestens vert er påkrevd. Tunarr krever i tillegg frisk Emby
+  (API og konkret mediefillesing), også kontrollert rett før tiltak.
+- Kun `pct reboot 200`, `250` eller `106` på kontrollert node. Maks én gjest
+  per kjøring, minst 30 minutter mellom forsøk og maks to forsøk per gjest
+  i rullerende 24 timer. Forsøk lagres **før** reboot-kommandoen sendes.
+- Frisk kontroll nullstiller feiltelleren, men **ikke** forsøksbudsjettet.
+- Etter tiltak poller runneren og krever samme dype kontroll før `recovered`.
+  Restarten alene er ikke suksessbevis.
+- **Aldri** restart av router, Unraid, Proxmox-vert eller CT210; aldri
+  automatisk unmount/remount, `umount -l`, rettighetsendring eller medieskriving.
+- Ved feil i vertens NFS: varsle og eskaler til menneskelig vurdering av alle
+  mount-konsumenter. En gammel bind-mount kan repareres ved godkjent gjestereboot
+  når vertskilden igjen er frisk, men en dårlig vertsmount repareres ikke automatisk.
 
-Hostmount-feil returnerer exit `2`. n8n sender da kritisk iPhone-varsel i stedet
-for å prøve en risikabel remount. Det gir en kontrollert vedlikeholdsoppgave
-heller enn at automatikk gjør Emby eller Roon mer utilgjengelig.
+## Varig tilstand, varsling og feil
 
-En frisk kontroll skriver bare `tower-media: healthy`; dette gir ikke varsling.
-`flock` hindrer overlappende reparasjoner.
+På pc6: `/var/lib/media-recovery/state.json`, `latest.json`, `events.jsonl` og
+`lock`. Atomisk state-lagring, katalog 0700 og state 0600. `flock` hindrer
+parallelle kontroller/tiltak. Logrotate `/etc/logrotate.d/media-recovery` beholder
+12 ukesrotasjoner. n8n lagrer både vellykkede og feilede kjøringer.
 
-## Varsling
+Reparasjon, gjenoppretting og vedvarende feil går gjennom eksisterende
+`POST /notify` på .135:9118 og dermed `notify_ha.py` sitt felles time-tak.
+Friske kjøringer er stille. Runneren begrenser feilpåminnelser til én/time.
+HTTP-nodefeil, SSH-feil, timeout og runnerfeil rutes til samme varselnode.
+HTTP-kall har tre forsøk med fem sekunders mellomrom.
+Et 200-svar fra `/notify` betyr at det felles leveransepunktet aksepterte
+meldingen; den kan være undertrykt av time-taket, ikke nødvendigvis synlig push.
 
-Workflowen varsler iPhone via Home Assistant ved reparasjon eller feil. Uptime
-Kuma overvåker i tillegg Tunarrs reelle M3U-feeder. Det dekker to ulike feil:
+**Begrensning i installert n8n 2.41.5:** `executeCommand` er ikke tilgjengelig
+(`Unrecognized node type`), derfor brukes HTTP-adapteren uten å åpne shell-noder.
+API-et avviste tilkobling av generell Error Workflow med «no published version»
+selv etter aktivisering/publisert versjons-ID. Testworkflowene er slettet.
+Operative HTTP-/runnerfeil varsles og ble kjørt gjennom ekte n8n, men en total
+n8n-stans, feil i selve Code-noden eller et samtidig bortfall av audit-/notify-
+tjenesten kan ikke varsles gjennom denne samme kjeden. Overvåk tjenestene
+utenfra. Vi hevder ikke at en slik generell feilhåndterer er installert.
 
-- NFS-/bind-mount-feil oppdages av n8n på filsystemnivå.
-- Tunarr-feil som gjør Emby-feed ulesbar oppdages av Uptime Kuma.
+## Verifisert
 
-## Gjenoppretting
+- Python: ni tester i isolerte midlertidige kataloger, inkludert gjentatte feil,
+  NFS-avhengighet, endret identitet, cooldown, maksbudsjett og konkret målrettet
+  mock-reboot med etterkontroll. Ingen mock-test bruker produksjonsstate.
+- JavaScript: tre parsertilfeller og `node --check`.
+- Frisk direkte kontroll og autentisert HTTP-adapter: begge NFS-verter,
+  Emby API/LXC/Docker-lesing, begge Tunarr-videoer à 65536 byte. Ingen reboot.
+- Ekte planlagt n8n-kjøring **51742**: `success`, alle tre tjenester friske,
+  `actions: []`. Kjøring 51733 var også frisk; 51730 var korrekt låst/overlappet.
+- Isolert n8n-feiltest **51737**: utilgjengelig test-URL, varselgrenen
+  fullførte via eksisterende `/notify`. Testworkflowen er slettet.
+- Kjøring 51740 feilet fordi audit-serveren ble restartet akkurat under testen;
+  dette er ikke skjult. HTTP-retries ble lagt til og etterfølgende planlagt
+  kjøring 51742 var frisk. Ingen medietjeneste ble stoppet i testene.
+- Uautentisert `/media/check`: HTTP 401. Forsøk på vilkårlig SSH-kommando med
+  adapterens nøkkel kjørte bare den faste helsekontrollen.
+- Tidligere Emby-workflow lest tilbake som `active: false`.
 
-Kildeskriptene er versjonert som:
+## Gjenoppretting / rollback
 
-- `scripts/n8n-tower-media-repair-pc6`
-- `scripts/n8n-tower-media-repair-pc9`
+Kilde: `pc6-ct103-n8n/scripts/media_recovery.py` og testfilene ved siden av.
+På pc6 installeres runneren root-eid som `/usr/local/sbin/media_recovery.py`;
+`media-recovery-entrypoint` installeres 0755 som både
+`/usr/local/sbin/n8n-tower-media-repair` og `/usr/local/sbin/check-tower-media-nfs`.
+Sistnevnte foreldede CT104-script er nå ufarlig alias til samme låste runner.
+Installer logrotate-filen til `/etc/logrotate.d/media-recovery`.
 
-Før skript byttes på en node skal den eksisterende `/usr/local/sbin`-filen
-kopieres tidsstemplet, og den nye filen skal valideres med `bash -n`. Test kun
-en frisk kontroll først. Ikke simuler stale mount på Emby.
+På Hermes kopieres `media_recovery_adapter.py` til `.hermes/scripts/`.
+Kjør `python3 scripts/install_media_endpoint.py` som hermes for idempotent
+integrasjon i eksisterende audit-server. Denne er testet mot faktisk fil.
+Installer egen ny SSH-nøkkel 0600 ved gjenoppretting (ikke kopier nøkkel fra Git),
+og legg public key med nøyaktig forced-command-begrensning ovenfor i pc6s
+`/root/.ssh/authorized_keys`. Behold eksisterende, verifisert `known_hosts`.
+Restart audit-service med
+`XDG_RUNTIME_DIR=/run/user/1000 systemctl --user restart homelab-audit`.
+
+Importer scrubbet workflow-JSON, erstatt **begge** `REDACTED_AUDIT_TOKEN`
+med gyldig eksisterende audit-token i privat n8n-lagring. JSON er en import-body
+uten read-only-felter, hemmeligheter eller `description`. Aktiver og les tilbake
+workflow, vent på en ekte planlagt kjøring og se dype resultater.
+Ikke aktiver gammel Emby-workflow parallelt.
+
+Trygg pause: deaktiver `tower-media-nfs-health-repair` i n8n først.
+Behold state/forsøksbudsjett og logg. Ikke nullstill state for å tvinge nye reboot.
+Originale verts-skript er bevart privat under
+`/var/lib/media-recovery/backups/`; **ikke** gjeninnfør den gamle CT104-
+`umount -l`-automatikken. De gamle `n8n-tower-media-repair-pc6/pc9` i repoet er
+historiske, supersedert og skal ikke deployes som ny løsning.
+
+## Til å leke med (uten produksjonseffekt)
+
+```sh
+cd pc6-ct103-n8n/scripts
+python3 test_media_recovery.py
+node test_media_workflow.js
+```
+
+Testene erstatter state, kommandoer og tjenester lokalt. Ikke fremprovoser stale
+NFS eller restart fungerende gjester for å teste policy. Ingen nye IP-er, porter
+eller tjenester er lagt til; derfor ingen topologi-/dashboardendring nødvendig.

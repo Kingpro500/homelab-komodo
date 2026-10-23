@@ -1,0 +1,3 @@
+#!/bin/sh
+# Fixed forced-command entrypoint; ignores SSH_ORIGINAL_COMMAND.
+exec /usr/bin/python3 /usr/local/sbin/media_recovery.py

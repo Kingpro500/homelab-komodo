@@ -2,7 +2,7 @@
 
 **Workflow-id:** `dK3dJJIQ7smvUy9v`
 **Eksport:** `workflows/emby-overvaaking-autorestart.json`
-**Status:** aktiv (hvert minutt)
+**Status:** deaktivert 23. oktober 2026. Supersedert av [Media health](tower-media-nfs-health-repair.md). Ikke aktiver parallelt; resten av dokumentet er historisk.
 
 ## Hva den gjør og hvorfor
 
