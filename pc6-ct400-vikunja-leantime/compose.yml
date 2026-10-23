@@ -1,0 +1,60 @@
+services:
+  vikunja-db:
+    image: "postgres:16-alpine"
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: vikunja
+      POSTGRES_PASSWORD: "${VIKUNJA_DB_PASSWORD:?set in environment}"
+      POSTGRES_DB: vikunja
+    volumes:
+      - vikunja_db:/var/lib/postgresql/data
+  vikunja:
+    image: "vikunja/vikunja:latest"
+    restart: unless-stopped
+    depends_on:
+      - vikunja-db
+    ports:
+      - "3456:3456"
+    environment:
+      VIKUNJA_SERVICE_PUBLICURL: "${VIKUNJA_PUBLIC_URL:?set in environment}"
+      VIKUNJA_DATABASE_TYPE: postgres
+      VIKUNJA_DATABASE_HOST: vikunja-db
+      VIKUNJA_DATABASE_DATABASE: vikunja
+      VIKUNJA_DATABASE_USER: vikunja
+      VIKUNJA_DATABASE_PASSWORD: "${VIKUNJA_DB_PASSWORD:?set in environment}"
+    volumes:
+      - vikunja_files:/app/vikunja/files
+      - vikunja_config:/etc/vikunja
+  leantime-db:
+    image: "mysql:8.0"
+    restart: unless-stopped
+    command: "--character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci"
+    environment:
+      MYSQL_ROOT_PASSWORD: "${LEANTIME_DB_PASSWORD:?set in environment}"
+      MYSQL_DATABASE: leantime
+      MYSQL_USER: leantime
+      MYSQL_PASSWORD: "${LEANTIME_DB_PASSWORD:?set in environment}"
+    volumes:
+      - leantime_db:/var/lib/mysql
+  leantime:
+    image: "leantime/leantime:latest"
+    restart: unless-stopped
+    depends_on:
+      - leantime-db
+    ports:
+      - "8080:8080"
+    environment:
+      LEANTIME_DB_HOST: leantime-db
+      LEANTIME_DB_DATABASE: leantime
+      LEANTIME_DB_USER: leantime
+      LEANTIME_DB_PASSWORD: "${LEANTIME_DB_PASSWORD:?set in environment}"
+      LEANTIME_SESSION_PASSWORD: "${LEANTIME_SESSION_PASSWORD:?set in environment}"
+      LEANTIME_SERVER: "${LEANTIME_PUBLIC_URL:?set in environment}"
+    volumes:
+      - leantime_public_user:/var/www/html/public/userfiles
+volumes:
+  vikunja_db:
+  vikunja_files:
+  vikunja_config:
+  leantime_db:
+  leantime_public_user:

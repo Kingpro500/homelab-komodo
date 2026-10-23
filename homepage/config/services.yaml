@@ -441,6 +441,15 @@
     - Lancache DNS gammel:
         icon: mdi:dns
         description: CT160 · pc6 · DNS-oppsett arkivert · stoppet
+- Project Management:
+    - Vikunja:
+        icon: mdi:format-list-checks
+        href: http://10.0.0.33:3456/
+        description: 10.0.0.33:3456 · CT400 · pc6
+    - Leantime:
+        icon: mdi:chart-timeline-variant
+        href: http://10.0.0.33:8080/
+        description: 10.0.0.33:8080 · CT400 · pc6
     - Unraid Monitoring API gammel:
         icon: mdi:chart-line
         description: CT108 · pc6 · krever Tower-vertstilgang · stoppet
