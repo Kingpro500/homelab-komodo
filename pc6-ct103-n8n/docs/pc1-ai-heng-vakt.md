@@ -15,6 +15,9 @@ Workflowen kjører hvert minutt og sjekker:
 - Hvis CT350 er stoppet med vilje, nullstilles feil telleren og ingen restart
   utføres.
 - Etter automatisk restart er det 30 minutters sperre før nytt forsøk.
+- I tillegg er det en **15 minutters recovery-periode** etter restart. I denne
+  perioden gjøres ingen ny automatisk restart, selv om én enkelt helsesjekk
+  feiler.
 
 ## Tiltak
 

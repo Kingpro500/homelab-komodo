@@ -97,7 +97,7 @@
         0
       ],
       "parameters": {
-        "jsCode": "const sd=$getWorkflowStaticData('global'); const now=Date.now(); const a=$input.all().map(x=>x.json||{}); const n=a.find(x=>Array.isArray(x.nodes)); const o=a.find(x=>x.version==='0.35.0'); const pc=n&&n.nodes?.find(x=>x.node==='pc1'); const g=pc&&pc.vms?.find(x=>String(x.vmid)==='350'); if(!g||g.status!=='running'){sd.fail=0; return [{json:{restart:false,reason:'CT350 ikke running'}}]}; if(o){sd.fail=0; return [{json:{restart:false,reason:'Ollama OK'}}]}; sd.fail=(sd.fail||0)+1; if(sd.last && now-sd.last<1800000)return [{json:{restart:false,reason:'cooldown',fail:sd.fail}}]; if(sd.fail<3)return [{json:{restart:false,reason:'venter på 3 feil',fail:sd.fail}}]; sd.last=now; sd.fail=0; return [{json:{restart:true,node:'pc1',vmid:350,action:'off',reason:'Ollama utilgjengelig tre målinger'}}];"
+        "jsCode": "const sd=$getWorkflowStaticData('global'); const now=Date.now(); const a=$input.all().map(x=>x.json||{}); const n=a.find(x=>Array.isArray(x.nodes)); const o=a.find(x=>x.version==='0.35.0'); const pc=n&&n.nodes?.find(x=>x.node==='pc1'); const g=pc&&pc.vms?.find(x=>String(x.vmid)==='350'); if(!g||g.status!=='running'){sd.fail=0; return [{json:{restart:false,reason:'CT350 ikke running'}}]}; if(o){sd.fail=0; return [{json:{restart:false,reason:'Ollama OK'}}]}; sd.fail=(sd.fail||0)+1; if(sd.recoverUntil && now<sd.recoverUntil)return [{json:{restart:false,reason:'cooldown',fail:sd.fail}}]; if(sd.fail<3)return [{json:{restart:false,reason:'venter på 3 feil',fail:sd.fail}}]; sd.last=now; sd.fail=0; return [{json:{restart:true,node:'pc1',vmid:350,action:'off',reason:'Ollama utilgjengelig tre målinger'}}];"
       }
     },
     {
