@@ -1,0 +1,176 @@
+{
+  "name": "AI-modus - frigjor PC1",
+  "description": null,
+  "nodes": [
+    {
+      "id": "f76d168f-c1b7-4843-b66e-96e6bf568d4c",
+      "name": "AI start webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 4.2,
+      "position": [
+        -600,
+        0
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ai-start",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "webhookId": "d77e33c0-ccb1-4584-bcae-65b4204338df"
+    },
+    {
+      "id": "591cae63-6263-42ef-b412-2bf1e2eb8113",
+      "name": "AI stop webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 4.2,
+      "position": [
+        -600,
+        300
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ai-stop",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "webhookId": "d744698a-472f-4a25-ac4b-b7d5e01db617"
+    },
+    {
+      "id": "52633b0e-69dc-4c0a-b752-72ef67db9be5",
+      "name": "Start: velg CT-er",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -300,
+        0
+      ],
+      "parameters": {
+        "jsCode": "return [{json:{node:'pc1',vmid:102,action:'off',reason:'AI-modus'}}];"
+      }
+    },
+    {
+      "id": "044f5cfa-f764-4875-aa05-22c5132659c9",
+      "name": "Stop: gjenopprett Pi-hole",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -300,
+        300
+      ],
+      "parameters": {
+        "jsCode": "return [{json:{node:'pc1',vmid:102,action:'on',reason:'AI-modus avsluttet'}}];"
+      }
+    },
+    {
+      "id": "594cf150-a002-425d-a937-0c1675ab2ab8",
+      "name": "Proxmox kontroll",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        0,
+        150
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://10.0.0.135:9118/control",
+        "authentication": "none",
+        "sendHeaders": true,
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({node:$json.node,vmid:$json.vmid,action:$json.action}) }}",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer REDACTED_AUDIT_TOKEN"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 60000
+        }
+      }
+    },
+    {
+      "id": "6b0ad085-8d87-48cb-8d9e-3cf737b80e4b",
+      "name": "Resultat",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        300,
+        150
+      ],
+      "parameters": {
+        "jsCode": "return [{json:{ok:true,mode:$json.action==='off'?'AI_START':'AI_STOP',target:$json.vmid,control:$json}}];"
+      }
+    }
+  ],
+  "connections": {
+    "AI start webhook": {
+      "main": [
+        [
+          {
+            "node": "Start: velg CT-er",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI stop webhook": {
+      "main": [
+        [
+          {
+            "node": "Stop: gjenopprett Pi-hole",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start: velg CT-er": {
+      "main": [
+        [
+          {
+            "node": "Proxmox kontroll",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Stop: gjenopprett Pi-hole": {
+      "main": [
+        [
+          {
+            "node": "Proxmox kontroll",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Proxmox kontroll": {
+      "main": [
+        [
+          {
+            "node": "Resultat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true,
+    "executionOrder": "v1",
+    "availableInMCP": false
+  }
+}

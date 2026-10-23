@@ -46,6 +46,7 @@ running service.
 | Emby - overvaaking og autorestart (**deaktivert, supersedert av Media health**) | ingen; beholdt som historikk | [docs/emby-overvaaking-autorestart.md](docs/emby-overvaaking-autorestart.md) | [workflows/emby-overvaaking-autorestart.json](workflows/emby-overvaaking-autorestart.json) |
 | Homelab-ressurs-alarmer | Alertmanager webhook | [docs/homelab-ressurs-alarmer.md](docs/homelab-ressurs-alarmer.md) | [workflows/homelab-ressurs-alarmer.json](workflows/homelab-ressurs-alarmer.json) |
 | Hendelseslogg - FerretDB | webhook `/events` | [docs/hendelseslogg-ferretdb.md](docs/hendelseslogg-ferretdb.md) | [workflows/hendelseslogg-ferretdb.json](workflows/hendelseslogg-ferretdb.json) |
+| AI-modus – frigjør PC1 | webhook `/ai-start` + `/ai-stop` | [docs/ai-modus-frigjor-pc1.md](docs/ai-modus-frigjor-pc1.md) | [workflows/ai-modus-frigjor-pc1.json](workflows/ai-modus-frigjor-pc1.json) |
 
 Driftsprinsipper for hvordan n8n-automasjoner bygges, sikres og gjenopprettes
 er samlet i [docs/operations/n8n-workflows.md](../docs/operations/n8n-workflows.md).
