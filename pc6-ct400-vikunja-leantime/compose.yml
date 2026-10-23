@@ -44,12 +44,12 @@ services:
     ports:
       - "8080:8080"
     environment:
-      LEANTIME_DB_HOST: leantime-db
-      LEANTIME_DB_DATABASE: leantime
-      LEANTIME_DB_USER: leantime
-      LEANTIME_DB_PASSWORD: "${LEANTIME_DB_PASSWORD:?set in environment}"
-      LEANTIME_SESSION_PASSWORD: "${LEANTIME_SESSION_PASSWORD:?set in environment}"
-      LEANTIME_SERVER: "${LEANTIME_PUBLIC_URL:?set in environment}"
+      LEAN_DB_HOST: leantime-db
+      LEAN_DB_DATABASE: leantime
+      LEAN_DB_USER: leantime
+      LEAN_DB_PASSWORD: "${LEANTIME_DB_PASSWORD:?set in environment}"
+      LEAN_SESSION_PASSWORD: "${LEANTIME_SESSION_PASSWORD:?set in environment}"
+      LEAN_APP_URL: "${LEANTIME_PUBLIC_URL:?set in environment}"
     volumes:
       - leantime_public_user:/var/www/html/public/userfiles
 volumes:
