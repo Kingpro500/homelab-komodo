@@ -1,0 +1,124 @@
+{
+  "name": "PC1-GPU-vakt",
+  "description": null,
+  "nodes": [
+    {
+      "id": "d7e1b9d7-bb51-4f8f-9bf0-822c9f1a03e7",
+      "name": "PC1-GPU-vakt",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -500,
+        0
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "pc1-gpu-alert",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "webhookId": "e9254a0c-1a14-4542-8ccd-53e6394daa66"
+    },
+    {
+      "id": "c5d257da-e8cf-4a6d-920c-bd4182696355",
+      "name": "Avgjor sikker tiltak",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -220,
+        0
+      ],
+      "parameters": {
+        "jsCode": "const alerts = ($json.body && $json.body.alerts) || $json.alerts || [];\nconst out=[];\nfor (const a of alerts) {\n  if (a.status !== 'firing') continue;\n  const n = a.labels && a.labels.alertname;\n  if (n === 'PC1GPUTemperatureCritical') out.push({json:{node:'pc1',vmid:350,action:'off',reason:'GPU kritisk varm'}});\n  if (n === 'PC1GPUTemperatureHigh' || n === 'PC1GPUTemperatureCritical') out.push({json:{node:'pc1',vmid:102,action:'off',reason:'GPU varm - frigjor PC1'}});\n}\nif (!out.length) return [{json:{skipped:true,reason:'Ingen aktiv PC1 GPU-alarm'}}];\nreturn out;"
+      }
+    },
+    {
+      "id": "766fc696-0b35-4c84-8968-ce7c2d9edb50",
+      "name": "Stopp avgrenset CT",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        40,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://10.0.0.135:9118/control",
+        "authentication": "none",
+        "sendHeaders": true,
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({node:$json.node,vmid:$json.vmid,action:$json.action}) }}",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer REDACTED_AUDIT_TOKEN"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 60000
+        }
+      }
+    },
+    {
+      "id": "4a6138d2-7877-4088-abd3-b7a79fd9ac0b",
+      "name": "Svar",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        300,
+        0
+      ],
+      "parameters": {
+        "jsCode": "return [{json:{ok:true,control:$json}}];"
+      }
+    }
+  ],
+  "connections": {
+    "PC1-GPU-vakt": {
+      "main": [
+        [
+          {
+            "node": "Avgjor sikker tiltak",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Avgjor sikker tiltak": {
+      "main": [
+        [
+          {
+            "node": "Stopp avgrenset CT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Stopp avgrenset CT": {
+      "main": [
+        [
+          {
+            "node": "Svar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true,
+    "executionOrder": "v1",
+    "availableInMCP": false
+  }
+}
