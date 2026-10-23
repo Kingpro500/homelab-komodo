@@ -1,0 +1,40 @@
+# TubeArchivist on pc6 CT215 (10.0.0.170:8000)
+services:
+  tubearchivist-es:
+    image: bbilly1/tubearchivist-es:latest
+    container_name: tubearchivist-es
+    restart: unless-stopped
+    environment:
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD:?set in Komodo Environment}
+      ES_JAVA_OPTS: -Xms1g -Xmx1g
+      discovery.type: single-node
+      xpack.security.enabled: "true"
+      path.repo: /usr/share/elasticsearch/data/snapshot
+    volumes:
+      - /opt/tubearchivist/es:/usr/share/elasticsearch/data
+
+  tubearchivist-redis:
+    image: redis:7-alpine
+    container_name: tubearchivist-redis
+    restart: unless-stopped
+
+  tubearchivist:
+    image: bbilly1/tubearchivist:latest
+    container_name: tubearchivist
+    restart: unless-stopped
+    depends_on:
+      - tubearchivist-es
+      - tubearchivist-redis
+    environment:
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD:?set in Komodo Environment}
+      ES_URL: http://tubearchivist-es:9200
+      REDIS_CON: redis://tubearchivist-redis:6379
+      TA_HOST: ${TA_HOST:?set in Komodo Environment}
+      TA_PASSWORD: ${TA_PASSWORD:?set in Komodo Environment}
+      TA_USERNAME: ${TA_USERNAME:?set in Komodo Environment}
+    ports:
+      - "8000:8000"
+    volumes:
+      - /opt/tubearchivist/cache:/cache
+      - /opt/tubearchivist/config:/config
+      - /media/tubearchivist:/youtube
