@@ -2,7 +2,7 @@
 
 **Workflow-id:** `dK3dJJIQ7smvUy9v`
 **Eksport:** `workflows/emby-overvaaking-autorestart.json`
-**Status:** deaktivert 23. oktober 2026. Supersedert av [Media health](tower-media-nfs-health-repair.md). Ikke aktiver parallelt; resten av dokumentet er historisk.
+**Status:** deaktivert. Beholdt som historikk; ikke aktiver parallelt med Media health. Den tidligere reboot-grenen krever nå `went_down=true`, `active_sessions_known=true` og `active_streams=0`, men workflowen skal fortsatt ikke aktiveres før full ende-til-ende-test.
 
 ## Hva den gjør og hvorfor
 
