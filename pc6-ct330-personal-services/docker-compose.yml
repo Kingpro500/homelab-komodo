@@ -1,0 +1,38 @@
+# Personal services on pc6 CT330 (10.0.0.171)
+services:
+  grocy:
+    image: linuxserver/grocy:latest
+    container_name: grocy
+    restart: unless-stopped
+    environment:
+      PUID: "1000"
+      PGID: "1000"
+      TZ: Europe/Oslo
+    ports:
+      - "9283:80"
+    volumes:
+      - /opt/grocy:/config
+
+  mealie:
+    image: ghcr.io/mealie-recipes/mealie:latest
+    container_name: mealie
+    restart: unless-stopped
+    environment:
+      TZ: Europe/Oslo
+      ALLOW_SIGNUP: "true"
+      BASE_URL: http://10.0.0.171:9925
+      APP_PORT: "9000"
+      HOST: 0.0.0.0
+    ports:
+      - "9925:9000"
+    volumes:
+      - /opt/mealie/data:/app/data
+
+  linkding:
+    image: sissbruecker/linkding:latest
+    container_name: linkding
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - /opt/linkding/data:/etc/linkding/data
