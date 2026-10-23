@@ -1,0 +1,15 @@
+# Grovemap on pc6 CT340 (10.0.0.142:8080)
+services:
+  grovemap:
+    image: ghcr.io/robsmallridge/grovemap:latest
+    container_name: grovemap
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      SCAN_CACHE_TTL: "3600"
+      SCAN_ON_START: "false"
+    volumes:
+      - /media:/data/media:ro
+      - /photos:/data/photos:ro
+      - /backups:/data/backups:ro

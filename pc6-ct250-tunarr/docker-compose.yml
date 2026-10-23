@@ -1,0 +1,21 @@
+# Tunarr on pc6 CT250 (10.0.0.123:8005)
+services:
+  tunarr:
+    image: ghcr.io/chrisbenincasa/tunarr:2026.9.3
+    container_name: tunarr
+    restart: unless-stopped
+    environment:
+      TUNARR_PROXY_ARTWORK: "true"
+    ports:
+      - "8005:8000"
+    volumes:
+      - /opt/tunarr/config:/config
+      - "/media/3 Folder Emby/James Bond:/media/james-bond:ro"
+      - "/media/YouTube/shows/Adam Carolla:/media/adam-carolla:ro"
+      - "/media/YouTube/shows/PowerfulJRE:/media/powerful-jre:ro"
+      - "/media/YouTube/shows/AutoTopNL:/media/autotopnl:ro"
+      - "/media/YouTube/shows/Harry's garage:/media/harrys-garage:ro"
+      - "/media/YouTube/shows/Theo Von:/media/theo-von:ro"
+    devices:
+      - /dev/dri/renderD128:/dev/dri/renderD128
+    mem_limit: 4g
