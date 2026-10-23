@@ -21,8 +21,9 @@ on pc6, pc8 or pc9. n8n used to violate this; it moved to CT 103 on pc6.
 
 | Node | VM | Current name | IP | RAM | Disk | Docker | Stacks | Proposed name | Notes |
 |---|---|---|---|---|---|---|---|---|---|
-| pc1 | 156 lxc | `pc1-ct156-ollama` | 10.0.0.133 | 3G | 32G | yes | 1 | | Local LLM. **Runs on CPU**: no GPU is passed through, `/api/ps` is empty, and a short reply takes ~9 s |
-| pc1 | 105 lxc | `pc1-ct105-mediespillere` | 10.0.0.159 | 2G | 20G | yes | 1 | | Temporary Jellyfin + Plex migration from Tower. Tower media is mounted read-only; CT has autostart disabled and remains shut down when unused. |
+| pc1 | 350 lxc | `ct156-ollama` | 10.0.0.133 | 3G | 32G | yes | 1 | | Local Ollama with RTX 3070 passthrough; autostart disabled |
+| pc6 | 105 lxc | `ct105-mediespillere` | 10.0.0.159 | 2G | 20G | yes | 0 | | Restored from backup; stopped until needed; Tower-media mounted read-only |
+| pc6 | 150 lxc | `ct158-browsers` | 10.0.0.158 | 4G | 20G | no | 0 | | Restored from backup; stopped until needed |
 | pc6 | 101 qemu | `Unraid-Tower` | 10.0.0.101 | 15G | — | no (VM) | 0 | | Docker in a VM. 31 of 32 containers stopped. **Holds the only GPU passthrough in the cluster** |
 | pc6 | 103 lxc | `pc1-ct103-node` | 10.0.0.119 | 4G | 32G | yes | 2 | `pc6-ct103-node` | n8n and Open WebUI. **Names differ:** the Proxmox guest name and `hostname` in the LXC config are still `pc1-ct103-node`, but Periphery now reports `pc6-ct103-node`. That mismatch is what kept the server red; the agent was renamed, not the guest. Renaming the guest in Proxmox is still pending |
 | pc6 | 104 lxc | **`pc6`** | 10.0.0.124 | 4G | 32G | yes | 1 | `pc6-ct104-media-downloaders` | MeTube, Pinchflat, MySpeed, DiskSpeed |
