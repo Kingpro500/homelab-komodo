@@ -1,0 +1,24 @@
+# CT120 local helpers
+services:
+  uptime-kuma:
+    image: louislam/uptime-kuma:1
+    container_name: uptime-kuma
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /opt/uptime-kuma/data:/app/data
+
+  dockctl:
+    image: node:22-alpine
+    container_name: dockctl
+    restart: unless-stopped
+    environment:
+      CONTROL_TOKEN: ${CONTROL_TOKEN:?set in Komodo Environment}
+    ports:
+      - "3015:3015"
+    volumes:
+      - /opt/dockctl/server.js:/app/server.js:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: ["node", "/app/server.js"]
