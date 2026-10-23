@@ -1,0 +1,26 @@
+services:
+  pihole:
+    image: pihole/pihole:2026.09.0
+    hostname: ${PIHOLE_HOSTNAME:-pihole}
+    ports:
+      - "${PIHOLE_BIND_IP:?Set PIHOLE_BIND_IP in Komodo}:53:53/tcp"
+      - "${PIHOLE_BIND_IP:?Set PIHOLE_BIND_IP in Komodo}:53:53/udp"
+      - "${PIHOLE_BIND_IP:?Set PIHOLE_BIND_IP in Komodo}:8080:80/tcp"
+    environment:
+      TZ: Europe/Oslo
+      FTLCONF_webserver_api_password: "${PIHOLE_WEB_PASSWORD:?Set PIHOLE_WEB_PASSWORD in Komodo}"
+      FTLCONF_dns_upstreams: "${PIHOLE_UPSTREAM_DNS:?Set PIHOLE_UPSTREAM_DNS in Komodo}"
+      FTLCONF_dns_revServers: "${PIHOLE_REVERSE_SERVERS:-}"
+      FTLCONF_dns_listeningMode: ALL
+    volumes:
+      - pihole_data:/etc/pihole
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+volumes:
+  pihole_data:
+    external: true
+    name: pihole-pc8_pihole_data
