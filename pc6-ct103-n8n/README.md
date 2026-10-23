@@ -49,6 +49,7 @@ running service.
 | AI-modus – frigjør PC1 | webhook `/ai-start` + `/ai-stop` | [docs/ai-modus-frigjor-pc1.md](docs/ai-modus-frigjor-pc1.md) | [workflows/ai-modus-frigjor-pc1.json](workflows/ai-modus-frigjor-pc1.json) |
 | PC1 GPU-vakt | Prometheus/Alertmanager webhook | [docs/pc1-gpu-vakt.md](docs/pc1-gpu-vakt.md) | [workflows/pc1-gpu-vakt.json](workflows/pc1-gpu-vakt.json) |
 | PC1 AI-heng-vakt | hvert minutt; tre mislykkede Ollama-sjekker | [docs/pc1-ai-heng-vakt.md](docs/pc1-ai-heng-vakt.md) | [workflows/pc1-ai-heng-vakt.json](workflows/pc1-ai-heng-vakt.json) |
+| PC1 full heng – varsel | hvert minutt; fem uavhengige feilrunder | [docs/pc1-full-heng-varsel.md](docs/pc1-full-heng-varsel.md) | [workflows/pc1-full-heng-varsel.json](workflows/pc1-full-heng-varsel.json) |
 
 Driftsprinsipper for hvordan n8n-automasjoner bygges, sikres og gjenopprettes
 er samlet i [docs/operations/n8n-workflows.md](../docs/operations/n8n-workflows.md).
