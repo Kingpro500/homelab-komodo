@@ -19,10 +19,22 @@ request timeout:
 - Prometheus health: `http://10.0.0.124:9090/-/healthy`
 - PC6 Proxmox web: `https://10.0.0.120:8006/` (self-signed TLS accepted)
 
-The iPhone notification currently passes through n8n on PC6. Therefore this
-secondary Kuma can detect a PC6 outage, but cannot deliver an iPhone alert
-while PC6/n8n is unavailable. A direct PC9-to-Home-Assistant or external
-notification route is needed before it becomes independent alerting as well.
+## Direct iPhone alarms
+
+PC9 Kuma now delivers outages directly to Home Assistant on PC8, which sends
+the notification through `notify.mobile_app_1_iphone_r`. The notification is
+enabled for all five monitors above. This path does **not** depend on PC6 or
+n8n:
+
+`PC9 Kuma → Home Assistant (PC8) → iPhone`
+
+The Home Assistant webhook identifier is an access secret. It exists only in
+Home Assistant and the Kuma notification configuration; never put it in this
+repository, a workflow export, screenshots, or logs.
+
+This makes alerts resilient to a PC6/n8n outage. It cannot alert if PC9/CT106,
+Home Assistant/PC8, or the LAN itself is unavailable; that would require an
+external monitoring location or provider.
 
 Manage the container through the Komodo stack `pc9-ct106-uptime-kuma`; do not
 run ad-hoc `docker compose` commands in the stack directory.
