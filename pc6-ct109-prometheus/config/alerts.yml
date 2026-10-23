@@ -45,3 +45,23 @@ groups:
         annotations:
           summary: "CPU høyt: {{ $labels.name }} ({{ $labels.node }})"
           description: "{{ $labels.name }} på {{ $labels.node }} har ligget over 90 % CPU i 15 min."
+
+      - alert: PC1GPUTemperatureHigh
+        expr: pc1_gpu_temperature_celsius >= 75
+        for: 2m
+        labels:
+          severity: warning
+          node: pc1
+        annotations:
+          summary: "PC1 GPU varm: {{ $value | printf \"%.0f\" }} °C"
+          description: "RTX 3070 på PC1 har vært over 75 °C i minst 2 minutter. AI-modus skal frigjøre PC1-ressurser, men ikke restarte maskinen automatisk."
+
+      - alert: PC1GPUTemperatureCritical
+        expr: pc1_gpu_temperature_celsius >= 82
+        for: 1m
+        labels:
+          severity: critical
+          node: pc1
+        annotations:
+          summary: "PC1 GPU KRITISK VARM: {{ $value | printf \"%.0f\" }} °C"
+          description: "RTX 3070 på PC1 har vært over 82 °C. Stopp AI-belastningen og kontroller kjøling/power-limit."

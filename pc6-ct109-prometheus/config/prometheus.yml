@@ -28,3 +28,8 @@ scrape_configs:
     scrape_interval: 60s
     static_configs:
       - targets: ['10.0.0.135:9120']
+
+  - job_name: 'pc1-gpu'
+    scrape_interval: 15s
+    static_configs:
+      - targets: ['10.0.0.112:9105']
