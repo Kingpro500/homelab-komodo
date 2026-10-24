@@ -1,6 +1,9 @@
 {
   "name": "Daglig homelab-diagnose",
-  "description": "EKSPORTERT UTEN HEMMELIGHETER. Erstatt REDACTED_AUDIT_TOKEN og REDACTED_HASS_TOKEN før import. Se docs/*.md i pc6-ct103-n8n.",
+  "description": null,
+  "active": true,
+  "versionCounter": 4,
+  "sourceWorkflowId": null,
   "nodes": [
     {
       "name": "Hver dag 08:15",
@@ -147,7 +150,7 @@
           "parameters": [
             {
               "name": "Authorization",
-              "value": "Bearer REDACTED_HASS_TOKEN"
+              "value": "REDACTED_HASS_TOKEN"
             },
             {
               "name": "Content-Type",
@@ -182,7 +185,7 @@
           "parameters": [
             {
               "name": "Authorization",
-              "value": "Bearer REDACTED_HASS_TOKEN"
+              "value": "REDACTED_HASS_TOKEN"
             },
             {
               "name": "Content-Type",
@@ -280,7 +283,7 @@
           "parameters": [
             {
               "name": "Authorization",
-              "value": "Bearer REDACTED_HASS_TOKEN"
+              "value": "REDACTED_HASS_TOKEN"
             },
             {
               "name": "Content-Type",
@@ -385,6 +388,7 @@
       ]
     }
   },
+  "nodeGroups": [],
   "settings": {
     "saveExecutionProgress": true,
     "saveManualExecutions": true,
