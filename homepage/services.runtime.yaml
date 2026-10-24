@@ -107,6 +107,14 @@
               label: Forbruk ($)
               format: text
 
+- Retrospill:
+    - Oslo Børs (C64):
+        icon: mdi:chart-line
+        href: http://10.0.0.128:3020/oslo-bors.html
+        description: C64-emulator i nettleser · CT109 · pc6
+        server: ct109
+        container: nettkart
+
 - Infrastructure & IPAM:
     - Step CA:
         icon: mdi:shield-key-outline

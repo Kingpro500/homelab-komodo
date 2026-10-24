@@ -128,3 +128,6 @@ localStorage.setItem("homelab_audit_token", "<AUDIT_TOKEN fra ~/.hermes/.env>")
 ## Vedlikehold
 
 Følg PUBLISHING.md for den autoritative publiseringsprosessen.
+
+## Oslo Børs
+`oslo-bors.html` er en LAN-side som rammer inn original CommodoreGames-emulatoren; spillfilen speiles ikke til repoet.
