@@ -25,7 +25,172 @@ services:
     volumes:
       - /opt/beszel/data:/beszel_data
 
-  ersatztv:
+  diun:
+    image: crazymax/diun:latest
+    container_name: diun
+    restart: unless-stopped
+    command: serve
+    environment:
+      TZ: Europe/Oslo
+      LOG_LEVEL: info
+      DIUN_WATCH_WORKERS: 4
+      DIUN_WATCH_SCHEDULE: "0 */6 * * *"
+      DIUN_PROVIDERS_DOCKER: "true"
+    volumes:
+      - /opt/diun:/data
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+  kopia:
+    image: kopia/kopia:latest
+    container_name: kopia
+    restart: unless-stopped
+    command: server start --insecure --address=0.0.0.0:51515
+    ports:
+      - "51515:51515"
+    volumes:
+      - /opt/kopia:/app/config
+      - /opt/kopia/cache:/app/cache
+      - /opt/kopia/logs:/app/logs
+      - /backups:/backups
+      - /unraid-backup:/unraid-backup:ro
+
+  healthchecks:
+    image: linuxserver/healthchecks:latest
+    container_name: healthchecks
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - /opt/healthchecks:/config
+    environment:
+      TZ: Europe/Oslo
+      SITE_ROOT: http://10.0.0.142:8000
+      SITE_NAME: Healthchecks
+      APPRISE_ENABLED: "True"
+
+  gatus:
+    image: twinproduction/gatus:latest
+    container_name: gatus
+    restart: unless-stopped
+    ports:
+      - "8081:8080"
+    volumes:
+      - /opt/gatus:/config
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: qdrant
+    restart: unless-stopped
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - /opt/qdrant:/qdrant/storage
+
+  searxng:
+    image: searxng/searxng:latest
+    container_name: searxng
+    restart: unless-stopped
+    ports:
+      - "8082:8080"
+    volumes:
+      - /opt/searxng:/etc/searxng
+      - /opt/searxng-data:/var/cache/searxng
+
+  litellm:
+    image: ghcr.io/berriai/litellm:main-latest
+    container_name: litellm
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    volumes:
+      - /opt/litellm/config.yaml:/app/config.yaml:ro
+    command: ["--config", "/app/config.yaml", "--port", "4000"]
+
+  netalertx:
+    image: jokobsk/netalertx:latest
+    container_name: netalertx
+    restart: unless-stopped
+    network_mode: host
+    volumes:
+      - /opt/netalertx/config:/app/config
+      - /opt/netalertx/db:/app/db
+    environment:
+      TZ: Europe/Oslo
+
+  authentik-server:
+    image: ghcr.io/goauthentik/server:latest
+    container_name: authentik-server
+    restart: unless-stopped
+    command: server
+    ports:
+      - "9000:9000"
+      - "9443:9443"
+    volumes:
+      - /opt/authentik/media:/media
+      - /opt/authentik/templates:/templates
+    environment:
+      AUTHENTIK_SECRET_KEY: ${AUTHENTIK_SECRET_KEY:?set in Komodo Environment}
+      AUTHENTIK_ERROR_REPORTING__ENABLED: "false"
+      AUTHENTIK_POSTGRESQL__HOST: authentik-postgres
+      AUTHENTIK_POSTGRESQL__NAME: authentik
+      AUTHENTIK_POSTGRESQL__USER: authentik
+      AUTHENTIK_POSTGRESQL__PASSWORD: ${AUTHENTIK_POSTGRESQL_PASSWORD:?set in Komodo Environment}
+      AUTHENTIK_REDIS__HOST: authentik-redis
+    depends_on:
+      - authentik-postgres
+      - authentik-redis
+
+  authentik-worker:
+    image: ghcr.io/goauthentik/server:latest
+    container_name: authentik-worker
+    restart: unless-stopped
+    command: worker
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /opt/authentik/media:/media
+      - /opt/authentik/certs:/certs
+      - /opt/authentik/templates:/templates
+    environment:
+      AUTHENTIK_SECRET_KEY: ${AUTHENTIK_SECRET_KEY:?set in Komodo Environment}
+      AUTHENTIK_POSTGRESQL__HOST: authentik-postgres
+      AUTHENTIK_POSTGRESQL__NAME: authentik
+      AUTHENTIK_POSTGRESQL__USER: authentik
+      AUTHENTIK_POSTGRESQL__PASSWORD: ${AUTHENTIK_POSTGRESQL_PASSWORD:?set in Komodo Environment}
+      AUTHENTIK_REDIS__HOST: authentik-redis
+    depends_on:
+      - authentik-postgres
+      - authentik-redis
+
+  authentik-postgres:
+    image: postgres:16-alpine
+    container_name: authentik-postgres
+    restart: unless-stopped
+    volumes:
+      - /opt/authentik/postgres:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: authentik
+      POSTGRES_USER: authentik
+      POSTGRES_PASSWORD: ${AUTHENTIK_POSTGRESQL_PASSWORD:?set in Komodo Environment}
+
+  authentik-redis:
+    image: redis:alpine
+    container_name: authentik-redis
+    restart: unless-stopped
+
+  vaultwarden:
+    image: vaultwarden/server:latest
+    container_name: vaultwarden
+    restart: unless-stopped
+    ports:
+      - "8222:80"
+    volumes:
+      - /opt/vaultwarden:/data
+    environment:
+      DOMAIN: https://vaultwarden.lan.local
+      SIGNUPS_ALLOWED: "false"
+      ADMIN_TOKEN: ${VAULTWARDEN_ADMIN_TOKEN:?set in Komodo Environment}
+
     image: jasongdove/ersatztv:latest
     container_name: ersatztv
     restart: unless-stopped
