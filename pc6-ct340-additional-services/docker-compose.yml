@@ -191,6 +191,7 @@ services:
       SIGNUPS_ALLOWED: "false"
       ADMIN_TOKEN: ${VAULTWARDEN_ADMIN_TOKEN:?set in Komodo Environment}
 
+  ersatztv:
     image: jasongdove/ersatztv:latest
     container_name: ersatztv
     restart: unless-stopped
@@ -204,8 +205,11 @@ services:
     image: containrrr/watchtower:latest
     container_name: watchtower
     restart: unless-stopped
+    command: --no-pull --cleanup=false
+    environment:
+      DOCKER_API_VERSION: "1.44"
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock:ro
 
   scrutiny:
     image: ghcr.io/analogj/scrutiny:master-omnibus
