@@ -1,7 +1,16 @@
 {
   "id": "kALMQJZ2VgJLSOHp",
   "name": "Homelab-ressurs-alarmer",
+  "description": "Webhook mottar Prometheus/Alertmanager-alarmer og sender leser vennlig varsel til telefon",
   "active": true,
+  "activeVersionId": "fe4f078a-ff8e-45de-adab-08c1395a833d",
+  "createdAt": "2026-10-06T05:11:39.072Z",
+  "updatedAt": "2026-10-25T06:20:19.349Z",
+  "isArchived": false,
+  "versionId": "fe4f078a-ff8e-45de-adab-08c1395a833d",
+  "versionCounter": 7,
+  "sourceWorkflowId": null,
+  "triggerCount": 1,
   "nodes": [
     {
       "id": "webhook-homelab-alerts",
@@ -36,15 +45,15 @@
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify((() => { const b = $json.body || {}; const a = b.alerts || []; if (!a.length) { return { title: 'Homelab-varsel', message: JSON.stringify(b) }; } const f = a[0]; const resolved = b.status === 'resolved'; const name = (f.labels && (f.labels.name || f.labels.alertname)) || 'tjeneste'; const summary = (f.annotations && f.annotations.summary) || ('Alarm: ' + name); const desc = (f.annotations && f.annotations.description) || ''; return { title: (resolved ? '[LØST] ' : '[ALARM] ') + summary,          message: (desc || summary) + (b.status ? ' (' + b.status + ')' : '') }; })())",
         "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "X-Audit-Token",
-              "value": "REDACTED_AUDIT_TOKEN"
-            }
-          ]
-        },
-        "options": {}
+        "options": {},
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth"
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "TcgXN7shgc4X7U8w",
+          "name": "Homelab Audit Header"
+        }
       }
     },
     {
@@ -87,7 +96,138 @@
       ]
     }
   },
+  "nodeGroups": [],
   "settings": {
     "executionOrder": "v1"
+  },
+  "staticData": null,
+  "pinData": null,
+  "meta": null,
+  "tags": [],
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "kALMQJZ2VgJLSOHp",
+      "projectId": "KXT1M3IDP7uzR2Xe",
+      "project": {
+        "id": "KXT1M3IDP7uzR2Xe",
+        "name": "Roger Lillefosse <rogerlillefosse@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "79a33b7a-6319-42bf-827e-3928073bdeb7",
+        "createdAt": "2026-10-01T05:21:05.719Z",
+        "updatedAt": "2026-10-01T08:58:31.958Z"
+      },
+      "createdAt": "2026-10-06T05:11:39.072Z",
+      "updatedAt": "2026-10-06T05:11:39.072Z"
+    }
+  ],
+  "activeVersion": {
+    "versionId": "fe4f078a-ff8e-45de-adab-08c1395a833d",
+    "workflowId": "kALMQJZ2VgJLSOHp",
+    "nodes": [
+      {
+        "id": "webhook-homelab-alerts",
+        "name": "Webhook",
+        "webhookId": "homelab-alerts",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          0,
+          0
+        ],
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "homelab-alerts",
+          "responseMode": "onReceived",
+          "options": {}
+        }
+      },
+      {
+        "id": "http-to-notify",
+        "name": "Send til telefon",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          220,
+          0
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "http://10.0.0.135:9118/notify",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify((() => { const b = $json.body || {}; const a = b.alerts || []; if (!a.length) { return { title: 'Homelab-varsel', message: JSON.stringify(b) }; } const f = a[0]; const resolved = b.status === 'resolved'; const name = (f.labels && (f.labels.name || f.labels.alertname)) || 'tjeneste'; const summary = (f.annotations && f.annotations.summary) || ('Alarm: ' + name); const desc = (f.annotations && f.annotations.description) || ''; return { title: (resolved ? '[LØST] ' : '[ALARM] ') + summary,          message: (desc || summary) + (b.status ? ' (' + b.status + ')' : '') }; })())",
+          "sendHeaders": true,
+          "options": {},
+          "authentication": "predefinedCredentialType",
+          "nodeCredentialType": "httpHeaderAuth"
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "TcgXN7shgc4X7U8w",
+            "name": "Homelab Audit Header"
+          }
+        }
+      },
+      {
+        "id": "res-log",
+        "name": "Logg hendelse",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          660,
+          600
+        ],
+        "parameters": {
+          "url": "http://10.0.0.119:5678/webhook/events",
+          "method": "POST",
+          "authentication": "none",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({ source: ($json.body && $json.body.job) || 'alertmanager', host: (($json.body && $json.body.alerts && $json.body.alerts[0] && $json.body.alerts[0].labels && $json.body.alerts[0].labels.node) || ''), ...(($json.body || {})) }) }}",
+          "options": {
+            "timeout": 30000
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Webhook": {
+        "main": [
+          [
+            {
+              "node": "Send til telefon",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Logg hendelse",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Roger Lillefosse",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "createdAt": "2026-10-25T06:20:19.352Z",
+    "updatedAt": "2026-10-25T06:20:19.352Z",
+    "workflowPublishHistory": [
+      {
+        "id": 123,
+        "workflowId": "kALMQJZ2VgJLSOHp",
+        "versionId": "fe4f078a-ff8e-45de-adab-08c1395a833d",
+        "event": "activated",
+        "userId": "79a33b7a-6319-42bf-827e-3928073bdeb7",
+        "createdAt": "2026-10-25T06:20:19.394Z"
+      }
+    ]
   }
 }

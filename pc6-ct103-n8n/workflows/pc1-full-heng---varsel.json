@@ -1,0 +1,636 @@
+{
+  "id": "XqFVyopKBfaxfVMh",
+  "name": "PC1 full heng - varsel",
+  "description": null,
+  "active": true,
+  "activeVersionId": "d180fb84-112d-41f9-9a6f-29f99272cb6a",
+  "createdAt": "2026-10-23T16:29:48.728Z",
+  "updatedAt": "2026-10-25T06:20:18.997Z",
+  "isArchived": false,
+  "versionId": "d180fb84-112d-41f9-9a6f-29f99272cb6a",
+  "versionCounter": 2,
+  "sourceWorkflowId": null,
+  "triggerCount": 1,
+  "nodes": [
+    {
+      "id": "b746aa20-ad8e-495d-8936-f842b36bf74a",
+      "name": "Hvert minutt",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1000,
+        0
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "37dd3da9-00d3-4297-8b64-1994024ed063",
+      "name": "PC1 status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "continueOnFail": true,
+      "position": [
+        -780,
+        -180
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "http://10.0.0.135:9118/nodes",
+        "authentication": "none",
+        "options": {
+          "timeout": 8000,
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "9988662e-04b9-437f-a5b1-e83185115c6d",
+      "name": "GPU exporter",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "continueOnFail": true,
+      "position": [
+        -780,
+        0
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "http://10.0.0.112:9105/metrics",
+        "authentication": "none",
+        "options": {
+          "timeout": 8000,
+          "response": {
+            "response": {
+              "responseFormat": "text"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "95c8f896-4a9f-429b-9db1-aef75abfbbbc",
+      "name": "HA strømplugg",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "continueOnFail": true,
+      "position": [
+        -780,
+        180
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "http://10.0.0.7:8123/api/states/switch.pc1_ai",
+        "authentication": "predefinedCredentialType",
+        "sendHeaders": true,
+        "options": {
+          "timeout": 8000,
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        },
+        "nodeCredentialType": "homeAssistantApi"
+      },
+      "credentials": {
+        "homeAssistantApi": {
+          "id": "V3OoXYi3tIJVwD3D",
+          "name": "Home Assistant API"
+        }
+      }
+    },
+    {
+      "id": "978728ba-6ef5-431c-9636-e579eb9a15fa",
+      "name": "Samle signaler",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -500,
+        0
+      ],
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition"
+      }
+    },
+    {
+      "id": "66f0469a-cfba-499c-b0aa-16a8f174ed5c",
+      "name": "Fem feil før varsel",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -250,
+        0
+      ],
+      "parameters": {
+        "jsCode": "const sd=$getWorkflowStaticData('global'); const a=$input.all().map(x=>x.json||{}); const nodes=a.find(x=>Array.isArray(x.nodes)); const gpu=a.find(x=>typeof x.data==='string' || typeof x.body==='string'); const plug=a.find(x=>x.entity_id==='switch.pc1_ai'); const pc=nodes&&nodes.nodes?.find(x=>x.node==='pc1'); const pc1ok=!!pc; const gpuok=!!gpu && !gpu.error && String(gpu.data||gpu.body||'').includes('pc1_gpu_exporter_up 1'); const powerOn=plug&&plug.state==='on'; if(pc1ok&&gpuok){sd.fail=0;return[{json:{alert:false,reason:'PC1 og GPU svarer'}}]}; if(!powerOn){sd.fail=0;return[{json:{alert:false,reason:'strømplugg ikke på'}}]}; sd.fail=(sd.fail||0)+1; if(sd.fail<5)return[{json:{alert:false,reason:'venter på fem feil',fail:sd.fail}}]; if(sd.last&&Date.now()-sd.last<3600000)return[{json:{alert:false,reason:'varsel-cooldown',fail:sd.fail}}]; sd.last=Date.now(); sd.fail=0; return[{json:{alert:true,title:'PC1 mulig heng',message:'PC1 svarer ikke fra Proxmox/GPU-exporter i fem minutter, men strømpluggen er fortsatt på. Ingen automatisk strømreset er utført.'}}];"
+      }
+    },
+    {
+      "id": "1af0ddc9-fd9b-46bd-8a72-d13fba6d55ad",
+      "name": "Varsle audit",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "leftValue": "={{$json.alert}}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "07efddce-92b0-4924-acc2-527455bf88ff",
+      "name": "Send varsel",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        250,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://10.0.0.135:9118/notify",
+        "authentication": "predefinedCredentialType",
+        "sendHeaders": true,
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{JSON.stringify({title:$json.title,message:$json.message})}}",
+        "options": {
+          "timeout": 30000
+        },
+        "nodeCredentialType": "httpHeaderAuth"
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "TcgXN7shgc4X7U8w",
+          "name": "Homelab Audit Header"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Hvert minutt": {
+      "main": [
+        [
+          {
+            "node": "PC1 status",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "GPU exporter",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HA strømplugg",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PC1 status": {
+      "main": [
+        [
+          {
+            "node": "Samle signaler",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GPU exporter": {
+      "main": [
+        [
+          {
+            "node": "Samle signaler",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "HA strømplugg": {
+      "main": [
+        [
+          {
+            "node": "Samle signaler",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Samle signaler": {
+      "main": [
+        [
+          {
+            "node": "Fem feil før varsel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fem feil før varsel": {
+      "main": [
+        [
+          {
+            "node": "Varsle audit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Varsle audit": {
+      "main": [
+        [
+          {
+            "node": "Send varsel",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    }
+  },
+  "nodeGroups": [],
+  "settings": {
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true,
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "staticData": {
+    "node:Hvert minutt": {
+      "recurrenceRules": [
+        null
+      ],
+      "recurrenceRuleSignatures": [
+        null
+      ]
+    },
+    "global": {
+      "fail": 0
+    }
+  },
+  "pinData": null,
+  "meta": null,
+  "tags": [],
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "XqFVyopKBfaxfVMh",
+      "projectId": "KXT1M3IDP7uzR2Xe",
+      "project": {
+        "id": "KXT1M3IDP7uzR2Xe",
+        "name": "Roger Lillefosse <rogerlillefosse@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "79a33b7a-6319-42bf-827e-3928073bdeb7",
+        "createdAt": "2026-10-01T05:21:05.719Z",
+        "updatedAt": "2026-10-01T08:58:31.958Z"
+      },
+      "createdAt": "2026-10-23T16:29:48.728Z",
+      "updatedAt": "2026-10-23T16:29:48.728Z"
+    }
+  ],
+  "activeVersion": {
+    "versionId": "d180fb84-112d-41f9-9a6f-29f99272cb6a",
+    "workflowId": "XqFVyopKBfaxfVMh",
+    "nodes": [
+      {
+        "id": "b746aa20-ad8e-495d-8936-f842b36bf74a",
+        "name": "Hvert minutt",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          -1000,
+          0
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "minutes",
+                "minutesInterval": 1
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "37dd3da9-00d3-4297-8b64-1994024ed063",
+        "name": "PC1 status",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "continueOnFail": true,
+        "position": [
+          -780,
+          -180
+        ],
+        "parameters": {
+          "method": "GET",
+          "url": "http://10.0.0.135:9118/nodes",
+          "authentication": "none",
+          "options": {
+            "timeout": 8000,
+            "response": {
+              "response": {
+                "responseFormat": "json"
+              }
+            }
+          }
+        }
+      },
+      {
+        "id": "9988662e-04b9-437f-a5b1-e83185115c6d",
+        "name": "GPU exporter",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "continueOnFail": true,
+        "position": [
+          -780,
+          0
+        ],
+        "parameters": {
+          "method": "GET",
+          "url": "http://10.0.0.112:9105/metrics",
+          "authentication": "none",
+          "options": {
+            "timeout": 8000,
+            "response": {
+              "response": {
+                "responseFormat": "text"
+              }
+            }
+          }
+        }
+      },
+      {
+        "id": "95c8f896-4a9f-429b-9db1-aef75abfbbbc",
+        "name": "HA strømplugg",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "continueOnFail": true,
+        "position": [
+          -780,
+          180
+        ],
+        "parameters": {
+          "method": "GET",
+          "url": "http://10.0.0.7:8123/api/states/switch.pc1_ai",
+          "authentication": "predefinedCredentialType",
+          "sendHeaders": true,
+          "options": {
+            "timeout": 8000,
+            "response": {
+              "response": {
+                "responseFormat": "json"
+              }
+            }
+          },
+          "nodeCredentialType": "homeAssistantApi"
+        },
+        "credentials": {
+          "homeAssistantApi": {
+            "id": "V3OoXYi3tIJVwD3D",
+            "name": "Home Assistant API"
+          }
+        }
+      },
+      {
+        "id": "978728ba-6ef5-431c-9636-e579eb9a15fa",
+        "name": "Samle signaler",
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3.2,
+        "position": [
+          -500,
+          0
+        ],
+        "parameters": {
+          "mode": "combine",
+          "combineBy": "combineByPosition"
+        }
+      },
+      {
+        "id": "66f0469a-cfba-499c-b0aa-16a8f174ed5c",
+        "name": "Fem feil før varsel",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -250,
+          0
+        ],
+        "parameters": {
+          "jsCode": "const sd=$getWorkflowStaticData('global'); const a=$input.all().map(x=>x.json||{}); const nodes=a.find(x=>Array.isArray(x.nodes)); const gpu=a.find(x=>typeof x.data==='string' || typeof x.body==='string'); const plug=a.find(x=>x.entity_id==='switch.pc1_ai'); const pc=nodes&&nodes.nodes?.find(x=>x.node==='pc1'); const pc1ok=!!pc; const gpuok=!!gpu && !gpu.error && String(gpu.data||gpu.body||'').includes('pc1_gpu_exporter_up 1'); const powerOn=plug&&plug.state==='on'; if(pc1ok&&gpuok){sd.fail=0;return[{json:{alert:false,reason:'PC1 og GPU svarer'}}]}; if(!powerOn){sd.fail=0;return[{json:{alert:false,reason:'strømplugg ikke på'}}]}; sd.fail=(sd.fail||0)+1; if(sd.fail<5)return[{json:{alert:false,reason:'venter på fem feil',fail:sd.fail}}]; if(sd.last&&Date.now()-sd.last<3600000)return[{json:{alert:false,reason:'varsel-cooldown',fail:sd.fail}}]; sd.last=Date.now(); sd.fail=0; return[{json:{alert:true,title:'PC1 mulig heng',message:'PC1 svarer ikke fra Proxmox/GPU-exporter i fem minutter, men strømpluggen er fortsatt på. Ingen automatisk strømreset er utført.'}}];"
+        }
+      },
+      {
+        "id": "1af0ddc9-fd9b-46bd-8a72-d13fba6d55ad",
+        "name": "Varsle audit",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [
+          0,
+          0
+        ],
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "typeValidation": "loose",
+              "version": 2
+            },
+            "conditions": [
+              {
+                "leftValue": "={{$json.alert}}",
+                "rightValue": true,
+                "operator": {
+                  "type": "boolean",
+                  "operation": "true"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        }
+      },
+      {
+        "id": "07efddce-92b0-4924-acc2-527455bf88ff",
+        "name": "Send varsel",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          250,
+          0
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "http://10.0.0.135:9118/notify",
+          "authentication": "predefinedCredentialType",
+          "sendHeaders": true,
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{JSON.stringify({title:$json.title,message:$json.message})}}",
+          "options": {
+            "timeout": 30000
+          },
+          "nodeCredentialType": "httpHeaderAuth"
+        },
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "TcgXN7shgc4X7U8w",
+            "name": "Homelab Audit Header"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Hvert minutt": {
+        "main": [
+          [
+            {
+              "node": "PC1 status",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "GPU exporter",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "HA strømplugg",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "PC1 status": {
+        "main": [
+          [
+            {
+              "node": "Samle signaler",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "GPU exporter": {
+        "main": [
+          [
+            {
+              "node": "Samle signaler",
+              "type": "main",
+              "index": 1
+            }
+          ]
+        ]
+      },
+      "HA strømplugg": {
+        "main": [
+          [
+            {
+              "node": "Samle signaler",
+              "type": "main",
+              "index": 2
+            }
+          ]
+        ]
+      },
+      "Samle signaler": {
+        "main": [
+          [
+            {
+              "node": "Fem feil før varsel",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Fem feil før varsel": {
+        "main": [
+          [
+            {
+              "node": "Varsle audit",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Varsle audit": {
+        "main": [
+          [
+            {
+              "node": "Send varsel",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          []
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Roger Lillefosse",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "createdAt": "2026-10-25T06:20:18.999Z",
+    "updatedAt": "2026-10-25T06:20:18.999Z",
+    "workflowPublishHistory": [
+      {
+        "id": 119,
+        "workflowId": "XqFVyopKBfaxfVMh",
+        "versionId": "d180fb84-112d-41f9-9a6f-29f99272cb6a",
+        "event": "activated",
+        "userId": "79a33b7a-6319-42bf-827e-3928073bdeb7",
+        "createdAt": "2026-10-25T06:20:19.036Z"
+      }
+    ]
+  }
+}
