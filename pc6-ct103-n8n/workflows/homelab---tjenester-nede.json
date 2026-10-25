@@ -1,0 +1,191 @@
+{
+  "id": "jBtxTAAxX3VoSLFN",
+  "name": "Homelab - tjenester nede",
+  "description": null,
+  "active": false,
+  "activeVersionId": null,
+  "createdAt": "2026-10-06T05:25:24.862Z",
+  "updatedAt": "2026-10-06T05:25:24.862Z",
+  "isArchived": false,
+  "versionId": "3f1dedf4-fa00-4611-bcc8-f604e406b8ba",
+  "versionCounter": 1,
+  "sourceWorkflowId": null,
+  "triggerCount": 1,
+  "nodes": [
+    {
+      "id": "s-a",
+      "name": "Hvert 15. min",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 15
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "h-a",
+      "name": "Hent status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "http://10.0.0.135:9118/network/status",
+        "sendBody": false,
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Audit-Token",
+              "value": "e92b188aafdb10c77ef1f09337551d2b7b3bda115e085365"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "f-a",
+      "name": "Noe nede?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.all_clear }}",
+              "rightValue": "false",
+              "operator": {
+                "type": "boolean",
+                "operation": "false"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "n-a",
+      "name": "Varsle telefonen",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://10.0.0.135:9118/notify",
+        "sendBody": true,
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Audit-Token",
+              "value": "e92b188aafdb10c77ef1f09337551d2b7b3bda115e085365"
+            }
+          ]
+        },
+        "options": {},
+        "specifyBody": "json",
+        "jsonBody": "={{ { title: 'Homelab: tjenester nede', message: 'Nede: ' + ($json.services_down||[]).join(', ') + '. Nye problem: ' + ($json.new_problems||[]).map(function(p){return p.text}).join('; ') } }}"
+      }
+    }
+  ],
+  "connections": {
+    "Hvert 15. min": {
+      "main": [
+        [
+          {
+            "node": "Hent status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hent status": {
+      "main": [
+        [
+          {
+            "node": "Noe nede?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Noe nede?": {
+      "main": [
+        [
+          {
+            "node": "Varsle telefonen",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    }
+  },
+  "nodeGroups": [],
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": {
+    "node:Hvert 15. min": {
+      "recurrenceRules": [
+        null
+      ],
+      "recurrenceRuleSignatures": [
+        null
+      ]
+    }
+  },
+  "pinData": null,
+  "meta": null,
+  "tags": [],
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "jBtxTAAxX3VoSLFN",
+      "projectId": "KXT1M3IDP7uzR2Xe",
+      "project": {
+        "id": "KXT1M3IDP7uzR2Xe",
+        "name": "Roger Lillefosse <rogerlillefosse@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "79a33b7a-6319-42bf-827e-3928073bdeb7",
+        "createdAt": "2026-10-01T05:21:05.719Z",
+        "updatedAt": "2026-10-01T08:58:31.958Z"
+      },
+      "createdAt": "2026-10-06T05:25:24.862Z",
+      "updatedAt": "2026-10-06T05:25:24.862Z"
+    }
+  ],
+  "activeVersion": null
+}

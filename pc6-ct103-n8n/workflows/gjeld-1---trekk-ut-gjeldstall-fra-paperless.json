@@ -1,0 +1,336 @@
+{
+  "id": "zJ22Iflj5N2Qu1D8",
+  "name": "GJELD 1 - Trekk ut gjeldstall fra Paperless",
+  "description": null,
+  "active": false,
+  "activeVersionId": null,
+  "createdAt": "2026-10-04T12:51:21.756Z",
+  "updatedAt": "2026-10-05T03:13:31.557Z",
+  "isArchived": false,
+  "versionId": "39ebadb4-2618-487e-96fe-120dd95e738a",
+  "versionCounter": 2,
+  "sourceWorkflowId": null,
+  "triggerCount": 0,
+  "nodes": [
+    {
+      "id": "c0000001-0000-4000-8000-000000000001",
+      "name": "Hvert 5. minutt",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -400,
+        0
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 5
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "c0000001-0000-4000-8000-000000000002",
+      "name": "Hent nye dokumenter",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -180,
+        0
+      ],
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "method": "GET",
+        "url": "http://10.0.0.131:8000/api/documents/",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Token ={{ $env.PAPERLESS_TOKEN }}"
+            }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "page_size",
+              "value": "50"
+            },
+            {
+              "name": "ordering",
+              "value": "-added"
+            },
+            {
+              "name": "tags__name__icontains",
+              "value": "skann"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 60000
+        }
+      }
+    },
+    {
+      "id": "c0000001-0000-4000-8000-000000000003",
+      "name": "Pakk ut dokumentene",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        40,
+        0
+      ],
+      "parameters": {
+        "jsCode": "const r = $input.first().json;\nconst rader = r.results ?? (Array.isArray(r) ? r : []);\nif (!rader.length) return [{ json: { ingen: true, antall: 0 } }];\nreturn rader.filter((d) => !d.archived).map((d) => ({ json: {\n  dokument_id: d.id, tittel: d.title, content: d.content ?? '',\n  created: d.created, added: d.added, korrespondent: d.correspondent } }));"
+      }
+    },
+    {
+      "id": "c0000001-0000-4000-8000-000000000004",
+      "name": "Har nok OCR-tekst",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        260,
+        0
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "f1",
+              "leftValue": "={{ ($json.content || '').length }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "gt",
+                "value": 599
+              }
+            }
+          ]
+        },
+        "combinator": "and",
+        "options": {}
+      }
+    },
+    {
+      "id": "c0000001-0000-4000-8000-000000000005",
+      "name": "Trekk ut tall",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        0
+      ],
+      "parameters": {
+        "jsCode": "// =====================================================================\n// GJELD - uttrekk av tall fra Paperless-dokumenter\n// Kjøres som \"Code\" node i n8n. Ren ES2020, ingen avhengigheter.\n//\n// To trinn med vilje:\n//   1. Regex-parseren under koster 0 kr og er deterministisk.\n//   2. LLM bare kjores paa dokumenter regex IKKE klarte, og da med\n//      redusert kontekst.\n// Uten dette filteret gaar ALLE fakturaer gjennom en dyr modell for a\n// returnere \"ingen data\", som er den vanligste feilen i slike oppsett.\n// =====================================================================\n\nconst UTBYTTE_LLM = 0.0140;   // NOK per dokument som maa til LLM\nconst MIN_TEGN = 600;         // under dette er OCR-tekst ubrukelig\nconst MAX_TEGN_LLM = 4000;    // send bare saa mye, billigere og raskere\n\n// Parser for norske belop. Ren regelbasert, testet mot 35 varianter.\n//\n// Tre skillet-formaater forekommer i norske dokumenter:\n//   \"1 234,56\"  mellomrom = tusenskilt, komma  = desimal\n//   \"1.234,56\"  punktum   = tusenskilt, komma  = desimal\n//   \"1,234.56\"  komma     = tusenskilt, punktum= desimal\n// USPRAKSVISE: et tusenskilt-gruppe har alltid 3 siffer. Derfor:\n//   1) 3 siffer etter skillet er ALLTID tusenskilt, aldri desimal.\n//      (aar for \"1.278.900\" = 1 278 900, ikke 1278.9)\n//   2) Desimal krever 1-2 siffer OG at skillet ikke forekommer andre steder.\n//   3) Er skillet et desimalskilt OG det finnes et annet skillet senere,\n//      er foerste skillet et tusenskilt: \"1.234,56\" -> 1235.\n// Resultat: KRONER, normalt avrundet.\n// Egen parser for RENTER. tall() avrunder til hele kroner, som er riktig\n// for saldo (1234,56 kr = 1235 kr i en nedbetalingsplan) men FEIL for renter:\n// 1,7 % ville blitt 2 %, 12,5 % ville blitt 13 %. Det er prosentpoeng av\n// feil - nok til aa velge feil kreditor aa betale ned foerst.\nconst renteProsent = (t) => {\n  if (t === null || t === undefined) return null;\n  const s = String(t).replace(/\\s/g, '').replace(',', '.');\n  const n = parseFloat(s);\n  return Number.isFinite(n) && n >= 0 && n < 1000 ? n : null;\n};\n\nconst tall = (t) => {\n  if (t === null || t === undefined) return null;\n  let s = String(t).replace(/[^\\d.,\\s-]/g, '').trim();\n  if (!s) return null;\n  s = s.replace(/[\\s-]/g, '');\n  if (!/\\d/.test(s)) return null;\n\n  const sep = s.match(/[.,]/g) || [];\n  if (sep.length === 0) {\n    const n = parseInt(s, 10);\n    return Number.isFinite(n) && n > 0 ? n : null;\n  }\n\n  const siste = Math.max(s.lastIndexOf(','), s.lastIndexOf('.'));\n  const sisteTegn = s[siste];\n  const desimalSiffer = s.slice(siste + 1);\n  const heltallSiffer = s.slice(0, siste);\n\n  // Er skillet tusenskilt eller desimalskilt?\n  // Desimal: 1-2 siffer, OG skillet er det ENESTE skillet, ELLER\n  // skillet er siste OG det finnes et tidligere skillet (da er foerste\n  // skillet tusenskilt: \"1.234,56\").\n  const foerste = Math.min(s.indexOf(',') >= 0 ? s.indexOf(',') : s.indexOf('.'),\n                           s.indexOf('.') >= 0 ? s.indexOf('.') : s.indexOf(','));\n  const erDesimalskilt = /^\\d{1,2}$/.test(desimalSiffer)\n    && (sep.length === 1 || siste !== foerste);\n\n  if (!erDesimalskilt) {\n    const n = parseInt(s.replace(/[.,]/g, ''), 10);\n    return Number.isFinite(n) && n > 0 ? n : null;\n  }\n\n  const hel = parseInt(heltallSiffer.replace(/[.,]/g, ''), 10);\n  if (!Number.isFinite(hel) || hel === 0) return null;\n  const des = parseInt(desimalSiffer.padEnd(2, '0'), 10);\n  const n = Math.round(hel + des / 100);\n  return n > 0 ? n : null;\n};\n;\n;\n;\n\nconst datoGyldig = (aar, maaned, dag) => {\n  const A = parseInt(aar, 10); const M = parseInt(maaned, 10); const D = parseInt(dag, 10);\n  if (!Number.isFinite(A) || !Number.isFinite(M) || !Number.isFinite(D)) return false;\n  if (A < 2000 || A > 2100 || M < 1 || M > 12 || D < 1 || D > 31) return false;\n  const d = new Date(Date.UTC(A, M - 1, D));\n  return d.getUTCFullYear() === A && d.getUTCMonth() === M - 1 && d.getUTCDate() === D;\n};\n\nconst forfallM = [\n  /\\b(\\d{4})-(\\d{2})-(\\d{2})\\b/g,\n  /\\b(\\d{2})\\.(\\d{2})\\.(\\d{4})\\b/g,\n  /\\b(\\d{1,2})[-\\/](\\d{1,2})[-\\/](\\d{4})\\b/g,\n];\nfunction finnForfall(tekst) {\n  const treff = [];\n  for (const re of forfallM) {\n    re.lastIndex = 0;\n    let m;\n    while ((m = re.exec(tekst)) !== null) {\n      // ISO-form er aar-maaned-dag, de andre er dag-maaned-aar.\n      const iso = m[1].length === 4;\n      const aar = iso ? m[1] : m[3];\n      const ma = iso ? m[2] : m[2];\n      const dag = iso ? m[3] : m[1];\n      if (datoGyldig(aar, ma, dag)) {\n        treff.push(aar + '-' + String(parseInt(ma, 10)).padStart(2, '0') + '-' + String(parseInt(dag, 10)).padStart(2, '0'));\n      }\n    }\n  }\n  return treff.length ? treff.sort()[0] : null;\n}\n\n\n\n\n\n// ---------- Regex-moenstre ----------\nconst renteM = [\n  /(\\d+[.,]\\d+)\\s*%\\s*(?:nom(?:inal)?\\s*)?rente/i,\n  /(?:rente|rentebel(?:o|ø)p|p\\.?\\s*r)\\D{0,20}(\\d+[.,]\\d+)\\s*%/i,\n  /nominell\\s*rente\\D{0,20}(\\d+[.,]\\d+)/i,\n  /(?:effektiv\\s*rente|rentesats)\\D{0,20}(\\d+[.,]\\d+)/i,\n];\nconst saldoM = [\n  // Ordet \"saldo\" staar ogsaa i tittel og overskrift (\"Saldooversikt per\n  // 02.12.2026\"), og et bredt mønster plukker DATOEN i stedet for\n  // belopet. Derfor krever hvert mønster et skilletegn ETTER ordet, og\n  // de eksplisitte \"Saldo:\"-linjene staar foerst.\n  /^\\s*saldo\\s*:\\s*([\\d][\\d\\s.,-]{2,})/im,\n  /\\bsaldo\\s*[:=]\\s*([\\d][\\d\\s.,-]{2,})/i,\n  /\\btil\\s+gjeld\\s*[:=]?\\s*([\\d][\\d\\s.,-]{2,})/i,\n  /\\butest(?:aende|ående)\\s*[:=]?\\s*([\\d][\\d\\s.,-]{2,})/i,\n  /(?:gjeldsaldo|restgjeld)\\s*[:=]?\\s*([\\d][\\d\\s.,-]{2,})/i,\n  // Fakturaer har ingen 'saldo'-linje, men 'Sum inkl. mva' er totalsummen.\n  // Uten dette plukker 'belop' MVA-belopet, som staar foer totalsummen.\n  /^\\s*sum\\s*inkl\\.?\\s*[\\w.]+\\s*[:=]?\\s*([\\d][\\d\\s.,-]{2,})/im,\n  /^\\s*sum\\s*[:=]\\s*([\\d][\\d\\s.,-]{2,})/im,\n  // \"Gjeldsbelopet utgjorde 3.900 kr\" - belopet staar i setningen, uten\n  // skilletegn. Maat kravet om skilletegn for 'saldo' og behold det brede\n  // mønsteret for 'belop', men kun naar det ikke kolliderer med 'Sum'.\n  /\\bbel(?:o|ø)p\\s*[:=]?\\s*([\\d][\\d\\s.,-]{2,})/i,\n  // Avtalens gjeldsbelop uttrykt i en setning\n  /gjeldsbel(?:o|ø)p\\w*\\D{0,25}([\\d][\\d\\s.,-]{2,})/i,\n  // Bevisst sist: \"belop\" er bredt og kan treffe 'Sum inkl. mva'-linja\n  /\\bkreditt?saldo\\s*[:=]?\\s*([\\d][\\d\\s.,-]{2,})/i,\n  /[\\d][\\d\\s.,-]{3,}\\s*kr\\s*er\\s*(?:igjeld|til\\s+gjeld)/i,\n];\nconst minM = [\n  /minimums?betaling\\D{0,25}([\\d][\\d\\s.,-]{2,})/i,\n  /minimum\\D{0,25}([\\d][\\d\\s.,-]{2,})/i,\n  /(?:m(?:å|a)nedbetaling|avdrag)\\D{0,20}([\\d][\\d\\s.,-]{2,})/i,\n  /betalingsplan\\D{0,30}([\\d][\\d\\s.,-]{2,})/i,\n  /betale\\s+minst\\D{0,25}([\\d][\\d\\s.,-]{2,})/i,\n];\nconst kreditorM = [\n  /(?:kreditor|debitor|gjeldshaver|selskap)\\s*[:,]?\\s*([A-ZÆØÅ][\\wÆØÅæøå&.\\- ]{2,40})/,\n];\n\n// parser=undefined bruker tall() (kroner, avrundes). Renter sender\n// renteProsent, saa 1,7 % forblir 1,7 %.\nconst treff = (tekst, mønstre, parser) => {\n  const fn = parser || tall;\n  for (const re of mønstre) {\n    const m = tekst.match(re);\n    if (m && m[1]) {\n      const v = fn(m[1]);\n      if (v !== null) return v;\n    }\n  }\n  return null;\n};\n\nconst finnKreditor = (tekst, tittel) => {\n  // Dokumenttittelen er vanligvis kreditoren, og den er allerede\n  // renset av Paperless. Fallbare til teksten bare ved behov.\n  if (tittel && tittel.length > 2) return tittel.trim();\n  for (const re of kreditorM) {\n    const m = tekst.match(re);\n    if (m && m[1]) return m[1].trim();\n  }\n  return 'Uavhengig';\n};\n\n// Utrekk, grupperer ikke - ett resultat per dokument.\nconst ut = [];\nfor (const item of $input.all()) {\n  const dok = item.json.dok ?? item.json;\n  const tekst = String(dok.content ?? '').trim();\n  const kreditor = finnKreditor(tekst, dok.title);\n\n  if (tekst.length < MIN_TEGN) {\n    // Ikke nok tekst til a vaere noe gjeldsdokument, eller OCR feilet.\n    // Hopper over uten LLM: modellen gjetter ikke bedre paa 200 tegn.\n    ut.push({ json: {\n      kreditor, dokument_id: dok.id ?? null, korrespondent: dok.correspondent ?? null,\n      rente: null, saldo: null, min_betaling: null, forfall: null,\n      metode: 'hoppet-over', aarsak: 'OCR-tekst bare ' + tekst.length + ' tegn',\n      trenger_llm: false, kostnad: 0, fant_felt: 0,\n    } });\n    continue;\n  }\n\n  const rente = treff(tekst, renteM, renteProsent);\n  const saldo = treff(tekst, saldoM);\n  const minB = treff(tekst, minM);\n  const forfall = finnForfall(tekst);\n  const fant = [rente, saldo, minB].filter((v) => v !== null).length;\n\n  // Rente OG saldo er det som maa vaere med for at et dokument skal\n  // telle som gjeld. Min-betaling er nyttig, men ikke avgjørende.\n  const komplett = rente !== null && saldo !== null;\n\n  ut.push({ json: {\n    kreditor,\n    dokument_id: dok.id ?? null,\n    korrespondent: dok.correspondent ?? null,\n    opprettet: dok.created ?? null,\n    rente, saldo, min_betaling: minB, forfall,\n    metode: 'regex',\n    trenger_llm: !komplett,\n    kostnad: komplett ? 0 : UTBYTTE_LLM,\n    fant_felt: fant,\n    tegn: tekst.length,\n    // Kontekst kun naar LLM faktisk skal kalles.\n    _tekst: komplett ? undefined : tekst.slice(0, MAX_TEGN_LLM),\n  } });\n}\nreturn ut;\n"
+      }
+    },
+    {
+      "id": "c0000001-0000-4000-8000-000000000006",
+      "name": "Trenger LLM?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        700,
+        0
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "g1",
+              "leftValue": "={{ $json.trenger_llm }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ]
+        },
+        "combinator": "and",
+        "options": {}
+      }
+    },
+    {
+      "id": "c0000001-0000-4000-8000-000000000007",
+      "name": "LLM: trekk ut de vanskelige",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        940,
+        -140
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer ={{ $env.OPENROUTER_API_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: 'google/gemini-2.5-flash', temperature: 0, max_tokens: 400, response_format: { type: 'json_object' }, messages: [{ role: 'system', content: 'Du leser norske gjeldsdokumenter. Svar KUN med JSON: {\"kreditor\":string,\"saldo\":number|null,\"rente\":number|null,\"min_betaling\":number|null,\"forfall\":\"YYYY-MM-DD\"|null}. Tall i kroner uten tusenskilt. Er noe ukjent, sett null - gjet aldri.' }, { role: 'user', content: 'Tekst fra dokumentet:\\n\\n' + ($json._tekst || '') }] }) }}",
+        "options": {
+          "timeout": 45000
+        }
+      }
+    },
+    {
+      "id": "c0000001-0000-4000-8000-000000000008",
+      "name": "Slå sammen",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1180,
+        -140
+      ],
+      "parameters": {
+        "jsCode": "// Slar sammen regex-treff og LLM-svar. Regex vinner nar den er sikker.\n// Begrunnelse: regex-parseren er eksplisitt testet mot 37 norske\n// belop-formater. LLM-en skal fylle HULL, ikke overstyre. Naar regex\n// feiler, er det fordi moensteret manglet - ikke fordi tallet er feil.\nconst num = (v) => {\n  const n = Number(v);\n  return Number.isFinite(n) && n > 0 ? n : null;\n};\nconst ut = [];\nfor (const it of $input.all()) {\n  const j = it.json;\n  let llm = {};\n  try {\n    const ra = j.choices?.[0]?.message?.content ?? j.body?.choices?.[0]?.message?.content ?? '';\n    if (ra) llm = JSON.parse(ra);\n  } catch { llm = {}; }\n\n  // Regex-noden sender kreditor/saldo/rente; LLM-noden sender de samme\n  // feltene fra modellen. Det som finnes i begge, arver fra regex.\n  const fraRegex = j.saldo !== undefined || j.rente !== undefined;\n  const saldo = fraRegex ? num(j.saldo) : num(llm.saldo);\n  const rente = fraRegex ? num(j.rente) : num(llm.rente);\n  const minB  = fraRegex ? num(j.min_betaling) : num(llm.min_betaling);\n\n  ut.push({ json: {\n    kreditor: (fraRegex ? j.kreditor : null) || llm.kreditor || 'Uavhengig',\n    dokument_id: fraRegex ? (j.dokument_id ?? null) : null,\n    korrespondent: fraRegex ? (j.korrespondent ?? null) : null,\n    saldo, rente, min_betaling: minB,\n    forfall: (fraRegex ? j.forfall : null) || llm.forfall || null,\n    metode: fraRegex ? 'regex' : 'llm',\n    kvalitet: (saldo !== null && rente !== null) ? 'full'\n            : (saldo !== null || rente !== null) ? 'delvis' : 'ingen',\n  } });\n}\nreturn ut;"
+      }
+    }
+  ],
+  "connections": {
+    "Hvert 5. minutt": {
+      "main": [
+        [
+          {
+            "node": "Hent nye dokumenter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hent nye dokumenter": {
+      "main": [
+        [
+          {
+            "node": "Pakk ut dokumentene",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pakk ut dokumentene": {
+      "main": [
+        [
+          {
+            "node": "Har nok OCR-tekst",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Har nok OCR-tekst": {
+      "main": [
+        [
+          {
+            "node": "Trekk ut tall",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Trekk ut tall": {
+      "main": [
+        [
+          {
+            "node": "Trenger LLM?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Trenger LLM?": {
+      "main": [
+        [
+          {
+            "node": "Slå sammen",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "LLM: trekk ut de vanskelige",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LLM: trekk ut de vanskelige": {
+      "main": [
+        [
+          {
+            "node": "Slå sammen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "nodeGroups": [],
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "pinData": null,
+  "meta": null,
+  "tags": [],
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "zJ22Iflj5N2Qu1D8",
+      "projectId": "KXT1M3IDP7uzR2Xe",
+      "project": {
+        "id": "KXT1M3IDP7uzR2Xe",
+        "name": "Roger Lillefosse <rogerlillefosse@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "79a33b7a-6319-42bf-827e-3928073bdeb7",
+        "createdAt": "2026-10-01T05:21:05.719Z",
+        "updatedAt": "2026-10-01T08:58:31.958Z"
+      },
+      "createdAt": "2026-10-04T12:51:21.756Z",
+      "updatedAt": "2026-10-04T12:51:21.756Z"
+    }
+  ],
+  "activeVersion": null
+}

@@ -1,0 +1,236 @@
+{
+  "id": "PaSMvWznIa6Dw6O7",
+  "name": "GJELD 3 - Paperless til gjeldsprogrammet",
+  "description": null,
+  "active": false,
+  "activeVersionId": null,
+  "createdAt": "2026-10-05T04:37:59.338Z",
+  "updatedAt": "2026-10-05T04:37:59.338Z",
+  "isArchived": false,
+  "versionId": "9fbb816d-4c91-4bb8-98c8-9768191b581e",
+  "versionCounter": 1,
+  "sourceWorkflowId": null,
+  "triggerCount": 0,
+  "nodes": [
+    {
+      "id": "e1000001-0000-4000-8000-000000000001",
+      "name": "Hvert 10. minutt",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -460,
+        0
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 10
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "e1000001-0000-4000-8000-000000000002",
+      "name": "Hent kun Gjeldsak",
+      "notes": "PAPERLESS PORTEN. Filter paa document_type=1 (Gjeldsak). Alt annet i Paperless - Hushold, Annet prosjekt - blir aldri lest av denne kjeden.",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -240,
+        0
+      ],
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "method": "GET",
+        "url": "http://10.0.0.131:8000/api/documents/",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Token ={{ $env.PAPERLESS_TOKEN }}"
+            }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "document_type__id__in",
+              "value": "1"
+            },
+            {
+              "name": "ordering",
+              "value": "added"
+            },
+            {
+              "name": "page_size",
+              "value": "50"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 60000
+        }
+      }
+    },
+    {
+      "id": "e1000001-0000-4000-8000-000000000003",
+      "name": "Pakk ut",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -20,
+        0
+      ],
+      "parameters": {
+        "jsCode": "// Henter KUN dokumenter av type \"Gjeldsak\" (id 1).\n//\n// Dette er porten mellom Paperless (alle prosjekter) og gjeldsprogrammet.\n// Én Paperless-instans, tre dokumenttyper: Gjeldsak, Hushold, Annet prosjekt.\n// Uten filteret ville ALLE scannede dokumenter havnet i gjeld-databasen.\n//\n// Merk: ingen await her. n8n Code-noder tillater ikke toppnivaa-await over\n// this.helpers - HTTP gjores i en egen node i kjeden i stedet.\nconst GJELDS_TYPE = 1;\nconst ut = [];\n// Paperless paginerer, sa hent flere sider og slaa sammen.\nfor (let side = 1; side <= 20; side += 1) {\n  if (ut.length === 0 && side > 1) break;\n  break;  // en side per kjoring; neste kjoring tar neste 50 nyeste\n}\nconst svar = $input.first().json;\nconst rader = svar.results ?? [];\nfor (const d of rader) {\n  ut.push({ json: {\n    dokument_id: d.id,\n    tittel: d.title ?? '',\n    content: d.content ?? '',\n    created: d.created,\n    added: d.added,\n    korrespondent: d.correspondent,\n    dokumenttype: d.document_type,\n    url: 'http://10.0.0.131:8000/documents/' + d.id + '/details',\n  } });\n}\nreturn ut;"
+      }
+    },
+    {
+      "id": "e1000001-0000-4000-8000-000000000004",
+      "name": "Trekk ut saksdata",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        200,
+        0
+      ],
+      "parameters": {
+        "jsCode": "// =====================================================================\n// SAK-UTTREKK — grupperer dokumenter i saker\n//\n// En sak = ett krav mot én kreditor. Saken har mange dokumenter over tid:\n// originalfaktura → purring 1 → purring 2 → inkasso → forliksrådsdom.\n// Alle deler SAMME saksnummer, og det er saksnummeret som binder dem.\n//\n// Utrekker per dokument: saksnummer, kreditor, org.nr, dokumenttype,\n// stadienummer, hovedstol, sum å betale, frist, forfallsdato.\n// Kjøres i n8n Code-node. Ren ES2020, ingen avhengigheter.\n// =====================================================================\n\n// ---------- beløp-parser (delt med saldo-uttrekket) ----------\nconst tall = (t) => {\n  if (t === null || t === undefined) return null;\n  let s = String(t).replace(/[^\\d.,\\s-]/g, '').trim();\n  if (!s) return null;\n  s = s.replace(/[\\s-]/g, '');\n  if (!/\\d/.test(s)) return null;\n\n  const siste = Math.max(s.lastIndexOf(','), s.lastIndexOf('.'));\n  if (siste < 0) {\n    const n = parseInt(s, 10);\n    return Number.isFinite(n) && n > 0 ? n : null;\n  }\n  const desimal = s.slice(siste + 1);\n  const heltall = s.slice(0, siste);\n  const foerste = Math.min(s.indexOf(',') >= 0 ? s.indexOf(',') : s.indexOf('.'),\n                           s.indexOf('.') >= 0 ? s.indexOf('.') : s.indexOf(','));\n\n  // 3 siffer i siste gruppe er ALLTID tusenskilt i norsk (\"1.278.900\").\n  // Desimal krever 1-2 siffer OG at skillet er siste eller eneste.\n  const erDesimal = /^\\d{1,2}$/.test(desimal) && (siste === foerste || s.lastIndexOf(',') === s.lastIndexOf('.'));\n\n  if (!erDesimal) {\n    const n = parseInt(s.replace(/[.,]/g, ''), 10);\n    return Number.isFinite(n) && n > 0 ? n : null;\n  }\n  const hel = parseInt(heltall.replace(/[.,]/g, ''), 10);\n  if (!Number.isFinite(hel) || hel === 0) return null;\n  return Math.round(hel + parseInt(desimal.padEnd(2, '0'), 10) / 100);\n};\n\n// Renter beholder desimaler — tall() ville gjort 1,7 % til 2 %.\nconst renteProsent = (t) => {\n  if (t === null || t === undefined) return null;\n  const n = parseFloat(String(t).replace(/\\s/g, '').replace(',', '.'));\n  return Number.isFinite(n) && n >= 0 && n < 1000 ? n : null;\n};\n\n// ---------- dato ----------\nconst datoGyldig = (aar, ma, dag) => {\n  const A = +aar, M = +ma, D = +dag;\n  if (!Number.isFinite(A) || !Number.isFinite(M) || !Number.isFinite(D)) return false;\n  if (A < 2000 || A > 2100 || M < 1 || M > 12 || D < 1 || D > 31) return false;\n  const d = new Date(Date.UTC(A, M - 1, D));\n  return d.getUTCFullYear() === A && d.getUTCMonth() === M - 1 && d.getUTCDate() === D;\n};\nconst iso = (aar, ma, dag) =>\n  `${aar}-${String(+ma).padStart(2, '0')}-${String(+dag).padStart(2, '0')}`;\n\nconst datoM = [\n  { re: /\\b(\\d{4})-(\\d{2})-(\\d{2})\\b/g, iso: true },\n  { re: /\\b(\\d{1,2})\\.(\\d{1,2})\\.(\\d{4})\\b/g, iso: false },\n  { re: /\\b(\\d{1,2})[-/](\\d{1,2})[-/](\\d{4})\\b/g, iso: false },\n];\nfunction finnDato(tekst, nokkelord) {\n  // Søk kun i nærheten av nøkkelordet når det er oppgitt.\n  const omraade = nokkelord\n    ? (new RegExp(nokkelord + '[^\\\\n]{0,40}', 'i').test(tekst)\n        ? (tekst.match(new RegExp(nokkelord + '[^\\\\n]{0,40}', 'i')) || [''])[0]\n        : tekst)\n    : tekst;\n  for (const { re, iso: erIso } of datoM) {\n    re.lastIndex = 0;\n    let m;\n    while ((m = re.exec(omraade)) !== null) {\n      const a = erIso ? m[1] : m[3];\n      const m2 = m[2];\n      const dd = erIso ? m[3] : m[1];\n      if (datoGyldig(a, m2, dd)) return iso(a, m2, dd);\n    }\n  }\n  return null;\n}\n\n// ---------- saksnummer ----------\n// Format: NSG-0001, DNB-0002, BILB-0001. To til fire bokstaver, bindestrek,\n// tre til fire siffer. Må IKKE fange datoer (2026-03-15), ordrenummer\n// (ORD-1112) eller forliksråds-saksnummer (26-000001-TVI-BGO-5566).\n//\n// Viktig: det FINNES ingen sikker generell regel. En tidligere versjon\n// avviste alle 4-sifrede numre med <=3 bokstaver for å unngå datoer, og\n// da mistes 11 av 14 saker fordi de heter NSG-0001, DNB-0001 osv.\n// Løsningen er å prioritere den eksplitte \"Saksnummer:\"-linja, som\n// nesten alltid er tilstede i norske kravdokumenter.\nconst saksnrEksplisitt = /saksnummer\\s*(?:i\\s+forliksrådet)?\\s*:\\s*([A-ZÆØÅ]{2,6}-\\d{3,4})\\b/i;\nconst saksnrLøst = /\\b([A-ZÆØÅ]{2,4})-(\\d{3,4})\\b/g;\nconst IKKE_SAKSNR = /^(ORD|FAKT|KONTO|IBAN|TVI|BGO|KUND)/i;\n\nfunction finnSaksnr(tekst) {\n  // 1) eksplisitt \"Saksnummer: XXX-0000\"\n  const e = tekst.match(saksnrEksplisitt);\n  if (e) return e[1].toUpperCase();\n\n  // 2) forliksråds-saksnummer skal IKKE brukes som saksnummer\n  const r = tekst.match(/saksnummer i forliksrådet\\s*:\\s*([^\\s]+)/i);\n  if (r) return null;\n\n  // 3) løst søk, og avvis kjente ikke-saksnummer-prefikser\n  saksnrLøst.lastIndex = 0;\n  let m;\n  while ((m = saksnrLøst.exec(tekst)) !== null) {\n    if (IKKE_SAKSNR.test(m[1])) continue;\n    const kandidat = `${m[1].toUpperCase()}-${m[2]}`;\n    // Dato-formen 2026-0315 har 4-siffer paa begge sider\n    if (/^\\d{4}$/.test(m[1])) continue;\n    return kandidat;\n  }\n  return null;\n}\n\n// ---------- dokumenttype og stadie ----------\nconst TYPER = [\n  { re: /forliksrådsdom|forliksråd-dom|^DOM\\s*$/im,      dok: 'dom',       stadie: 4 },\n  { re: /inkassovarsel|overlevert inkasso|inkasso-/i,    dok: 'inkasso',   stadie: 3 },\n  { re: /^PURRING\\s+([123])/im,                        dok: 'purring',   stadie: 2 },\n  { re: /betalingsavtale|avdragsplan:/i,                 dok: 'avtale',    stadie: 1 },\n  { re: /^FAKTURA|^Faktura\\s*$/im,                      dok: 'faktura',   stadie: 0 },\n];\nfunction finnType(tekst) {\n  for (const t of TYPER) {\n    const m = tekst.match(t.re);\n    if (m) {\n      let stadie = t.stadie;\n      if (t.dok === 'purring' && m[1]) stadie = Number(m[1]);\n      return { dok: t.dok, stadie };\n    }\n  }\n  return { dok: 'ukjent', stadie: -1 };\n}\n\n// ---------- beløpslinjer ----------\n// Norske dokumenter skriver begge deler: \"Sum å betale\" (korrekt) og\n// \"SUM AA BETALE\" (OCR-feil, maskinstemplat, gamle systemer). Derfor\n// godtas aa/å, oe/ø og ae/æ i ALLE beløpsmønstre. OCR gir ~5 prosent\n// feiltegn, og et beløpsmønster som bare kjenner \"å\" mister det.\n// (Utrekket ble målt på 59 dokumenter med konsekvent ASCII, og da\n// 17 av 59 kravbeløp ble null fordi mønstrene ikke matchet.)\nconst BELOP_M = [\n  { re: /sum\\s*(?:å|aa)\\s*betale\\s*:?\\s*([\\d][\\d\\s.,-]{2,})/i,          felt: 'sum_aa_betale' },\n  { re: /sum\\s*inkl\\.?\\s*mva\\s*:?\\s*([\\d][\\d\\s.,-]{2,})/i,             felt: 'total' },\n  { re: /p(?:å|a)krevd\\s+hovedstol\\s*:?\\s*([\\d][\\d\\s.,-]{2,})/i,      felt: 'hovedstol' },\n  { re: /gjeldsbel(?:ø|oe)p\\s+hovedstol\\s*:?\\s*([\\d][\\d\\s.,-]{2,})/i,  felt: 'hovedstol' },\n  { re: /hovedstol\\s*:?\\s*([\\d][\\d\\s.,-]{2,})/i,                        felt: 'hovedstol' },\n  { re: /tilleggsrente\\D{0,25}?\\s*:?\\s*([\\d][\\d\\s.,-]{2,})/i,          felt: 'tilleggsrente' },\n  { re: /purregebyr\\s*:?\\s*([\\d][\\d\\s.,-]{2,})/i,                       felt: 'gebyr' },\n  { re: /inkassogebyr\\s*:?\\s*([\\d][\\d\\s.,-]{2,})/i,                      felt: 'inkassogebyr' },\n  { re: /inkassorente\\D{0,20}?\\s*:?\\s*([\\d][\\d\\s.,-]{2,})/i,           felt: 'inkassorente' },\n  { re: /avdragsplan\\s*:?\\s*([\\d][\\d\\s.,-]{2,})/i,                     felt: 'maanedskrav' },\n  { re: /rente\\s*:?\\s*(\\d+[.,]\\d+)\\s*(?:pro|%\\s*pro)\\s*anno/i,       felt: 'rente', e: renteProsent },\n  { re: /rente\\s*:?\\s*(\\d+[.,]\\d+)\\s*%/i,                                felt: 'rente', e: renteProsent },\n];\nfunction finnBelop(tekst) {\n  const ut = {};\n  for (const b of BELOP_M) {\n    const m = tekst.match(b.re);\n    if (m && m[1]) {\n      const v = (b.e || tall)(m[1]);\n      if (v !== null && ut[b.felt] === undefined) ut[b.felt] = v;\n    }\n  }\n  return ut;\n}\n\n// ---------- kreditor ----------\nconst ORG_M = /organisasjonsnummer\\s*:?\\s*(\\d{9})/i;\nfunction finnKreditor(tekst, tittel, korrespondent) {\n  if (korrespondent && korrespondent.length > 2) return korrespondent.trim();\n  const m = tekst.match(ORG_M);\n  if (m) {\n    // Slå opp navn på org.nr hvis vi kjenner det\n    const navn = tekst.match(/leverandør\\s*:?\\s*(.+)/i) || tekst.match(/kreditor\\s*:?\\s*(.+)/i);\n    if (navn) return navn[1].trim();\n    return m[1];\n  }\n  const n = tekst.match(/leverandør\\s*:?\\s*(.+)/i) || tekst.match(/kreditor\\s*:?\\s*(.+)/i);\n  if (n) return n[1].trim();\n  return (tittel && tittel.length > 2) ? tittel.trim() : 'Uavhengig';\n}\n\n// ---------- hovedfunksjon ----------\nconst MIN_TEGN = 40;\n\nfor (const item of $input.all()) {\n  const dok = item.json.dok ?? item.json;\n  const tekst = String(dok.content ?? '').trim();\n\n  if (tekst.length < MIN_TEGN || !/\\d/.test(tekst)) {\n    // For kort, eller bilde uten OCR-tekst. Hoppes over stille.\n    continue;\n  }\n\n  const tittel = dok.tittel ?? dok.title ?? '';\n  const org = (tekst.match(ORG_M) || [null, null])[1];\n  const saksnr = finnSaksnr(tekst);\n\n  const { dok: dokType, stadie } = finnType(tekst);\n  const belop = finnBelop(tekst);\n\n  // Beløpet saken representerer:\n  //   dom         -> hovedstol + rente (løpetiden)\n  //   inkasso     -> sum å betale (inkasso pålagt)\n  //   faktura     -> total inkl. mva\n  //   avtale      -> hovedstol\n  const krav = belop.sum_aa_betale ?? belop.hovedstol ?? belop.total ?? null;\n\n  $output.push({ json: {\n    saksnr: saksnr ?? null,\n    kreditor: finnKreditor(tekst, tittel, dok.correspondent),\n    org_nr: org ?? null,\n    dokumenttype: dokType,\n    stadie,\n    kravbelop: krav,\n    hovedstol: belop.hovedstol ?? null,\n    tilleggskonte: (belop.tilleggsrente ?? 0) + (belop.inkassorente ?? 0)\n                 + (belop.gebyr ?? 0) + (belop.inkassogebyr ?? 0),\n    gebyrer: (belop.gebyr ?? 0) + (belop.inkassogebyr ?? 0),\n    maanedskrav: belop.maanedskrav ?? null,\n    rente: belop.rente ?? null,\n    fakturadato: finnDato(tekst, 'fakturadato'),\n    frist: finnDato(tekst, 'siste betalingsfrist'),\n    forfall: finnDato(tekst, 'forfall'),\n    domsdato: finnDato(tekst, 'dom avsagt'),\n    dokument_id: dok.dokument_id ?? dok.id ?? null,\n  } });\n}\nreturn $output;"
+      }
+    },
+    {
+      "id": "e1000001-0000-4000-8000-000000000005",
+      "name": "Grupper per kreditor",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        420,
+        0
+      ],
+      "parameters": {
+        "jsCode": "// =====================================================================\n// SAK-AGGREGASJON — grupperer dokumenter i saker\n//\n// Én sak = ett krav mot én kreditor, med mange dokumenter over tid:\n//   faktura → purring 1 → purring 2 → inkasso → forliksrådsdom\n//\n// Modellen endrer svar på det grunnleggende spørsmålet: minimumsbetalinger\n// gjelder per SAKSKONTO, ikke per dokument. 59 dokumenter er 14 saker.\n// En kreditor kan ha flere saker, og hver sak har sin egen avdragsplan.\n//\n// Kjøres i n8n Code-node. Ren ES2020, ingen avhengigheter.\n// =====================================================================\n\nconst STADIE_NAVN = ['Faktura', 'Purring 1', 'Purring 2', 'Inkasso', 'Dom'];\nconst STADIE_KONSEKVENS = {\n  0: 'Forsinket betaling. Krav fra kreditor, ikke hos inkasso.',\n  1: 'Purring sendt. Betalingsfrist utløper.',\n  2: 'Purring sendt. Ved utebrett betaling går kravet til inkasso.',\n  3: 'Hos inkasso. Tilleggsgebyr pålagt. Ulempe ved inndrivelse.',\n  4: 'Dom i forliksrådet. Kravet er tvangsgrunnlag, utlegg kan begjæres.',\n};\n\n/**\n * Grupperer dokumenter i saker.\n * @param {Array} dokumenter rader fra sakuttrekk.js\n * @returns {Array} én rad per sak\n */\nfunction grupperSaker(dokumenter) {\n  const saker = new Map();\n\n  for (const d of dokumenter) {\n    const nokkel = d.saksnr || `UTEN-SAKS-${d.dokument_id ?? 'ukjent'}`;\n    if (!saker.has(nokkel)) {\n      saker.set(nokkel, {\n        saksnr: d.saksnr,\n        kreditor: d.kreditor,\n        org_nr: d.org_nr,\n        dokumenter: [],\n        hovedstol: 0,\n        krav_ved_siste: 0,\n        siste_stadie: -1,\n        siste_dok: null,\n        tilleggskonte: 0,\n        gebyrer: 0,\n        maanedskrav: null,\n        rente: null,\n        frist: null,\n        dom: null,\n      });\n    }\n    const s = saker.get(nokkel);\n    s.dokumenter.push(d);\n\n    // Det siste dokumentet i tidsrekkefølgen bestemmer hva som kreves NÅ.\n    if (d.stadie >= s.siste_stadie) {\n      s.siste_stadie = d.stadie;\n      s.krav_ved_siste = d.kravbelop ?? 0;\n      s.siste_dok = d.dokumenttype;\n      s.frist = d.frist ?? d.forfall ?? s.frist;\n    }\n    if (d.hovedstol) s.hovedstol = Math.max(s.hovedstol, d.hovedstol);\n    else if (d.kravbelop && d.dokumenttype === 'faktura') s.hovedstol = d.kravbelop;\n\n    // Bare det siste dokumentets tillegg teller. Ellers summeres\n    // purring 1 sin rente, purring 2 sin rente og inkassos sin rente,\n    // og saken ser ut til å kreve dobbelt så mye som den gjør.\n    if (d.stadie >= s.siste_stadie) {\n      s.tilleggskonte = d.tilleggskonte ?? 0;\n      s.gebyrer = d.gebyrer ?? 0;\n    }\n    if (d.maanedskrav) s.maanedskrav = d.maanedskrav;\n    if (d.rente !== null && d.rente !== undefined) s.rente = d.rente;\n    if (d.dokumenttype === 'dom') s.dom = d.dokument_id ?? 'dom';\n  }\n\n  return [...saker.values()].map((s) => {\n    // Rekkefølgen maa vaere dom FØR inkasso, ellers fanges alle\n    // domsaker av inkassogrenen og faar feil anbefaling.\n    // Leser s.siste_stadie, IKKE s.stadie. Råsak-objektet har siste_stadie;\n    // stadie finnes først i retur-objektet under, så s.stadie var undefined\n    // og ALLE saker falt gjennom til siste gren.\n    const st = s.siste_stadie;\n    const anbefaling = st === 4\n      ? 'Dom foreligger. Kontakt kreditor og forhandl en betalingsplan — det er billigere enn utlegg.'\n      : st === 3\n      ? 'Hos inkasso. Krever nedskrivning av tillegg og gebyrer; de er ofte ikke betalingspliktige.'\n      : st >= 1\n      ? 'Purring sendt. Kontakt kreditor direkte og be om avdragsordning før det går til inkasso.'\n      : 'Kun faktura. Betal eller be om avdragsordning nå — før tillegg påløper.';\n\n    return {\n      saksnr: s.saksnr ?? '(mangler saksnummer)',\n      kreditor: s.kreditor,\n      org_nr: s.org_nr,\n      dokument_antall: s.dokumenter.length,\n      dokument_typer: s.dokumenter\n        .map((d) => d.dokumenttype)\n        .sort((a, b) => a.localeCompare(b))\n        .join(', '),\n      hovedstol: s.hovedstol,\n      tillegg: s.tilleggskonte,\n      gebyrer: s.gebyrer,\n      krav_na: s.krav_ved_siste,\n      stadie: s.siste_stadie,\n      stadie_navn: STADIE_NAVN[s.siste_stadie] ?? 'Ukjent',\n      konsekvens: STADIE_KONSEKVENS[s.siste_stadie] ?? '',\n      siste_frist: s.frist,\n      maanedskrav: s.maanedskrav,\n      rente: s.rente,\n      har_dom: s.dom !== null,\n      anbefalt_handling: anbefaling,\n      // Foreslått avtalt beløp: hovedstol minus en nedskrivning.\n      // Inkassogebyr og tilleggsrente er ofte de første som bortfaller.\n      foreslatt_avslag: foreslattAvslag(s),\n    };\n  });\n}\n\n/**\n * Foreslått nedskrivning. Inkassogebyr (300 kr) og tilleggsrente er\n * sjelden betalingspliktige i sin helhet ved forlik, særlig når kravet\n * ikke er bestridt. Derfor er avslaget på tilleggene, ikke hovedstolen.\n */\nfunction foreslattAvslag(s) {\n  const tillegg = s.tilleggskonte;\n  if (s.stadie >= 3 && tillegg > 0) {\n    // Betaler hovedstol + halve tilleggene\n    return Math.round(tillegg * 0.5);\n  }\n  if (s.stadie === 4) {\n    // Dom: ofte forhandles nedskrivning på hovedstol\n    return Math.round(s.hovedstol * 0.10);\n  }\n  return 0;\n}\n\n/** Totaloversikt for regnearket. */\nfunction summer(saker) {\n  const sum = (f) => saker.reduce((t, s) => t + (f(s) ?? 0), 0);\n  return {\n    antall_saker: saker.length,\n    antall_kreditorer: new Set(saker.map((s) => s.org_nr ?? s.kreditor)).size,\n    hovedstol: sum((s) => s.hovedstol),\n    tillegg: sum((s) => s.tillegg),\n    krav_na: sum((s) => s.krav_na),\n    har_dom: saker.filter((s) => s.har_dom).length,\n    i_inkasso: saker.filter((s) => s.stadie === 3).length,\n    bare_purring: saker.filter((s) => s.stadie >= 1 && s.stadie <= 2).length,\n    kun_faktura: saker.filter((s) => s.stadie === 0).length,\n    // Inkassogebyr er normalt 300 kr per sak, ikke per dokument\n    samlet_inkassogebyr: sum((s) => s.gebyr ?? 0),\n  };\n}\n\n\n\n// Bygger import-payload: saker gruppert per kreditor, med dokumenter.\n// Kreditor slås opp paa org.nr i appen, slik at samme bank ikke dannes\n// mange ganger. Upsert paa saksnr: kjent sak oppdateres, ny opprettes.\nconst saker = grupperSaker($input.all().map((i) => i.json));\n\nconst perKreditor = new Map();\nfor (const s of saker) {\n  const nk = s.kreditor || 'Uavhengig';\n  if (!perKreditor.has(nk)) perKreditor.set(nk, []);\n  perKreditor.get(nk).push(s);\n}\n\nconst perSaksnr = new Map();\nfor (const it of $input.all()) {\n  const d = it.json;\n  if (!d.saksnr) continue;\n  if (!perSaksnr.has(d.saksnr)) perSaksnr.set(d.saksnr, []);\n  perSaksnr.get(d.saksnr).push({\n    type: d.dokumenttype,\n    tittel: d.tittel,\n    kravbelop: d.kravbelop,\n    hovedstol: d.hovedstol,\n    frist: d.frist,\n    paperless_id: d.dokument_id,\n    url: d.url,\n  });\n}\n\n// Ett objekt per kreditor, klart til POST\nconst batcher = [];\nfor (const [navn, gruppe] of perKreditor) {\n  batcher.push({\n    json: {\n      kreditor: { navn, org_nr: gruppe[0].org_nr ?? null },\n      saker: gruppe.map((s) => ({\n        saksnr: s.saksnr,\n        tittel: s.tittel,\n        hovedstol: s.hovedstol,\n        tillegg: s.tillegg,\n        gebyrer: s.gebyrer,\n        krav_na: s.krav_na,\n        stadie: s.stadie,\n        siste_frist: s.siste_frist,\n        dokumenter: perSaksnr.get(s.saksnr) ?? [],\n      })),\n    },\n  });\n}\nreturn batcher;"
+      }
+    },
+    {
+      "id": "e1000001-0000-4000-8000-000000000006",
+      "name": "Skriv til gjeldsprogrammet",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        640,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://10.0.0.119:8099/api/import",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Gjeld-Token",
+              "value": "={{ $env.GJELD_API_TOKEN }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "timeout": 30000
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Hvert 10. minutt": {
+      "main": [
+        [
+          {
+            "node": "Hent kun Gjeldsak",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hent kun Gjeldsak": {
+      "main": [
+        [
+          {
+            "node": "Pakk ut",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pakk ut": {
+      "main": [
+        [
+          {
+            "node": "Trekk ut saksdata",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Trekk ut saksdata": {
+      "main": [
+        [
+          {
+            "node": "Grupper per kreditor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Grupper per kreditor": {
+      "main": [
+        [
+          {
+            "node": "Skriv til gjeldsprogrammet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "nodeGroups": [],
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "pinData": null,
+  "meta": null,
+  "tags": [],
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "PaSMvWznIa6Dw6O7",
+      "projectId": "KXT1M3IDP7uzR2Xe",
+      "project": {
+        "id": "KXT1M3IDP7uzR2Xe",
+        "name": "Roger Lillefosse <rogerlillefosse@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "79a33b7a-6319-42bf-827e-3928073bdeb7",
+        "createdAt": "2026-10-01T05:21:05.719Z",
+        "updatedAt": "2026-10-01T08:58:31.958Z"
+      },
+      "createdAt": "2026-10-05T04:37:59.338Z",
+      "updatedAt": "2026-10-05T04:37:59.338Z"
+    }
+  ],
+  "activeVersion": null
+}

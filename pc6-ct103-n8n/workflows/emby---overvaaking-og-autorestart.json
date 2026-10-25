@@ -1,0 +1,454 @@
+{
+  "id": "dK3dJJIQ7smvUy9v",
+  "name": "Emby - overvaaking og autorestart",
+  "description": null,
+  "active": false,
+  "activeVersionId": null,
+  "createdAt": "2026-10-06T07:19:04.161Z",
+  "updatedAt": "2026-10-24T23:42:37.940Z",
+  "isArchived": false,
+  "versionId": "734f1345-bfcf-4dab-b923-093bdca01e16",
+  "versionCounter": 6,
+  "sourceWorkflowId": null,
+  "triggerCount": 1,
+  "nodes": [
+    {
+      "id": "e18ba2d8-0001-41b0-ace1-000000000001",
+      "name": "Hvert minutt",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        300
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "seconds",
+              "secondsInterval": 60
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "e18ba2d8-0001-41b0-ace1-000000000002",
+      "name": "Hent Emby-status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        220,
+        300
+      ],
+      "parameters": {
+        "url": "http://10.0.0.135:9118/emby/status",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Audit-Token",
+              "value": "=e92b188aafdb10c77ef1f09337551d2b7b3bda115e085365"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000,
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "e18ba2d8-0001-41b0-ace1-000000000003",
+      "name": "Gikk Emby ned?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        440,
+        300
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "cond-down",
+              "leftValue": "={{ $json.went_down }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "cond-sessions-known",
+              "leftValue": "={{ $json.active_sessions_known }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "cond-no-streams",
+              "leftValue": "={{ $json.active_streams }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "cond-recovery-allowed",
+              "leftValue": "={{ $json.recovery_allowed }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "e18ba2d8-0001-41b0-ace1-000000000004",
+      "name": "Reboot Emby-CT",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        660,
+        200
+      ],
+      "parameters": {
+        "url": "http://10.0.0.135:9118/emby/restart",
+        "method": "POST",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Audit-Token",
+              "value": "=e92b188aafdb10c77ef1f09337551d2b7b3bda115e085365"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={}",
+        "options": {
+          "timeout": 60000
+        }
+      }
+    },
+    {
+      "id": "e18ba2d8-0001-41b0-ace1-000000000005",
+      "name": "Varsle om nedetid",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        660,
+        400
+      ],
+      "parameters": {
+        "url": "http://10.0.0.135:9118/notify",
+        "method": "POST",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Audit-Token",
+              "value": "=e92b188aafdb10c77ef1f09337551d2b7b3bda115e085365"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ title: 'Emby er nede - sender reboot', message: 'Emby svarte ikke (prober: ' + $json.ok_probes + '/' + $json.probes + '). CT151 (pc6) rebootes naa.' }) }}",
+        "options": {
+          "timeout": 30000
+        }
+      }
+    },
+    {
+      "id": "e18ba2d8-0001-41b0-ace1-000000000006",
+      "name": "Kom Emby tilbake?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        660,
+        600
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "cond-rec",
+              "leftValue": "={{ $json.recovered }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "e18ba2d8-0001-41b0-ace1-000000000007",
+      "name": "Varsle om tilbakekomst",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        880,
+        600
+      ],
+      "parameters": {
+        "url": "http://10.0.0.135:9118/notify",
+        "method": "POST",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Audit-Token",
+              "value": "=e92b188aafdb10c77ef1f09337551d2b7b3bda115e085365"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ title: 'Emby er tilbake', message: 'Emby svarer igjen (HTTP 200). Om CT-en ble rebootet, er alt oppe.' }) }}",
+        "options": {
+          "timeout": 30000
+        }
+      }
+    },
+    {
+      "id": "emby-log-down",
+      "name": "Logg nedetid",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        880,
+        200
+      ],
+      "parameters": {
+        "url": "http://10.0.0.119:5678/webhook/events",
+        "method": "POST",
+        "authentication": "none",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ source:'emby', type:'nedetid', severity:'warning', title:'Emby nede', message:'Emby svarte ikke (prober '+$json.ok_probes+'/'+$json.probes+')', host:'emby-pc6 (CT151)', at: new Date().toISOString(), details: JSON.stringify($json) }) }}",
+        "options": {
+          "timeout": 30000
+        }
+      }
+    },
+    {
+      "id": "emby-log-up",
+      "name": "Logg tilbakekomst",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1100,
+        600
+      ],
+      "parameters": {
+        "url": "http://10.0.0.119:5678/webhook/events",
+        "method": "POST",
+        "authentication": "none",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ source:'emby', type:'tilbake', severity:'info', title:'Emby tilbake', message:'Emby svarer igjen (HTTP 200)', host:'emby-pc6 (CT151)', at: new Date().toISOString(), details: JSON.stringify($json) }) }}",
+        "options": {
+          "timeout": 30000
+        }
+      }
+    },
+    {
+      "id": "1b5a593f-5c01-419e-836d-886490eaf024",
+      "name": "Emby recovery gate",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const sd = $getWorkflowStaticData('global');\nconst now = Date.now();\nconst input = $input.first().json;\nconst down = input.went_down === true;\nconst fingerprint = down ? JSON.stringify({up: input.up, ok: input.ok, active_sessions_known: input.active_sessions_known, active_streams: input.active_streams, error: input.error || input.reason || null}) : '';\nconst cooldownMs = 30 * 60 * 1000;\nconst maxAttempts = 1;\nif (!down) {\n  sd.embyFailureFingerprint = '';\n  sd.embyFailureCount = 0;\n  return [{json: {...input, recovery_allowed: false, recovery_reason: 'not_down'}}];\n}\nif (sd.embyFailureFingerprint !== fingerprint) {\n  sd.embyFailureFingerprint = fingerprint;\n  sd.embyFailureCount = 1;\n  sd.embyLastAttemptAt = 0;\n} else {\n  sd.embyFailureCount = (sd.embyFailureCount || 0) + 1;\n}\nconst attemptWindowMs = 24 * 60 * 60 * 1000;\nif (!sd.embyAttemptWindowStart || now - sd.embyAttemptWindowStart >= attemptWindowMs) {\n  sd.embyAttemptWindowStart = now;\n  sd.embyRestartAttempts = 0;\n}\nconst attempts = sd.embyRestartAttempts || 0;\nconst lastAttempt = sd.embyLastAttemptAt || 0;\nconst cooldownOk = now - lastAttempt >= cooldownMs;\nconst recovery_allowed = sd.embyFailureCount >= 2 && attempts < maxAttempts && cooldownOk && input.active_sessions_known === true && input.active_streams === 0 && input.maintenance_lock !== true;\nlet recovery_reason = recovery_allowed ? 'allowed' : (sd.embyFailureCount < 2 ? 'waiting_for_second_failure' : attempts >= maxAttempts ? 'max_attempts_reached' : !cooldownOk ? 'cooldown' : input.maintenance_lock === true ? 'maintenance_lock' : input.active_sessions_known !== true ? 'sessions_unknown' : input.active_streams !== 0 ? 'stream_guard' : 'blocked');\nif (recovery_allowed) { sd.embyRestartAttempts = attempts + 1; sd.embyLastAttemptAt = now; }\nreturn [{json: {...input, recovery_allowed, recovery_reason, consecutive_failures: sd.embyFailureCount, restart_attempts: sd.embyRestartAttempts || 0}}];",
+        "mode": "runOnceForAllItems"
+      }
+    }
+  ],
+  "connections": {
+    "Hvert minutt": {
+      "main": [
+        [
+          {
+            "node": "Hent Emby-status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hent Emby-status": {
+      "main": [
+        [
+          {
+            "node": "Emby recovery gate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gikk Emby ned?": {
+      "main": [
+        [
+          {
+            "node": "Reboot Emby-CT",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Kom Emby tilbake?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reboot Emby-CT": {
+      "main": [
+        [
+          {
+            "node": "Varsle om nedetid",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Kom Emby tilbake?": {
+      "main": [
+        [
+          {
+            "node": "Varsle om tilbakekomst",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Varsle om nedetid": {
+      "main": [
+        [
+          {
+            "node": "Logg nedetid",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Varsle om tilbakekomst": {
+      "main": [
+        [
+          {
+            "node": "Logg tilbakekomst",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Emby recovery gate": {
+      "main": [
+        [
+          {
+            "node": "Gikk Emby ned?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "nodeGroups": [],
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": {
+    "node:Hvert minutt": {
+      "recurrenceRules": [
+        null
+      ],
+      "recurrenceRuleSignatures": [
+        null
+      ]
+    }
+  },
+  "pinData": null,
+  "meta": null,
+  "tags": [],
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "dK3dJJIQ7smvUy9v",
+      "projectId": "KXT1M3IDP7uzR2Xe",
+      "project": {
+        "id": "KXT1M3IDP7uzR2Xe",
+        "name": "Roger Lillefosse <rogerlillefosse@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "79a33b7a-6319-42bf-827e-3928073bdeb7",
+        "createdAt": "2026-10-01T05:21:05.719Z",
+        "updatedAt": "2026-10-01T08:58:31.958Z"
+      },
+      "createdAt": "2026-10-06T07:19:04.161Z",
+      "updatedAt": "2026-10-06T07:19:04.161Z"
+    }
+  ],
+  "activeVersion": null
+}
