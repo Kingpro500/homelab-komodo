@@ -30,6 +30,11 @@ scrape_configs:
       - targets: ['10.0.0.135:9120']
 
   - job_name: 'pc1-gpu'
+    # PC1 er gaming-node. Frakobling er forventet og skal ikke bli kritisk homelab-feil.
     scrape_interval: 15s
     static_configs:
       - targets: ['10.0.0.112:9105']
+        labels:
+          node_role: gaming
+          monitoring_policy: best_effort
+          alerting: excluded_by_design
