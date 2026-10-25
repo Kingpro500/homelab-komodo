@@ -1,7 +1,12 @@
 {
+  "id": "dK3dJJIQ7smvUy9v",
   "name": "Emby - overvaaking og autorestart",
+  "description": null,
+  "active": false,
+  "createdAt": "2026-10-06T07:19:04.161Z",
+  "updatedAt": "2026-10-24T23:42:37.940Z",
   "isArchived": false,
-  "versionCounter": 3,
+  "versionCounter": 6,
   "sourceWorkflowId": null,
   "triggerCount": 1,
   "nodes": [
@@ -42,7 +47,7 @@
           "parameters": [
             {
               "name": "X-Audit-Token",
-              "value": "REDACTED_AUDIT_TOKEN"
+              "value": "=REDACTED_AUDIT_TOKEN"
             }
           ]
         },
@@ -102,6 +107,16 @@
                 "type": "number",
                 "operation": "equals"
               }
+            },
+            {
+              "id": "cond-recovery-allowed",
+              "leftValue": "={{ $json.recovery_allowed }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
             }
           ],
           "combinator": "and"
@@ -127,7 +142,7 @@
           "parameters": [
             {
               "name": "X-Audit-Token",
-              "value": "REDACTED_AUDIT_TOKEN"
+              "value": "=REDACTED_AUDIT_TOKEN"
             }
           ]
         },
@@ -157,7 +172,7 @@
           "parameters": [
             {
               "name": "X-Audit-Token",
-              "value": "REDACTED_AUDIT_TOKEN"
+              "value": "=REDACTED_AUDIT_TOKEN"
             },
             {
               "name": "Content-Type",
@@ -225,7 +240,7 @@
           "parameters": [
             {
               "name": "X-Audit-Token",
-              "value": "REDACTED_AUDIT_TOKEN"
+              "value": "=REDACTED_AUDIT_TOKEN"
             },
             {
               "name": "Content-Type",
@@ -282,6 +297,20 @@
           "timeout": 30000
         }
       }
+    },
+    {
+      "id": "1b5a593f-5c01-419e-836d-886490eaf024",
+      "name": "Emby recovery gate",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const sd = $getWorkflowStaticData('global');\nconst now = Date.now();\nconst input = $input.first().json;\nconst down = input.went_down === true;\nconst fingerprint = down ? JSON.stringify({up: input.up, ok: input.ok, active_sessions_known: input.active_sessions_known, active_streams: input.active_streams, error: input.error || input.reason || null}) : '';\nconst cooldownMs = 30 * 60 * 1000;\nconst maxAttempts = 1;\nif (!down) {\n  sd.embyFailureFingerprint = '';\n  sd.embyFailureCount = 0;\n  return [{json: {...input, recovery_allowed: false, recovery_reason: 'not_down'}}];\n}\nif (sd.embyFailureFingerprint !== fingerprint) {\n  sd.embyFailureFingerprint = fingerprint;\n  sd.embyFailureCount = 1;\n  sd.embyLastAttemptAt = 0;\n} else {\n  sd.embyFailureCount = (sd.embyFailureCount || 0) + 1;\n}\nconst attemptWindowMs = 24 * 60 * 60 * 1000;\nif (!sd.embyAttemptWindowStart || now - sd.embyAttemptWindowStart >= attemptWindowMs) {\n  sd.embyAttemptWindowStart = now;\n  sd.embyRestartAttempts = 0;\n}\nconst attempts = sd.embyRestartAttempts || 0;\nconst lastAttempt = sd.embyLastAttemptAt || 0;\nconst cooldownOk = now - lastAttempt >= cooldownMs;\nconst recovery_allowed = sd.embyFailureCount >= 2 && attempts < maxAttempts && cooldownOk && input.active_sessions_known === true && input.active_streams === 0 && input.maintenance_lock !== true;\nlet recovery_reason = recovery_allowed ? 'allowed' : (sd.embyFailureCount < 2 ? 'waiting_for_second_failure' : attempts >= maxAttempts ? 'max_attempts_reached' : !cooldownOk ? 'cooldown' : input.maintenance_lock === true ? 'maintenance_lock' : input.active_sessions_known !== true ? 'sessions_unknown' : input.active_streams !== 0 ? 'stream_guard' : 'blocked');\nif (recovery_allowed) { sd.embyRestartAttempts = attempts + 1; sd.embyLastAttemptAt = now; }\nreturn [{json: {...input, recovery_allowed, recovery_reason, consecutive_failures: sd.embyFailureCount, restart_attempts: sd.embyRestartAttempts || 0}}];",
+        "mode": "runOnceForAllItems"
+      }
     }
   ],
   "connections": {
@@ -300,7 +329,7 @@
       "main": [
         [
           {
-            "node": "Gikk Emby ned?",
+            "node": "Emby recovery gate",
             "type": "main",
             "index": 0
           }
@@ -364,6 +393,17 @@
         [
           {
             "node": "Logg tilbakekomst",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Emby recovery gate": {
+      "main": [
+        [
+          {
+            "node": "Gikk Emby ned?",
             "type": "main",
             "index": 0
           }
