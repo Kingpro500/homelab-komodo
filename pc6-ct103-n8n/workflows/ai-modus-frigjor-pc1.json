@@ -83,7 +83,7 @@
           "parameters": [
             {
               "name": "Authorization",
-              "value": "Bearer REDACTED_AUDIT_TOKEN"
+              "value": "REDACTED_LEGACY_CREDENTIAL"
             },
             {
               "name": "Content-Type",

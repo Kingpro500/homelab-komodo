@@ -49,7 +49,7 @@
           "parameters": [
             {
               "name": "X-Audit-Token",
-              "value": "=e92b188aafdb10c77ef1f09337551d2b7b3bda115e085365"
+              "value": "REDACTED_LEGACY_CREDENTIAL"
             }
           ]
         },
@@ -144,7 +144,7 @@
           "parameters": [
             {
               "name": "X-Audit-Token",
-              "value": "=e92b188aafdb10c77ef1f09337551d2b7b3bda115e085365"
+              "value": "REDACTED_LEGACY_CREDENTIAL"
             }
           ]
         },
@@ -174,7 +174,7 @@
           "parameters": [
             {
               "name": "X-Audit-Token",
-              "value": "=e92b188aafdb10c77ef1f09337551d2b7b3bda115e085365"
+              "value": "REDACTED_LEGACY_CREDENTIAL"
             },
             {
               "name": "Content-Type",
@@ -242,7 +242,7 @@
           "parameters": [
             {
               "name": "X-Audit-Token",
-              "value": "=e92b188aafdb10c77ef1f09337551d2b7b3bda115e085365"
+              "value": "REDACTED_LEGACY_CREDENTIAL"
             },
             {
               "name": "Content-Type",

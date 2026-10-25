@@ -52,7 +52,7 @@
           "parameters": [
             {
               "name": "Authorization",
-              "value": "Token ={{ $env.PAPERLESS_TOKEN }}"
+              "value": "REDACTED_LEGACY_CREDENTIAL"
             }
           ]
         },
@@ -134,7 +134,7 @@
           "parameters": [
             {
               "name": "X-Gjeld-Token",
-              "value": "={{ $env.GJELD_API_TOKEN }}"
+              "value": "REDACTED_LEGACY_CREDENTIAL"
             }
           ]
         },

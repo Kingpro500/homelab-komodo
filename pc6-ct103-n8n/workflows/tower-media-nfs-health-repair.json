@@ -43,7 +43,7 @@
           "parameters": [
             {
               "name": "X-Audit-Token",
-              "value": "REDACTED_AUDIT_TOKEN"
+              "value": "REDACTED_LEGACY_CREDENTIAL"
             },
             {
               "name": "Content-Type",
@@ -94,7 +94,7 @@
           "parameters": [
             {
               "name": "X-Audit-Token",
-              "value": "REDACTED_AUDIT_TOKEN"
+              "value": "REDACTED_LEGACY_CREDENTIAL"
             },
             {
               "name": "Content-Type",

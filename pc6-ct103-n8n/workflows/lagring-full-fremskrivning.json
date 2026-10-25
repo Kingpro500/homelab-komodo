@@ -49,7 +49,7 @@
           "parameters": [
             {
               "name": "X-Audit-Token",
-              "value": "REDACTED_AUDIT_TOKEN"
+              "value": "REDACTED_LEGACY_CREDENTIAL"
             }
           ]
         }
@@ -125,7 +125,7 @@
           "parameters": [
             {
               "name": "Authorization",
-              "value": "Bearer REDACTED_HASS_TOKEN"
+              "value": "REDACTED_LEGACY_CREDENTIAL"
             },
             {
               "name": "Content-Type",

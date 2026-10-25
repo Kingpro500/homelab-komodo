@@ -51,7 +51,7 @@
           "parameters": [
             {
               "name": "Authorization",
-              "value": "Token ={{ $env.PAPERLESS_TOKEN }}"
+              "value": "REDACTED_LEGACY_CREDENTIAL"
             }
           ]
         },
@@ -188,7 +188,7 @@
           "parameters": [
             {
               "name": "Authorization",
-              "value": "Bearer ={{ $env.OPENROUTER_API_KEY }}"
+              "value": "REDACTED_LEGACY_CREDENTIAL"
             },
             {
               "name": "Content-Type",
