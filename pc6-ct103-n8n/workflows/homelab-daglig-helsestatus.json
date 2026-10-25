@@ -1,0 +1,195 @@
+{
+  "id": "1yLU74fLwugB8j79",
+  "name": "Homelab - daglig helsestatus",
+  "description": null,
+  "active": false,
+  "activeVersionId": null,
+  "createdAt": "2026-10-06T05:25:24.991Z",
+  "updatedAt": "2026-10-25T06:09:38.631Z",
+  "isArchived": false,
+  "versionId": "b58efd56-fc9d-41df-8cbe-4f1f52c84f70",
+  "versionCounter": 2,
+  "sourceWorkflowId": null,
+  "triggerCount": 1,
+  "nodes": [
+    {
+      "id": "s-b",
+      "name": "Kl 20:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "rule": {
+          "cronExpression": "0 20 * * *"
+        }
+      }
+    },
+    {
+      "id": "h-b",
+      "name": "Hent audit",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "http://10.0.0.135:9118/audit",
+        "sendBody": false,
+        "sendHeaders": true,
+        "options": {},
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth"
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "TcgXN7shgc4X7U8w",
+          "name": "Homelab Audit Header"
+        }
+      }
+    },
+    {
+      "id": "f-b",
+      "name": "Noe aa si?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "combinator": "or",
+          "conditions": [
+            {
+              "leftValue": "={{ $json.summary.KRITISK }}",
+              "rightValue": "0",
+              "operator": {
+                "type": "number",
+                "operation": "larger"
+              }
+            },
+            {
+              "leftValue": "={{ $json.summary.ADVARSEL }}",
+              "rightValue": "0",
+              "operator": {
+                "type": "number",
+                "operation": "larger"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "n-b",
+      "name": "Varsle telefonen",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://10.0.0.135:9118/notify",
+        "sendBody": true,
+        "sendHeaders": true,
+        "options": {},
+        "specifyBody": "json",
+        "jsonBody": "={{ { title: 'Homelab daglig', message: 'KRITISK: ' + $json.summary.KRITISK + '. ADVARSEL: ' + $json.summary.ADVARSEL + '. Persisterte funn (top 5): ' + ($json.persistent_critical||[]).slice(0,5).map(function(p){return p.source + ' ' + p.title}).join('; ') } }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth"
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "TcgXN7shgc4X7U8w",
+          "name": "Homelab Audit Header"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Kl 20:00": {
+      "main": [
+        [
+          {
+            "node": "Hent audit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hent audit": {
+      "main": [
+        [
+          {
+            "node": "Noe aa si?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Noe aa si?": {
+      "main": [
+        [
+          {
+            "node": "Varsle telefonen",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    }
+  },
+  "nodeGroups": [],
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": {
+    "node:Kl 20:00": {
+      "recurrenceRules": [
+        null
+      ],
+      "recurrenceRuleSignatures": [
+        null
+      ]
+    }
+  },
+  "pinData": null,
+  "meta": null,
+  "tags": [],
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "1yLU74fLwugB8j79",
+      "projectId": "KXT1M3IDP7uzR2Xe",
+      "project": {
+        "id": "KXT1M3IDP7uzR2Xe",
+        "name": "Roger Lillefosse <rogerlillefosse@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "79a33b7a-6319-42bf-827e-3928073bdeb7",
+        "createdAt": "2026-10-01T05:21:05.719Z",
+        "updatedAt": "2026-10-01T08:58:31.958Z"
+      },
+      "createdAt": "2026-10-06T05:25:24.991Z",
+      "updatedAt": "2026-10-06T05:25:24.991Z"
+    }
+  ],
+  "activeVersion": null
+}

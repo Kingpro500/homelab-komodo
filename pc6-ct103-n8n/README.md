@@ -38,6 +38,7 @@ running service.
 | Workflow | Trigger | Doc | Eksport |
 |---|---|---|---|
 | Daglig homelab-diagnose | daglig 08:15 | [docs/daglig-homelab-diagnose.md](docs/daglig-homelab-diagnose.md) | [workflows/daglig-homelab-diagnose.json](workflows/daglig-homelab-diagnose.json) |
+| Homelab – daglig helsestatus (**deaktivert historikk**) | daglig 20:00 | [docs/homelab-daglig-helsestatus.md](docs/homelab-daglig-helsestatus.md) | [workflows/homelab-daglig-helsestatus.json](workflows/homelab-daglig-helsestatus.json) |
 | Nettverksovervaakning | time + daglig 08:00 | [docs/nettverksovervaakning.md](docs/nettverksovervaakning.md) | [workflows/nettverksovervaakning.json](workflows/nettverksovervaakning.json) |
 | Pi-hole DNS failover | hvert minutt | [docs/pihole-dns-failover.md](docs/pihole-dns-failover.md) | [workflows/pihole-dns-failover.json](workflows/pihole-dns-failover.json) |
 | Media health – deep probes and guarded recovery | hvert 5. min; NFS + Emby-fil + begge Tunarr-videosegmenter | [docs/tower-media-nfs-health-repair.md](docs/tower-media-nfs-health-repair.md) | [workflows/tower-media-nfs-health-repair.json](workflows/tower-media-nfs-health-repair.json) |
