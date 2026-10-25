@@ -5,10 +5,10 @@
   "active": false,
   "activeVersionId": null,
   "createdAt": "2026-10-06T05:25:24.862Z",
-  "updatedAt": "2026-10-06T05:25:24.862Z",
+  "updatedAt": "2026-10-25T10:41:45.404Z",
   "isArchived": false,
-  "versionId": "3f1dedf4-fa00-4611-bcc8-f604e406b8ba",
-  "versionCounter": 1,
+  "versionId": "d8178527-85ed-44ce-be6c-081862399547",
+  "versionCounter": 2,
   "sourceWorkflowId": null,
   "triggerCount": 1,
   "nodes": [
@@ -46,15 +46,15 @@
         "url": "http://10.0.0.135:9118/network/status",
         "sendBody": false,
         "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "X-Audit-Token",
-              "value": "REDACTED_LEGACY_CREDENTIAL"
-            }
-          ]
-        },
-        "options": {}
+        "options": {},
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth"
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "TcgXN7shgc4X7U8w",
+          "name": "Homelab Audit Header"
+        }
       }
     },
     {
@@ -100,17 +100,17 @@
         "url": "http://10.0.0.135:9118/notify",
         "sendBody": true,
         "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "X-Audit-Token",
-              "value": "REDACTED_LEGACY_CREDENTIAL"
-            }
-          ]
-        },
         "options": {},
         "specifyBody": "json",
-        "jsonBody": "={{ { title: 'Homelab: tjenester nede', message: 'Nede: ' + ($json.services_down||[]).join(', ') + '. Nye problem: ' + ($json.new_problems||[]).map(function(p){return p.text}).join('; ') } }}"
+        "jsonBody": "={{ { title: 'Homelab: tjenester nede', message: 'Nede: ' + ($json.services_down||[]).join(', ') + '. Nye problem: ' + ($json.new_problems||[]).map(function(p){return p.text}).join('; ') } }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth"
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "TcgXN7shgc4X7U8w",
+          "name": "Homelab Audit Header"
+        }
       }
     }
   ],

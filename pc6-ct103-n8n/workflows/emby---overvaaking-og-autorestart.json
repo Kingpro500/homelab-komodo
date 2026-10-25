@@ -5,10 +5,10 @@
   "active": false,
   "activeVersionId": null,
   "createdAt": "2026-10-06T07:19:04.161Z",
-  "updatedAt": "2026-10-24T23:42:37.940Z",
+  "updatedAt": "2026-10-25T10:41:45.299Z",
   "isArchived": false,
-  "versionId": "734f1345-bfcf-4dab-b923-093bdca01e16",
-  "versionCounter": 6,
+  "versionId": "3a56ab1a-1134-4f11-ad9f-c8b22faeb59c",
+  "versionCounter": 7,
   "sourceWorkflowId": null,
   "triggerCount": 1,
   "nodes": [
@@ -43,16 +43,8 @@
       ],
       "parameters": {
         "url": "http://10.0.0.135:9118/emby/status",
-        "authentication": "none",
+        "authentication": "predefinedCredentialType",
         "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "X-Audit-Token",
-              "value": "REDACTED_LEGACY_CREDENTIAL"
-            }
-          ]
-        },
         "options": {
           "timeout": 30000,
           "response": {
@@ -60,6 +52,13 @@
               "responseFormat": "json"
             }
           }
+        },
+        "nodeCredentialType": "httpHeaderAuth"
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "TcgXN7shgc4X7U8w",
+          "name": "Homelab Audit Header"
         }
       }
     },
@@ -138,21 +137,20 @@
       "parameters": {
         "url": "http://10.0.0.135:9118/emby/restart",
         "method": "POST",
-        "authentication": "none",
+        "authentication": "predefinedCredentialType",
         "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "X-Audit-Token",
-              "value": "REDACTED_LEGACY_CREDENTIAL"
-            }
-          ]
-        },
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={}",
         "options": {
           "timeout": 60000
+        },
+        "nodeCredentialType": "httpHeaderAuth"
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "TcgXN7shgc4X7U8w",
+          "name": "Homelab Audit Header"
         }
       }
     },
@@ -168,25 +166,20 @@
       "parameters": {
         "url": "http://10.0.0.135:9118/notify",
         "method": "POST",
-        "authentication": "none",
+        "authentication": "predefinedCredentialType",
         "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "X-Audit-Token",
-              "value": "REDACTED_LEGACY_CREDENTIAL"
-            },
-            {
-              "name": "Content-Type",
-              "value": "application/json"
-            }
-          ]
-        },
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ title: 'Emby er nede - sender reboot', message: 'Emby svarte ikke (prober: ' + $json.ok_probes + '/' + $json.probes + '). CT151 (pc6) rebootes naa.' }) }}",
         "options": {
           "timeout": 30000
+        },
+        "nodeCredentialType": "httpHeaderAuth"
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "TcgXN7shgc4X7U8w",
+          "name": "Homelab Audit Header"
         }
       }
     },
@@ -236,25 +229,20 @@
       "parameters": {
         "url": "http://10.0.0.135:9118/notify",
         "method": "POST",
-        "authentication": "none",
+        "authentication": "predefinedCredentialType",
         "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "X-Audit-Token",
-              "value": "REDACTED_LEGACY_CREDENTIAL"
-            },
-            {
-              "name": "Content-Type",
-              "value": "application/json"
-            }
-          ]
-        },
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ title: 'Emby er tilbake', message: 'Emby svarer igjen (HTTP 200). Om CT-en ble rebootet, er alt oppe.' }) }}",
         "options": {
           "timeout": 30000
+        },
+        "nodeCredentialType": "httpHeaderAuth"
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "TcgXN7shgc4X7U8w",
+          "name": "Homelab Audit Header"
         }
       }
     },
