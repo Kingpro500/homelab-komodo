@@ -63,7 +63,7 @@
     - Komodo:
         icon: di:komodo
         href: http://10.0.0.117:9120/
-        description: 10.0.0.117:9120 · CT102 · pve (pc8)
+        description: 10.0.0.117:9120 · CT110 · pc9
     - OPNsense:
         icon: di:opnsense
         href: http://10.0.0.1/
