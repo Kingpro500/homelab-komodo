@@ -65,3 +65,35 @@ groups:
         annotations:
           summary: "PC1 GPU KRITISK VARM: {{ $value | printf \"%.0f\" }} °C"
           description: "RTX 3070 på PC1 har vært over 82 °C. Stopp AI-belastningen og kontroller kjøling/power-limit."
+
+  - name: emby
+    rules:
+      - alert: EmbyDown
+        expr: emby_up{instance="emby"} == 0
+        for: 3m
+        labels:
+          severity: critical
+          service: emby
+        annotations:
+          summary: "Emby er utilgjengelig"
+          description: "Autentisert Emby-probe har feilet i minst 3 minutter. Recovery skal fortsatt være blokkert dersom sessions-status ikke kan verifiseres."
+
+      - alert: EmbySessionsUnknown
+        expr: emby_up{instance="emby"} == 1 and emby_sessions_known{instance="emby"} == 0
+        for: 5m
+        labels:
+          severity: warning
+          service: emby
+        annotations:
+          summary: "Emby sessions kan ikke leses"
+          description: "Emby svarer, men sessions-status er ukjent. Autorestart skal ikke tillates før sessions kan leses."
+
+      - alert: EmbyProbeDegraded
+        expr: emby_up{instance="emby"} == 1 and emby_probe_success{instance="emby"} < emby_probe_total{instance="emby"}
+        for: 10m
+        labels:
+          severity: warning
+          service: emby
+        annotations:
+          summary: "Emby-proben er ustabil"
+          description: "Emby svarer, men én eller flere av de siste autentiserte probene feiler over tid."
