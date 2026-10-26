@@ -153,16 +153,16 @@
     - Uptime Kuma PC9:
         icon: di:uptime-kuma
         href: http://10.0.0.122:3002/
-        description: PC9 CT106 · Planlagt Komodo-import, HA direkte
+        description: PC9 CT106 · Komodo · 7 prober · HA direkte
     - Uptime Kuma:
         icon: di:uptime-kuma
-        href: http://10.0.0.128:3001/
-        description: 10.0.0.128:3001 · CT109 · pc6
+        href: http://10.0.0.124:3001/
+        description: 10.0.0.124:3001 · CT120 · pc6 · legacy runtime
         server: ct109
         container: uptime-kuma
         widget:
           type: uptimekuma
-          url: http://10.0.0.128:3001
+          url: http://10.0.0.124:3001
           version: 1
     - Docker-kontroll:
         icon: mdi:docker

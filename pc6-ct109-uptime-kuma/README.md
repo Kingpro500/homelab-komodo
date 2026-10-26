@@ -25,7 +25,14 @@ The health endpoints that matter are checked rather than only a web front page:
 - Tunarr PC6: `http://10.0.0.123:8005/api/channels.m3u`
 - Tunarr PC9: `http://10.0.0.122:8005/api/channels.m3u`
 - n8n: `http://10.0.0.119:5678/healthz`
-- Prometheus: `http://10.0.0.124:9090/-/healthy`
+- Prometheus now lives on PC9 CT104: `http://10.0.0.126:9090/-/ready`.
+  The list above describes the legacy primary configuration; its stored monitor
+  target must be checked separately, not inferred from this documentation.
+
+The independent PC9 Kuma at `http://10.0.0.122:3002/` is now Komodo-managed
+and checks Prometheus, Alertmanager and Blackbox on `.126` with its existing
+direct Home Assistant notification, independently of the primary Kuma/n8n.
+See [PC9 runtime and verification](../pc9-ct106-uptime-kuma/README.md).
 
 Kuma sends a down event only after its retry policy is exhausted and a recovery
 event when the service returns. Do not attach the notification to every
