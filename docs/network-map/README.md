@@ -30,8 +30,9 @@ versjonsnummeret, og `versions/` er indeksen med klikkbare gamle versjoner.
 
 **Publiser straks etter en kontrollert endring.** Ikke bruk live-siden som en
 arbeidskopi og aldri rull tilbake en publisert versjon. Dersom noe er feil, lag
-en ny versjon som retter feilen. Den eneste publiseringskommandoen er
-`/usr/local/sbin/deploy-network-map` i CT120; den henter kun GitHub `main`,
+en ny versjon som retter feilen. Etter `PullStack` av `pc6-ct120-web` er den eneste publiseringskommandoen
+`/usr/local/sbin/deploy-network-map` i CT120; den bruker eksplisitt
+`/opt/komodo/stacks/pc6-ct120-web`, henter kun GitHub `main`,
 validerer den komplette kartstrukturen og nekter å publisere lavere versjon enn
 den som allerede er live. Den lagrer dessuten en lokal, datostemplet kopi før
 atomisk bytte av HTML-filen.
@@ -105,7 +106,8 @@ curl -sk -u "$OPNSENSE_API_KEY:$OPNSENSE_API_SECRET" \
 
 nginx i CT120 serverer `docs/network-map/` read-only på `10.0.0.124:3020`.
 Etter endring: arkiver forrige versjon, oppdater indeks, commit + push til
-GitHub `main`, og kjør `/usr/local/sbin/deploy-network-map` i CT120. Tile
+GitHub `main`, kjør `PullStack` for `pc6-ct120-web`, og kjør deretter
+`/usr/local/sbin/deploy-network-map` i CT120. Tile
 «Nettverkskart» i Homepage peker hit. Scriptet er den eneste tillatte måten å
 oppdatere den levende siden på.
 
