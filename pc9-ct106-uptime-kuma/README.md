@@ -5,6 +5,7 @@
 - **Runtime:** CT106 (`10.0.0.122`), separate Docker stack and database from
   Tunarr.
 - **URL:** `http://10.0.0.122:3002`
+- **Image:** `louislam/uptime-kuma:2.5.7` (pinned stable release)
 - **Persistent data:** `/opt/komodo/stacks/pc9-ct106-uptime-kuma/data`
 
 This is an independent *monitoring location* for PC6. It does not share the

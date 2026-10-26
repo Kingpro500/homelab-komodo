@@ -1,6 +1,6 @@
 services:
   uptime-kuma-pc9:
-    image: louislam/uptime-kuma:2
+    image: louislam/uptime-kuma:2.5.7
     container_name: uptime-kuma-pc9
     restart: unless-stopped
     ports:
