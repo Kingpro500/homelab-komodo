@@ -143,7 +143,7 @@ footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-
   <button id="sw-token-save" class="sw-btn">Lagre</button><button id="tok-edit" class="sw-btn" title="endre token" style="display:none">✎</button>
   <span id="sw-token-msg" style="color:var(--lan);font-size:11px"></span>
   <span style="color:var(--dim);font-size:11px" id="sw-meta"></span>
-  <span style="color:var(--muted);margin-left:6px">📜 versjon <b>2.051</b> · <a target="_blank" rel="noopener noreferrer" href="versions/">historikk</a></span>
+  <span style="color:var(--muted);margin-left:6px">📜 versjon <b>2.052</b> · <a target="_blank" rel="noopener noreferrer" href="versions/">historikk</a></span>
 </div>
 
 <h1>🏠 Homelab — tjenester &amp; nettverk <span style="color:var(--lan)">10.0.0.0/24</span></h1>
@@ -246,6 +246,13 @@ footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-
 
 
 </tbody></table></div></td></tr>
+<tr class="vm-frame-row"><td colspan="6"><div class="vm-frame" data-vmid="104">
+<div class="vm-h"><span class="tag tag-ct">CT</span>pc9-observability 104</div>
+<table class="svc"><thead><tr><th>Tjeneste</th><th>Adresse</th><th>Merknad</th><th>Status</th><th>Strøm</th></tr></thead><tbody>
+<tr><td><a target="_blank" rel="noopener noreferrer" href="http://10.0.0.126:9090/">Prometheus</a></td><td class="ip"><a target="_blank" rel="noopener noreferrer" href="http://10.0.0.126:9090/">10.0.0.126:9090</a></td><td>uavhengige metrikker · PC9</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+<tr><td><a target="_blank" rel="noopener noreferrer" href="http://10.0.0.126:9093/">Alertmanager</a></td><td class="ip"><a target="_blank" rel="noopener noreferrer" href="http://10.0.0.126:9093/">10.0.0.126:9093</a></td><td>alarmruting</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+<tr><td><a target="_blank" rel="noopener noreferrer" href="http://10.0.0.126:9115/">Blackbox exporter</a></td><td class="ip"><a target="_blank" rel="noopener noreferrer" href="http://10.0.0.126:9115/">10.0.0.126:9115</a></td><td>Emby/Tunarr/PC6-prober</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+</tbody></table></div></td></tr>
 <tr class="vm-frame-row"><td colspan="6"><div class="vm-frame" data-vmid="106">
 <div class="vm-h"><span class="tag tag-ct">CT</span>ct106-tunarr 106</div>
 <table class="svc"><thead><tr><th>Tjeneste</th><th>Adresse</th><th>Merknad</th><th>Status</th><th>Strøm</th></tr></thead><tbody>
@@ -340,6 +347,8 @@ footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-
     </div>
     <div class="node">
       <div class="n-title">pc9 · N100</div><div class="n-ip">10.0.0.103 · 16 GB</div>
+      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>pc9-observability</b> 104</span><span class="ip">10.0.0.126</span></div>
+      <div class="svc-list">Prometheus · Alertmanager · Blackbox</div>
       <div class="guest"><span class="g"><span class="vt gt">CT</span><b>pc9-ct106-tunarr</b> 106</span><span class="ip">10.0.0.122</span></div>
       <div class="svc-list">Tunarr</div>
       <div class="guest"><span class="g"><span class="vt gt">CT</span><b>pihole-pc9</b> 116</span><span class="ip">10.0.0.116</span></div>
@@ -516,6 +525,7 @@ offline.forEach(o=>{
 })();
 </script>
 <div class="note"><b>Endringsnotat v2.050 (23. okt 2026):</b> CT105 mediespillere og CT150 browsers er gjenopprettet fra verifisert backup på pc6 og står stoppet til de skal brukes. PC1 beholder AI-CT350 med RTX 3070 passthrough.</div>
+<div class="note"><b>Endringsnotat v2.052 (26. okt 2026):</b> PC9 CT104 <code>pc9-observability</code> er lagt inn etter Proxmox-, Komodo- og runtime-verifisering. Den kjører Prometheus, Alertmanager og Blackbox på 10.0.0.126 og overvåker Emby, begge Tunarr-instansene og PC6.</div>
 
 <div class="note" style="border:1px solid var(--svc);padding:10px 12px;margin:10px 0;color:var(--text)"><b>Publiseringsregler:</b> Endre bare Git-kilden. Arkiver forrige versjon, oppdater historikken, verifiser mot Proxmox/Docker, commit + push til main, og publiser med <code>/usr/local/sbin/deploy-network-map</code> fra repoet på CT120. Feil rettes alltid i en ny versjon. Full regel: <code>docs/network-map/PUBLISHING.md</code>.</div>
 
