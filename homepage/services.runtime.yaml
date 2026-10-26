@@ -66,7 +66,7 @@
     - pve (pc8):
         icon: proxmox.png
         href: https://10.0.0.102:8006/
-        description: 10.0.0.102:8006 · Proxmox master · HA, Komodo core
+        description: 10.0.0.102:8006 · Proxmox master · HA
     - Unraid Tower:
         icon: unraid.png
         href: http://10.0.0.101/
