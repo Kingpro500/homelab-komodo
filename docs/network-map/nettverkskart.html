@@ -143,7 +143,7 @@ footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-
   <button id="sw-token-save" class="sw-btn">Lagre</button><button id="tok-edit" class="sw-btn" title="endre token" style="display:none">✎</button>
   <span id="sw-token-msg" style="color:var(--lan);font-size:11px"></span>
   <span style="color:var(--dim);font-size:11px" id="sw-meta"></span>
-  <span style="color:var(--muted);margin-left:6px">📜 versjon <b>2.056</b> · <a target="_blank" rel="noopener noreferrer" href="versions/">historikk</a></span>
+  <span style="color:var(--muted);margin-left:6px">📜 versjon <b>2.057</b> · <a target="_blank" rel="noopener noreferrer" href="versions/">historikk</a></span>
 </div>
 
 <h1>🏠 Homelab — tjenester &amp; nettverk <span style="color:var(--lan)">10.0.0.0/24</span></h1>
@@ -243,7 +243,7 @@ footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-
 <tr class="vm-frame-row"><td colspan="6"><div class="vm-frame" data-vmid="110">
 <div class="vm-h"><span class="tag tag-ct">CT</span>ct110-komodo-core 110</div>
 <table class="svc"><thead><tr><th>Tjeneste</th><th>Adresse</th><th>Merknad</th><th>Status</th><th>Strøm</th></tr></thead><tbody>
-<tr><td><a target="_blank" rel="noopener noreferrer" href="http://10.0.0.117:9120/">Komodo core (Komodo-tilknytning uavklart)</a></td><td class="ip"><a target="_blank" rel="noopener noreferrer" href="http://10.0.0.117:9120/">10.0.0.117:9120</a></td><td>Komodo-kontroll</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+<tr><td><a target="_blank" rel="noopener noreferrer" href="http://10.0.0.117:9120/">Komodo core (Komodo-kilde avviker fra live)</a></td><td class="ip"><a target="_blank" rel="noopener noreferrer" href="http://10.0.0.117:9120/">10.0.0.117:9120</a></td><td>Komodo-kontroll</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
 
 
 </tbody></table></div></td></tr>
@@ -559,6 +559,7 @@ document.querySelectorAll(".vm-frame table.svc tbody tr").forEach(function(row){
 \n<div class="note" style="border:1px solid var(--lan);padding:10px 12px;margin:10px 0;color:var(--text)"><b>Endringsnotat v2.051 (26. okt 2026):</b> Pinchflat er flyttet fra CT120 til dedikert CT172 på pc6 (10.0.0.164:8945) etter verifisert minne- og I/O-belastning. CT172 er Komodo-styrt, bruker lokal app-state og Tower-media på /media.</div>
 
 <div class="note" style="border:1px solid var(--lan);padding:10px 12px;margin:10px 0;color:var(--text)"><b>Endringsnotat v2.053 (26. okt 2026):</b> Publiseringsskriptet er bundet til den faktiske Komodo-arbeidskopien for pc6-ct120-web, og formateringen av CT172-oppføringen er rettet. Pinchflat forblir frisk på dedikert CT172.</div>
-<div class="note"><b>Endringsnotat v2.056:</b> PC9: Kuma og Tunarr på CT106 mangler Komodo-stack i fersk ListStacks, men begge compose-kilder finnes i GitHub. Komodo Core CT110 og Roon CT220 har eldre stack- og GitHub-kilder (pc8-ct102-core / gitops/core og pc6-ct152-roon); nåværende tilknytning er uavklart og merkes ikke som manglende GitHub. CT103 og CT104 har stack og GitHub-kilde. Kun kartmerking; ingen tjenester restartet.</div>
+<div class="note"><b>Endringsnotat v2.057: PC9 Core CT110: legacy-stack finnes, men repoets gitops/core har annet compose-prosjekt, service-navn og database-images enn live /opt/komodo/ferretdb.compose.yaml. Avvik merket før retting. CT106 in-place registrering planlagt uten deploy/restart; Roon legacy-mapping verifiseres.</div>
+<div class="note"><b>Forrige endring v2.056:</b> PC9: Kuma og Tunarr på CT106 mangler Komodo-stack i fersk ListStacks, men begge compose-kilder finnes i GitHub. Komodo Core CT110 og Roon CT220 har eldre stack- og GitHub-kilder (pc8-ct102-core / gitops/core og pc6-ct152-roon); nåværende tilknytning er uavklart og merkes ikke som manglende GitHub. CT103 og CT104 har stack og GitHub-kilde. Kun kartmerking; ingen tjenester restartet.</div>
 </body>
 </html>
