@@ -8,9 +8,9 @@ changed from automation, so the "new name" column is a proposal.
 
 | Node | Address | Role |
 |---|---|---|
-| pc8 (`pve`) | 10.0.0.102 | Proxmox master. Home Assistant, Komodo core, Pi-hole |
+| pc8 (`pve`) | 10.0.0.102 | Proxmox master. Home Assistant, Pi-hole |
 | pc6 | 10.0.0.120 | Workload host. Most guests, plus the Unraid VM |
-| pc9 | 10.0.0.103 | Load-balanced host. Pi-hole, iVentoy, UniFi, Paperless, Roon, Immich. Uplink = USB 2.5GbE (RTL8156) |
+| pc9 | 10.0.0.103 | Load-balanced host. Komodo Core, Pi-hole, iVentoy, UniFi, Paperless, Roon, Immich. Uplink = USB 2.5GbE (RTL8156) |
 | pc1 | 10.0.0.112 | Dual boot with Windows. Ollama only |
 | pc7 | 10.0.0.1 | OPNsense firewall, not a Proxmox node |
 
