@@ -1,0 +1,14 @@
+services:
+  threadfin:
+    image: fyb3roptik/threadfin:latest
+    container_name: threadfin
+    restart: unless-stopped
+    ports:
+      - "34400:34400"
+    volumes:
+      - threadfin-config:/home/threadfin/conf
+    environment:
+      - TZ=Europe/Oslo
+    mem_limit: 512m
+volumes:
+  threadfin-config:
