@@ -36,12 +36,14 @@ probe oppretter, endrer eller sletter filer på mediedelingen.
 
 ## Reparasjonspolicy
 
-- Tre påfølgende mislykkede kontroller før gjestereboot (normalt ca. 10–15 min).
+- Emby er kun observasjon og varsling: aldri automatisk restart/reboot, heller ikke ved langvarig feil.
+- Tre påfølgende mislykkede Tunarr-kontroller før gjestereboot (normalt ca. 10–15 min).
 - Både node/VMID/navn/kjørestatus kontrolleres fra fersk Proxmox-inventar.
   Flyttet, renummerert eller bevisst stoppet gjest gir **ingen** start/reboot.
 - Frisk NFS på gjestens vert er påkrevd. Tunarr krever i tillegg frisk Emby
   (API og konkret mediefillesing), også kontrollert rett før tiltak.
-- Kun `pct reboot 200`, `250` eller `106` på kontrollert node. Maks én gjest
+- Hard allowlist ved kommandogrensen: kun `(pc6,250)` og `(pc9,106)`.
+  Emby `(pc6,200)` avvises før subprocess. Maks én gjest
   per kjøring, minst 30 minutter mellom forsøk og maks to forsøk per gjest
   i rullerende 24 timer. Forsøk lagres **før** reboot-kommandoen sendes.
 - Frisk kontroll nullstiller feiltelleren, men **ikke** forsøksbudsjettet.
@@ -79,7 +81,8 @@ utenfra. Vi hevder ikke at en slik generell feilhåndterer er installert.
 
 ## Verifisert
 
-- Python: ni tester i isolerte midlertidige kataloger, inkludert gjentatte feil,
+- Python: tolv tester i isolerte midlertidige kataloger, inkludert 72 timers simulert
+  Emby-feil med varsling uten reboot/forsøksbudsjett, hard reboot-allowlist, gjentatte feil,
   NFS-avhengighet, endret identitet, cooldown, maksbudsjett og konkret målrettet
   mock-reboot med etterkontroll. Ingen mock-test bruker produksjonsstate.
 - JavaScript: tre parsertilfeller og `node --check`.
@@ -104,6 +107,10 @@ På pc6 installeres runneren root-eid som `/usr/local/sbin/media_recovery.py`;
 `/usr/local/sbin/n8n-tower-media-repair` og `/usr/local/sbin/check-tower-media-nfs`.
 Sistnevnte foreldede CT104-script er nå ufarlig alias til samme låste runner.
 Installer logrotate-filen til `/etc/logrotate.d/media-recovery`.
+Ved runner-oppdatering: ta backup, kompiler staging-filen uten å kjøre runneren,
+installer atomisk og les tilbake SHA-256/kilde. Ikke start runneren manuelt som
+deploytest: HLS-probene starter strømmer. Ingen Emby/Tunarr-restart kreves.
+Ikke rull tilbake til en versjon som tillater automatisk Emby-restart.
 
 På Hermes kopieres `media_recovery_adapter.py` til `.hermes/scripts/`.
 Kjør `python3 scripts/install_media_endpoint.py` som hermes for idempotent

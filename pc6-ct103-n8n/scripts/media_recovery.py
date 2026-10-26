@@ -15,6 +15,9 @@ def decide(s,healthy,dependency,now):
  if attempts and now-attempts[-1]<1800:return 'cooldown'
  return 'repair'
 def command(node,args,timeout=20):
+ # Final reboot boundary: never permit Emby or an unexpected node/VMID.
+ if args[:2]==['pct','reboot'] and (len(args)!=3 or (node,args[2]) not in {('pc6','250'),('pc9','106')}):
+  raise RuntimeError('reboot target not allowlisted')
  cmd=args if node=='pc6' else REMOTE+[shlex.join(args)]
  r=subprocess.run(cmd,capture_output=True,text=True,timeout=timeout)
  if r.returncode:raise RuntimeError('command failed: '+r.stderr[-180:])
@@ -97,6 +100,8 @@ def run():
    result=probe(lambda:guest_probe(name,hosts[node]['detail'])) if hosts[node]['ok'] and identity else {'ok':False,'detail':'host dependency or identity unavailable'}
    s=state.setdefault(name,{})
    decision=decide(s,result['ok'],dep,now)
+   # Emby is observation/notification only, regardless of failure duration.
+   if name=='emby' and not result['ok'] and dep:decision='observe'
    if decision=='repair' and actions:decision='deferred-one-repair-per-run'
    if decision=='repair':
     # Fresh dependency/identity check before each single guest reboot.
@@ -107,7 +112,7 @@ def run():
      fresh=probe(lambda:host_read(node))
      current=json.loads(command('pc6',['pvesh','get','/cluster/resources','--type','vm','--output-format','json']))
      still_target=any(v.get('vmid')==ct and v.get('node')==node and v.get('status')=='running' and v.get('name')=={200:'ct151-emby',250:'ct162-tunarr',106:'ct106-tunarr'}[ct] for v in current)
-     upstream=name=='emby' or probe(lambda:guest_probe('emby',hosts['pc6']['detail']))['ok']
+     upstream=probe(lambda:guest_probe('emby',hosts['pc6']['detail']))['ok']
      if not fresh['ok'] or not still_target or not upstream:decision='blocked'
      else:
       s['attempts']=attempts+[now]

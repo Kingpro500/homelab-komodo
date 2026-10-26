@@ -60,4 +60,30 @@ class IsolatedRuns(unittest.TestCase):
    result=m.run();self.assertTrue(result['ok'])
    self.assertEqual([(n,a) for n,a in calls if a[:2]==['pct','reboot']],[('pc9',['pct','reboot','106'])])
    self.assertEqual(json.loads((pathlib.Path(tmp)/'state.json').read_text())['tunarr-pc9']['attempts'].__len__(),1)
+class EmbySafety(unittest.TestCase):
+ def test_prolonged_emby_failure_only_observes_and_notifies(self):
+  inventory=[{'vmid':ct,'node':node,'status':'running','name':{200:'ct151-emby',250:'ct162-tunarr',106:'ct106-tunarr'}[ct]} for node,ct,_ in m.SERVICES.values()]
+  def guest(name,sample):
+   if name=='emby':raise RuntimeError('persistent Emby failure')
+   return {'bytes':65536}
+  def cmd(node,args,timeout=20):
+   if args[0]=='pvesh':return json.dumps(inventory)
+   self.fail('unexpected command: '+repr(args))
+  with tempfile.TemporaryDirectory(dir=pathlib.Path(__file__).parent) as tmp,patch.object(m,'STATE',pathlib.Path(tmp)),patch.object(m,'host_read',return_value='sample'),patch.object(m,'guest_probe',side_effect=guest),patch.object(m,'command',side_effect=cmd),patch.object(m,'fetch',return_value=b'{}'):
+   for hour in range(72):
+    with patch.object(m.time,'time',return_value=100000+hour*3600):result=m.run()
+    self.assertEqual(result['services']['emby']['decision'],'observe')
+    self.assertFalse(result['actions'])
+    self.assertTrue(result['notify'])
+   self.assertNotIn('attempts',json.loads((pathlib.Path(tmp)/'state.json').read_text())['emby'])
+ def test_reboot_boundary_rejects_non_allowlisted_targets(self):
+  with patch.object(m.subprocess,'run') as run:
+   for node,ct in [('pc6',200),('pc9',200),('pc6',106),('pc9',250),('other',250)]:
+    with self.assertRaises(RuntimeError):m.command(node,['pct','reboot',str(ct)])
+   run.assert_not_called()
+ def test_reboot_boundary_preserves_allowlisted_targets(self):
+  with patch.object(m.subprocess,'run') as run:
+   run.return_value.returncode=0;run.return_value.stdout='ok'
+   for node,ct in [('pc6',250),('pc9',106)]:self.assertEqual(m.command(node,['pct','reboot',str(ct)]),'ok')
+   self.assertEqual(run.call_count,2)
 if __name__=='__main__': unittest.main()
