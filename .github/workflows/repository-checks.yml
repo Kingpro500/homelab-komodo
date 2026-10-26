@@ -1,0 +1,44 @@
+name: repository-checks
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check whitespace
+        run: git diff --check "${{ github.event.before }}" "${{ github.sha }}"
+
+      - name: Validate YAML
+        run: |
+          python - <<'PY'
+          import pathlib, sys
+          try:
+              import yaml
+          except ImportError:
+              print('PyYAML is not available on runner')
+              raise SystemExit(1)
+          files = list(pathlib.Path('.').rglob('*.yml')) + list(pathlib.Path('.').rglob('*.yaml'))
+          ignored = {'node_modules', '.git'}
+          for path in files:
+              if any(part in ignored for part in path.parts):
+                  continue
+              with path.open(encoding='utf-8') as handle:
+                  yaml.safe_load(handle)
+              print(f'YAML OK: {path}')
+          PY
+
+      - name: Validate shell syntax
+        run: |
+          while IFS= read -r -d '' file; do
+            bash -n "$file"
+            echo "Shell OK: $file"
+          done < <(find . -type f -name '*.sh' -not -path './.git/*' -print0)
