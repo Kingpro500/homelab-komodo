@@ -33,7 +33,7 @@ client ──(Kea DHCP gives 10.0.0.115 / 10.0.0.116)──▶ Pi-hole
                         lan.local host overrides            1.1.1.1 (system DNS)
                         (homeassistant, bridge, ac-pro,        via General → Settings
                          espcontrol-*, media-player,           → DNS Servers
-                         pihole-pc8/9, komodo, pve, pc9)
+                         pihole-pc8/9, Komodo Core on pc9, pc9)
                                              │                    │
                                              └───── internet ───┘
 ```

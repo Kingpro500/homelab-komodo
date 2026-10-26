@@ -1,6 +1,6 @@
 #!/bin/bash
-# NetBox + Scanopy stack setup for CT102 on the pve node
-# Run this INSIDE CT102 (pct exec 102 -- bash /opt/stacks/setup.sh)
+# NetBox + Scanopy stack staging for CT340 on pc6
+# Run this on the CT340 Periphery host.
 #
 # This script only stages files on disk. It does NOT create the Komodo stack and
 # does NOT deploy anything. A stack only exists once it is registered in Komodo
