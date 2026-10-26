@@ -20,7 +20,7 @@ inside the LAN can use it as its "Let's Encrypt" endpoint.
 
 1. **Komodo stack configuration:**
    - Stack name: `pc8-ct102-stepca`
-   - Server: `pc8-ct102-core`
+   - Server: `pc6-ct340-periphery`
    - Run directory: `stacks/pc8-ct102-stepca`
    - File paths: `docker-compose.yml`
    - Source: `https://github.com/Kingpro500/homelab-komodo`, branch `main`

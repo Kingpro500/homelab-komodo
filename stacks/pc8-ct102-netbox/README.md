@@ -12,8 +12,8 @@ IPAM/DCIM platform for infrastructure management, device tracking, and network d
 ## First-time setup
 
 1. **Komodo stack configuration:**
-   - Stack name: `pc8-ct102-netbox`
-   - Server: `pc8-ct102-core`
+   - Stack name: `pc6-ct340-netbox`
+   - Server: `pc6-ct340-periphery`
    - Run directory: `stacks/pc8-ct102-netbox`
    - File paths: `docker-compose.yml`
    - Source: `https://github.com/Kingpro500/homelab-komodo`, branch `main`
@@ -22,7 +22,7 @@ IPAM/DCIM platform for infrastructure management, device tracking, and network d
      or maintain a runtime `.env` file for this stack.
 
 2. **After Komodo creates the stack, deploy it:**
-   - Komodo UI → Stacks → `pc8-ct102-netbox` → Deploy
+   - Komodo UI → Stacks → `pc6-ct340-netbox` → Deploy
    - Wait for containers to start (~30s)
 
 3. **Access NetBox:**

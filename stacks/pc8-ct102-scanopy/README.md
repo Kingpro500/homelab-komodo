@@ -14,8 +14,8 @@ Network discovery and topology mapping via SNMP, integrated with NetBox for devi
    - See `../pc8-ct102-netbox/README.md` for NetBox setup
 
 2. **Create the stack in Komodo UI:**
-   - Stack name: `pc8-ct102-scanopy`
-   - Server: `pc8-ct102-komodo`
+   - Stack name: `pc6-ct340-scanopy`
+   - Server: `pc6-ct340-periphery`
    - Run directory: `/opt/stacks/pc8-ct102-scanopy`
    - File paths: `docker-compose.yml`
    - **Important:** This stack reuses the `netbox` network from the NetBox stack

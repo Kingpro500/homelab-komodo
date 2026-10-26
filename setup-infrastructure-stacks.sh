@@ -10,8 +10,8 @@
 set -e
 
 STACKS=(
-    "pc8-ct102-netbox"
-    "pc8-ct102-scanopy"
+    "pc6-ct340-netbox"
+    "pc6-ct340-scanopy"
 )
 
 REPO_URL="https://github.com/Kingpro500/homelab-komodo"
