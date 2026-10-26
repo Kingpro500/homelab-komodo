@@ -3,7 +3,12 @@
 # Run on CT120. The path defaults to the Komodo working copy that backs `nettkart`.
 set -euo pipefail
 
-repo_root="${NETWORK_MAP_REPO_ROOT:-/opt/komodo/stacks/pc6-ct120-web}"\nif [[ ! -d "$repo_root/.git" ]]; then\n  echo "Refusing publish: expected Git checkout is missing at $repo_root." >&2\n  exit 1\nfi\ncd "$repo_root"
+repo_root="${NETWORK_MAP_REPO_ROOT:-/opt/komodo/stacks/pc6-ct120-web}"
+if [[ ! -d "$repo_root/.git" ]]; then
+  echo "Refusing publish: expected Git checkout is missing at $repo_root." >&2
+  exit 1
+fi
+cd "$repo_root"
 map_rel='docs/network-map/nettverkskart.html'
 live_map="$repo_root/$map_rel"
 backup_dir='/var/lib/nettkart/backups'
