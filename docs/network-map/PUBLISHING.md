@@ -21,7 +21,7 @@ fjern historikken for den planlagte endringen.
 Den aktive nginx-containeren `nettkart` kjører i **CT120** (`10.0.0.124`) og
 serverer bind-mounten:
 
-`/opt/moved-services/nettkart-repo/docs/network-map` →
+`/opt/komodo/stacks/pc6-ct120-web/docs/network-map` →
 `/usr/share/nginx/html` (read-only i containeren).
 
 CT120 er den renummererte tidligere CT104. Se
@@ -34,11 +34,11 @@ Kjør kun dette på CT120 etter at en kartendring er reviewet og pushet til
 GitHub:
 
 ```sh
-cd /opt/moved-services/nettkart-repo
+cd /opt/komodo/stacks/pc6-ct120-web
 bash scripts/deploy-network-map.sh
 ```
 
-Skriptet henter `origin/main`, validerer at kandidaten har:
+Kjør først **PullStack** for `pc6-ct120-web` i Komodo. Skriptet bruker deretter den samme arbeidskopien som nginx faktisk har bind-mountet, henter `origin/main`, og validerer at kandidaten har:
 
 - versjonsnummer;
 - full serviceoversikt;
