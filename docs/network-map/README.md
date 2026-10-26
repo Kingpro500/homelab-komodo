@@ -3,6 +3,11 @@
 Frittstående startside (HTML) over hele homelab-et. Åpne `nettverkskart.html`
 eller se den live på **http://10.0.0.124:3020/** (nginx i CT120 på PC6).
 
+Komodo-endringer følger
+[stack-deployment-runbooken](../komodo-stack-deployment-runbook.md). Ved nye
+Docker-tjenester skal både Homepage og nettverkskartet oppdateres etter at
+containerstatus og helse er verifisert.
+
 ## ⛔ PÅLAGT: NODE-SAMMENDRAGET + VERSJONERING — MÅ IKKE FJERNES
 
 **Det finnes ETT element som er beskyttet uten unntak:** node-sammendraget —
