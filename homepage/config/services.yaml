@@ -150,6 +150,10 @@
         icon: di:netdata
         href: http://10.0.0.103:19999/
         description: 10.0.0.103:19999 · Proxmox pc9 · 16 GB
+    - Uptime Kuma PC9:
+        icon: di:uptime-kuma
+        href: http://10.0.0.122:3002/
+        description: PC9 CT106 · Planlagt Komodo-import, HA direkte
     - Uptime Kuma:
         icon: di:uptime-kuma
         href: http://10.0.0.128:3001/

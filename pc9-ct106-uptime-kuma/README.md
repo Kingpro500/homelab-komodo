@@ -1,6 +1,7 @@
 # Uptime Kuma — PC9 secondary monitor
 
-- **Host:** PC9, deployed through Komodo on the existing `pc9-ct106-node`
+- **Status 26 October:** Komodo import planned; existing runtime must be adopted in place.
+- **Host:** PC9, existing `pc9-ct106-node`
   Periphery agent.
 - **Runtime:** CT106 (`10.0.0.122`), separate Docker stack and database from
   Tunarr.
