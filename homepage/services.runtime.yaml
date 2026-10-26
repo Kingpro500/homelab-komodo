@@ -259,8 +259,8 @@
         description: 10.0.0.124:8081 · CT104 · pc6
     - Pinchflat:
         icon: pinchflat.png
-        href: http://10.0.0.124:8945/
-        description: 10.0.0.124:8945 · CT104 · pc6
+        href: http://10.0.0.164:8945/
+        description: 10.0.0.164:8945 · CT172 · pc6 · dedikert og ressursbegrenset
     - Sonarr:
         icon: sonarr.png
         href: http://10.0.0.128:8989/
