@@ -1,0 +1,23 @@
+groups:
+  - name: availability
+    rules:
+      - alert: EmbyUnavailable
+        expr: probe_success{instance="http://10.0.0.150:8096/web/"} == 0
+        for: 2m
+        labels: {severity: critical, service: emby, node: pc6}
+        annotations: {summary: "Emby is unavailable from PC9"}
+      - alert: TunarrCt250Unavailable
+        expr: probe_success{instance="http://10.0.0.123:8005/web/"} == 0
+        for: 2m
+        labels: {severity: warning, service: tunarr, node: pc6}
+        annotations: {summary: "Tunarr CT250 is unavailable from PC9"}
+      - alert: TunarrFeedUnavailable
+        expr: probe_success{instance=~"http://10.0.0.(122|123):8005/api/(channels.m3u|xmltv.xml)"} == 0
+        for: 5m
+        labels: {severity: warning, service: tunarr}
+        annotations: {summary: "A Tunarr feed is unavailable"}
+      - alert: Pc6HostUnavailable
+        expr: probe_success{instance=~"10.0.0.120:(22|8006)"} == 0
+        for: 2m
+        labels: {severity: critical, service: proxmox, node: pc6}
+        annotations: {summary: "PC6 is unavailable from PC9"}
