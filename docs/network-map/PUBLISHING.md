@@ -6,6 +6,18 @@
 eller tilfeldig serverfil rett til den levende siden. Dette er spesielt viktig
 etter at en ufullstendig v2.014-fil erstattet den komplette kart-layouten.
 
+## Planlagt først
+
+Før en CT/VM, Docker-stack eller tjeneste flyttes, opprettes eller vesentlig
+endres, skal den føres i kartets gjeldende kilde som **Planlagt**. Oppføringen
+skal si hva som skal skje, mål-node, planlagt CT/VM-ID og IP når dette er
+kjent, samt viktige avhengigheter. Dette gjelder også når arbeidet ennå bare
+er under utredning.
+
+Etter teknisk verifisering endres den samme oppføringen til aktiv i en **ny**
+kartversjon. Ikke vent med kartoppføringen til arbeidet er ferdig, og aldri
+fjern historikken for den planlagte endringen.
+
 Den aktive nginx-containeren `nettkart` kjører i **CT120** (`10.0.0.124`) og
 serverer bind-mounten:
 
