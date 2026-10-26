@@ -29,6 +29,7 @@ on pc6, pc8 or pc9. n8n used to violate this; it moved to CT 103 on pc6.
 | pc6 | 120 lxc | `ct104-monitoring` | 10.0.0.124 | 2G | 32G | yes | flere | `pc6-ct120-monitoring` | Monitoring, dashboards, MeTube og nettverkskart; Pinchflat flyttet til CT172 |
 | pc6 | 172 lxc | `pc6-ct172-pinchflat` | 10.0.0.164 | 4G | 32G | yes | 1 | | Dedikert Pinchflat-CT; app-state lokalt, Tower-media bind-mountet på `/media` |
 | pc6 | 107 lxc | `pc6-ct107-mediespillere-gammel` | 10.0.0.160 | 2G | 64G | no (autostart av) | 0 | `pc6-ct107-mediespillere` | Plex + Jellyfin, flyttet fra Unraid-Docker. Midlertidig oppryddings-CT, stoppes etter test |
+| pc9 | 107 lxc | `pc9-ct107-threadfin-test` | 10.0.0.130 | 1G | 8G | yes | 1 | | Komodo/Periphery-administrert Threadfin IPTV/tuner; web UI :34400 |
 | pc6 | 108 lxc | `pc6-ct108-legacy-dockere-gammel` | 10.0.0.161 | 1.5G | 40G | no (autostart av) | 0 | `pc6-ct108-legacy-dockere` | iPXE-buildweb, netbootxyz, openvscode-server, Flame, 4get, Linkding, unraid-moni, cloudflared, Valheim-data. Flyttet fra Unraid-Docker; manuell docker, midlertidig |
 | pc6 | 109 lxc | **`pc6-ct109-node`** | 10.0.0.128 | 4G | 32G | yes | 12 | `pc6-ct109-docker` | Shared Docker node: arr stack, Grafana, Homepage, Kuma, Seerr, Speedtest, Deluge, Audiobookshelf, Grovemap, Glance, Dashy, Heimdall |
 | pc9 | 111 lxc | `pc6-ct111-iventoy` | 10.0.0.134 | 1G | 16G | yes | 1 | | iVentoy PXE boot (moved from pc6). WebUI :26000 |

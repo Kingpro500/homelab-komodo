@@ -344,6 +344,10 @@
         icon: di:tunarr
         href: http://10.0.0.122:8005/
         description: 10.0.0.122:8005 · CT106 · pc9-ct106-tunarr · dedikert Tunarr · autostart av
+    - Threadfin (CT107):
+        icon: mdi:television-guide
+        href: http://10.0.0.130:34400/
+        description: 10.0.0.130:34400 · CT107 · pc9 · IPTV/tuner · Komodo
     - Plex (CT107):
         icon: mdi:play
         href: http://10.0.0.160:32400/web/
