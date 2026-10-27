@@ -27,6 +27,7 @@ on pc6, pc8 or pc9. n8n used to violate this; it moved to CT 103 on pc6.
 | pc6 | 101 qemu | `Unraid-Tower` | 10.0.0.101 | 15G | — | no (VM) | 0 | | Docker in a VM. 31 of 32 containers stopped. **Holds the only GPU passthrough in the cluster** |
 | pc6 | 103 lxc | `pc1-ct103-node` | 10.0.0.119 | 4G | 32G | yes | 2 | `pc6-ct103-node` | n8n and Open WebUI. **Names differ:** the Proxmox guest name and `hostname` in the LXC config are still `pc1-ct103-node`, but Periphery now reports `pc6-ct103-node`. That mismatch is what kept the server red; the agent was renamed, not the guest. Renaming the guest in Proxmox is still pending |
 | pc6 | 120 lxc | `ct104-monitoring` | 10.0.0.124 | 2G | 32G | yes | flere | `pc6-ct120-monitoring` | Monitoring, dashboards, MeTube og nettverkskart; Pinchflat flyttet til CT172 |
+| pc9 | 104 lxc | `pc9-observability` | 10.0.0.126 | — | — | yes | 1 | | Prometheus, Alertmanager og Blackbox exporter; Komodo-stack `pc9-ct104-observability` |
 | pc6 | 172 lxc | `pc6-ct172-pinchflat` | 10.0.0.164 | 4G | 32G | yes | 1 | | Dedikert Pinchflat-CT; app-state lokalt, Tower-media bind-mountet på `/media` |
 | pc6 | 107 lxc | `pc6-ct107-mediespillere-gammel` | 10.0.0.160 | 2G | 64G | no (autostart av) | 0 | `pc6-ct107-mediespillere` | Plex + Jellyfin, flyttet fra Unraid-Docker. Midlertidig oppryddings-CT, stoppes etter test |
 | pc9 | 107 lxc | `pc9-ct107-threadfin-test` | 10.0.0.130 | 1G | 8G | yes | 1 | | Komodo/Periphery-administrert Threadfin IPTV/tuner; web UI :34400 |
