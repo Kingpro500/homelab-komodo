@@ -85,10 +85,10 @@
         icon: ollama.png
         href: http://10.0.0.133:11434/
         description: 10.0.0.133:11434 · CT156 · pc1 · qwen3:4b API
-    - Hermes Agent:
-        icon: mdi-robot
-        href: http://10.0.0.135:9119/chat?profile=default
-        description: 10.0.0.135:9119 · CT157 · pc6 · chat
+    - Hermes AI Matrix:
+        icon: mdi-message-processing
+        href: http://10.0.0.120/
+        description: 10.0.0.120 · CT180 · pc6 · Matrix-bot for Home Assistant, Sonos og lys
     - Gjeld:
         icon: mdi-cash-multiple
         href: http://10.0.0.119:8099/

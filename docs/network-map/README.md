@@ -72,7 +72,7 @@ Vær derfor nøye med dette:
 | Node | kjører | stoppet/arkivert |
 |---|---|---|
 | pc8 N150 | VM100 Home Assistant | — |
-| pc6 N355 | VM201 Unraid, CT101 Pi-hole, CT115 UniFi, CT120 monitoring/nettkart, CT130 Hermes, CT200 Emby, CT210 tjenester, CT215 TubeArchivist, CT250 Tunarr, CT310 n8n, CT330 personlige tjenester, CT340 Krusader | CT108, CT140, CT202, CT230, CT235, CT240, CT320, CT390–392 |
+| pc6 N355 | CT101 Pi-hole, CT115 UniFi, CT120 monitoring/nettkart, CT130 Hermes, CT180 Matrix, CT200 Emby, CT210 tjenester, CT215 TubeArchivist, CT250 Tunarr, CT310 n8n, CT330 personlige tjenester, CT340 Krusader | CT108, CT140, CT202, CT230, CT235, CT240, CT320, CT390–392 |
 | pc9 N100 | CT103 Pi-hole reserve, CT106 Tunarr, CT110 Komodo Core, CT220 Roon | — |
 | pc1 3900X | CT102 Pi-hole | CT105 mediespiller, CT150 browsers, CT350 Ollama |
 
