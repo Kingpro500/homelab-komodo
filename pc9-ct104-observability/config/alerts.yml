@@ -26,3 +26,29 @@ groups:
         for: 2m
         labels: {severity: warning, service: observability, node: pc9}
         annotations: {summary: "A PC9 observability component is unavailable"}
+      # Proxmox guest rules are deduplicated by guest identity.
+      - alert: GuestMemoryHigh
+        expr: max by (name, node, type, vmid) ((proxmox_guest_mem_used_bytes / proxmox_guest_mem_total_bytes) * 100) >= 90
+        for: 10m
+        labels: {severity: warning, service: proxmox}
+        annotations: {summary: "Proxmox guest memory usage is high"}
+      - alert: GuestMemoryCritical
+        expr: max by (name, node, type, vmid) ((proxmox_guest_mem_used_bytes / proxmox_guest_mem_total_bytes) * 100) >= 97
+        for: 5m
+        labels: {severity: critical, service: proxmox}
+        annotations: {summary: "Proxmox guest memory usage is critical"}
+      - alert: GuestDiskHigh
+        expr: max by (name, node, type, vmid) ((proxmox_guest_disk_used_bytes / proxmox_guest_disk_total_bytes) * 100) >= 85
+        for: 10m
+        labels: {severity: warning, service: proxmox}
+        annotations: {summary: "Proxmox guest disk usage is high"}
+      - alert: GuestDiskCritical
+        expr: max by (name, node, type, vmid) ((proxmox_guest_disk_used_bytes / proxmox_guest_disk_total_bytes) * 100) >= 90
+        for: 5m
+        labels: {severity: critical, service: proxmox}
+        annotations: {summary: "Proxmox guest disk usage is critical"}
+      - alert: GuestSustainedCPU
+        expr: max by (name, node, type, vmid) (proxmox_guest_cpu_percent) >= 90
+        for: 10m
+        labels: {severity: info, service: proxmox}
+        annotations: {summary: "Proxmox guest CPU usage is sustained"}
