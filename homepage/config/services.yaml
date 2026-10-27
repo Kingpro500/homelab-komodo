@@ -188,15 +188,15 @@
           version: 1
     - Prometheus:
         icon: si:prometheus
-        href: http://10.0.0.128:9090/
-        description: 10.0.0.128:9090 · CT109 · pc6 · metrikker
-        server: ct109
+        href: http://10.0.0.126:9090/
+        description: 10.0.0.126:9090 · CT104 · pc9 · metrikker
+        server: pc9-observability
         container: prometheus
     - Alertmanager:
         icon: mdi:bell-alert-outline
-        href: http://10.0.0.128:9093/
-        description: 10.0.0.128:9093 · CT109 · pc6 · varsler
-        server: ct109
+        href: http://10.0.0.126:9093/
+        description: 10.0.0.126:9093 · CT104 · pc9 · varsler
+        server: pc9-observability
         container: alertmanager
     - FlareSolverr:
         icon: mdi:cloud-question
