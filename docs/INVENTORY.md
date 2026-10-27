@@ -39,7 +39,7 @@ on pc6, pc8 or pc9. n8n used to violate this; it moved to CT 103 on pc6.
 | pc9 | 153 lxc | `pc6-ct153-immich` | 10.0.0.127 | 4G | 64G | yes | 1 | | Photo library (moved from pc6). USB-dongle på Flex Mini 2.5G; iGPU /dev/dri passthrough |
 | pc9 | 154 lxc | `pc6-ct154-paperless` | 10.0.0.131 | 2G | 64G | yes | 1 | | Documents and scanning (moved from pc6) |
 | pc9 | 155 lxc | `pc6-ct155-unifi` | 10.0.0.132 | 2G | 16G | yes | 1 | | UniFi Network Controller (moved from pc6) |
-| pc6 | 157 lxc | `pc6-ct157-hermes` | 10.0.0.135 | 4G | 32G | yes | 0 | | Hermes agent. Gateway, cron jobs, watchdogs. Runs no Komodo stacks |
+| pc6 | 180 lxc | `pc6-ct180-matrix` | 10.0.0.120 | — | — | no | 0 | | Synapse og `hermes-ai-matrix.service`; Matrix-bot for Home Assistant, Sonos og stuelampe. Se [dokumentasjon](hermes-matrix-ai.md) |
 | pc9 | 106 lxc | **`pc9-ct106-tunarr`** | 10.0.0.122 | 4G | 19G | yes | 1 | | Dedicated Tunarr CT; autostart disabled |
 | pc9 | 108 lxc | **`docker-test`** | 10.0.0.130 | 1G | 8G | yes | 0 | *delete* | **Unused.** No stacks, not in Homepage, not mentioned anywhere. 1 GB RAM for nothing |
 | pc6 | 159 lxc | `pc6-ct159-audiobookshelf-ngrok-gammel` | 10.0.0.162 | 1G | 8G | no | 0 | | Audiobookshelf- og ngrok-oppsett arkivert fra Tower. Stoppet; autostart av. |
