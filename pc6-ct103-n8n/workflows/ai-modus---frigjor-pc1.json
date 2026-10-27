@@ -1,25 +1,15 @@
 {
-  "id": "TVxIF3OGvWTOVdVW",
-  "name": "AI-modus - frigjor PC1",
+  "name": "AI-modus - Ollama PC1",
   "description": null,
-  "active": true,
-  "activeVersionId": "3818ec41-3bec-4c42-b7f7-6ad0e37a1f5b",
-  "createdAt": "2026-10-23T10:12:28.987Z",
-  "updatedAt": "2026-10-25T06:20:31.787Z",
-  "isArchived": false,
-  "versionId": "3818ec41-3bec-4c42-b7f7-6ad0e37a1f5b",
-  "versionCounter": 2,
-  "sourceWorkflowId": null,
-  "triggerCount": 2,
   "nodes": [
     {
-      "id": "f76d168f-c1b7-4843-b66e-96e6bf568d4c",
+      "id": "d6558387-9d5d-49fd-9420-3d81381382cf",
       "name": "AI start webhook",
-      "webhookId": "d77e33c0-ccb1-4584-bcae-65b4204338df",
+      "webhookId": "9608ae87-054a-48f0-9bc6-d33299824957",
       "type": "n8n-nodes-base.webhook",
-      "typeVersion": 4.2,
+      "typeVersion": 1.2,
       "position": [
-        -600,
+        -900,
         0
       ],
       "parameters": {
@@ -30,13 +20,13 @@
       }
     },
     {
-      "id": "591cae63-6263-42ef-b412-2bf1e2eb8113",
+      "id": "8e071e89-859e-4f6c-a220-7f0bb4cbfc34",
       "name": "AI stop webhook",
-      "webhookId": "d744698a-472f-4a25-ac4b-b7d5e01db617",
+      "webhookId": "a6c2b668-23a6-4a28-bf7c-8d7b58b831ea",
       "type": "n8n-nodes-base.webhook",
-      "typeVersion": 4.2,
+      "typeVersion": 1.2,
       "position": [
-        -600,
+        -900,
         300
       ],
       "parameters": {
@@ -47,71 +37,155 @@
       }
     },
     {
-      "id": "52633b0e-69dc-4c0a-b752-72ef67db9be5",
-      "name": "Start: velg CT-er",
+      "id": "c5c85502-2c13-4712-a1e4-475613c14051",
+      "name": "AI start: velg Ollama CT",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -300,
+        -650,
         0
       ],
       "parameters": {
-        "jsCode": "return [{json:{node:'pc1',vmid:102,action:'off',reason:'AI-modus'}}];"
+        "jsCode": "return [{json:{node:'pc1',vmid:350,action:'on',mode:'AI_START'}}];"
       }
     },
     {
-      "id": "044f5cfa-f764-4875-aa05-22c5132659c9",
-      "name": "Stop: gjenopprett Pi-hole",
+      "id": "8a122c38-bedd-46d6-8c8f-5162b4d63d05",
+      "name": "AI stop: stopp Ollama CT",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -300,
+        -650,
         300
       ],
       "parameters": {
-        "jsCode": "return [{json:{node:'pc1',vmid:102,action:'on',reason:'AI-modus avsluttet'}}];"
+        "jsCode": "return [{json:{node:'pc1',vmid:350,action:'off',mode:'AI_STOP'}}];"
       }
     },
     {
-      "id": "594cf150-a002-425d-a937-0c1675ab2ab8",
+      "id": "e3eec84c-8c06-4b8d-9fe4-5b661c43925e",
       "name": "Proxmox kontroll",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        0,
+        -350,
         150
       ],
       "parameters": {
         "method": "POST",
         "url": "http://10.0.0.135:9118/control",
         "authentication": "predefinedCredentialType",
-        "sendHeaders": true,
+        "sendHeaders": false,
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({node:$json.node,vmid:$json.vmid,action:$json.action}) }}",
+        "jsonBody": "={{ JSON.stringify({node: $json.node, vmid: Number($json.vmid), action: $json.action}) }}",
         "options": {
-          "timeout": 60000
+          "timeout": 60000,
+          "response": {
+            "response": {
+              "neverError": true,
+              "responseFormat": "json"
+            }
+          }
         },
         "nodeCredentialType": "httpHeaderAuth"
       },
       "credentials": {
         "httpHeaderAuth": {
           "id": "TcgXN7shgc4X7U8w",
-          "name": "Homelab Audit Header"
+          "name": "Homelab Audit Header [REDACTED]"
         }
       }
     },
     {
-      "id": "6b0ad085-8d87-48cb-8d9e-3cf737b80e4b",
+      "id": "75308f96-8b62-46e3-8d34-f72dc35a419a",
+      "name": "Vent på Ollama",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -50,
+        0
+      ],
+      "parameters": {
+        "jsCode": "return [{json:{...$json, mode:'AI_START'}}];"
+      }
+    },
+    {
+      "id": "1d795823-da60-45d4-be97-62ec0bdbc9ae",
+      "name": "Ollama health",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        200,
+        0
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "={{$json.health_url || \"http://10.0.0.133:11434/api/version\"}}",
+        "options": {
+          "timeout": 10000
+        }
+      }
+    },
+    {
+      "id": "2f6599bc-b2aa-427a-894d-c70e79c17704",
       "name": "Resultat",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        300,
+        450,
         150
       ],
       "parameters": {
-        "jsCode": "return [{json:{ok:true,mode:$json.action==='off'?'AI_START':'AI_STOP',target:$json.vmid,control:$json}}];"
+        "jsCode": "const body=$json; return [{json:{ok:true,mode:'AI_START',target:350,ollama:body,verified:true}}];"
+      }
+    },
+    {
+      "id": "stop-result-node-20261027",
+      "name": "Stop-resultat",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        450,
+        350
+      ],
+      "parameters": {
+        "jsCode": "return [{json:{ok:true,mode:'AI_STOP',target:350,stopped:true,ollama:false,verified:true}}];"
+      }
+    },
+    {
+      "id": "proxmox-control-stop-final",
+      "name": "Proxmox kontroll stopp",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        0,
+        350
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://10.0.0.135:9118/control",
+        "authentication": "predefinedCredentialType",
+        "sendHeaders": false,
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({node: $json.node, vmid: Number($json.vmid), action: $json.action}) }}",
+        "options": {
+          "timeout": 60000,
+          "response": {
+            "response": {
+              "neverError": true,
+              "responseFormat": "json"
+            }
+          }
+        },
+        "nodeCredentialType": "httpHeaderAuth"
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "TcgXN7shgc4X7U8w",
+          "name": "Homelab Audit Header [REDACTED]"
+        }
       }
     }
   ],
@@ -120,7 +194,7 @@
       "main": [
         [
           {
-            "node": "Start: velg CT-er",
+            "node": "AI start: velg Ollama CT",
             "type": "main",
             "index": 0
           }
@@ -131,14 +205,14 @@
       "main": [
         [
           {
-            "node": "Stop: gjenopprett Pi-hole",
+            "node": "AI stop: stopp Ollama CT",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Start: velg CT-er": {
+    "AI start: velg Ollama CT": {
       "main": [
         [
           {
@@ -149,11 +223,11 @@
         ]
       ]
     },
-    "Stop: gjenopprett Pi-hole": {
+    "AI stop: stopp Ollama CT": {
       "main": [
         [
           {
-            "node": "Proxmox kontroll",
+            "node": "Proxmox kontroll stopp",
             "type": "main",
             "index": 0
           }
@@ -164,7 +238,40 @@
       "main": [
         [
           {
+            "node": "Vent på Ollama",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vent på Ollama": {
+      "main": [
+        [
+          {
+            "node": "Ollama health",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama health": {
+      "main": [
+        [
+          {
             "node": "Resultat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Proxmox kontroll stopp": {
+      "main": [
+        [
+          {
+            "node": "Stop-resultat",
             "type": "main",
             "index": 0
           }
@@ -179,210 +286,5 @@
     "executionOrder": "v1",
     "availableInMCP": false
   },
-  "staticData": null,
-  "pinData": null,
-  "meta": null,
-  "tags": [],
-  "shared": [
-    {
-      "role": "workflow:owner",
-      "workflowId": "TVxIF3OGvWTOVdVW",
-      "projectId": "KXT1M3IDP7uzR2Xe",
-      "project": {
-        "id": "KXT1M3IDP7uzR2Xe",
-        "name": "Roger Lillefosse <rogerlillefosse@gmail.com>",
-        "type": "personal",
-        "icon": null,
-        "description": null,
-        "customTelemetryTags": [],
-        "creatorId": "79a33b7a-6319-42bf-827e-3928073bdeb7",
-        "createdAt": "2026-10-01T05:21:05.719Z",
-        "updatedAt": "2026-10-01T08:58:31.958Z"
-      },
-      "createdAt": "2026-10-23T10:12:28.987Z",
-      "updatedAt": "2026-10-23T10:12:28.987Z"
-    }
-  ],
-  "activeVersion": {
-    "versionId": "3818ec41-3bec-4c42-b7f7-6ad0e37a1f5b",
-    "workflowId": "TVxIF3OGvWTOVdVW",
-    "nodes": [
-      {
-        "id": "f76d168f-c1b7-4843-b66e-96e6bf568d4c",
-        "name": "AI start webhook",
-        "webhookId": "d77e33c0-ccb1-4584-bcae-65b4204338df",
-        "type": "n8n-nodes-base.webhook",
-        "typeVersion": 4.2,
-        "position": [
-          -600,
-          0
-        ],
-        "parameters": {
-          "httpMethod": "POST",
-          "path": "ai-start",
-          "responseMode": "lastNode",
-          "options": {}
-        }
-      },
-      {
-        "id": "591cae63-6263-42ef-b412-2bf1e2eb8113",
-        "name": "AI stop webhook",
-        "webhookId": "d744698a-472f-4a25-ac4b-b7d5e01db617",
-        "type": "n8n-nodes-base.webhook",
-        "typeVersion": 4.2,
-        "position": [
-          -600,
-          300
-        ],
-        "parameters": {
-          "httpMethod": "POST",
-          "path": "ai-stop",
-          "responseMode": "lastNode",
-          "options": {}
-        }
-      },
-      {
-        "id": "52633b0e-69dc-4c0a-b752-72ef67db9be5",
-        "name": "Start: velg CT-er",
-        "type": "n8n-nodes-base.code",
-        "typeVersion": 2,
-        "position": [
-          -300,
-          0
-        ],
-        "parameters": {
-          "jsCode": "return [{json:{node:'pc1',vmid:102,action:'off',reason:'AI-modus'}}];"
-        }
-      },
-      {
-        "id": "044f5cfa-f764-4875-aa05-22c5132659c9",
-        "name": "Stop: gjenopprett Pi-hole",
-        "type": "n8n-nodes-base.code",
-        "typeVersion": 2,
-        "position": [
-          -300,
-          300
-        ],
-        "parameters": {
-          "jsCode": "return [{json:{node:'pc1',vmid:102,action:'on',reason:'AI-modus avsluttet'}}];"
-        }
-      },
-      {
-        "id": "594cf150-a002-425d-a937-0c1675ab2ab8",
-        "name": "Proxmox kontroll",
-        "type": "n8n-nodes-base.httpRequest",
-        "typeVersion": 4.2,
-        "position": [
-          0,
-          150
-        ],
-        "parameters": {
-          "method": "POST",
-          "url": "http://10.0.0.135:9118/control",
-          "authentication": "predefinedCredentialType",
-          "sendHeaders": true,
-          "sendBody": true,
-          "specifyBody": "json",
-          "jsonBody": "={{ JSON.stringify({node:$json.node,vmid:$json.vmid,action:$json.action}) }}",
-          "options": {
-            "timeout": 60000
-          },
-          "nodeCredentialType": "httpHeaderAuth"
-        },
-        "credentials": {
-          "httpHeaderAuth": {
-            "id": "TcgXN7shgc4X7U8w",
-            "name": "Homelab Audit Header"
-          }
-        }
-      },
-      {
-        "id": "6b0ad085-8d87-48cb-8d9e-3cf737b80e4b",
-        "name": "Resultat",
-        "type": "n8n-nodes-base.code",
-        "typeVersion": 2,
-        "position": [
-          300,
-          150
-        ],
-        "parameters": {
-          "jsCode": "return [{json:{ok:true,mode:$json.action==='off'?'AI_START':'AI_STOP',target:$json.vmid,control:$json}}];"
-        }
-      }
-    ],
-    "connections": {
-      "AI start webhook": {
-        "main": [
-          [
-            {
-              "node": "Start: velg CT-er",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "AI stop webhook": {
-        "main": [
-          [
-            {
-              "node": "Stop: gjenopprett Pi-hole",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Start: velg CT-er": {
-        "main": [
-          [
-            {
-              "node": "Proxmox kontroll",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Stop: gjenopprett Pi-hole": {
-        "main": [
-          [
-            {
-              "node": "Proxmox kontroll",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Proxmox kontroll": {
-        "main": [
-          [
-            {
-              "node": "Resultat",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      }
-    },
-    "nodeGroups": [],
-    "authors": "Roger Lillefosse",
-    "name": null,
-    "description": null,
-    "autosaved": false,
-    "createdAt": "2026-10-25T06:20:31.789Z",
-    "updatedAt": "2026-10-25T06:20:31.789Z",
-    "workflowPublishHistory": [
-      {
-        "id": 129,
-        "workflowId": "TVxIF3OGvWTOVdVW",
-        "versionId": "3818ec41-3bec-4c42-b7f7-6ad0e37a1f5b",
-        "event": "activated",
-        "userId": "79a33b7a-6319-42bf-827e-3928073bdeb7",
-        "createdAt": "2026-10-25T06:20:31.837Z"
-      }
-    ]
-  }
+  "staticData": null
 }
