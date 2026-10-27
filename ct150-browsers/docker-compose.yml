@@ -1,0 +1,21 @@
+# CT150 / ct158-browsers on pc6. Restored backup; kept stopped by Proxmox.
+services:
+  browser-pool:
+    image: lscr.io/linuxserver/webtop:ubuntu-xfce
+    container_name: browser-pool
+    ports:
+      - "3001:3001"
+      - "3002:3002"
+      - "3003:3003"
+      - "3004:3004"
+      - "3005:3005"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Oslo
+    volumes:
+      - browser_config:/config
+    shm_size: "2gb"
+    restart: unless-stopped
+volumes:
+  browser_config:
