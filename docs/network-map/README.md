@@ -132,9 +132,19 @@ Av/på-knappene krever `AUDIT_TOKEN`:
 localStorage.setItem("homelab_audit_token", "<AUDIT_TOKEN fra ~/.hermes/.env>")
 ```
 
+## Vedlikehold og planlagte endringer
+
+Kartet er den synlige arbeidslisten. Når en endring er planlagt, legges den inn
+med kort status `(planlagt)` og forventet mål. Når den er kontrollert og utført,
+oppdateres samme oppføring med faktisk adresse, port, status og kilde i en ny
+versjon. Planlagte oppføringer skal ikke skjules i historikk eller chat.
+
+Publisering skjer straks etter hver kartendring gjennom GitHub-flyten. En
+endring er først ferdig når live-siden viser den nye versjonen.
+
 ## Vedlikehold
 
-Følg PUBLISHING.md for den autoritative publiseringsprosessen.
+Følg [PUBLISHING.md](../../PUBLISHING.md) for den autoritative publiseringsprosessen.
 
 ## Oslo Børs
 `oslo-bors.html` er en LAN-side som rammer inn original CommodoreGames-emulatoren; spillfilen speiles ikke til repoet.
