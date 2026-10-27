@@ -36,6 +36,7 @@ groups:
         for: 5m
         labels: {severity: critical, service: emby, node: pc6}
         annotations: {summary: "Emby CT200 disk metric is missing", description: "Disk protection is not operational; do not declare Emby monitoring complete."}
+      - alert: TunarrUnavailable
         expr: probe_success{instance="http://10.0.0.123:8005/web/"} == 0
         for: 2m
         labels: {severity: warning, service: tunarr, node: pc6}
