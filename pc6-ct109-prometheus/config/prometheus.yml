@@ -26,6 +26,11 @@ scrape_configs:
     # unraid_device_* (disk/cache) og unraid_share_*. Lytt egen jobb så dashbord
     # og alert-regler kan filtrere på job="unraid-storage".
     scrape_interval: 60s
+    metric_relabel_configs:
+      # Emby-metrikkene hører kun hjemme i homelab-resources; unngå doble serier.
+      - source_labels: [__name__]
+        regex: 'emby_.*'
+        action: drop
     static_configs:
       - targets: ['10.0.0.135:9120']
 
