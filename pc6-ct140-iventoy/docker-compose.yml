@@ -1,0 +1,15 @@
+services:
+  iventoy:
+    image: ziggyds/iventoy:latest
+    container_name: iventoy
+    restart: unless-stopped
+    privileged: true
+    # PXE needs LAN broadcast traffic, which Docker port forwarding cannot relay.
+    # CT 140 is dedicated to iVentoy, so host networking is intentional.
+    network_mode: host
+    volumes:
+      - /iso:/app/iso
+      - /opt/iventoy/data:/app/data
+      - /opt/iventoy/log:/app/log
+    environment:
+      AUTO_START_PXE: "true"
