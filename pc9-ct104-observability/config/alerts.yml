@@ -6,6 +6,21 @@ groups:
         for: 2m
         labels: {severity: critical, service: emby, node: pc6}
         annotations: {summary: "Emby is unavailable from PC9"}
+      - alert: EmbyDown
+        expr: emby_up{instance="emby"} == 0
+        for: 2m
+        labels: {severity: critical, service: emby, node: pc6}
+        annotations: {summary: "Emby health exporter reports unavailable"}
+      - alert: EmbySessionsUnknown
+        expr: emby_sessions_known{instance="emby"} == 0
+        for: 2m
+        labels: {severity: critical, service: emby, node: pc6}
+        annotations: {summary: "Emby sessions status is unknown; recovery must remain blocked"}
+      - alert: EmbyProbeDegraded
+        expr: emby_probe_success{instance="emby"} < emby_probe_total{instance="emby"}
+        for: 5m
+        labels: {severity: warning, service: emby, node: pc6}
+        annotations: {summary: "Emby authenticated health probes are degraded"}
       - alert: TunarrCt250Unavailable
         expr: probe_success{instance="http://10.0.0.123:8005/web/"} == 0
         for: 2m
