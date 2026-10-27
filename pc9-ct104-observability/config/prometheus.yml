@@ -19,9 +19,9 @@ scrape_configs:
           - http://10.0.0.122:8005/web/
           - http://10.0.0.122:8005/api/channels.m3u
           - http://10.0.0.122:8005/api/xmltv.xml
-          - http://10.0.0.126:9090/-/ready
-          - http://10.0.0.126:9093/-/ready
-          - http://10.0.0.126:9115/metrics
+          - http://10.0.0.128:9090/-/ready
+          - http://10.0.0.128:9093/-/ready
+          - http://10.0.0.124:9115/metrics
     relabel_configs:
       - {source_labels: [__address__], target_label: __param_target}
       - {source_labels: [__param_target], target_label: instance}
