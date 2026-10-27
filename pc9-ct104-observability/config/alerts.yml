@@ -21,7 +21,21 @@ groups:
         for: 5m
         labels: {severity: warning, service: emby, node: pc6}
         annotations: {summary: "Emby authenticated health probes are degraded"}
-      - alert: TunarrCt250Unavailable
+      - alert: EmbyDiskHigh
+        expr: (proxmox_guest_disk_used_bytes{vmid="200"} / proxmox_guest_disk_total_bytes{vmid="200"}) * 100 >= 75
+        for: 10m
+        labels: {severity: warning, service: emby, node: pc6}
+        annotations: {summary: "Emby CT200 disk usage is high", description: "CT200 disk usage is above 75%; inspect /opt/emby/transcode before service impact."}
+      - alert: EmbyDiskCritical
+        expr: (proxmox_guest_disk_used_bytes{vmid="200"} / proxmox_guest_disk_total_bytes{vmid="200"}) * 100 >= 85
+        for: 5m
+        labels: {severity: critical, service: emby, node: pc6}
+        annotations: {summary: "Emby CT200 disk usage is critical", description: "CT200 disk usage is above 85%; recovery must be guarded by active-session checks."}
+      - alert: EmbyDiskExporterMissing
+        expr: absent(proxmox_guest_disk_used_bytes{vmid="200"}) or absent(proxmox_guest_disk_total_bytes{vmid="200"})
+        for: 5m
+        labels: {severity: critical, service: emby, node: pc6}
+        annotations: {summary: "Emby CT200 disk metric is missing", description: "Disk protection is not operational; do not declare Emby monitoring complete."}
         expr: probe_success{instance="http://10.0.0.123:8005/web/"} == 0
         for: 2m
         labels: {severity: warning, service: tunarr, node: pc6}

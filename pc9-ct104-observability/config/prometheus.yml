@@ -31,7 +31,7 @@ scrape_configs:
       - targets: ["10.0.0.135:9120"]
     metric_relabel_configs:
       - source_labels: [__name__]
-        regex: emby_.*
+        regex: (emby_.*|proxmox_guest_.*)
         action: keep
   - job_name: blackbox-tcp
     metrics_path: /probe
