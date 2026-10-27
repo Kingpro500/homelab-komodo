@@ -22,7 +22,7 @@ groups:
         labels: {severity: critical, service: proxmox, node: pc6}
         annotations: {summary: "PC6 is unavailable from PC9"}
       - alert: Pc9ObservabilityComponentUnavailable
-        expr: probe_success{instance=~"http://10.0.0.128:(9090/-/ready|9093/-/ready)|10.0.0.124:9115/metrics"} == 0
+        expr: probe_success{instance=~"http://10.0.0.126:(9090/-/ready|9093/-/ready)|10.0.0.124:9115/metrics"} == 0
         for: 2m
         labels: {severity: warning, service: observability, node: pc9}
         annotations: {summary: "A PC9 observability component is unavailable"}

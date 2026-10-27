@@ -11,7 +11,7 @@ datasources:
     uid: prometheus
     type: prometheus
     access: proxy
-    url: http://10.0.0.128:9090
+    url: http://10.0.0.126:9090
     orgName: "Main Org"
     basicAuth: false
     isDefault: true

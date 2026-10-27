@@ -1,7 +1,7 @@
-# Prometheus — pc6 CT109
+# Prometheus — pc9 CT104
 
-- **Komodo server / stack:** `pc6-ct109-node` / `pc6-ct109-prometheus`
-- **UI:** `http://10.0.0.128:9090`
+- **Komodo server / stack:** `pc9-observability` / `pc9-ct104-observability`
+- **UI:** `http://10.0.0.126:9090`
 
 Prometheus is the bridge between an exporter and Grafana. Netdata cannot feed
 Grafana: its Grafana plugin is gone from the registry, and its
@@ -32,7 +32,7 @@ days in the named volume `prometheus-data`.
 
 ## Grafana side
 
-Grafana has a provisioned Prometheus datasource pointing at `http://10.0.0.128:9090`
+Grafana has a provisioned Prometheus datasource pointing at `http://10.0.0.126:9090`
 and a dashboard under `pc6-ct109-grafana/provisioning/dashboards/homelab-overview.json`.
 NB: Grafana 13.x does not auto-load the legacy file-based dashboard provisioning;
 the dashboard JSON must be imported via API/UI (it is version-controlled in this
