@@ -54,3 +54,5 @@ running service.
 
 Driftsprinsipper for hvordan n8n-automasjoner bygges, sikres og gjenopprettes
 er samlet i [docs/operations/n8n-workflows.md](../docs/operations/n8n-workflows.md).
+
+| AI-modus – Ollama PC1 | `ai-modus---frigjor-pc1.json` | Aktiv start/stopp av CT350 med Ollama-health ved start |
