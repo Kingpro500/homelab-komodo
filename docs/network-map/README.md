@@ -28,12 +28,16 @@ versjonsnummer. HTML-versjonen kan oppdateres når det er nyttig for leseren.
 
 **Publiser straks etter en kontrollert endring.** Ikke bruk live-siden som en
 arbeidskopi og aldri rull tilbake en publisert versjon. Dersom noe er feil, lag
-en ny commit som retter feilen. Etter `PullStack` av `pc6-ct120-web` er den eneste publiseringskommandoen
-`/usr/local/sbin/deploy-network-map` i CT120; den bruker eksplisitt
-`/opt/komodo/stacks/pc6-ct120-web`, henter kun GitHub `main`,
-validerer den komplette kartstrukturen og nekter å publisere lavere versjon enn
-den som allerede er live. Den lagrer dessuten en lokal, datostemplet kopi før
-atomisk bytte av HTML-filen.
+en ny commit som retter feilen. Den enkle publiseringskommandoen er:
+
+```sh
+cd /opt/komodo/stacks/pc6-ct120-web
+bash scripts/deploy-network-map.sh
+```
+
+Skriptet henter kun `origin/main`, validerer kartet og bytter den serverte filen
+atomisk. Etterpå er det nok å pushe til `main` og kjøre denne kommandoen. Den
+lagrer dessuten en lokal, datostemplet kopi før atomisk bytte av HTML-filen.
 
 ## ⚠️ Vedlikeholdsregler — LES FØR DU ENDRER
 

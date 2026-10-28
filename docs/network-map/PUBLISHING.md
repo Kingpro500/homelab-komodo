@@ -30,20 +30,16 @@ ID-mappingen.
 
 ## Automatisk publisering
 
-Når en endring er pushet til `main`, skal Komodo-stacken `pc6-ct120-web`
-kjøre PullStack og deretter publiseringskommandoen på CT120. Det kreves ingen
-manuell godkjenning og ingen separat versjonsbestilling utover historikken i
-Git. GitHub Actions validerer kun innholdet etter oppdateringen av `main`.
-
-Komodo-handlingen skal bruke:
+Når en endring er pushet til `main`, kjører du én kommando på CT120:
 
 ```sh
-/usr/local/sbin/deploy-network-map
+cd /opt/komodo/stacks/pc6-ct120-web
+bash scripts/deploy-network-map.sh
 ```
 
-og kjøre den først etter at `PullStack` er ferdig og `latest_hash` er en
-konkret commit uten `remote_errors`. Dette er den faktiske deploy-triggeren;
-en GitHub Actions-kall direkte til CT120 brukes ikke.
+Det kreves ingen manuell godkjenning og ingen separat versjonsbestilling utover
+Git-historikken. GitHub Actions validerer innholdet etter oppdateringen av
+`main`; publiseringsskriptet er den eneste kommandoen som oppdaterer live-filen.
 
 Publiseringsjobben bruker den samme arbeidskopien som nginx faktisk har
 bind-mountet, henter `origin/main`, og validerer at kandidaten har:
@@ -63,7 +59,8 @@ Manuell fallback
 Ved behov kan samme publisering startes på CT120:
 
 ```sh
-ssh <admin>@10.0.0.124 /usr/local/sbin/deploy-network-map
+cd /opt/komodo/stacks/pc6-ct120-web
+bash scripts/deploy-network-map.sh
 ```
 
 ## Komodo
