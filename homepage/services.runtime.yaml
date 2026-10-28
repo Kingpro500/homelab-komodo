@@ -8,6 +8,10 @@
 # References: https://gethomepage.dev/configs/services/ (Docker Integration).
 
 - Homelab:
+    - ntfy:
+        icon: mdi:bell-outline
+        href: http://10.0.0.166:2586/
+        description: 10.0.0.166:2586 · CT109 · pc6
     - Homepage:
         icon: homepage.png
         href: http://10.0.0.128:3009/
