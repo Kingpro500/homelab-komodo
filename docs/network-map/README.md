@@ -22,15 +22,13 @@ de fire maskinene (pc1 · Gaming, pc6 · Tower, pc9 · Minipc, pc8 · pve) med
   eller erstatte innholdet med noe annet. Du kan legge til elementer i tillegg.
 - Kommentaren i HTML-en rett over `#node-resources` er også der av denne grunn.
 
-**Versjonering og publisering:** Skjema = **`baseversjon.desimal`**. Vi ligger på base `2`; hver
-minste endring hever sub-versjonen med 0.001 (`2.001`, `2.002`, …); ved store
-omskrivinger hopper vi til neste baseversjon (`3`, …). Arkiver forrige versjon
-til `versions/vNN/` og oppdater `versions/index.html`. Topp-høyre på siden viser
-versjonsnummeret, og `versions/` er indeksen med klikkbare gamle versjoner.
+**Versjonering og publisering:** Git-commitene er historikken. Ikke opprett en
+separat arkivside eller stopp en liten rettelse for å manuelt bestille et nytt
+versjonsnummer. HTML-versjonen kan oppdateres når det er nyttig for leseren.
 
 **Publiser straks etter en kontrollert endring.** Ikke bruk live-siden som en
 arbeidskopi og aldri rull tilbake en publisert versjon. Dersom noe er feil, lag
-en ny versjon som retter feilen. Etter `PullStack` av `pc6-ct120-web` er den eneste publiseringskommandoen
+en ny commit som retter feilen. Etter `PullStack` av `pc6-ct120-web` er den eneste publiseringskommandoen
 `/usr/local/sbin/deploy-network-map` i CT120; den bruker eksplisitt
 `/opt/komodo/stacks/pc6-ct120-web`, henter kun GitHub `main`,
 validerer den komplette kartstrukturen og nekter å publisere lavere versjon enn
