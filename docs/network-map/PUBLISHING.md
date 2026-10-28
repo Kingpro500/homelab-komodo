@@ -30,36 +30,19 @@ ID-mappingen.
 
 ## Automatisk publisering
 
-Når en endring er pushet til `main`, henter CT120 automatisk siste commit og
-publiserer kartet. Det kreves ingen manuell godkjenning og ingen separat
-versjonsbestilling utover historikken i Git.
+Når en endring er merget til `main`, bruker den verifiserte Komodo-flyten
+stacken `pc6-ct120-web`:
 
-```sh
-cd /opt/komodo/stacks/pc6-ct120-web
-bash scripts/deploy-network-map.sh
-```
+1. `POST /read/ListStacks` — finn stack-ID-en.
+2. `POST /execute/PullStack` med `{"stack":"<id>"}`.
+3. Vent på `POST /read/GetStackActionState` til `pulling:false`.
+4. Les `POST /read/GetStack` og fortsett bare når `latest_hash` er en konkret
+   commit og `remote_errors` er tom.
+5. Kjør `POST /execute/DeployStack` med samme stack-ID.
+6. Verifiser `deployed_hash == latest_hash` og les live-HTML tilbake.
 
-Publiseringsjobben bruker den samme arbeidskopien som nginx faktisk har
-bind-mountet, henter `origin/main`, og validerer at kandidaten har:
-
-- versjonsnummer;
-- full serviceoversikt;
-- VM/CT-rammer (`data-vmid`);
-- det pålagte node-sammendraget og `/nodes`-integrasjonen.
-
-Det nekter også å publisere lavere versjon enn den levende siden. Før hver
-publisering lagres den nåværende live-filen i
-`/var/lib/nettkart/backups/` på CT120. Nginx trenger ikke restart fordi den
-leser den erstattede statiske filen på neste HTTP-kall.
-
-Manuell fallback
-
-Ved behov kan samme publisering startes på CT120:
-
-```sh
-cd /opt/komodo/stacks/pc6-ct120-web
-bash scripts/deploy-network-map.sh
-```
+Dette er den operative publiseringsflyten. GitHub Actions validerer innholdet,
+men er ikke en deploy-garanti. GitHub-merge alene publiserer ikke kartet.
 
 ## Komodo
 
