@@ -8,7 +8,7 @@ Komodo-endringer følger
 Docker-tjenester skal både Homepage og nettverkskartet oppdateres etter at
 containerstatus og helse er verifisert.
 
-## ⛔ PÅLAGT: NODE-SAMMENDRAGET + VERSJONERING — MÅ IKKE FJERNES
+## ⛔ PÅLAGT: NODE-SAMMENDRAGET — MÅ IKKE FJERNES
 
 **Det finnes ETT element som er beskyttet uten unntak:** node-sammendraget —
 de fire maskinene (pc1 · Gaming, pc6 · Tower, pc9 · Minipc, pc8 · pve) med
