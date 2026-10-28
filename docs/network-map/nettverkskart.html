@@ -143,14 +143,14 @@ footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-
   <button id="sw-token-save" class="sw-btn">Lagre</button><button id="tok-edit" class="sw-btn" title="endre token" style="display:none">✎</button>
   <span id="sw-token-msg" style="color:var(--lan);font-size:11px"></span>
   <span style="color:var(--dim);font-size:11px" id="sw-meta"></span>
-  <span style="color:var(--muted);margin-left:6px">📜 versjon <b>2.061</b> · <a target="_blank" rel="noopener noreferrer" href="versions/">historikk</a></span>
+  <span style="color:var(--muted);margin-left:6px">📜 versjon <b>2.062</b> · <a target="_blank" rel="noopener noreferrer" href="versions/">historikk</a></span>
 </div>
 
 <h1>🏠 Homelab — tjenester &amp; nettverk <span style="color:var(--lan)">10.0.0.0/24</span></h1>
 
 <div class="sub">Intern startside · Proxmox-kluster «CyberCluster» · OPNsense pc7 (brannmur)</div>
 <div class="note" style="margin:8px 0 12px"><b>📌 Kartregler:</b> <a target="_blank" rel="noopener noreferrer" href="PUBLISHING.md">PUBLISHING.md</a> i Git-repoet <code>homelab-komodo/docs/network-map/</code>. Følg dem før alle endringer og publiseringer.</div>
-<div class="meta">Verifisert 18. okt 2026 mot Proxmox og Docker. Kilder: OPNsense-ARP (48 enheter) · Proxmox-API (4 noder, CPU fra <code>/nodes/*/status</code>, gjester + IP fra config) · levende docker-inventar i hver CT · Komodo. «Inaktiv/» = finnes, men er av. CT-er merket er nede med vilje (arkivert fra Tower/Unraid) og kommer opp igjen ved behov.</div>
+<div class="meta">Verifisert 28. okt 2026 mot Proxmox og Docker. Kilder: OPNsense-ARP (48 enheter) · Proxmox-API (4 noder, CPU fra <code>/nodes/*/status</code>, gjester + IP fra config) · levende docker-inventar i hver CT · Komodo. «Inaktiv/» = finnes, men er av. CT-er merket er nede med vilje (arkivert fra Tower/Unraid) og kommer opp igjen ved behov.</div>
 
 <tr class="vm-frame-row"><td colspan="6"><div class="vm-frame" data-vmid="180"><div class="vm-h"><span class="tag tag-ct">CT</span>CT180</div><table class="svc"><thead><tr><th>Tjeneste</th><th>Adresse</th><th>Merknad</th><th>Status</th><th>Strøm</th></tr></thead><tbody><tr><td><a target="_blank" rel="noopener noreferrer" href="http://10.0.0.180:8008/">Synapse</a></td><td class="ip"><a target="_blank" rel="noopener noreferrer" href="http://10.0.0.180:8008/">10.0.0.180:8008</a></td><td>Matrix homeserver · pc6</td><td class="st-wrap"></td><td class="g-ctl"></td></tr></tbody></table></div></td></tr>
 <!-- ============ SERVICE-OVERSIKT ============ -->
@@ -244,7 +244,7 @@ footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-
 <tr class="vm-frame-row"><td colspan="6"><div class="vm-frame" data-vmid="110">
 <div class="vm-h"><span class="tag tag-ct">CT</span>CT110</div>
 <table class="svc"><thead><tr><th>Tjeneste</th><th>Adresse</th><th>Merknad</th><th>Status</th><th>Strøm</th></tr></thead><tbody>
-<tr><td><a target="_blank" rel="noopener noreferrer" href="http://10.0.0.117:9120/">Komodo core (Komodo-kilde avviker fra live)</a></td><td class="ip"><a target="_blank" rel="noopener noreferrer" href="http://10.0.0.117:9120/">10.0.0.117:9120</a></td><td>Komodo-kontroll</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+<tr><td><a target="_blank" rel="noopener noreferrer" href="http://10.0.0.117:9120/">Komodo core</a></td><td class="ip"><a target="_blank" rel="noopener noreferrer" href="http://10.0.0.117:9120/">10.0.0.117:9120</a></td><td>Komodo-kontroll</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
 
 
 </tbody></table></div></td></tr>
@@ -330,8 +330,8 @@ footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-
       <div class="guest"><span class="g"><span class="vt gv">VM</span><b>homeassistant</b> 100</span><span class="ip">10.0.0.7</span></div>
       <div class="guest"><span class="g"><span class="vt gt">CT</span><b>Komodo-core</b> 110</span><span class="ip">10.0.0.117</span></div>
       <div class="svc-list"><i>Legacy service references; Komodo Core is on pc9/CT110</i></div>
-      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>pihole-pc8</b> 115</span><span class="ip">10.0.0.115</span></div>
-      <div class="svc-list">DNS1</div>
+      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>pihole-pc6</b> 101</span><span class="ip">10.0.0.115</span></div>
+      <div class="svc-list">DNS1 · status via trafikklys</div>
       <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct110-node</b> 110</span><span class="ip">10.0.0.129</span></div>
     </div>
     <div class="node">
@@ -390,7 +390,7 @@ footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-
 
 <div class="note">
 <b>Verifiserte fakta (12. okt):</b><br>
-• <b>Gjesteplassering</b> hentet levende fra Proxmox: ct105/150/157 og de øvrige workload-CT-ene ligger på <b>pc6</b>; ct102/350 ligger på <b>pc1</b>; Tunarr/legacy- og reservegjester ligger på <b>pc9</b> eller <b>pve</b> etter live Proxmox-status.<br>
+• <b>Gjesteplassering</b> hentet levende fra Proxmox: CT105/CT150/CT130 og de øvrige workload-CT-ene ligger på <b>pc6</b>; CT102/CT350 ligger på <b>pc1</b>; Tunarr/legacy- og reservegjester ligger på <b>pc9</b> eller <b>pve</b> etter live Proxmox-status.<br>
 • <b>ct107/108/159/160</b> er arkiverte legacy-CT-er fra Unraid/Tower, med vilje — kommer opp ved behov (bl.a. Plex/Jellyfin, Lancache).<br>
 • <b>Sonos:</b> ARP viser 7; de to Sonos One (Arc-surround) er lagt til som offline nedenfor. Totalt 9.<br>
 • <b>ESP ×5</b> i ARP inkl. EspMedia 10.1″ på <b>.48</b>.
@@ -530,7 +530,7 @@ offline.forEach(o=>{
 })();
 </script>
 <div class="note"><b>Endringsnotat v2.050 (23. okt 2026):</b> CT105 mediespillere og CT150 browsers er gjenopprettet fra verifisert backup på pc6 og står stoppet til de skal brukes. PC1 beholder AI-CT350 med RTX 3070 passthrough.</div>
-<div class="note"><b>Revisjon v2.053 (27. okt 2026):</b> Proxmox-revisjon verifiserer 36 gjester: 34 CT-er og VM 100 + VM 201. Alle 36 VMID-er finnes i dette kartet. Komodo-revisjonen viser at live Komodo har 50 stack-definisjoner, men ikke én stack/server for hver Proxmox-gjest: enkelte CT-er mangler stack, og flere stacker har <code>unknown</code>/<code>down</code>/<code>restarting</code>/<code>unhealthy</code>. Strømknappene i kartet går via audit-API-et på <code>10.0.0.135:9118/control</code> og er ikke det samme som at en Komodo-stack finnes. Derfor er Komodo-dekning er delvis verifisert: live Komodo har 23 servere og 50 stack-definisjoner. 36 VMID-er er kartlagt, men ikke alle VMID-er har egen Komodo-server/stack; kartets start/stopp-kontroller må derfor ikke tolkes som full Komodo-dekning.</div>
+<div class="note"><b>Revisjon v2.062 (28. okt 2026):</b> Proxmox-revisjon verifiserer 36 gjester: 34 CT-er og VM 100 + VM 201. Alle 36 VMID-er finnes i dette kartet. Komodo-revisjonen viser at live Komodo har 50 stack-definisjoner, men ikke én stack/server for hver Proxmox-gjest: enkelte CT-er mangler stack, og flere stacker har <code>unknown</code>/<code>down</code>/<code>restarting</code>/<code>unhealthy</code>. Strømknappene i kartet går via audit-API-et på <code>10.0.0.135:9118/control</code> og er ikke det samme som at en Komodo-stack finnes. Derfor er Komodo-dekning er delvis verifisert: live Komodo har 23 servere og 50 stack-definisjoner. 36 VMID-er er kartlagt, men ikke alle VMID-er har egen Komodo-server/stack; kartets start/stopp-kontroller må derfor ikke tolkes som full Komodo-dekning.</div>
 <div class="note"><b>Endringsnotat v2.052 (26. okt 2026):</b> PC9 CT104 <code>pc9-observability</code> er lagt inn etter Proxmox-, Komodo- og runtime-verifisering. Den kjører Prometheus, Alertmanager og Blackbox på 10.0.0.126 og overvåker Emby, begge Tunarr-instansene og PC6.</div>
 
 <div class="note" style="border:1px solid var(--svc);padding:10px 12px;margin:10px 0;color:var(--text)"><b>Publiseringsregler:</b> Endre bare Git-kilden. Arkiver forrige versjon, oppdater historikken, verifiser mot Proxmox/Docker, commit + push til main, og publiser med <code>/usr/local/sbin/deploy-network-map</code> fra repoet på CT120. Feil rettes alltid i en ny versjon. Full regel: <code>docs/network-map/PUBLISHING.md</code>.</div>
