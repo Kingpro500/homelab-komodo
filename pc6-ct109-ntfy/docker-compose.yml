@@ -1,0 +1,16 @@
+services:
+  ntfy:
+    image: binwied/ntfy:latest
+    container_name: ntfy
+    restart: unless-stopped
+    command: serve
+    ports:
+      - "2586:80"
+    volumes:
+      - /opt/ntfy/cache:/var/cache/ntfy
+      - /opt/ntfy/etc:/etc/ntfy
+    environment:
+      NTFY_BASE_URL: http://10.0.0.166:2586
+      NTFY_CACHE_FILE: /var/cache/ntfy/cache.db
+      NTFY_AUTH_FILE: /var/cache/ntfy/user.db
+      NTFY_AUTH_DEFAULT_ACCESS: deny-all
