@@ -45,6 +45,7 @@ running service.
 | WAN offentlig IP-vakt | hvert 6. time | [docs/wan-offentlig-ip-vakt.md](docs/wan-offentlig-ip-vakt.md) | [workflows/wan-offentlig-ip-vakt.json](workflows/wan-offentlig-ip-vakt.json) |
 | Lagring - full-fremskrivning | daglig 08:30 | [docs/lagring-full-fremskrivning.md](docs/lagring-full-fremskrivning.md) | [workflows/lagring-full-fremskrivning.json](workflows/lagring-full-fremskrivning.json) |
 | Emby - overvaaking og autorestart (**deaktivert, supersedert av Media health**) | ingen; beholdt som historikk | [docs/emby-overvaaking-autorestart.md](docs/emby-overvaaking-autorestart.md) | [workflows/emby-overvaaking-autorestart.json](workflows/emby-overvaaking-autorestart.json) |
+| CT reconcile orchestrator (generisk VMID) | webhook `/ct-reconcile` | [docs/ct-reconcile-orchestrator.md](docs/ct-reconcile-orchestrator.md) | [workflows/ct-reconcile-orchestrator.json](workflows/ct-reconcile-orchestrator.json) |
 | Homelab-ressurs-alarmer | Alertmanager webhook | [docs/homelab-ressurs-alarmer.md](docs/homelab-ressurs-alarmer.md) | [workflows/homelab-ressurs-alarmer.json](workflows/homelab-ressurs-alarmer.json) |
 | Hendelseslogg - FerretDB | webhook `/events` | [docs/hendelseslogg-ferretdb.md](docs/hendelseslogg-ferretdb.md) | [workflows/hendelseslogg-ferretdb.json](workflows/hendelseslogg-ferretdb.json) |
 | AI-modus – frigjør PC1 | webhook `/ai-start` + `/ai-stop` | [docs/ai-modus-frigjor-pc1.md](docs/ai-modus-frigjor-pc1.md) | [workflows/ai-modus-frigjor-pc1.json](workflows/ai-modus-frigjor-pc1.json) |
