@@ -143,7 +143,7 @@ footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-
   <button id="sw-token-save" class="sw-btn">Lagre</button><button id="tok-edit" class="sw-btn" title="endre token" style="display:none">✎</button>
   <span id="sw-token-msg" style="color:var(--lan);font-size:11px"></span>
   <span style="color:var(--dim);font-size:11px" id="sw-meta"></span>
-  <span style="color:var(--muted);margin-left:6px">📜 versjon <b>2.063</b> · <a target="_blank" rel="noopener noreferrer" href="versions/">historikk</a></span>
+  <span style="color:var(--muted);margin-left:6px">📜 versjon <b>2.064</b> · <a target="_blank" rel="noopener noreferrer" href="versions/">historikk</a></span>
 </div>
 
 <h1>🏠 Homelab — tjenester &amp; nettverk <span style="color:var(--lan)">10.0.0.0/24</span></h1>
@@ -536,7 +536,7 @@ offline.forEach(o=>{
 })();
 </script>
 <div class="note"><b>Endringsnotat v2.050 (23. okt 2026):</b> CT105 mediespillere og CT150 browsers er gjenopprettet fra verifisert backup på pc6 og står stoppet til de skal brukes. PC1 beholder AI-CT350 med RTX 3070 passthrough.</div>
-<div class="note"><b>Revisjon v2.063 (28. okt 2026):</b> Proxmox-revisjon verifiserer 36 gjester: 34 CT-er og VM 100 + VM 201. Alle 36 VMID-er finnes i dette kartet. Komodo-revisjonen viser at live Komodo har 50 stack-definisjoner, men ikke én stack/server for hver Proxmox-gjest: enkelte CT-er mangler stack, og flere stacker har <code>unknown</code>/<code>down</code>/<code>restarting</code>/<code>unhealthy</code>. Strømknappene i kartet går via audit-API-et på <code>10.0.0.135:9118/control</code> og er ikke det samme som at en Komodo-stack finnes. Derfor er Komodo-dekning er delvis verifisert: live Komodo har 23 servere og 50 stack-definisjoner. 36 VMID-er er kartlagt, men ikke alle VMID-er har egen Komodo-server/stack; kartets start/stopp-kontroller må derfor ikke tolkes som full Komodo-dekning.</div>
+<div class="note"><b>Revisjon v2.064 (29. okt 2026):</b> Live Proxmox-inventar er kontrollert på nytt: 38 gjester totalt, bestående av 36 CT-er og 2 VM-er. Alle 38 VMID-er finnes i kartet. CT111 og CT392 ble først lagt inn med verifisert live-status i parentes og er nå en del av kartets ordinære oversikt. Tallet 38 gjelder Proxmox-gjester, ikke CT340-containere; CT340 er én enkelt LXC-container. Komodo-dekning og Proxmox-gjestetall er separate målinger.</div>
 <div class="note"><b>Endringsnotat v2.052 (26. okt 2026):</b> PC9 CT104 <code>pc9-observability</code> er lagt inn etter Proxmox-, Komodo- og runtime-verifisering. Den kjører Prometheus, Alertmanager og Blackbox på 10.0.0.126 og overvåker Emby, begge Tunarr-instansene og PC6.</div>
 
 <div class="note" style="border:1px solid var(--svc);padding:10px 12px;margin:10px 0;color:var(--text)"><b>Publiseringsregler:</b> Endre bare Git-kilden. Arkiver forrige versjon, oppdater historikken, verifiser mot Proxmox/Docker, commit + push til main, og publiser med <code>/usr/local/sbin/deploy-network-map</code> fra repoet på CT120. Feil rettes alltid i en ny versjon. Full regel: <code>docs/network-map/PUBLISHING.md</code>.</div>
