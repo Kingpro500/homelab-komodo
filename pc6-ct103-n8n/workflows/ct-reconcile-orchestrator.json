@@ -1,0 +1,64 @@
+{
+  "name": "CT reconcile orchestrator (generic VMID)",
+  "nodes": [
+    {
+      "id": "ct-reconcile-webhook",
+      "name": "Receive CT reconcile request",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ct-reconcile",
+        "responseMode": "onReceived",
+        "options": {}
+      }
+    },
+    {
+      "id": "ct-reconcile-normalize",
+      "name": "Validate VMID and build job key",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [500, 300],
+      "parameters": {
+        "jsCode": "const body = $json.body ?? $json;\nconst raw = body.vmid ?? body.ct ?? body.ct_number;\nconst vmid = Number(raw);\nif (!Number.isInteger(vmid) || vmid < 100 || vmid > 999999) throw new Error('invalid_vmid');\nconst action = body.requested_action ?? 'reconcile';\nif (!['inspect','reconcile','deploy','repair'].includes(action)) throw new Error('invalid_action');\nconst startPolicy = body.start_policy ?? 'approval_required';\nif (!['never','approval_required'].includes(startPolicy)) throw new Error('invalid_start_policy');\nreturn [{ json: { vmid, requested_action: action, start_policy: startPolicy, mode: 'continue_until_done', job_key: `ct:${vmid}:${action}`, correlation_id: `ct-${vmid}-${Date.now()}` } }];"
+      }
+    },
+    {
+      "id": "ct-reconcile-submit",
+      "name": "Submit to Hermes durable runner",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [760, 300],
+      "parameters": {
+        "url": "http://10.0.0.135:9118/ct-reconcile",
+        "method": "POST",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": { "timeout": 30000 }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "onError": "stopWorkflow"
+    }
+  ],
+  "connections": {
+    "Receive CT reconcile request": { "main": [[{ "node": "Validate VMID and build job key", "type": "main", "index": 0 }]] },
+    "Validate VMID and build job key": { "main": [[{ "node": "Submit to Hermes durable runner", "type": "main", "index": 0 }]] }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "executionTimeout": 60
+  }
+}
