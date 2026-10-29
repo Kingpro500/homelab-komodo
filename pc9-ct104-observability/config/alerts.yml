@@ -36,6 +36,26 @@ groups:
         for: 5m
         labels: {severity: critical, service: emby, node: pc6}
         annotations: {summary: "Emby CT200 disk metric is missing", description: "Disk protection is not operational; do not declare Emby monitoring complete."}
+      - alert: EmbyTranscodeExporterMissing
+        expr: absent(emby_transcode_collector_success{job="emby-transcode-exporter"}) or emby_transcode_collector_success{job="emby-transcode-exporter"} == 0
+        for: 5m
+        labels: {severity: critical, service: emby, node: pc6}
+        annotations: {summary: "Emby transcode collector is missing or failing", description: "Read-only transcode performance monitoring is unavailable; no restart is permitted based on this signal."}
+      - alert: EmbyTranscodeBelowRealtime
+        expr: emby_transcode_speed_ratio{job="emby-transcode-exporter"} >= 0 and emby_transcode_speed_ratio{job="emby-transcode-exporter"} < 1
+        for: 2m
+        labels: {severity: warning, service: emby, node: pc6}
+        annotations: {summary: "Emby transcoding is below realtime", description: "An active FFmpeg job is slower than realtime; alert only, no automatic restart or process termination."}
+      - alert: EmbyTranscodeCriticallySlow
+        expr: emby_transcode_speed_ratio{job="emby-transcode-exporter"} >= 0 and emby_transcode_speed_ratio{job="emby-transcode-exporter"} < 0.85
+        for: 2m
+        labels: {severity: critical, service: emby, node: pc6}
+        annotations: {summary: "Emby transcoding is critically slow", description: "FFmpeg is below 0.85x realtime; inspect subtitle/overlay and active sessions. Do not restart while streaming."}
+      - alert: EmbyTranscodeOverlayActive
+        expr: emby_transcode_overlay_jobs{job="emby-transcode-exporter"} > 0
+        for: 5m
+        labels: {severity: warning, service: emby, node: pc6}
+        annotations: {summary: "Emby transcode uses CPU overlay or hardware transfers", description: "Read-only diagnostic signal for hwdownload/hwupload/overlay pipeline."}
       - alert: TunarrUnavailable
         expr: probe_success{instance="http://10.0.0.123:8005/web/"} == 0
         for: 2m
