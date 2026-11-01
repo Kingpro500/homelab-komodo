@@ -1,0 +1,23 @@
+services:
+  ntp:
+    image: cturra/ntp:latest
+    container_name: ct112-ntp
+    restart: unless-stopped
+    read_only: true
+    ports:
+      - "123:123/udp"
+    environment:
+      NTP_SERVERS: "time.cloudflare.com,time1.google.com,time2.google.com,time3.google.com,time4.google.com"
+      LOG_LEVEL: "0"
+      NOCLIENTLOG: "true"
+      TZ: "Europe/Oslo"
+    tmpfs:
+      - /etc/chrony:rw,mode=1750
+      - /run/chrony:rw,mode=1750
+      - /var/lib/chrony:rw,mode=1750
+    healthcheck:
+      test: ["CMD", "chronyc", "tracking"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
