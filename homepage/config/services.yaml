@@ -392,6 +392,16 @@
         href: https://play.sonos.com/
         description: play.sonos.com · musikk og rom
 
+- Recipes & Meals:
+    - Mealie:
+        icon: di:mealie
+        href: http://10.0.0.173:9925/
+        description: 10.0.0.173:9925 · CT116 · pc9 · oppskrifter og måltidsplanlegging
+    - Tandoor Recipes:
+        icon: mdi:food-variant
+        href: http://10.0.0.173:8080/
+        description: 10.0.0.173:8080 · CT116 · pc9 · oppskrifter og handlelister
+
 - Photos & Documents:
     - Immich:
         icon: di:immich
