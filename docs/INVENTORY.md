@@ -31,7 +31,7 @@ on pc6, pc8 or pc9. n8n used to violate this; it moved to CT 103 on pc6.
 | pc6 | 172 lxc | `pc6-ct172-pinchflat` | 10.0.0.164 | 4G | 32G | yes | 1 | | Dedikert Pinchflat-CT; app-state lokalt, Tower-media bind-mountet på `/media` |
 | pc6 | 107 lxc | `pc6-ct107-mediespillere-gammel` | 10.0.0.160 | 2G | 64G | no (autostart av) | 0 | `pc6-ct107-mediespillere` | Plex + Jellyfin, flyttet fra Unraid-Docker. Midlertidig oppryddings-CT, stoppes etter test |
 | pc9 | 107 lxc | `pc9-ct107-threadfin-test` | 10.0.0.130 | 1G | 8G | yes | 1 | | Komodo/Periphery-administrert Threadfin IPTV/tuner; web UI :34400 |
-| pc6 | 108 lxc | `pc6-ct108-legacy-dockere-gammel` | 10.0.0.161 | 1.5G | 40G | no (autostart av) | 0 | `pc6-ct108-legacy-dockere` | iPXE-buildweb, netbootxyz, openvscode-server, Flame, 4get, Linkding, unraid-moni, cloudflared, Valheim-data. Flyttet fra Unraid-Docker; manuell docker, midlertidig |
+| pc6 | 108 lxc | `ct108-legacy-dockere-gammel` | 10.0.0.161 | 1.5G | 40G | stopped | 0 | `pc6-ct108-legacy-dockere` | Legacy archive: iPXE-buildweb, netbootxyz, openvscode-server, Flame, 4get, Linkding, unraid-moni, cloudflared and Valheim data. No Compose found under `/opt`, `/root`, or `/srv`; GitHub has README only |
 | pc6 | 109 lxc | **`ntfy`** | 10.0.0.166 | 1G | 8G | yes | 1 | `pc6-ct109-ntfy` | Dedicated ntfy notification service, Komodo-managed |
 | pc9 | 111 lxc | `pc6-ct111-iventoy` | 10.0.0.134 | 1G | 16G | yes | 1 | | iVentoy PXE boot (moved from pc6). WebUI :26000 |
 | pc6 | 151 lxc | **`emby-pc6`** | 10.0.0.150 | 8G | 256G | yes | 1 | `pc6-ct151-emby` | Active Emby. Transcoding should use the N355 iGPU |
@@ -43,8 +43,10 @@ on pc6, pc8 or pc9. n8n used to violate this; it moved to CT 103 on pc6.
 | pc6 | 180 lxc | `pc6-ct180-matrix` | 10.0.0.120 | — | — | no | 0 | | Synapse og `hermes-ai-matrix.service`; Matrix-bot for Home Assistant, Sonos og stuelampe. Se [dokumentasjon](hermes-matrix-ai.md) |
 | pc9 | 106 lxc | **`pc9-ct106-tunarr`** | 10.0.0.122 | 4G | 19G | yes | 1 | | Dedicated Tunarr CT; autostart disabled |
 | pc9 | 108 lxc | **`docker-test`** | 10.0.0.130 | 1G | 8G | yes | 0 | *delete* | **Unused.** No stacks, not in Homepage, not mentioned anywhere. 1 GB RAM for nothing |
-| pc6 | 159 lxc | `pc6-ct159-audiobookshelf-ngrok-gammel` | 10.0.0.162 | 1G | 8G | no | 0 | | Audiobookshelf- og ngrok-oppsett arkivert fra Tower. Stoppet; autostart av. |
-| pc6 | 160 lxc | `pc6-ct160-lancache-gammel` | 10.0.0.163 | 1G | 8G | no | 0 | | Lancache- og Lancache-DNS-oppsett arkivert fra Tower. Stoppet; autostart av. |
+| pc6 | 235 lxc | `ct159-audiobookshelf-ngrok-gammel` | 10.0.0.162 | 1G | 8G | stopped | 0 | | Audiobookshelf/ngrok archive. GitHub only has legacy Audiobookshelf source under `pc6-ct109-audiobookshelf`; no current ngrok source. Existing Proxmox `lock: mounted` left untouched |
+| pc6 | 240 lxc | `ct160-lancache-gammel` | 10.0.0.163 | 1G | 8G | stopped | 0 | | Lancache archive. Local source exists at `/opt/legacy-services/docker-compose.yml`; not represented in GitHub or Komodo |
+| pc6 | 390 lxc | `ct112-openwebui-gjeld-gammel` | 10.0.0.164 | 2G | 20G | stopped | 0 | | Gjeld archive. Local source exists at `/opt/gjeld/docker-compose.yml`; related Paperless files are not a CT390 deployment source |
+| pc6 | 392 lxc | `ct114-dashboards-gammel` | 10.0.0.166 | 2G | 24G | stopped | 0 | | Dashboard/DiskSpeed archive. Local DiskSpeed source exists at `/opt/diskspeed/docker-compose.yml`; no matching Komodo resource. `onboot=1` conflicts with archived status |
 | pc9 | 116 lxc | `pihole-pc9` | 10.0.0.116 | 1G | 8G | yes | 1 | | Pi-hole DNS, upstream Unbound |
 | pve | 100 qemu | `homeassistant` | 10.0.0.7 | 9G | — | no (VM) | 0 | | Home Assistant, a VM not a container. 1834 entities |
 | pc9 | 110 lxc | **`ct102-komodo-core`** | 10.0.0.117 | 3G | 36G | yes | 3 | `pc9-ct110-core` | Active Komodo Core with FerretDB v2. GitOps source mirrors `/opt/komodo/ferretdb.compose.yaml` plus `compose.performance.yaml` |
