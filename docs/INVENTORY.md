@@ -36,7 +36,7 @@ on pc6, pc8 or pc9. n8n used to violate this; it moved to CT 103 on pc6.
 | pc9 | 111 lxc | `pc6-ct111-iventoy` | 10.0.0.134 | 1G | 16G | yes | 1 | | iVentoy PXE boot (moved from pc6). WebUI :26000 |
 | pc6 | 151 lxc | **`emby-pc6`** | 10.0.0.150 | 8G | 256G | yes | 1 | `pc6-ct151-emby` | Active Emby. Transcoding should use the N355 iGPU |
 | pc6 | 161 lxc | `pc6-ct161-krusader` | 10.0.0.142 | 2G | 16G | yes | 1 | | Dedicated Krusader (web twin-pane file manager over Unraid media NFS). Privileged, debian-13, start/stop-able CT. Self-managed docker compose (not Komodo) |
-| pc9 | 152 lxc | `pc6-ct152-roon` | 10.0.0.125 | 2G | 32G | yes | 1 | | Roon server (moved from pc6). Startup via 9330. Gemountet /music + /backup |
+| pc9 | 220 lxc | `ct152-roon` | 10.0.0.125 | 2G | 32G | yes (stopped) | 1 | `pc9-ct220-roon` | Roon server, currently stopped. Komodo/GitHub-stack `pc6-ct152-roon` is the verified legacy mapping from before the move/renumbering. Mounted `/music` + `/backup` |
 | pc9 | 153 lxc | `pc6-ct153-immich` | 10.0.0.127 | 4G | 64G | yes | 1 | | Photo library (moved from pc6). USB-dongle på Flex Mini 2.5G; iGPU /dev/dri passthrough |
 | pc9 | 154 lxc | `pc6-ct154-paperless` | 10.0.0.131 | 2G | 64G | yes | 1 | | Documents and scanning (moved from pc6) |
 | pc9 | 155 lxc | `pc6-ct155-unifi` | 10.0.0.132 | 2G | 16G | yes | 1 | | UniFi Network Controller (moved from pc6) |
@@ -47,7 +47,7 @@ on pc6, pc8 or pc9. n8n used to violate this; it moved to CT 103 on pc6.
 | pc6 | 160 lxc | `pc6-ct160-lancache-gammel` | 10.0.0.163 | 1G | 8G | no | 0 | | Lancache- og Lancache-DNS-oppsett arkivert fra Tower. Stoppet; autostart av. |
 | pc9 | 116 lxc | `pihole-pc9` | 10.0.0.116 | 1G | 8G | yes | 1 | | Pi-hole DNS, upstream Unbound |
 | pve | 100 qemu | `homeassistant` | 10.0.0.7 | 9G | — | no (VM) | 0 | | Home Assistant, a VM not a container. 1834 entities |
-| pc9 | 110 lxc | **`Komodo-core`** | 10.0.0.117 | 1G | 36G | yes | 3 | `pc9-ct110-core` | Komodo API |
+| pc9 | 110 lxc | **`ct102-komodo-core`** | 10.0.0.117 | 3G | 36G | yes | 3 | `pc9-ct110-core` | Active Komodo Core with FerretDB v2. GitOps source mirrors `/opt/komodo/ferretdb.compose.yaml` plus `compose.performance.yaml` |
 | pve | 110 lxc | `pc8-ct110-node` | 10.0.0.129 | 2G | 16G | yes | 0 | | Periphery agent, no stacks |
 | pve | 115 lxc | `pihole-pc8` | 10.0.0.115 | 1G | 8G | yes | 1 | | Pi-hole DNS, upstream Unbound |
 

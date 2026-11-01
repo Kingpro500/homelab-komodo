@@ -1,6 +1,8 @@
 .env
 .env.*
 !.env.example
+compose.env
+!compose.env.example
 *.secret
 *.key
 *.pem
