@@ -1,0 +1,8 @@
+---
+# Docker engine access for the Homepage container.
+# Homepage shares /var/run/docker.sock (read-only) with every container on
+# CT109 (10.0.0.128), so "ct109" watches all 22 containers on that host.
+# Reference: https://gethomepage.dev/configs/docker/
+
+ct109:
+  socket: /var/run/docker.sock

@@ -18,4 +18,5 @@ indeksen med linker.)
 
 | Versjon | Dato | Commit | Endring | Snapshot |
 |---|---|---|---|---|
+| v002 | 2026-11-01 | PR #50 | Mealie og Tandoor Recipes på pc9 CT116 | [v002](v002/) |
 | v001 | 2026-10-08 | (restaurert) | Proxmox-gruppa (pc1/pc6/pc9/pve+Tower) **øverst**, fjerne ødelagte proxmox-widgeter, CDN-ikoner, dokcerstatus, hastighetsmetre, dockctl | [v001](v001/) |
