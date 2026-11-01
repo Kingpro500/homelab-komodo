@@ -1,0 +1,73 @@
+services:
+  mealie:
+    image: ghcr.io/mealie-recipes/mealie:v3.29.0
+    container_name: mealie
+    restart: unless-stopped
+    ports:
+      - "9925:9000"
+    environment:
+      ALLOW_SIGNUP: "true"
+      PUID: "1000"
+      PGID: "1000"
+      TZ: Europe/Oslo
+      BASE_URL: http://10.0.0.173:9925
+    volumes:
+      - /opt/mealie/data:/app/data
+    mem_limit: 768m
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  tandoor-db:
+    image: postgres:16-alpine
+    container_name: tandoor-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: djangodb
+      POSTGRES_USER: djangouser
+      POSTGRES_PASSWORD: ${TANDOOR_DB_PASSWORD}
+    volumes:
+      - /opt/tandoor/postgresql:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U djangouser -d djangodb"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  tandoor:
+    image: vabene1111/recipes:latest
+    container_name: tandoor
+    restart: unless-stopped
+    depends_on:
+      tandoor-db:
+        condition: service_healthy
+    ports:
+      - "8080:80"
+    environment:
+      SECRET_KEY: ${TANDOOR_SECRET_KEY}
+      DB_ENGINE: django.db.backends.postgresql
+      POSTGRES_HOST: tandoor-db
+      POSTGRES_PORT: "5432"
+      POSTGRES_DB: djangodb
+      POSTGRES_USER: djangouser
+      POSTGRES_PASSWORD: ${TANDOOR_DB_PASSWORD}
+      ALLOWED_HOSTS: 10.0.0.173,localhost,tandoor
+      TZ: Europe/Oslo
+    volumes:
+      - tandoor-static:/opt/recipes/staticfiles
+      - /opt/tandoor/media:/opt/recipes/mediafiles
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  tandoor-static:
