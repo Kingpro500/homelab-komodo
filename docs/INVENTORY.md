@@ -43,10 +43,10 @@ on pc6, pc8 or pc9. n8n used to violate this; it moved to CT 103 on pc6.
 | pc6 | 180 lxc | `pc6-ct180-matrix` | 10.0.0.120 | — | — | no | 0 | | Synapse og `hermes-ai-matrix.service`; Matrix-bot for Home Assistant, Sonos og stuelampe. Se [dokumentasjon](hermes-matrix-ai.md) |
 | pc9 | 106 lxc | **`pc9-ct106-tunarr`** | 10.0.0.122 | 4G | 19G | yes | 1 | | Dedicated Tunarr CT; autostart disabled |
 | pc9 | 108 lxc | **`docker-test`** | 10.0.0.130 | 1G | 8G | yes | 0 | *delete* | **Unused.** No stacks, not in Homepage, not mentioned anywhere. 1 GB RAM for nothing |
-| pc6 | 235 lxc | `ct159-audiobookshelf-ngrok-gammel` | 10.0.0.162 | 1G | 8G | stopped | 0 | | Audiobookshelf/ngrok archive. GitHub only has legacy Audiobookshelf source under `pc6-ct109-audiobookshelf`; no current ngrok source. Existing Proxmox `lock: mounted` left untouched |
+| pc6 | 235 lxc | `ct159-audiobookshelf-ngrok-gammel` | 10.0.0.162 | 1G | 8G | stopped | 0 | | Audiobookshelf/ngrok archive. GitHub only has legacy Audiobookshelf source under `pc6-ct109-audiobookshelf`; no current ngrok source. Stale Proxmox mount lock cleared 2026-11-01 |
 | pc6 | 240 lxc | `ct160-lancache-gammel` | 10.0.0.163 | 1G | 8G | stopped | 0 | | Lancache archive. Local source exists at `/opt/legacy-services/docker-compose.yml`; not represented in GitHub or Komodo |
 | pc6 | 390 lxc | `ct112-openwebui-gjeld-gammel` | 10.0.0.164 | 2G | 20G | stopped | 0 | | Gjeld archive. Local source exists at `/opt/gjeld/docker-compose.yml`; related Paperless files are not a CT390 deployment source |
-| pc6 | 392 lxc | `ct114-dashboards-gammel` | 10.0.0.166 | 2G | 24G | stopped | 0 | | Dashboard/DiskSpeed archive. Local DiskSpeed source exists at `/opt/diskspeed/docker-compose.yml`; no matching Komodo resource. `onboot=1` conflicts with archived status |
+| pc6 | 392 lxc | `ct114-dashboards-gammel` | 10.0.0.166 | 2G | 24G | stopped | 0 | | Dashboard/DiskSpeed archive. Local DiskSpeed source exists at `/opt/diskspeed/docker-compose.yml`; no matching Komodo resource. Autostart disabled 2026-11-01 |
 | pc9 | 116 lxc | `pihole-pc9` | 10.0.0.116 | 1G | 8G | yes | 1 | | Pi-hole DNS, upstream Unbound |
 | pve | 100 qemu | `homeassistant` | 10.0.0.7 | 9G | — | no (VM) | 0 | | Home Assistant, a VM not a container. 1834 entities |
 | pc9 | 110 lxc | **`ct102-komodo-core`** | 10.0.0.117 | 3G | 36G | yes | 3 | `pc9-ct110-core` | Active Komodo Core with FerretDB v2. GitOps source mirrors `/opt/komodo/ferretdb.compose.yaml` plus `compose.performance.yaml` |
