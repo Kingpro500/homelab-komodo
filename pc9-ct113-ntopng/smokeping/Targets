@@ -1,0 +1,74 @@
+*** Targets ***
+
+probe = FPing
+
+menu = Homelab
+title = Homelab latency
+remark = Latency and packet loss from CT113 on pc9
+
++ Infrastructure
+menu = Infrastructure
+title = Core infrastructure
+
+++ OPNsense
+menu = OPNsense
+title = OPNsense gateway
+host = 10.0.0.1
+
+++ pc8
+menu = pc8
+title = Proxmox pc8
+host = 10.0.0.102
+
+++ pc9
+menu = pc9
+title = Proxmox pc9
+host = 10.0.0.103
+
+++ pc1
+menu = pc1
+title = Proxmox pc1
+host = 10.0.0.112
+
+++ pc6
+menu = pc6
+title = Proxmox pc6
+host = 10.0.0.120
+
++ NetworkServices
+menu = Network services
+title = DNS and time services
+
+++ PiHolePC8
+menu = Pi-hole pc8
+title = Pi-hole pc8
+host = 10.0.0.115
+
+++ PiHolePC9
+menu = Pi-hole pc9
+title = Pi-hole pc9
+host = 10.0.0.116
+
+++ TimeServer
+menu = Time server
+title = Local NTP server
+host = 10.0.0.170
+
++ Internet
+menu = Internet
+title = External connectivity
+
+++ Cloudflare
+menu = Cloudflare
+title = Cloudflare DNS
+host = 1.1.1.1
+
+++ Quad9
+menu = Quad9
+title = Quad9 DNS
+host = 9.9.9.9
+
+++ Google
+menu = Google
+title = Google DNS
+host = 8.8.8.8

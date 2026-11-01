@@ -33,6 +33,7 @@ services:
     volumes:
       - /opt/smokeping/config:/config
       - /opt/smokeping/data:/data
+      - ./smokeping/Targets:/config/Targets
     logging:
       driver: json-file
       options:
