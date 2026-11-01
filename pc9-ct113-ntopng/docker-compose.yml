@@ -18,3 +18,23 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+
+  smokeping:
+    image: lscr.io/linuxserver/smokeping:latest
+    container_name: smokeping
+    hostname: smokeping
+    restart: unless-stopped
+    environment:
+      PUID: "1000"
+      PGID: "1000"
+      TZ: Europe/Oslo
+    ports:
+      - "3001:80"
+    volumes:
+      - /opt/smokeping/config:/config
+      - /opt/smokeping/data:/data
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
