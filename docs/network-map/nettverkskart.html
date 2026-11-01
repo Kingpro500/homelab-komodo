@@ -143,14 +143,14 @@ footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-
   <button id="sw-token-save" class="sw-btn">Lagre</button><button id="tok-edit" class="sw-btn" title="endre token" style="display:none">✎</button>
   <span id="sw-token-msg" style="color:var(--lan);font-size:11px"></span>
   <span style="color:var(--dim);font-size:11px" id="sw-meta"></span>
-  <span style="color:var(--muted);margin-left:6px">📜 versjon <b>2.066</b> · <a target="_blank" rel="noopener noreferrer" href="versions/">historikk</a></span>
+  <span style="color:var(--muted);margin-left:6px">📜 versjon <b>2.067</b> · <a target="_blank" rel="noopener noreferrer" href="versions/">historikk</a></span>
 </div>
 
 <h1>🏠 Homelab — tjenester &amp; nettverk <span style="color:var(--lan)">10.0.0.0/24</span></h1>
 
 <div class="sub">Intern startside · Proxmox-kluster «CyberCluster» · OPNsense pc7 (brannmur)</div>
 <div class="note" style="margin:8px 0 12px"><b>📌 Kartregler:</b> <a target="_blank" rel="noopener noreferrer" href="PUBLISHING.md">PUBLISHING.md</a> i Git-repoet <code>homelab-komodo/docs/network-map/</code>. Følg dem før alle endringer og publiseringer.</div>
-<div class="meta">Verifisert 1. nov 2026 mot live Proxmox-inventar, Komodo og kartserveren. Proxmox viser fortsatt 38 gjester og kartet dekker 38/38 VMID-er. Tjeneste-/IP-felter oppdateres fortløpende når live-data bekrefter endringer. Kilder: OPNsense-ARP (48 enheter) · Proxmox-API (4 noder, CPU fra <code>/nodes/*/status</code>, gjester + IP fra config) · levende docker-inventar i hver CT · Komodo. «Inaktiv/» = finnes, men er av. CT-er merket er nede med vilje (arkivert fra Tower/Unraid) og kommer opp igjen ved behov.</div>
+<div class="meta">Verifisert 1. nov 2026 mot live Proxmox-inventar, Komodo og kartserveren. Proxmox viser nå 41 gjester. Tjeneste-/IP-felter oppdateres fortløpende når live-data bekrefter endringer. Kilder: OPNsense-ARP (48 enheter) · Proxmox-API (4 noder, CPU fra <code>/nodes/*/status</code>, gjester + IP fra config) · levende docker-inventar i hver CT · Komodo. «Inaktiv/» = finnes, men er av. CT-er merket er nede med vilje (arkivert fra Tower/Unraid) og kommer opp igjen ved behov.</div>
 
 <tr class="vm-frame-row"><td colspan="6"><div class="vm-frame" data-vmid="180"><div class="vm-h"><span class="tag tag-ct">CT</span>CT180</div><table class="svc"><thead><tr><th>Tjeneste</th><th>Adresse</th><th>Merknad</th><th>Status</th><th>Strøm</th></tr></thead><tbody><tr><td><a target="_blank" rel="noopener noreferrer" href="http://10.0.0.180:8008/">Synapse</a></td><td class="ip"><a target="_blank" rel="noopener noreferrer" href="http://10.0.0.180:8008/">10.0.0.180:8008</a></td><td>Matrix homeserver · pc6</td><td class="st-wrap"></td><td class="g-ctl"></td></tr></tbody></table></div></td></tr>
 <!-- ============ SERVICE-OVERSIKT ============ -->
@@ -252,6 +252,7 @@ footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-
 </tbody></table></div></td></tr>
 <tr class="vm-frame-row"><td colspan="6"><div class="vm-frame" data-vmid="111"><div class="vm-h"><span class="tag tag-ct">CT</span>CT111</div><table class="svc"><thead><tr><th>Tjeneste</th><th>Adresse</th><th>Merknad</th><th>Status</th><th>Strøm</th></tr></thead><tbody><tr><td>ntfy</td><td class="ip">10.0.0.131</td><td>live Proxmox: kjører på pc9 (kartoppføring lagt inn umiddelbart)</td><td class="st-wrap"></td><td class="g-ctl"></td></tr></tbody></table></div></td></tr>
 <tr class="vm-frame-row"><td colspan="6"><div class="vm-frame" data-vmid="114"><div class="vm-h"><span class="tag tag-ct">CT</span>CT114</div><table class="svc"><thead><tr><th>Tjeneste</th><th>Adresse</th><th>Merknad</th><th>Status</th><th>Strøm</th></tr></thead><tbody><tr><td><a target="_blank" rel="noopener noreferrer" href="http://10.0.0.172:4533/">Navidrome</a></td><td class="ip"><a target="_blank" rel="noopener noreferrer" href="http://10.0.0.172:4533/">10.0.0.172:4533</a></td><td>Musikkserver · Komodo/GitOps · Tower-musikk read-only</td><td class="st-wrap"></td><td class="g-ctl"></td></tr></tbody></table></div></td></tr>
+<tr class="vm-frame-row"><td colspan="6"><div class="vm-frame" data-vmid="116"><div class="vm-h"><span class="tag tag-ct">CT</span>CT116</div><table class="svc"><thead><tr><th>Tjeneste</th><th>Adresse</th><th>Merknad</th><th>Status</th><th>Strøm</th></tr></thead><tbody><tr><td><a target="_blank" rel="noopener noreferrer" href="http://10.0.0.173:9925/">Mealie</a></td><td class="ip"><a target="_blank" rel="noopener noreferrer" href="http://10.0.0.173:9925/">10.0.0.173:9925</a></td><td>Oppskrifter og måltidsplanlegging · Komodo/GitOps</td><td class="st-wrap"></td><td class="g-ctl"></td></tr><tr><td><a target="_blank" rel="noopener noreferrer" href="http://10.0.0.173:8080/">Tandoor Recipes</a></td><td class="ip"><a target="_blank" rel="noopener noreferrer" href="http://10.0.0.173:8080/">10.0.0.173:8080</a></td><td>Oppskrifts- og handledatabase · PostgreSQL 16 · Komodo/GitOps</td><td class="st-wrap"></td><td class="g-ctl"></td></tr></tbody></table></div></td></tr>
 <tr class="vm-frame-row"><td colspan="6"><div class="vm-frame" data-vmid="104">
 <div class="vm-h"><span class="tag tag-ct">CT</span>CT104</div>
 <table class="svc"><thead><tr><th>Tjeneste</th><th>Adresse</th><th>Merknad</th><th>Status</th><th>Strøm</th></tr></thead><tbody>
@@ -367,7 +368,8 @@ footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-
       <div class="svc-list">Tunarr</div>
       <div class="guest"><span class="g"><span class="vt gt">CT</span><b>pc9-ct114-navidrome</b> 114</span><span class="ip">10.0.0.172</span></div>
       <div class="svc-list">Navidrome · Tower-musikk read-only</div>
-      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>pihole-pc9</b> 116</span><span class="ip">10.0.0.116</span></div>
+      <div class="guest"><span class="g"><span class="vt gt">CT</span><b>pc9-ct116-recipes</b> 116</span><span class="ip">10.0.0.173</span></div>
+      <div class="svc-list">Mealie · Tandoor Recipes · PostgreSQL 16</div>
       <div class="guest"><span class="g"><span class="vt gt">CT</span><b>ct152-roon</b> 152</span><span class="ip">10.0.0.125</span></div>
       <div class="guest off"><span class="g"><span class="vt gt">CT</span><b>ct153 immich</b> 153</span><span class="ip">10.0.0.127</span></div>
       <div class="guest off"><span class="g"><span class="vt gt">CT</span><b>ct154 paperless</b> 154</span><span class="ip">10.0.0.131</span></div>
@@ -539,6 +541,7 @@ offline.forEach(o=>{
 </script>
 <div class="note"><b>Endringsnotat v2.050 (23. okt 2026):</b> CT105 mediespillere og CT150 browsers er gjenopprettet fra verifisert backup på pc6 og står stoppet til de skal brukes. PC1 beholder AI-CT350 med RTX 3070 passthrough.</div>
 <div class="note"><b>Endringsnotat v2.066 (1. nov 2026):</b> Navidrome er lagt inn på PC9 CT114 etter verifisering mot Proxmox, Komodo og HTTP-helsetesten. Tjenesten kjører på <a target="_blank" rel="noopener noreferrer" href="http://10.0.0.172:4533/">10.0.0.172:4533</a> og leser Tower-biblioteket fra <code>/music</code> read-only.</div>
+<div class="note"><b>Endringsnotat v2.067 (1. nov 2026):</b> Mealie og Tandoor Recipes er lagt inn på PC9 CT116 etter verifisering mot Proxmox, Komodo, containerhelse og HTTP. Tjenestene kjører på <a target="_blank" rel="noopener noreferrer" href="http://10.0.0.173:9925/">10.0.0.173:9925</a> og <a target="_blank" rel="noopener noreferrer" href="http://10.0.0.173:8080/">10.0.0.173:8080</a>. Den foreldede CT116/Pi-hole-oppføringen er erstattet med live-inventaret.</div>
 <div class="note"><b>Revisjon v2.064 (29. okt 2026):</b> Live Proxmox-inventar er kontrollert på nytt: 38 gjester totalt, bestående av 36 CT-er og 2 VM-er. Alle 38 VMID-er finnes i kartet. CT111 og CT392 ble først lagt inn med verifisert live-status i parentes og er nå en del av kartets ordinære oversikt. Tallet 38 gjelder Proxmox-gjester, ikke CT340-containere; CT340 er én enkelt LXC-container. Komodo-dekning og Proxmox-gjestetall er separate målinger.</div>
 <div class="note"><b>Endringsnotat v2.052 (26. okt 2026):</b> PC9 CT104 <code>pc9-observability</code> er lagt inn etter Proxmox-, Komodo- og runtime-verifisering. Den kjører Prometheus, Alertmanager og Blackbox på 10.0.0.126 og overvåker Emby, begge Tunarr-instansene og PC6.</div>
 
