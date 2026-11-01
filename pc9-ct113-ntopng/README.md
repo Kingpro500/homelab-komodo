@@ -21,3 +21,22 @@ An ordinary bridged LXC interface primarily sees traffic addressed to CT113,
 plus broadcast and multicast traffic. Full-LAN analysis requires a mirrored
 switch port, a dedicated capture interface, or NetFlow/sFlow/IPFIX export from
 the router or switches to a collector.
+
+## Deferred: full-LAN traffic mirroring
+
+**Status:** Postponed until approximately 8 November 2026. Ntopng remains
+operational on `eth0` with limited visibility in the meantime.
+
+Planned implementation:
+
+1. Connect pc9's currently unused physical interface `nic0` to a dedicated
+   mirror-destination port on the EdgeSwitch 8 150W.
+2. Configure the switch to mirror the relevant LAN/uplink source port(s) to
+   that destination port. Do not reuse pc9's management port on `nic1`.
+3. Create `vmbr1` on pc9 with `nic0` as bridge port and no host IP address.
+4. Add a second CT113 interface (`eth1`) on `vmbr1` without an IP address.
+5. Change Ntopng capture from `eth0` to `eth1`, redeploy, and verify that it
+   observes traffic for hosts other than CT113 without disrupting management.
+
+Before implementation, record the chosen EdgeSwitch source and destination
+port numbers and confirm that a physical cable is connected to `nic0`.
