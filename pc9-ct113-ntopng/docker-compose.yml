@@ -1,0 +1,23 @@
+services:
+  ntopng:
+    image: ntop/ntopng:stable
+    container_name: ntopng
+    restart: unless-stopped
+    network_mode: host
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    command:
+      - --community
+      - --interface=eth0
+      - --http-port=3000
+      - --local-networks=10.0.0.0/24
+    volumes:
+      - /opt/ntopng/data:/var/lib/ntopng
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
