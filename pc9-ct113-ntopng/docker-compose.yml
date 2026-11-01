@@ -4,11 +4,8 @@ services:
     container_name: ntopng
     restart: unless-stopped
     network_mode: host
-    cap_drop:
-      - ALL
     cap_add:
       - NET_ADMIN
-      - NET_RAW
     command:
       - --community
       - --interface=eth0

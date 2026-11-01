@@ -7,7 +7,7 @@
 - **Capture interface:** `eth0`
 - **Persistent data:** `/opt/ntopng/data`
 
-The container uses host networking with only `NET_ADMIN` and `NET_RAW` added.
+The container uses host networking with Docker's default capability set plus `NET_ADMIN` for packet capture.
 Logs are bounded by Docker log rotation.
 
 ## Visibility limitation
