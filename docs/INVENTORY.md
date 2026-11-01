@@ -35,7 +35,7 @@ on pc6, pc8 or pc9. n8n used to violate this; it moved to CT 103 on pc6.
 | pc6 | 109 lxc | **`ntfy`** | 10.0.0.166 | 1G | 8G | yes | 1 | `pc6-ct109-ntfy` | Dedicated ntfy notification service, Komodo-managed |
 | pc9 | 111 lxc | `pc6-ct111-iventoy` | 10.0.0.134 | 1G | 16G | yes | 1 | | iVentoy PXE boot (moved from pc6). WebUI :26000 |
 | pc6 | 151 lxc | **`emby-pc6`** | 10.0.0.150 | 8G | 256G | yes | 1 | `pc6-ct151-emby` | Active Emby. Transcoding should use the N355 iGPU |
-| pc6 | 161 lxc | `pc6-ct161-krusader` | 10.0.0.142 | 2G | 16G | yes | 1 | | Dedicated Krusader (web twin-pane file manager over Unraid media NFS). Privileged, debian-13, start/stop-able CT. Self-managed docker compose (not Komodo) |
+| pc6 | 340 lxc | `ct161-krusader` | 10.0.0.142 | 4G | 48G | yes (stopped) | several | `pc6-ct340-krusader` | Stopped dedicated Krusader CT. Komodo server and stack are both `pc6-ct340-krusader`; GitHub run directory remains the legacy path `pc6-ct161-krusader` pending a coordinated rename |
 | pc9 | 220 lxc | `ct152-roon` | 10.0.0.125 | 2G | 32G | yes (stopped) | 1 | `pc9-ct220-roon` | Roon server, currently stopped. Komodo/GitHub-stack `pc6-ct152-roon` is the verified legacy mapping from before the move/renumbering. Mounted `/music` + `/backup` |
 | pc9 | 153 lxc | `pc6-ct153-immich` | 10.0.0.127 | 4G | 64G | yes | 1 | | Photo library (moved from pc6). USB-dongle på Flex Mini 2.5G; iGPU /dev/dri passthrough |
 | pc9 | 154 lxc | `pc6-ct154-paperless` | 10.0.0.131 | 2G | 64G | yes | 1 | | Documents and scanning (moved from pc6) |
