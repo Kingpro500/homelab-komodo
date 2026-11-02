@@ -1,0 +1,4 @@
+proxmoxer>=2.0,<3
+requests>=2.32,<3
+docker>=7,<8
+jmespath>=1,<2
