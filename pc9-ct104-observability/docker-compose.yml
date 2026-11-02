@@ -1,4 +1,16 @@
 services:
+  network-interface-exporter:
+    build:
+      context: ./network-interface-exporter
+    restart: unless-stopped
+    environment:
+      NETWORK_SYSFS_ROOT: /host/sys/class/net
+      NETWORK_INTERFACES: eth0
+      LISTEN_ADDRESS: 0.0.0.0
+      LISTEN_PORT: "9100"
+    volumes:
+      - /sys/class/net:/host/sys/class/net:ro
+
   blackbox:
     image: prom/blackbox-exporter:v0.27.0
     restart: unless-stopped
@@ -30,7 +42,7 @@ services:
       - ./config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - ./config/alerts.yml:/etc/prometheus/alerts.yml:ro
       - prometheus-data:/prometheus
-    depends_on: [blackbox, alertmanager]
+    depends_on: [blackbox, alertmanager, network-interface-exporter]
 
 volumes:
   prometheus-data:
