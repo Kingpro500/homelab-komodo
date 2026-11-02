@@ -1,6 +1,26 @@
 groups:
   - name: availability
     rules:
+      - alert: NetworkInterfaceExporterMissing
+        expr: absent(network_interface_exporter_scrape_success{job="network-interface"}) or network_interface_exporter_scrape_success{job="network-interface"} == 0
+        for: 5m
+        labels: {severity: critical, service: observability, node: pc9}
+        annotations: {summary: "PC9 network-interface metrics are missing", description: "The CT104 exporter cannot read one or more configured interface counters."}
+      - alert: NetworkInterfaceReceiveDrops
+        expr: increase(network_interface_rx_dropped_total{job="network-interface",interface="eth0"}[5m]) > 0
+        for: 2m
+        labels: {severity: warning, service: network, node: pc9}
+        annotations: {summary: "PC9 observability interface is dropping received packets"}
+      - alert: NetworkInterfaceTransmitDrops
+        expr: increase(network_interface_tx_dropped_total{job="network-interface",interface="eth0"}[5m]) > 0
+        for: 2m
+        labels: {severity: warning, service: network, node: pc9}
+        annotations: {summary: "PC9 observability interface is dropping transmitted packets"}
+      - alert: NetworkInterfaceErrors
+        expr: increase(network_interface_rx_errors_total{job="network-interface",interface="eth0"}[5m]) + increase(network_interface_tx_errors_total{job="network-interface",interface="eth0"}[5m]) > 0
+        for: 2m
+        labels: {severity: warning, service: network, node: pc9}
+        annotations: {summary: "PC9 observability interface reports network errors"}
       - alert: EmbyUnavailable
         expr: probe_success{instance="http://10.0.0.150:8096/web/"} == 0
         for: 2m
