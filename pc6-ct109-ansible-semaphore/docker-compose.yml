@@ -1,0 +1,55 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: semaphore-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: semaphore
+      POSTGRES_USER: semaphore
+      POSTGRES_PASSWORD: ${SEMAPHORE_DB_PASSWORD:?Set SEMAPHORE_DB_PASSWORD in Komodo}
+    volumes:
+      - semaphore-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U semaphore -d semaphore"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - semaphore-internal
+
+  semaphore:
+    image: semaphoreui/semaphore:v2.19.17
+    container_name: semaphore
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SEMAPHORE_DB_DIALECT: postgres
+      SEMAPHORE_DB_HOST: postgres
+      SEMAPHORE_DB_PORT: "5432"
+      SEMAPHORE_DB_NAME: semaphore
+      SEMAPHORE_DB_USER: semaphore
+      SEMAPHORE_DB_PASS: ${SEMAPHORE_DB_PASSWORD:?Set SEMAPHORE_DB_PASSWORD in Komodo}
+      SEMAPHORE_ADMIN: ${SEMAPHORE_ADMIN_USER:-admin}
+      SEMAPHORE_ADMIN_PASSWORD: ${SEMAPHORE_ADMIN_PASSWORD:?Set SEMAPHORE_ADMIN_PASSWORD in Komodo}
+      SEMAPHORE_ADMIN_NAME: ${SEMAPHORE_ADMIN_NAME:-Homelab Admin}
+      SEMAPHORE_ADMIN_EMAIL: ${SEMAPHORE_ADMIN_EMAIL:-admin@lan.local}
+      SEMAPHORE_ACCESS_KEY_ENCRYPTION: ${SEMAPHORE_ACCESS_KEY_ENCRYPTION:?Set a 32-byte base64 key in Komodo}
+      SEMAPHORE_LDAP_ACTIVATED: "no"
+      TZ: Europe/Oslo
+    ports:
+      - "3000:3000"
+    volumes:
+      - semaphore-data:/var/lib/semaphore
+      - ./requirements.txt:/etc/semaphore/requirements.txt:ro
+    networks:
+      - semaphore-internal
+
+networks:
+  semaphore-internal:
+    driver: bridge
+
+volumes:
+  semaphore-data:
+  semaphore-postgres:
