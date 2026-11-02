@@ -1,15 +1,14 @@
 services:
   network-interface-exporter:
-    build:
-      context: ./network-interface-exporter
+    image: python:3.12-alpine
     restart: unless-stopped
+    command: ["python3", "/opt/network-exporter/network_interface_exporter.py"]
     environment:
-      NETWORK_SYSFS_ROOT: /host/sys/class/net
-      NETWORK_INTERFACES: eth0
-      LISTEN_ADDRESS: 0.0.0.0
-      LISTEN_PORT: "9100"
+      NETWORK_EXPORTER_INTERFACES: "eth0"
+      NETWORK_EXPORTER_PORT: "9122"
+    ports: ["9122:9122"]
     volumes:
-      - /sys/class/net:/host/sys/class/net:ro
+      - ./scripts/network_interface_exporter.py:/opt/network-exporter/network_interface_exporter.py:ro
 
   blackbox:
     image: prom/blackbox-exporter:v0.27.0
@@ -41,8 +40,10 @@ services:
     volumes:
       - ./config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - ./config/alerts.yml:/etc/prometheus/alerts.yml:ro
+      - ./config/network-alerts.yml:/etc/prometheus/network-alerts.yml:ro
+      - ./scripts/network_interface_exporter.py:/opt/network-exporter/network_interface_exporter.py:ro
       - prometheus-data:/prometheus
-    depends_on: [blackbox, alertmanager, network-interface-exporter]
+    depends_on: [blackbox, alertmanager]
 
 volumes:
   prometheus-data:

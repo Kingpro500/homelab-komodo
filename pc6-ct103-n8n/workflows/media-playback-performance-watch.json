@@ -1,0 +1,176 @@
+{
+  "name": "Media playback performance watch",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 2
+            }
+          ]
+        }
+      },
+      "id": "9e9a3c96-4cbb-4b90-a6e2-1d4bf0c1e001",
+      "name": "Every 2 minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        260,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "http://10.0.0.135:9118/media/check",
+        "method": "POST",
+        "authentication": "predefinedCredentialType",
+        "sendHeaders": true,
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={}",
+        "options": {
+          "timeout": 590000
+        },
+        "nodeCredentialType": "httpHeaderAuth"
+      },
+      "id": "9e9a3c96-4cbb-4b90-a6e2-1d4bf0c1e002",
+      "name": "Read media and playback health",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 5000,
+      "onError": "continueRegularOutput",
+      "position": [
+        520,
+        300
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "TcgXN7shgc4X7U8w",
+          "name": "Homelab Audit Header"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const sd = $getWorkflowStaticData('global');\nconst report = $json;\nconst jobs = (((report.playback_performance || {}).jobs) || []);\nconst speeds = jobs.map(j => j.speed).filter(v => Number.isFinite(v));\nconst riskJobs = jobs.filter(j => Number.isFinite(j.speed) && j.speed < 1.0);\nconst warnJobs = jobs.filter(j => Number.isFinite(j.speed) && j.speed < 1.15);\nconst errors = jobs.filter(j => j.read_ok === false);\nconst fingerprint = riskJobs.map(j => `${j.path || j.log}:${j.speed}`).join('|') || 'healthy';\nconst now = Date.now();\nconst previous = sd.playback || { fingerprint: null, consecutiveRisk: 0, lastAlertAt: 0 };\nconst risk = riskJobs.length > 0;\nconst measurementFailure = errors.length > 0 || !report.playback_performance || !Array.isArray(report.playback_performance.jobs);\nconst measurementFingerprint = measurementFailure ? 'measurement_unavailable' : null;\nconst failureFingerprint = measurementFingerprint;\nconst consecutiveRisk = risk ? (previous.fingerprint === fingerprint ? previous.consecutiveRisk + 1 : 1) : 0;\nconst consecutiveFailure = measurementFailure ? (previous.failureFingerprint === failureFingerprint ? (previous.consecutiveFailure || 0) + 1 : 1) : 0;\nsd.playback = { fingerprint, consecutiveRisk, lastAlertAt: previous.lastAlertAt || 0, failureFingerprint, consecutiveFailure };\nconst alert = risk && consecutiveRisk >= 2 && now - sd.playback.lastAlertAt > 3600000;\nif (alert) sd.playback.lastAlertAt = now;\nconst fmt = jobs.map(j => `${(j.path || j.log).split('/').pop()}: ${j.speed == null ? 'ukjent' : j.speed.toFixed(2) + 'x'}${j.throttle_buffer_s == null ? '' : ', buffer ' + j.throttle_buffer_s + 's'}`).join('\\n');\nreturn [{ json: { notify: alert, title: risk ? 'Emby: transcode under sanntid' : 'Emby: playback normalisert', message: `Aktive jobber: ${jobs.length}.\\n${fmt || 'Ingen lesbare transcodejobber.'}\\nVedvarende risikoprøver: ${consecutiveRisk}.`, metrics: { jobs: jobs.length, speeds, risk_jobs: riskJobs.length, warning_jobs: warnJobs.length, errors: errors.length, consecutive_risk: consecutiveRisk, measurement_failure: measurementFailure, consecutive_failure: consecutiveFailure }, read_only: true, recovery_allowed: false } }];"
+      },
+      "id": "9e9a3c96-4cbb-4b90-a6e2-1d4bf0c1e003",
+      "name": "Deduplicate playback risk",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        780,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$json.notify}}",
+              "operation": "isTrue"
+            }
+          ]
+        }
+      },
+      "id": "9e9a3c96-4cbb-4b90-a6e2-1d4bf0c1e004",
+      "name": "Only notify on persistent risk",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1040,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "http://10.0.0.135:9118/notify",
+        "method": "POST",
+        "authentication": "predefinedCredentialType",
+        "sendHeaders": true,
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({title: $json.title, message: $json.message}) }}",
+        "options": {
+          "timeout": 30000
+        },
+        "nodeCredentialType": "httpHeaderAuth"
+      },
+      "id": "9e9a3c96-4cbb-4b90-a6e2-1d4bf0c1e005",
+      "name": "Notify through existing phone path",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "position": [
+        1300,
+        220
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "TcgXN7shgc4X7U8w",
+          "name": "Homelab Audit Header"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Every 2 minutes": {
+      "main": [
+        [
+          {
+            "node": "Read media and playback health",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read media and playback health": {
+      "main": [
+        [
+          {
+            "node": "Deduplicate playback risk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Deduplicate playback risk": {
+      "main": [
+        [
+          {
+            "node": "Only notify on persistent risk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Only notify on persistent risk": {
+      "main": [
+        [
+          {
+            "node": "Notify through existing phone path",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "executionTimeout": 600
+  }
+}
