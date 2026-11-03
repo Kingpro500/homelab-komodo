@@ -5,6 +5,7 @@ import urllib.request, urllib.parse
 STATE=pathlib.Path('/var/lib/media-recovery')
 REMOTE=['ssh','-o','BatchMode=yes','-o','ConnectTimeout=8','-o','StrictHostKeyChecking=yes','-o','HostKeyAlias=pc9','-o','UserKnownHostsFile=/etc/pve/nodes/pc9/ssh_known_hosts','-o','GlobalKnownHostsFile=/dev/null','-o','HostKeyAlgorithms=rsa-sha2-512,rsa-sha2-256','root@10.0.0.103']
 SERVICES={'emby':('pc6',200,'http://10.0.0.150:8096'),'tunarr-pc6':('pc6',250,'http://10.0.0.123:8005'),'tunarr-pc9':('pc9',106,'http://10.0.0.122:8005')}
+EMBY_STABLE_SERIES='4.10'
 def decide(s,healthy,dependency,now):
  s['failures']=0 if healthy else s.get('failures',0)+1
  if healthy:return 'healthy'
@@ -67,7 +68,9 @@ def json_url(url,headers=None):
 def emby_latest():
  tags=json_url('https://hub.docker.com/v2/repositories/emby/embyserver/tags?page_size=100').get('results',[])
  versions=[item.get('name','') for item in tags]
- return max((tag for tag in versions if version_key(tag)),key=version_key)
+ stable=[tag for tag in versions if tag.startswith(EMBY_STABLE_SERIES+'.') and version_key(tag)]
+ if not stable:raise RuntimeError('no stable Emby '+EMBY_STABLE_SERIES+' tag found')
+ return max(stable,key=version_key)
 def tunarr_latest():
  token=json_url('https://ghcr.io/token?service=ghcr.io&scope=repository%3Achrisbenincasa%2Ftunarr%3Apull').get('token')
  if not token:raise RuntimeError('GHCR token missing')
