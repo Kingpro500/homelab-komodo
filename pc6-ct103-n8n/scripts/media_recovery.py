@@ -98,7 +98,7 @@ def run():
   # Verify current identities on every invocation; fail closed on moves/renumbering.
   inventory=json.loads(command('pc6',['pvesh','get','/cluster/resources','--type','vm','--output-format','json']))
   for name,(node,ct,base) in SERVICES.items():
-   expected={200:'ct151-emby',250:'ct162-tunarr',106:'ct106-tunarr'}[ct]
+   expected={200:'pc6-ct200-emby',250:'ct162-tunarr',106:'ct106-tunarr'}[ct]
    guest=next((v for v in inventory if v.get('vmid')==ct and v.get('node')==node and v.get('name')==expected),None)
    identity=bool(guest and guest.get('status')=='running')
    # CT250 is explicitly an always-on service: a verified stopped instance is actionable.
