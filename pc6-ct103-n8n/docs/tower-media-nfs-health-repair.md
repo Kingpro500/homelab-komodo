@@ -37,12 +37,12 @@ probe oppretter, endrer eller sletter filer på mediedelingen.
 ## Reparasjonspolicy
 
 - Emby er kun observasjon og varsling: aldri automatisk restart/reboot, heller ikke ved langvarig feil.
-- Tre påfølgende mislykkede Tunarr-kontroller før gjestereboot (normalt ca. 10–15 min).
+- Tre påfølgende mislykkede Tunarr-kontroller før tiltak (normalt ca. 10–15 min). En verifisert stoppet CT250 startes kontrollert; en kjørende CT250 eller CT106 kan bare rebootes innenfor samme grenser.
 - Både node/VMID/navn/kjørestatus kontrolleres fra fersk Proxmox-inventar.
-  Flyttet, renummerert eller bevisst stoppet gjest gir **ingen** start/reboot.
+  Flyttet eller renummerert gjest gir **ingen** start/reboot. CT250 er det avtalte unntaket: korrekt navn/node/VMID i status <code>stopped</code> kan startes kontrollert; CT106 og Emby kan aldri startes av denne flyten.
 - Frisk NFS på gjestens vert er påkrevd. Tunarr krever i tillegg frisk Emby
   (API og konkret mediefillesing), også kontrollert rett før tiltak.
-- Hard allowlist ved kommandogrensen: kun `(pc6,250)` og `(pc9,106)`.
+- Hard allowlist ved kommandogrensen: reboot kun `(pc6,250)` og `(pc9,106)`; start kun `(pc6,250)`.
   Emby `(pc6,200)` avvises før subprocess. Maks én gjest
   per kjøring, minst 30 minutter mellom forsøk og maks to forsøk per gjest
   i rullerende 24 timer. Forsøk lagres **før** reboot-kommandoen sendes.
