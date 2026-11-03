@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Read-only media probes; bounded guest-only recovery. Invoked by forced SSH."""
-import concurrent.futures, fcntl, json, os, pathlib, shlex, subprocess, time
+import concurrent.futures, fcntl, json, os, pathlib, re, shlex, subprocess, time
 import urllib.request, urllib.parse
 STATE=pathlib.Path('/var/lib/media-recovery')
 REMOTE=['ssh','-o','BatchMode=yes','-o','ConnectTimeout=8','-o','StrictHostKeyChecking=yes','-o','HostKeyAlias=pc9','-o','UserKnownHostsFile=/etc/pve/nodes/pc9/ssh_known_hosts','-o','GlobalKnownHostsFile=/dev/null','-o','HostKeyAlgorithms=rsa-sha2-512,rsa-sha2-256','root@10.0.0.103']
@@ -57,6 +57,49 @@ def installed_images():
    node,['pct','exec',str(ct),'--','docker','inspect',container,'--format','{{.Config.Image}}']))
   result[name]=value['detail'] if value['ok'] else {'error':value['detail']}
  return result
+def version_key(value):
+ match=re.fullmatch(r'(\d+)\.(\d+)\.(\d+)(?:\.(\d+))?',value)
+ return tuple(int(item or 0) for item in match.groups()) if match else None
+def json_url(url,headers=None):
+ request=urllib.request.Request(url,headers=headers or {})
+ with urllib.request.urlopen(request,timeout=20) as response:
+  return json.load(response)
+def emby_latest():
+ tags=json_url('https://hub.docker.com/v2/repositories/emby/embyserver/tags?page_size=100').get('results',[])
+ versions=[item.get('name','') for item in tags]
+ return max((tag for tag in versions if version_key(tag)),key=version_key)
+def tunarr_latest():
+ token=json_url('https://ghcr.io/token?service=ghcr.io&scope=repository%3Achrisbenincasa%2Ftunarr%3Apull').get('token')
+ if not token:raise RuntimeError('GHCR token missing')
+ tags=json_url('https://ghcr.io/v2/chrisbenincasa/tunarr/tags/list?n=10000',{'Authorization':'Bearer '+token}).get('tags',[])
+ versions=[tag for tag in tags if version_key(tag)]
+ return max(versions,key=version_key)
+def image_tag(ref):
+ return ref.rsplit(':',1)[-1] if isinstance(ref,str) and ':' in ref else None
+def version_audit(state,images,now):
+ """Daily upstream check, cached so the five-minute health probe never hammers registries."""
+ cached=state.get('_version_audit',{})
+ targets=cached.get('targets') if cached.get('checked_at',0)>now-86400 else None
+ errors=[]
+ if not targets:
+  targets={}
+  for source,fetcher in (('emby',emby_latest),('tunarr',tunarr_latest)):
+   try:targets[source]=fetcher()
+   except Exception as exc:errors.append(source+': '+str(exc)[:160])
+  if targets:
+   cached={'checked_at':now,'targets':targets,'errors':errors}
+   state['_version_audit']=cached
+  else:
+   cached={'checked_at':now,'targets':{},'errors':errors}
+ status={}
+ for name,current in images.items():
+  source='emby' if name=='emby' else 'tunarr'
+  target=(cached.get('targets') or {}).get(source)
+  tag=image_tag(current)
+  status[name]={'installed':tag,'latest_stable':target,
+                'outdated':bool(tag and target and version_key(tag) and version_key(target) and version_key(tag)<version_key(target))}
+ return {'checked_at':cached.get('checked_at'), 'errors':cached.get('errors',[]),
+         'services':status, 'outdated':any(item['outdated'] for item in status.values())}
 # Bounded traversal only under this existing media folder. No writes, full-tree scans or symlink traversal.
 READ_CODE="""import os,json,sys
 root=sys.argv[1]
@@ -148,8 +191,9 @@ def run():
   notify=bool(actions) or (not ok and (now-state.get('_last_notice',0)>=3600)) or (ok and state.get('_down',False))
   if notify:state['_last_notice']=now
   state['_down']=not ok;state['_last_check']=now
+  images=installed_images()
   report={'ok':ok,'hosts':hosts,'services':results,'actions':actions,'notify':notify,
-          'installed_images':installed_images(),'at':now}
+          'installed_images':images,'version_audit':version_audit(state,images,now),'at':now}
   save(path,state);save(STATE/'latest.json',report)
   with open(STATE/'events.jsonl','a') as f:f.write(json.dumps(report)+'\n')
   return report
