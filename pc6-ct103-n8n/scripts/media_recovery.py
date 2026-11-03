@@ -15,9 +15,12 @@ def decide(s,healthy,dependency,now):
  if attempts and now-attempts[-1]<1800:return 'cooldown'
  return 'repair'
 def command(node,args,timeout=20):
- # Final reboot boundary: never permit Emby or an unexpected node/VMID.
+ # Final action boundary: never permit Emby or an unexpected node/VMID.
+ # A stopped CT250 may be started; CT106 is reboot-only while running.
  if args[:2]==['pct','reboot'] and (len(args)!=3 or (node,args[2]) not in {('pc6','250'),('pc9','106')}):
   raise RuntimeError('reboot target not allowlisted')
+ if args[:2]==['pct','start'] and (len(args)!=3 or (node,args[2]) not in {('pc6','250')}):
+  raise RuntimeError('start target not allowlisted')
  cmd=args if node=='pc6' else REMOTE+[shlex.join(args)]
  r=subprocess.run(cmd,capture_output=True,text=True,timeout=timeout)
  if r.returncode:raise RuntimeError('command failed: '+r.stderr[-180:])
@@ -95,9 +98,13 @@ def run():
   # Verify current identities on every invocation; fail closed on moves/renumbering.
   inventory=json.loads(command('pc6',['pvesh','get','/cluster/resources','--type','vm','--output-format','json']))
   for name,(node,ct,base) in SERVICES.items():
-   identity=any(v.get('vmid')==ct and v.get('node')==node and v.get('status')=='running' and v.get('name')=={200:'ct151-emby',250:'ct162-tunarr',106:'ct106-tunarr'}[ct] for v in inventory)
-   dep=hosts[node]['ok'] and identity and (name=='emby' or (emby['ok'] and results.get('emby',{}).get('ok',False)))
-   result=probe(lambda:guest_probe(name,hosts[node]['detail'])) if hosts[node]['ok'] and identity else {'ok':False,'detail':'host dependency or identity unavailable'}
+   expected={200:'ct151-emby',250:'ct162-tunarr',106:'ct106-tunarr'}[ct]
+   guest=next((v for v in inventory if v.get('vmid')==ct and v.get('node')==node and v.get('name')==expected),None)
+   identity=bool(guest and guest.get('status')=='running')
+   # CT250 is explicitly an always-on service: a verified stopped instance is actionable.
+   startable=bool(name=='tunarr-pc6' and guest and guest.get('status')=='stopped')
+   dep=hosts[node]['ok'] and (identity or startable) and (name=='emby' or (emby['ok'] and results.get('emby',{}).get('ok',False)))
+   result=probe(lambda:guest_probe(name,hosts[node]['detail'])) if hosts[node]['ok'] and identity else {'ok':False,'detail':'guest stopped; controlled start eligible' if startable else 'host dependency or identity unavailable'}
    s=state.setdefault(name,{})
    decision=decide(s,result['ok'],dep,now)
    # Emby is observation/notification only, regardless of failure duration.
@@ -111,14 +118,16 @@ def run():
     else:
      fresh=probe(lambda:host_read(node))
      current=json.loads(command('pc6',['pvesh','get','/cluster/resources','--type','vm','--output-format','json']))
-     still_target=any(v.get('vmid')==ct and v.get('node')==node and v.get('status')=='running' and v.get('name')=={200:'ct151-emby',250:'ct162-tunarr',106:'ct106-tunarr'}[ct] for v in current)
+     current_guest=next((v for v in current if v.get('vmid')==ct and v.get('node')==node and v.get('name')==expected),None)
+     still_target=bool(current_guest and (current_guest.get('status')=='running' or (name=='tunarr-pc6' and current_guest.get('status')=='stopped')))
      upstream=probe(lambda:guest_probe('emby',hosts['pc6']['detail']))['ok']
      if not fresh['ok'] or not still_target or not upstream:decision='blocked'
      else:
       s['attempts']=attempts+[now]
       save(path,state) # Count even failed reboot requests; survive crashes.
-      repair=probe(lambda:command(node,['pct','reboot',str(ct)],100))
-      actions.append({'service':name,'reboot':repair})
+      action='start' if name=='tunarr-pc6' and current_guest.get('status')=='stopped' else 'reboot'
+      repair=probe(lambda:command(node,['pct',action,str(ct)],100))
+      actions.append({'service':name,action:repair})
       if repair['ok']:
        until=time.monotonic()+100
        while time.monotonic()<until:
