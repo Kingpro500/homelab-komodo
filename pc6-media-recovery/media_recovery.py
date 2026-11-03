@@ -101,8 +101,14 @@ def version_audit(state,images,now):
   tag=image_tag(current)
   status[name]={'installed':tag,'latest_stable':target,
                 'outdated':bool(tag and target and version_key(tag) and version_key(target) and version_key(tag)<version_key(target))}
+ signature=sorted(name+':'+item['installed']+'>'+str(item['latest_stable'])
+                  for name,item in status.items() if item['outdated'])
+ previous=state.get('_version_notice')
+ notify=bool(signature and signature!=previous)
+ if signature:state['_version_notice']=signature
+ else:state.pop('_version_notice',None)
  return {'checked_at':cached.get('checked_at'), 'errors':cached.get('errors',[]),
-         'services':status, 'outdated':any(item['outdated'] for item in status.values())}
+         'services':status, 'outdated':bool(signature), 'notify':notify}
 # Bounded traversal only under this existing media folder. No writes, full-tree scans or symlink traversal.
 READ_CODE="""import os,json,sys
 root=sys.argv[1]
@@ -191,12 +197,13 @@ def run():
       decision='recovered' if result['ok'] else 'repair-failed'
    results[name]={**result,'decision':decision,'failures':s['failures']}
   ok=all(x['ok'] for x in results.values())
-  notify=bool(actions) or (not ok and (now-state.get('_last_notice',0)>=3600)) or (ok and state.get('_down',False))
+  images=installed_images()
+  versions=version_audit(state,images,now)
+  notify=bool(actions) or versions['notify'] or (not ok and (now-state.get('_last_notice',0)>=3600)) or (ok and state.get('_down',False))
   if notify:state['_last_notice']=now
   state['_down']=not ok;state['_last_check']=now
-  images=installed_images()
   report={'ok':ok,'hosts':hosts,'services':results,'actions':actions,'notify':notify,
-          'installed_images':images,'version_audit':version_audit(state,images,now),'at':now}
+          'installed_images':images,'version_audit':versions,'at':now}
   save(path,state);save(STATE/'latest.json',report)
   with open(STATE/'events.jsonl','a') as f:f.write(json.dumps(report)+'\n')
   return report
