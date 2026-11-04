@@ -25,6 +25,14 @@ CT200 runs `/usr/local/sbin/emby-config-backup` daily at 04:15 (with 15 minutes 
 
 The backup contains SQLite `.backup` exports, configuration, plugins, a manifest and hashes. It deliberately excludes metadata, BIF previews, cache, logs and transcodes. The requested `/mnt/user/appdata/backup` is not exported by Unraid; the established writable Emby Backup location is used instead.
 
+An isolated restore drill on CT203 on 2026-11-04 copied the newest snapshot to temporary local storage, validated the archive and all database hashes, checked the SQLite file signatures, and removed only the temporary test directory. It did not start a second Emby process or alter CT200.
+
+## Tower NFS mount authority
+
+`Tower-media` is owned by Proxmox cluster storage configuration at `/etc/pve/storage.cfg`. It uses NFSv4 and is bound read-only into Emby/Tunarr containers. On PC6, a competing legacy `/etc/fstab` entry using a soft NFS mount was disabled on 2026-11-04 after a dated backup of `fstab` was made under `/root/config-backups/`.
+
+Do not add a second fstab mount for `/mnt/pve/Tower-media`. A competing mount definition can race with Proxmox/systemd automount handling after reboot and worsen stale-file-handle recovery.
+
 ## Verify
 
 ```sh
