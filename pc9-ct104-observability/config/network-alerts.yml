@@ -33,3 +33,50 @@ groups:
         annotations:
           summary: "eth0 RX-drop ratio is high"
           description: "More than 0.1% of received packets have been dropped for 5 minutes."
+
+  - name: correlated-wan-health
+    interval: 15s
+    rules:
+      - alert: OPNsenseGatewayPathFailure
+        expr: |
+          probe_success{job="blackbox-wan-icmp-pc9",instance="10.0.0.1"} == 0
+          and on() sum(probe_success{job="blackbox-wan-icmp-pc9",instance=~"1.1.1.1|9.9.9.9"} == 1) == 2
+        for: 30s
+        labels:
+          severity: critical
+          scope: local-gateway
+        annotations:
+          summary: "OPNsense gateway path fails while the Internet remains reachable"
+          description: "PC9 cannot reach OPNsense over ICMP, but both external ICMP targets are healthy. Investigate OPNsense, LAN path or NIC—not the ISP."
+
+      - alert: OPNsenseDnsFailure
+        expr: |
+          probe_success{job="blackbox-wan-dns-pc9",instance="10.0.0.1:53"} == 0
+          and on() sum(probe_success{job="blackbox-wan-dns-pc9",instance=~"1.1.1.1:53|9.9.9.9:53"} == 1) == 2
+        for: 30s
+        labels:
+          severity: warning
+          scope: local-dns
+        annotations:
+          summary: "OPNsense DNS fails while public DNS is healthy"
+          description: "This is isolated to the local resolver path, not a general WAN outage."
+
+      - alert: ExternalDnsDegraded
+        expr: sum(probe_success{job="blackbox-wan-dns-pc9",instance=~"1.1.1.1:53|9.9.9.9:53"} == 0) >= 2
+        for: 30s
+        labels:
+          severity: warning
+          scope: external-dns
+        annotations:
+          summary: "Both independent public DNS probes fail"
+          description: "Cloudflare and Quad9 DNS both fail from PC9 for at least 30 seconds. Check WAN and upstream DNS."
+
+      - alert: ExternalWanPathFailure
+        expr: sum(probe_success{job="blackbox-wan-icmp-pc9",instance=~"1.1.1.1|9.9.9.9"} == 0) >= 2
+        for: 30s
+        labels:
+          severity: critical
+          scope: wan-or-isp
+        annotations:
+          summary: "Both independent Internet ICMP probes fail"
+          description: "PC9 cannot reach Cloudflare or Quad9 for at least 30 seconds. Correlate with Hermes gateway and NIC samples for WAN/ISP diagnosis."

@@ -39,6 +39,10 @@ scrape_configs:
     scrape_interval: 30s
     static_configs:
       - targets: ["network-interface-exporter:9122"]
+  - job_name: opnsense-crash-status
+    scrape_interval: 30s
+    static_configs:
+      - targets: ["10.0.0.135:9130"]
   - job_name: emby-transcode-exporter
     static_configs:
       - targets: ["10.0.0.150:9121"]
@@ -46,6 +50,10 @@ scrape_configs:
       - source_labels: [__name__]
         regex: emby_transcode_.*
         action: keep
+  - job_name: tunarr-nfs-health
+    scrape_interval: 30s
+    static_configs:
+      - targets: ["10.0.0.122:9101"]
   - job_name: blackbox-tcp
     metrics_path: /probe
     params: {module: [tcp_connect]}
