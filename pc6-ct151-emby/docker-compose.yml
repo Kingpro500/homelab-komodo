@@ -2,7 +2,7 @@
 # Deployed by Komodo after the restored configuration is in place.
 services:
   emby:
-    image: emby/embyserver:4.10.0.40
+    image: emby/embyserver:4.10.2.0
     container_name: emby
     hostname: emby-pc6
     network_mode: host
