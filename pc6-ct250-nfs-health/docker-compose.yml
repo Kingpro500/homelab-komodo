@@ -1,0 +1,73 @@
+# Passive stale-NFS signal for CT250. This stack intentionally does not manage Tunarr.
+services:
+  nfs-health-checker:
+    image: alpine:3.21.3
+    container_name: tunarr-ct250-nfs-health-checker
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "2"
+    command:
+      - /bin/sh
+      - -ec
+      - |
+        mkdir -p /metrics
+        while true; do
+          temporary="/metrics/.tunarr_nfs_health.prom.$$"
+          now="$$(date +%s)"
+          {
+            echo '# HELP tunarr_nfs_media_path_healthy 1 when a read-only Tunarr media mount can be statted.'
+            echo '# TYPE tunarr_nfs_media_path_healthy gauge'
+            for item in \
+              'james_bond:/media/james-bond' \
+              'adam_carolla:/media/adam-carolla' \
+              'powerful_jre:/media/powerful-jre' \
+              'autotopnl:/media/autotopnl' \
+              'harrys_garage:/media/harrys-garage' \
+              'theo_von:/media/theo-von'; do
+              name="$${item%%:*}"
+              path="$${item#*:}"
+              if stat -L "$$path" >/dev/null 2>&1; then result=1; else result=0; fi
+              printf 'tunarr_nfs_media_path_healthy{path="%s"} %s\n' "$$name" "$$result"
+            done
+            echo '# HELP tunarr_nfs_media_check_timestamp_seconds Unix timestamp for the last completed complete NFS check.'
+            echo '# TYPE tunarr_nfs_media_check_timestamp_seconds gauge'
+            printf 'tunarr_nfs_media_check_timestamp_seconds %s\n' "$$now"
+          } > "$$temporary"
+          mv "$$temporary" /metrics/tunarr_nfs_health.prom
+          sleep 60
+        done
+    volumes:
+      - nfs-health-metrics:/metrics
+      - "/media/3 Folder Emby/James Bond:/media/james-bond:ro"
+      - "/media/YouTube/shows/Adam Carolla:/media/adam-carolla:ro"
+      - "/media/YouTube/shows/PowerfulJRE:/media/powerful-jre:ro"
+      - "/media/YouTube/shows/AutoTopNL:/media/autotopnl:ro"
+      - "/media/YouTube/shows/Harry's garage:/media/harrys-garage:ro"
+      - "/media/YouTube/shows/Theo Von:/media/theo-von:ro"
+
+  nfs-health-exporter:
+    image: prom/node-exporter:v1.9.1
+    container_name: tunarr-ct250-nfs-health-exporter
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "2"
+    command:
+      - --web.listen-address=:9101
+      - --collector.disable-defaults
+      - --collector.textfile
+      - --collector.textfile.directory=/textfile
+    ports:
+      - "9101:9101"
+    volumes:
+      - nfs-health-metrics:/textfile:ro
+    depends_on:
+      - nfs-health-checker
+
+volumes:
+  nfs-health-metrics:

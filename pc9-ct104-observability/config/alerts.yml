@@ -117,30 +117,30 @@ groups:
           summary: "OPNsense crash-status monitoring is unavailable"
 
       - alert: TunarrNfsHealthExporterUnavailable
-        expr: up{job="tunarr-nfs-health"} == 0
+        expr: up{job=~"tunarr-nfs-health(-ct250)?"} == 0
         for: 3m
-        labels: {severity: warning, service: tunarr, node: pc9}
+        labels: {severity: warning, service: tunarr}
         annotations:
-          summary: "CT106 Tunarr NFS-health exporter is unavailable"
+          summary: "A Tunarr NFS-health exporter is unavailable"
           description: "The passive stale-NFS health signal is unavailable. No automatic mount recovery is performed."
       - alert: TunarrNfsHealthMetricMissing
-        expr: absent(tunarr_nfs_media_check_timestamp_seconds{job="tunarr-nfs-health"})
+        expr: absent(tunarr_nfs_media_check_timestamp_seconds{job=~"tunarr-nfs-health(-ct250)?"})
         for: 3m
-        labels: {severity: warning, service: tunarr, node: pc9}
+        labels: {severity: warning, service: tunarr}
         annotations:
-          summary: "CT106 Tunarr NFS-health metric is missing"
+          summary: "A Tunarr NFS-health metric is missing"
           description: "The checker has not published a mount-health timestamp. Inspect CT106 and Tower NFS before manual recovery."
       - alert: TunarrNfsMediaPathUnhealthy
-        expr: tunarr_nfs_media_path_healthy{job="tunarr-nfs-health"} == 0
+        expr: tunarr_nfs_media_path_healthy{job=~"tunarr-nfs-health(-ct250)?"} == 0
         for: 2m
-        labels: {severity: warning, service: tunarr, node: pc9}
+        labels: {severity: warning, service: tunarr}
         annotations:
-          summary: "A CT106 Tunarr NFS media path is unhealthy"
+          summary: "A Tunarr NFS media path is unhealthy"
           description: "The passive file-stat check failed. This can indicate a stale NFS handle; inspect before any remount."
       - alert: TunarrNfsHealthCheckStalled
-        expr: time() - tunarr_nfs_media_check_timestamp_seconds{job="tunarr-nfs-health"} > 180
+        expr: time() - tunarr_nfs_media_check_timestamp_seconds{job=~"tunarr-nfs-health(-ct250)?"} > 180
         for: 2m
-        labels: {severity: warning, service: tunarr, node: pc9}
+        labels: {severity: warning, service: tunarr}
         annotations:
-          summary: "CT106 Tunarr NFS-health check is stalled"
+          summary: "A Tunarr NFS-health check is stalled"
           description: "A mount check has not completed for over three minutes. This may indicate a hard NFS operation is blocked; do not restart Emby."
