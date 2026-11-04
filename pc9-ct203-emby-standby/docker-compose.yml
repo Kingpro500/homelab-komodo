@@ -1,0 +1,21 @@
+name: pc9-ct203-emby-standby
+
+services:
+  emby:
+    image: emby/embyserver:4.10.0.40
+    container_name: emby-standby
+    network_mode: host
+    restart: unless-stopped
+    environment:
+      TZ: Europe/Oslo
+      UID: "0"
+      GID: "0"
+      GIDLIST: "2"
+    volumes:
+      # Separate state: never share Emby's SQLite/config directory with CT200.
+      - /opt/emby/EmbyServer:/config
+      # Matches CT200's in-container library root and is read-only at every layer.
+      - /media:/mnt:ro
+      - /opt/emby/transcode:/transcode
+    devices:
+      - /dev/dri/renderD128:/dev/dri/renderD128
