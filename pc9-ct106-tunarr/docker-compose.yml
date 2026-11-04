@@ -1,9 +1,14 @@
 # Independent Tunarr worker on pc9 / CT106.
 services:
   tunarr:
-    image: ghcr.io/chrisbenincasa/tunarr:latest
+    image: ghcr.io/chrisbenincasa/tunarr:2026.9.3
     container_name: tunarr
     restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     ports:
       - "8005:8000"
     volumes:
