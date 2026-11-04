@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+source=/opt/emby/EmbyServer
+target='/media/Emby Backup/ct200-config-snapshots'
+stamp=$(date -u +%Y%m%dT%H%M%SZ)
+install -d -m 0750 "$target"
+stage=$(mktemp -d "$target/.incomplete-$stamp.XXXXXX")
+final="$target/$stamp"
+
+cleanup() {
+  if [ -d "$stage" ]; then
+    rm -rf -- "$stage"
+  fi
+}
+trap cleanup EXIT
+
+for database in "$source"/data/*.db; do
+  [ -f "$database" ] || continue
+  name=$(basename "$database")
+  sqlite3 "$database" ".timeout 15000" ".backup '$stage/$name'"
+done
+
+tar -C "$source" -czf "$stage/config-and-plugins.tar.gz" config plugins
+{
+  printf 'created_utc=%s\n' "$stamp"
+  printf 'purpose=Emby CT200 critical config and consistent SQLite backup; excludes metadata, cache, logs and transcode.\n'
+  (cd "$stage" && sha256sum *)
+} > "$stage/MANIFEST.txt"
+
+mv -- "$stage" "$final"
+stage=''
+printf 'Created %s\n' "$final"
