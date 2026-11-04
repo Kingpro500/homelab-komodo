@@ -78,12 +78,12 @@ groups:
         annotations: {summary: "A PC9 observability component is unavailable"}
       # Proxmox guest rules are deduplicated by guest identity.
       - alert: GuestMemoryHigh
-        expr: max by (name, node, type, vmid) ((proxmox_guest_mem_used_bytes / proxmox_guest_mem_total_bytes) * 100) >= 90
+        expr: max by (name, node, type, vmid) ((proxmox_guest_mem_used_bytes{name!="pc6-vm201-unraid"} / proxmox_guest_mem_total_bytes{name!="pc6-vm201-unraid"}) * 100) >= 90
         for: 10m
         labels: {severity: warning, service: proxmox}
         annotations: {summary: "Proxmox guest memory usage is high"}
       - alert: GuestMemoryCritical
-        expr: max by (name, node, type, vmid) ((proxmox_guest_mem_used_bytes / proxmox_guest_mem_total_bytes) * 100) >= 97
+        expr: max by (name, node, type, vmid) ((proxmox_guest_mem_used_bytes{name!="pc6-vm201-unraid"} / proxmox_guest_mem_total_bytes{name!="pc6-vm201-unraid"}) * 100) >= 97
         for: 5m
         labels: {severity: critical, service: proxmox}
         annotations: {summary: "Proxmox guest memory usage is critical"}
@@ -102,3 +102,45 @@ groups:
         for: 10m
         labels: {severity: info, service: proxmox}
         annotations: {summary: "Proxmox guest CPU usage is sustained"}
+      - alert: OPNsenseCrashReporterActive
+        expr: opnsense_crash_reporter_active{job="opnsense-crash-status"} == 1
+        for: 2m
+        labels: {severity: warning, service: opnsense, node: pc7}
+        annotations:
+          summary: "OPNsense reports a pending crash report"
+          description: "Hermes detected an OPNsense crashreporter event. Inspect the firewall crash reporter and system logs before clearing it."
+      - alert: OPNsenseStatusCollectorUnavailable
+        expr: up{job="opnsense-crash-status"} == 0 or opnsense_status_sampler_up{job="opnsense-crash-status"} == 0
+        for: 5m
+        labels: {severity: warning, service: opnsense, node: pc7}
+        annotations:
+          summary: "OPNsense crash-status monitoring is unavailable"
+
+      - alert: TunarrNfsHealthExporterUnavailable
+        expr: up{job="tunarr-nfs-health"} == 0
+        for: 3m
+        labels: {severity: warning, service: tunarr, node: pc9}
+        annotations:
+          summary: "CT106 Tunarr NFS-health exporter is unavailable"
+          description: "The passive stale-NFS health signal is unavailable. No automatic mount recovery is performed."
+      - alert: TunarrNfsHealthMetricMissing
+        expr: absent(tunarr_nfs_media_check_timestamp_seconds{job="tunarr-nfs-health"})
+        for: 3m
+        labels: {severity: warning, service: tunarr, node: pc9}
+        annotations:
+          summary: "CT106 Tunarr NFS-health metric is missing"
+          description: "The checker has not published a mount-health timestamp. Inspect CT106 and Tower NFS before manual recovery."
+      - alert: TunarrNfsMediaPathUnhealthy
+        expr: tunarr_nfs_media_path_healthy{job="tunarr-nfs-health"} == 0
+        for: 2m
+        labels: {severity: warning, service: tunarr, node: pc9}
+        annotations:
+          summary: "A CT106 Tunarr NFS media path is unhealthy"
+          description: "The passive file-stat check failed. This can indicate a stale NFS handle; inspect before any remount."
+      - alert: TunarrNfsHealthCheckStalled
+        expr: time() - tunarr_nfs_media_check_timestamp_seconds{job="tunarr-nfs-health"} > 180
+        for: 2m
+        labels: {severity: warning, service: tunarr, node: pc9}
+        annotations:
+          summary: "CT106 Tunarr NFS-health check is stalled"
+          description: "A mount check has not completed for over three minutes. This may indicate a hard NFS operation is blocked; do not restart Emby."
