@@ -54,6 +54,10 @@ scrape_configs:
     scrape_interval: 30s
     static_configs:
       - targets: ["10.0.0.122:9101"]
+  - job_name: tunarr-nfs-health-ct250
+    scrape_interval: 30s
+    static_configs:
+      - targets: ["10.0.0.123:9101"]
   - job_name: blackbox-tcp
     metrics_path: /probe
     params: {module: [tcp_connect]}
