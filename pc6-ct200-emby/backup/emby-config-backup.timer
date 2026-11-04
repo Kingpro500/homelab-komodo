@@ -1,0 +1,10 @@
+[Unit]
+Description=Daily Emby CT200 critical configuration backup
+
+[Timer]
+OnCalendar=*-*-* 04:15:00
+Persistent=true
+RandomizedDelaySec=15m
+
+[Install]
+WantedBy=timers.target
