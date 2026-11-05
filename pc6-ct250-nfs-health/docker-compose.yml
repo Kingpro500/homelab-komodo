@@ -78,12 +78,12 @@ services:
             echo '# TYPE tunarr_hls_ffmpeg_processes gauge'
             ffmpeg=0
             for comm in /proc/[0-9]*/comm; do
-              if [ -r "$${comm}" ] && [ "$(cat "$${comm}" 2>/dev/null)" = ffmpeg ]; then ffmpeg=$((ffmpeg + 1)); fi
+              if [ -r "$${comm}" ] && [ "$$(cat "$${comm}" 2>/dev/null)" = ffmpeg ]; then ffmpeg=$$((ffmpeg + 1)); fi
             done
             printf 'tunarr_hls_ffmpeg_processes %s\n' "$${ffmpeg}"
             echo '# HELP tunarr_hls_tcp_clients Established TCP clients currently connected to Tunarr port 8005.'
             echo '# TYPE tunarr_hls_tcp_clients gauge'
-            clients=$(awk '$4 == "01" && $2 ~ /:1F45$/ { count++ } END { print count + 0 }' /proc/net/tcp /proc/net/tcp6 2>/dev/null)
+            clients=$$(awk '$$4 == "01" && $$2 ~ /:1F45$$/ { count++ } END { print count + 0 }' /proc/net/tcp /proc/net/tcp6 2>/dev/null)
             printf 'tunarr_hls_tcp_clients %s\n' "$${clients}"
             echo '# HELP tunarr_hls_session_check_timestamp_seconds Unix timestamp of the completed Tunarr session check.'
             echo '# TYPE tunarr_hls_session_check_timestamp_seconds gauge'
