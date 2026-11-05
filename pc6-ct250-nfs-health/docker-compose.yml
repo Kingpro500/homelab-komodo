@@ -14,6 +14,7 @@ services:
       - -ec
       - |
         mkdir -p /metrics
+        chmod 1777 /metrics
         while true; do
           temporary="/metrics/.tunarr_nfs_health.prom.$$"
           now="$$(date +%s)"
@@ -47,6 +48,54 @@ services:
       - "/media/YouTube/shows/AutoTopNL:/media/autotopnl:ro"
       - "/media/YouTube/shows/Harry's garage:/media/harrys-garage:ro"
       - "/media/YouTube/shows/Theo Von:/media/theo-von:ro"
+
+  tunarr-session-checker:
+    image: alpine:3.21.3
+    container_name: tunarr-ct250-nfs-health-session-checker
+    restart: unless-stopped
+    # Shares only Tunarr's own namespaces. It cannot see the CT host.
+    pid: "container:tunarr"
+    network_mode: "container:tunarr"
+    user: "65534:65534"
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "2"
+    command:
+      - /bin/sh
+      - -ec
+      - |
+        while true; do
+          temporary="/metrics/.tunarr_hls_session.prom.$"
+          now="$(date +%s)"
+          {
+            echo '# HELP tunarr_hls_ffmpeg_processes Number of ffmpeg processes in the Tunarr container namespace.'
+            echo '# TYPE tunarr_hls_ffmpeg_processes gauge'
+            ffmpeg=0
+            for comm in /proc/[0-9]*/comm; do
+              if [ -r "$comm" ] && [ "$(cat "$comm" 2>/dev/null)" = ffmpeg ]; then ffmpeg=$((ffmpeg + 1)); fi
+            done
+            printf 'tunarr_hls_ffmpeg_processes %s\\n' "$ffmpeg"
+            echo '# HELP tunarr_hls_tcp_clients Established TCP clients currently connected to Tunarr port 8005.'
+            echo '# TYPE tunarr_hls_tcp_clients gauge'
+            clients=$(awk '$4 == "01" && $2 ~ /:1F45$/ { count++ } END { print count + 0 }' /proc/net/tcp /proc/net/tcp6 2>/dev/null)
+            printf 'tunarr_hls_tcp_clients %s\\n' "$clients"
+            echo '# HELP tunarr_hls_session_check_timestamp_seconds Unix timestamp of the completed Tunarr session check.'
+            echo '# TYPE tunarr_hls_session_check_timestamp_seconds gauge'
+            printf 'tunarr_hls_session_check_timestamp_seconds %s\\n' "$now"
+          } > "$temporary"
+          mv "$temporary" /metrics/tunarr_hls_session.prom
+          sleep 60
+        done
+    volumes:
+      - nfs-health-metrics:/metrics
+    depends_on:
+      - nfs-health-checker
 
   nfs-health-exporter:
     image: prom/node-exporter:v1.9.1

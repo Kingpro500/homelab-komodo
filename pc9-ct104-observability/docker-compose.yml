@@ -41,6 +41,7 @@ services:
       - ./config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - ./config/alerts.yml:/etc/prometheus/alerts.yml:ro
       - ./config/network-alerts.yml:/etc/prometheus/network-alerts.yml:ro
+      - ./config/tunarr-session-alerts.yml:/etc/prometheus/tunarr-session-alerts.yml:ro
       - ./scripts/network_interface_exporter.py:/opt/network-exporter/network_interface_exporter.py:ro
       - prometheus-data:/prometheus
     depends_on: [blackbox, alertmanager]
