@@ -71,7 +71,7 @@ services:
       - -ec
       - |
         while true; do
-          temporary="/metrics/.tunarr_hls_session.prom.$$"
+          temporary="/metrics/.tunarr_hls_session.prom.tmp"
           now="$$(date +%s)"
           {
             echo '# HELP tunarr_hls_ffmpeg_processes Number of ffmpeg processes in the Tunarr container namespace.'
