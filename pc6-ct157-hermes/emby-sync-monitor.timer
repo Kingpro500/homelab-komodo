@@ -1,0 +1,12 @@
+[Unit]
+Description=Poll Emby Download and Sync jobs every minute
+
+[Timer]
+OnBootSec=90s
+OnUnitActiveSec=60s
+RandomizedDelaySec=8s
+Persistent=true
+Unit=emby-sync-monitor.service
+
+[Install]
+WantedBy=timers.target
