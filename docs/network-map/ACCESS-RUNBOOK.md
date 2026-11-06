@@ -27,7 +27,7 @@ NetBox/the network map:
 | --- | --- | --- |
 | `homelab-netbox.env` | NetBox URL and v2 bearer token | working, 6 November 2026 |
 | `homelab-unifi.env` | UniFi Network controller session login | working, 6 November 2026 |
-| `homelab-edgeswitch.env` | EdgeSwitch WebUI/API login | WebUI reachable; API login currently returns HTTP 403, 6 November 2026 |
+| `homelab-edgeswitch.env` | EdgeSwitch WebUI/SSH login | WebUI and SSH CLI working; internal WebUI API login returns HTTP 403, 6 November 2026 |
 
 Configuration backups stored beside these files are protected operational
 artifacts, not credential sources. Do not inspect or publish them.
@@ -186,6 +186,15 @@ the authentication method or account has been repaired. The HTTPS login page
 itself is reachable. A protected pre-upgrade backup exists locally; never
 print or inspect its contents in chat.
 
+**Preferred automation route:** direct SSH CLI on TCP/22, using the same local
+`homelab-edgeswitch.env` reference. It was authenticated and read-verified on
+6 November 2026 with `show version`: ES-8-150W, firmware 1.12.2. Start every
+task with display-only CLI commands such as `show version`, `show interfaces`
+or `show running-config`; any configuration command requires an explicit task
+request and a fresh backup. Do not use the unsupported internal WebUI API for
+automation. The switch warns that CLI changes can affect device access, so keep
+WebUI and CLI changes deliberate and documented.
+
 **Passive capture quality:** CT113 exposes read-only eth1 kernel counters on
 port `9102`; PC9 scrapes them as `passive-capture-interface`. Alerts cover
 missing metrics, carrier loss and sustained RX drops. These counters measure
@@ -226,6 +235,20 @@ catalog; do not infer the service is unavailable from that fact, and do not
 invent or store a credential in this repository. Use the established Komodo
 session or an explicitly documented credential reference when an authenticated
 operation is requested.
+
+**Verified local API route:** when an administrative Komodo action is requested,
+run the request inside Core's trusted CT110 context. The local-login response
+is wrapped: the bearer value is `data.jwt`, not a top-level `jwt` or `token`.
+Pass that value unchanged as the `Authorization` header to the Core API. A
+read-only `POST /read/ListRepos` with `{}` returned HTTP 200 on 6 November
+2026. Keep the local admin values and the JWT in process-local variables only;
+never print them, put them in a shell history, Git, NetBox, or this runbook.
+
+For a new Komodo server, use the established public-key server registration
+flow first. Do not create an onboarding key when the server already has an
+accepted Periphery public key. After Periphery reports a successful Core login,
+create and deploy application stacks through the Core API or UI from their
+versioned GitHub source.
 
 ## Network map and NetBox
 
