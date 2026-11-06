@@ -228,7 +228,7 @@ into the Gitea map publisher, and do not publish an unreviewed dirty worktree.
 
 ## Komodo control plane
 
-Komodo Core is hosted on PC9/CT102 (`10.0.0.117:9120`). Use the managed
+Komodo Core is hosted on PC9/CT110 (`10.0.0.117:9120`). Use the managed
 Proxmox SSH route for host/container diagnostics. No separate Codex-held
 Komodo API credential is currently registered in the local secure-reference
 catalog; do not infer the service is unavailable from that fact, and do not
