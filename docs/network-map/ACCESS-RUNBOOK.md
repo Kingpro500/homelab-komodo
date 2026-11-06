@@ -250,6 +250,34 @@ accepted Periphery public key. After Periphery reports a successful Core login,
 create and deploy application stacks through the Core API or UI from their
 versioned GitHub source.
 
+### Stack API procedure and checks
+
+For a requested stack deployment, use the existing Komodo repository resource
+and create the Stack through `POST /write/CreateStack`, then start it through
+`POST /execute/DeployStack`. Keep all authentication values process-local.
+The minimum stack configuration is the target `server_id`, the `linked_repo`,
+the branch, `run_directory`, `file_paths`, and an explicit project name.
+
+There are three implementation details that are easy to get wrong:
+
+1. The local-login bearer is the `data.jwt` field and is passed unchanged in
+   `Authorization`.
+2. `GET /read/GetStack` serializes the database identifier as
+   `_id["$oid"]`; `POST /write/UpdateStack` requires that inner text value as
+   its `id`, not the JSON object.
+3. `file_paths` are relative to the configured `run_directory`. For example,
+   a repository source at `pc9-ct124-uisp/docker-compose.yml` with
+   `run_directory: pc9-ct124-uisp` must use
+   `file_paths: ["docker-compose.yml"]`.
+
+Before declaring a deploy active, verify all of the following: the stack
+reports no `info.missing_files` or `info.remote_errors`; the target has the
+expected running container; and the service responds on its intended local
+endpoint. A successful `DeployStack` acceptance only means Core queued the
+operation, not that the service is ready. This procedure and the file-path
+correction were verified while deploying UISP to `pc9-ct124-uisp` on
+6 November 2026.
+
 ## Network map and NetBox
 
 Use this runbook for agent behaviour and access paths. Use the network map and
