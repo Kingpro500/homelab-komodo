@@ -9,6 +9,7 @@ rule_files:
   - "/etc/prometheus/alerts.yml"
   - "/etc/prometheus/network-alerts.yml"
   - "/etc/prometheus/tunarr-session-alerts.yml"
+  - "/etc/prometheus/media-services-alerts.yml"
 scrape_configs:
   - job_name: blackbox-http
     metrics_path: /probe
@@ -59,6 +60,21 @@ scrape_configs:
     scrape_interval: 30s
     static_configs:
       - targets: ["10.0.0.123:9101"]
+  - job_name: blackbox-media-services
+    metrics_path: /probe
+    params: {module: [tcp_connect]}
+    static_configs:
+      - {targets: ["10.0.0.128:8989"], labels: {app: sonarr}}
+      - {targets: ["10.0.0.128:7878"], labels: {app: radarr}}
+      - {targets: ["10.0.0.128:9696"], labels: {app: prowlarr}}
+      - {targets: ["10.0.0.128:6767"], labels: {app: bazarr}}
+      - {targets: ["10.0.0.128:8787"], labels: {app: readarr}}
+      - {targets: ["10.0.0.128:8112"], labels: {app: deluge}}
+      - {targets: ["10.0.0.128:5055"], labels: {app: seerr}}
+    relabel_configs:
+      - {source_labels: [__address__], target_label: __param_target}
+      - {source_labels: [__param_target], target_label: instance}
+      - {target_label: __address__, replacement: "blackbox:9115"}
   - job_name: blackbox-tcp
     metrics_path: /probe
     params: {module: [tcp_connect]}
