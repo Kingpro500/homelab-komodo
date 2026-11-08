@@ -143,14 +143,14 @@ footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-
   <button id="sw-token-save" class="sw-btn">Lagre</button><button id="tok-edit" class="sw-btn" title="endre token" style="display:none">✎</button>
   <span id="sw-token-msg" style="color:var(--lan);font-size:11px"></span>
   <span style="color:var(--dim);font-size:11px" id="sw-meta"></span>
-  <span style="color:var(--muted);margin-left:6px">📜 versjon <b>2.090</b> · <a target="_blank" rel="noopener noreferrer" href="versions/">historikk</a></span>
+  <span style="color:var(--muted);margin-left:6px">📜 versjon <b>2.091</b> · <a target="_blank" rel="noopener noreferrer" href="versions/">historikk</a></span>
 </div>
 
 <h1>🏠 Homelab — tjenester &amp; nettverk <span style="color:var(--lan)">10.0.0.0/24</span></h1>
 
-<div class="sub">Intern startside · Proxmox-kluster «CyberCluster» · OPNsense pc7 (brannmur)</div>
+<div class="sub">Intern startside · Proxmox-kluster «CyberCluster» (5 noder) · OPNsense VM191 på pc7 (brannmur) · reserve VM190 på pc8</div>
 <div class="note" style="margin:8px 0 12px"><b>📌 Kartregler:</b> <a target="_blank" rel="noopener noreferrer" href="PUBLISHING.md">PUBLISHING.md</a> i Git-repoet <code>homelab-komodo/docs/network-map/</code>. Følg dem før alle endringer og publiseringer.</div>
-<div class="meta">Verifisert 29. okt 2026 mot live Proxmox-inventar og kartserveren. Proxmox viser fortsatt 38 gjester og kartet dekker 38/38 VMID-er. Tjeneste-/IP-felter oppdateres fortløpende når live-data bekrefter endringer. Kilder: OPNsense-ARP (48 enheter) · Proxmox-API (4 noder, CPU fra <code>/nodes/*/status</code>, gjester + IP fra config) · levende docker-inventar i hver CT · Komodo. «Inaktiv/» = finnes, men er av. CT-er merket er nede med vilje (arkivert fra Tower/Unraid) og kommer opp igjen ved behov.</div>
+<div class="meta">Sist oppdatert 8. nov 2026 (pc7/pc8/OPNsense/Home Assistant verifisert live). Proxmox viser nå 53 gjester på 5 noder; full gjennomgang av alle VMID-er mot kartet gjenstår. Tjeneste-/IP-felter oppdateres fortløpende når live-data bekrefter endringer. Kilder: OPNsense-ARP (48 enheter) · Proxmox-API (5 noder, CPU fra <code>/nodes/*/status</code>, gjester + IP fra config) · levende docker-inventar i hver CT · Komodo. «Inaktiv/» = finnes, men er av. CT-er merket er nede med vilje (arkivert fra Tower/Unraid) og kommer opp igjen ved behov.</div>
 
 <tr class="vm-frame-row"><td colspan="6"><div class="vm-frame" data-vmid="180"><div class="vm-h"><span class="tag tag-ct">CT</span>CT180</div><table class="svc"><thead><tr><th>Tjeneste</th><th>Adresse</th><th>Merknad</th><th>Status</th><th>Strøm</th></tr></thead><tbody><tr><td><a target="_blank" rel="noopener noreferrer" href="http://10.0.0.180:8008/">Synapse</a></td><td class="ip"><a target="_blank" rel="noopener noreferrer" href="http://10.0.0.180:8008/">10.0.0.180:8008</a></td><td>Matrix homeserver · pc6</td><td class="st-wrap"></td><td class="g-ctl"></td></tr></tbody></table></div></td></tr>
 <!-- ============ SERVICE-OVERSIKT ============ -->
@@ -161,13 +161,17 @@ footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-
 <table id="svc-table">
 <tbody>
 <tr><th>Tjeneste</th><th>Gjest</th><th>Adresse</th><th>Merknad</th><th>Status</th><th>Strøm</th></tr>
-<tr class="section-row"><td colspan="6"><span class="tag tag-node">pve</span> pc8 · N150 · 10.0.0.102</td></tr>
-<tr class="vm-frame-row"><td colspan="6"><div class="vm-frame" data-vmid="100">
-<div class="vm-h"><span class="tag tag-vm">VM</span>homeassistant 100</div>
+<tr class="section-row"><td colspan="6"><span class="tag tag-node">pc7</span> N150 · 10.0.0.107 · bod · OPNsense primær (VM191)</td></tr>
+<tr class="vm-frame-row"><td colspan="6"><div class="vm-frame" data-vmid="191">
+<div class="vm-h"><span class="tag tag-vm">VM</span>pc7-vm191-opnsense 191 · PRIMÆR RUTER</div>
 <table class="svc"><thead><tr><th>Tjeneste</th><th>Adresse</th><th>Merknad</th><th>Status</th><th>Strøm</th></tr></thead><tbody>
-<tr><td><a target="_blank" rel="noopener noreferrer" href="http://10.0.0.7:8123/">Home Assistant</a></td><td class="ip"><a target="_blank" rel="noopener noreferrer" href="http://10.0.0.7:8123/">10.0.0.7:8123</a></td><td>Smarthus · 1834 enheter</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
-<tr><td>Matter Server</td><td class="ip"><a target="_blank" rel="noopener noreferrer" href="http://10.0.0.7:8123/">10.0.0.7:8123</a></td><td>Home Assistant-tillegg</td><td class="st-wrap"></td><td class="g-ctl"></td></tr><tr><td>Tailscale</td><td class="ip"><a target="_blank" rel="noopener noreferrer" href="http://10.0.0.7:8123/">10.0.0.7:8123</a></td><td>Home Assistant-tillegg</td><td class="st-wrap"></td><td class="g-ctl"></td></tr><tr><td>Advanced SSH & Web Terminal</td><td class="ip"><a target="_blank" rel="noopener noreferrer" href="http://10.0.0.7:8123/">10.0.0.7:8123</a></td><td>Home Assistant-tillegg</td><td class="st-wrap"></td><td class="g-ctl"></td></tr><tr><td>File editor</td><td class="ip"><a target="_blank" rel="noopener noreferrer" href="http://10.0.0.7:8123/">10.0.0.7:8123</a></td><td>Home Assistant-tillegg</td><td class="st-wrap"></td><td class="g-ctl"></td></tr><tr><td>AirCast</td><td class="ip"><a target="_blank" rel="noopener noreferrer" href="http://10.0.0.7:8123/">10.0.0.7:8123</a></td><td>Home Assistant-tillegg</td><td class="st-wrap"></td><td class="g-ctl"></td></tr><tr><td>ESPHome Device Builder</td><td class="ip"><a target="_blank" rel="noopener noreferrer" href="http://10.0.0.7:8123/">10.0.0.7:8123</a></td><td>Home Assistant-tillegg</td><td class="st-wrap"></td><td class="g-ctl"></td></tr><tr><td>Music Assistant</td><td class="ip"><a target="_blank" rel="noopener noreferrer" href="http://10.0.0.7:8123/">10.0.0.7:8123</a></td><td>Home Assistant-tillegg</td><td class="st-wrap"></td><td class="g-ctl"></td></tr><tr><td>Mosquitto broker</td><td class="ip"><a target="_blank" rel="noopener noreferrer" href="http://10.0.0.7:8123/">10.0.0.7:8123</a></td><td>Home Assistant-tillegg</td><td class="st-wrap"></td><td class="g-ctl"></td></tr></tbody></table></div></td></tr>
-<tr class="vm-frame-row"><td colspan="6"><div class="vm-frame"><div class="vm-h"><span class="tag tag-node">NODE</span>pve Netdata</div><table class="svc"><thead><tr><th>Tjeneste</th><th>Adresse</th><th>Merknad</th><th>Status</th><th>Strøm</th></tr></thead><tbody><tr><td><a target="_blank" rel="noopener noreferrer" href="http://10.0.0.102:19999/">Netdata</a></td><td class="ip"><a target="_blank" rel="noopener noreferrer" href="http://10.0.0.102:19999/">10.0.0.102:19999</a></td><td>vertsmonitorering</td><td class="st-wrap"></td><td class="g-ctl"></td></tr></tbody></table></div></td></tr>
+<tr><td><a target="_blank" rel="noopener noreferrer" href="https://10.0.0.1/">OPNsense 26.7.8_2</a></td><td class="ip"><a target="_blank" rel="noopener noreferrer" href="https://10.0.0.1/">10.0.0.1</a></td><td>Brannmur/ruter · igc0 LAN · igc1 WAN (89.10.228.222) · Kea · Unbound · FQ-CoDel · alle 4 I226-V via passthrough · onboot=1</td><td class="st-wrap"></td><td class="g-ctl"></td></tr><tr><td>Tailscale</td><td class="ip">100.112.130.60</td><td>opnsense-1 · exit node · samme identitet som VM190</td><td class="st-wrap"></td><td class="g-ctl"></td></tr><tr><td>UPnP / NAT-PMP</td><td class="ip">10.0.0.1</td><td>os-upnp (miniupnpd)</td><td class="st-wrap"></td><td class="g-ctl"></td></tr></tbody></table></div></td></tr>
+<tr class="section-row"><td colspan="6"><span class="tag tag-node">pc8</span> N150 · 10.0.0.102 · bod · OPNsense-reserve (VM190) · Proxmox-mgmt på USB-LAN</td></tr>
+<tr class="vm-frame-row"><td colspan="6"><div class="vm-frame" data-vmid="190">
+<div class="vm-h"><span class="tag tag-vm">VM</span>pc8-vm190-opnsense-backup 190 · KALD RESERVE (stoppet)</div>
+<table class="svc"><thead><tr><th>Tjeneste</th><th>Adresse</th><th>Merknad</th><th>Status</th><th>Strøm</th></tr></thead><tbody>
+<tr><td>OPNsense 26.7.8_2</td><td class="ip">10.0.0.1 (kun når aktiv)</td><td>Klon av VM191 · onboot=0 · ALDRI start samtidig med VM191 · bytte: flytt WAN→nic1 og LAN→nic0 på pc8, start VM190</td><td class="st-wrap"></td><td class="g-ctl"></td></tr></tbody></table></div></td></tr>
+<tr class="vm-frame-row"><td colspan="6"><div class="vm-frame"><div class="vm-h"><span class="tag tag-node">NODE</span>pc8 Netdata</div><table class="svc"><thead><tr><th>Tjeneste</th><th>Adresse</th><th>Merknad</th><th>Status</th><th>Strøm</th></tr></thead><tbody><tr><td><a target="_blank" rel="noopener noreferrer" href="http://10.0.0.102:19999/">Netdata</a></td><td class="ip"><a target="_blank" rel="noopener noreferrer" href="http://10.0.0.102:19999/">10.0.0.102:19999</a></td><td>vertsmonitorering</td><td class="st-wrap"></td><td class="g-ctl"></td></tr></tbody></table></div></td></tr>
 
 <tr class="section-row"><td colspan="6"><span class="tag tag-node">pc6</span> Core 3 N355 · 10.0.0.120 · QuickSync</td></tr>
 <tr class="vm-frame-row"><td colspan="6"><div class="vm-frame" data-vmid="201">
@@ -236,10 +240,15 @@ footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-
 <tr class="vm-frame-row"><td colspan="6"><div class="vm-frame" data-vmid="150"><div class="vm-h"><span class="tag tag-ct">CT</span>CT150</div><table class="svc"><thead><tr><th>Tjeneste</th><th>Adresse</th><th>Merknad</th><th>Status</th><th>Strøm</th></tr></thead><tbody><tr><td>Browser-pool</td><td class="ip">10.0.0.158:3001-3005</td><td class="on">test aktiv · fem nettlesere</td><td class="st-wrap"></td><td class="g-ctl"></td></tr></tbody></table></div></td></tr>
 
 <tr class="section-row"><td colspan="6"><span class="tag tag-node">pc9</span> N100 · 10.0.0.103</td></tr>
+<tr class="vm-frame-row"><td colspan="6"><div class="vm-frame" data-vmid="100">
+<div class="vm-h"><span class="tag tag-vm">VM</span>homeassistant 100 · flyttet fra pc8 8. nov</div>
+<table class="svc"><thead><tr><th>Tjeneste</th><th>Adresse</th><th>Merknad</th><th>Status</th><th>Strøm</th></tr></thead><tbody>
+<tr><td><a target="_blank" rel="noopener noreferrer" href="http://10.0.0.7:8123/">Home Assistant</a></td><td class="ip"><a target="_blank" rel="noopener noreferrer" href="http://10.0.0.7:8123/">10.0.0.7:8123</a></td><td>Smarthus · 1834 enheter</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+<tr><td>Matter Server</td><td class="ip"><a target="_blank" rel="noopener noreferrer" href="http://10.0.0.7:8123/">10.0.0.7:8123</a></td><td>Home Assistant-tillegg</td><td class="st-wrap"></td><td class="g-ctl"></td></tr><tr><td>Tailscale</td><td class="ip"><a target="_blank" rel="noopener noreferrer" href="http://10.0.0.7:8123/">10.0.0.7:8123</a></td><td>Home Assistant-tillegg</td><td class="st-wrap"></td><td class="g-ctl"></td></tr><tr><td>Advanced SSH & Web Terminal</td><td class="ip"><a target="_blank" rel="noopener noreferrer" href="http://10.0.0.7:8123/">10.0.0.7:8123</a></td><td>Home Assistant-tillegg</td><td class="st-wrap"></td><td class="g-ctl"></td></tr><tr><td>File editor</td><td class="ip"><a target="_blank" rel="noopener noreferrer" href="http://10.0.0.7:8123/">10.0.0.7:8123</a></td><td>Home Assistant-tillegg</td><td class="st-wrap"></td><td class="g-ctl"></td></tr><tr><td>AirCast</td><td class="ip"><a target="_blank" rel="noopener noreferrer" href="http://10.0.0.7:8123/">10.0.0.7:8123</a></td><td>Home Assistant-tillegg</td><td class="st-wrap"></td><td class="g-ctl"></td></tr><tr><td>ESPHome Device Builder</td><td class="ip"><a target="_blank" rel="noopener noreferrer" href="http://10.0.0.7:8123/">10.0.0.7:8123</a></td><td>Home Assistant-tillegg</td><td class="st-wrap"></td><td class="g-ctl"></td></tr><tr><td>Music Assistant</td><td class="ip"><a target="_blank" rel="noopener noreferrer" href="http://10.0.0.7:8123/">10.0.0.7:8123</a></td><td>Home Assistant-tillegg</td><td class="st-wrap"></td><td class="g-ctl"></td></tr><tr><td>Mosquitto broker</td><td class="ip"><a target="_blank" rel="noopener noreferrer" href="http://10.0.0.7:8123/">10.0.0.7:8123</a></td><td>Home Assistant-tillegg</td><td class="st-wrap"></td><td class="g-ctl"></td></tr></tbody></table></div></td></tr>
 <tr class="vm-frame-row"><td colspan="6"><div class="vm-frame" data-vmid="103">
 <div class="vm-h"><span class="tag tag-ct">CT</span>CT103</div>
 <table class="svc"><thead><tr><th>Tjeneste</th><th>Adresse</th><th>Merknad</th><th>Status</th><th>Strøm</th></tr></thead><tbody>
-<tr><td><a target="_blank" rel="noopener noreferrer" href="http://10.0.0.118:8080/admin/">Pi-hole reserve</a></td><td class="ip"><a target="_blank" rel="noopener noreferrer" href="http://10.0.0.118:8080/admin/">10.0.0.118:8080</a></td><td>DNS-reserve · pve · autostart</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
+<tr><td><a target="_blank" rel="noopener noreferrer" href="http://10.0.0.118:8080/admin/">Pi-hole reserve</a></td><td class="ip"><a target="_blank" rel="noopener noreferrer" href="http://10.0.0.118:8080/admin/">10.0.0.118:8080</a></td><td>DNS-reserve · CT103 pc9 · autostart</td><td class="st-wrap"></td><td class="g-ctl"></td></tr>
 </tbody></table></div></td></tr>
 <tr class="vm-frame-row"><td colspan="6"><div class="vm-frame" data-vmid="110">
 <div class="vm-h"><span class="tag tag-ct">CT</span>CT110</div>
@@ -298,8 +307,8 @@ footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-
   <div class="enhet"><div class="e-nm">pc1 Gaming Far <span class="tag tag-aktiv">aktiv</span></div><div class="e-role">Stue · W11 + Proxmox</div><div class="e-spec">Ryzen 9 3900X · RTX 3070 · 8 GB</div><div class="e-ip">10.0.0.112</div></div>
   <div class="enhet"><div class="e-nm">pc3 Mac Mini <span class="tag tag-aktiv">aktiv</span></div><div class="e-role">Stue · hoved-PC</div><div class="e-spec">Apple M1 · 8 GB</div><div class="e-ip">klient</div></div>
   <div class="enhet"><div class="e-nm">pc6 Tower <span class="tag tag-aktiv">aktiv</span></div><div class="e-role">Bod · Proxmox</div><div class="e-spec">Core 3 N355 · 32 GB · QuickSync</div><div class="e-ip">10.0.0.120</div></div>
-  <div class="enhet"><div class="e-nm">pc7 Minipc <span class="tag tag-aktiv">aktiv</span></div><div class="e-role">Bod · OPNsense-router</div><div class="e-spec">N150 · 16 GB · 4x 2.5G</div><div class="e-ip">10.0.0.1</div></div>
-  <div class="enhet"><div class="e-nm">pc8 Minipc <span class="tag tag-aktiv">aktiv</span></div><div class="e-role">Stue · Proxmox-master</div><div class="e-spec">N150 · 16 GB</div><div class="e-ip">10.0.0.102</div></div>
+  <div class="enhet"><div class="e-nm">pc7 Minipc <span class="tag tag-aktiv">aktiv</span></div><div class="e-role">Bod · Proxmox · OPNsense VM191 (primær ruter)</div><div class="e-spec">N150 · 16 GB · 4x 2.5G + USB-LAN</div><div class="e-ip">10.0.0.107 · ruter 10.0.0.1</div></div>
+  <div class="enhet"><div class="e-nm">pc8 Minipc <span class="tag tag-aktiv">aktiv</span></div><div class="e-role">Bod · Proxmox · OPNsense-reserve VM190</div><div class="e-spec">N150 · 16 GB · 4x 2.5G + USB-LAN</div><div class="e-ip">10.0.0.102</div></div>
   <div class="enhet"><div class="e-nm">pc9 Minipc <span class="tag tag-aktiv">aktiv</span></div><div class="e-role">Stue · Proxmox</div><div class="e-spec">N100 · 16 GB</div><div class="e-ip">10.0.0.103</div></div>
   <div class="enhet inactive"><div class="e-nm">pc2 Gaming Far <span class="tag tag-inaktiv">inaktiv</span></div><div class="e-role">Stue · gammel</div><div class="e-spec">i7-4790K · RTX 3070</div><div class="e-ip">av</div></div>
   <div class="enhet inactive"><div class="e-nm">pc10 Reserve <span class="tag tag-inaktiv">inaktiv</span></div><div class="e-role">Far</div><div class="e-spec">R7 5700X · RTX 3070</div><div class="e-ip">av</div></div>
@@ -315,24 +324,32 @@ footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-
   <div class="band-body">
     <div class="linkbox"><div class="id">NextGenTel Fiber</div><div class="nm">ONT · bod</div><div class="ip">89.10.228.222/23</div></div>
     <div style="align-self:center;color:var(--dim);font-size:16px">◄– fiber –►</div>
-    <div class="linkbox core"><div class="id">OPNsense</div><div class="nm">pc7 · brannmur</div><div class="ip">10.0.0.1 · igc0 LAN · igc1 WAN · Kea · Unbound</div></div>
+    <div class="linkbox core"><div class="id">OPNsense</div><div class="nm">pc7 · VM191 · brannmur</div><div class="ip">10.0.0.1 · igc0 LAN · igc1 WAN · Kea · Unbound</div></div>
+    <div class="linkbox"><div class="id">OPNsense-reserve</div><div class="nm">pc8 · VM190 · stoppet</div><div class="ip">kald reserve · samme config</div></div>
   </div>
 </div>
 <div class="band">
   <div class="band-title"><span class="bar"></span>Switch-lag — LAN 10.0.0.0/24 · Kea .2–.99</div>
   <div class="band-body">
     <div class="linkbox"><div class="id">Switch · bod</div><div class="nm">Flex Mini 2.5G</div><div class="ip">STP 4096</div></div>
+    <div class="linkbox"><div class="id">Switch · bod 2</div><div class="nm">gammel gigabit (dum)</div><div class="ip">USB-LAN mgmt pc7/pc8</div></div>
     <div class="linkbox"><div class="id">Switch · stue</div><div class="nm">EdgeSwitch 8 150W</div><div class="ip">Apple TV/Arc/Amp/PC</div></div>
     <div class="linkbox"><div class="id">WAP · gang</div><div class="nm">UniFi AC Pro</div><div class="ip">10.0.0.22</div></div>
     <div class="linkbox"><div class="id">WAP · plan</div><div class="nm">UniFi U7 Pro</div><div class="ip">skal kjøpes</div></div>
   </div>
 </div>
 <div class="proxmox">
-  <div class="px-head">◈ Proxmox-kluster — 4 noder · verifisert 6. okt</div>
+  <div class="px-head">◈ Proxmox-kluster — 5 noder · verifisert 8. nov</div>
   <div class="node-row">
     <div class="node">
-      <div class="n-title">pve (pc8) · N150</div><div class="n-ip">10.0.0.102 · 16 GB · master</div>
-      <div class="guest"><span class="g"><span class="vt gv">VM</span><b>homeassistant</b> 100</span><span class="ip">10.0.0.7</span></div>
+      <div class="n-title">pc7 · N150</div><div class="n-ip">10.0.0.107 · 16 GB · bod · USB-mgmt nic4</div>
+      <div class="guest"><span class="g"><span class="vt gv">VM</span><b>opnsense (primær)</b> 191</span><span class="ip">10.0.0.1</span></div>
+      <div class="svc-list">igc0–3 passthrough · ruter</div>
+    </div>
+    <div class="node">
+      <div class="n-title">pc8 · N150</div><div class="n-ip">10.0.0.102 · 16 GB · bod · USB-mgmt</div>
+      <div class="guest off"><span class="g"><span class="vt gv">VM</span><b>opnsense-reserve</b> 190</span><span class="ip">10.0.0.1</span></div>
+      <div class="svc-list">kald reserve · stoppet</div>
       <div class="guest"><span class="g"><span class="vt gt">CT</span><b>Komodo-core</b> 110</span><span class="ip">10.0.0.117</span></div>
       <div class="svc-list"><i>Legacy service references; Komodo Core is on pc9/CT110</i></div>
       <div class="guest"><span class="g"><span class="vt gt">CT</span><b>pihole-pc6</b> 101</span><span class="ip">10.0.0.115</span></div>
@@ -362,6 +379,8 @@ footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-
     </div>
     <div class="node">
       <div class="n-title">pc9 · N100</div><div class="n-ip">10.0.0.103 · 16 GB</div>
+      <div class="guest"><span class="g"><span class="vt gv">VM</span><b>homeassistant</b> 100</span><span class="ip">10.0.0.7</span></div>
+      <div class="svc-list">ZBT-2 (USB 303a:831a) · 6 GB</div>
       <div class="guest"><span class="g"><span class="vt gt">CT</span><b>pc9-observability</b> 104</span><span class="ip">10.0.0.126</span></div>
       <div class="svc-list">Prometheus · Alertmanager · Blackbox</div>
       <div class="guest"><span class="g"><span class="vt gt">CT</span><b>pc9-ct106-tunarr</b> 106</span><span class="ip">10.0.0.122</span></div>
@@ -397,7 +416,7 @@ footer{margin-top:28px;font-size:13px;color:var(--dim);text-align:center;border-
 
 <div class="note">
 <b>Verifiserte fakta (12. okt):</b><br>
-• <b>Gjesteplassering</b> hentet levende fra Proxmox: CT105/CT150/CT130 og de øvrige workload-CT-ene ligger på <b>pc6</b>; CT102/CT350 ligger på <b>pc1</b>; Tunarr/legacy- og reservegjester ligger på <b>pc9</b> eller <b>pve</b> etter live Proxmox-status.<br>
+• <b>Gjesteplassering</b> hentet levende fra Proxmox: CT105/CT150/CT130 og de øvrige workload-CT-ene ligger på <b>pc6</b>; CT102/CT350 ligger på <b>pc1</b>; Tunarr/legacy- og reservegjester ligger på <b>pc9</b> eller <b>pc8</b> etter live Proxmox-status.<br>
 • <b>ct107/108/159/160</b> er arkiverte legacy-CT-er fra Unraid/Tower, med vilje — kommer opp ved behov (bl.a. Plex/Jellyfin, Lancache).<br>
 • <b>Sonos:</b> ARP viser 7; de to Sonos One (Arc-surround) er lagt til som offline nedenfor. Totalt 9.<br>
 • <b>ESP ×5</b> i ARP inkl. EspMedia 10.1″ på <b>.48</b>.
@@ -536,6 +555,7 @@ offline.forEach(o=>{
   setInterval(refresh,15000);
 })();
 </script>
+<div class="note"><b>Endringsnotat v2.091 (8. nov 2026):</b> Proxmox-noden <code>pve</code> er omdøpt til <b>pc8</b> (corosync v8, 10.0.0.102). Home Assistant VM100 er flyttet fra pc8 til <b>pc9</b> (6 GB RAM, ZBT-2 via USB-ID 303a:831a, nattlig vzdump 03:45 til Tower). <b>pc7</b> er reinstallert som Proxmox-node (10.0.0.107, mgmt på USB-LAN nic4) og meldt inn i clusteret (nå 5 noder). OPNsense kjører nå som <b>VM191 på pc7</b> (primær, onboot) med alle fire I226-V via PCI-passthrough; <b>VM190 på pc8</b> er identisk kald reserve (stoppet, onboot=0). Begge: 26.7.8_2, os-tailscale/os-upnp/os-dmidecode, Tailscale <code>opnsense-1</code> 100.112.130.60. Ny gammel gigabit-switch i bod for USB-mgmt. Gammel Tailscale-node <code>opnsense</code> (100.123.102.121) er utgått.</div>
 <div class="note"><b>Endringsnotat v2.050 (23. okt 2026):</b> CT105 mediespillere og CT150 browsers er gjenopprettet fra verifisert backup på pc6 og står stoppet til de skal brukes. PC1 beholder AI-CT350 med RTX 3070 passthrough.</div>
 <div class="note"><b>Revisjon v2.064 (29. okt 2026):</b> Live Proxmox-inventar er kontrollert på nytt: 38 gjester totalt, bestående av 36 CT-er og 2 VM-er. Alle 38 VMID-er finnes i kartet. CT111 og CT392 ble først lagt inn med verifisert live-status i parentes og er nå en del av kartets ordinære oversikt. Tallet 38 gjelder Proxmox-gjester, ikke CT340-containere; CT340 er én enkelt LXC-container. Komodo-dekning og Proxmox-gjestetall er separate målinger.</div>
 <div class="note"><b>Endringsnotat v2.052 (26. okt 2026):</b> PC9 CT104 <code>pc9-observability</code> er lagt inn etter Proxmox-, Komodo- og runtime-verifisering. Den kjører Prometheus, Alertmanager og Blackbox på 10.0.0.126 og overvåker Emby, begge Tunarr-instansene og PC6.</div>

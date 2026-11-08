@@ -54,7 +54,7 @@ def api(path):
 
 
 real = {}
-for node in ["pc1", "pc6", "pc9", "pve"]:
+for node in ["pc1", "pc6", "pc7", "pc8", "pc9"]:
     for kind in ("lxc", "qemu"):
         for g in api(f"nodes/{node}/{kind}"):
             cfg = api(f"nodes/{node}/{kind}/{g['vmid']}/config")
@@ -89,8 +89,8 @@ for name, live in nodes.items():
                 (name, None, f"node {name}", "running" if live == "online" else live),
             )
 
-# Name aliases: the config says pc8, the API says pve.
-ALIAS = {"pc8": "pve"}
+# Name aliases between config and API (node pve was renamed to pc8 on 2026-11-08).
+ALIAS = {}
 
 text = open(SERVICES).read()
 import itertools

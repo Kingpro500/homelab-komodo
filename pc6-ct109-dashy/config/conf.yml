@@ -53,9 +53,13 @@ sections:
         url: http://10.0.0.128:3001/
         description: CT109
         icon: sh:uptime-kuma
+      - title: Proxmox pc7
+        url: https://10.0.0.107:8006/
+        description: OPNsense VM191 (primær)
+        icon: mdi:server
       - title: Proxmox pc8
         url: https://10.0.0.102:8006/
-        description: master
+        description: OPNsense-reserve VM190
         icon: mdi:server
       - title: Proxmox pc6
         url: https://10.0.0.120:8006/

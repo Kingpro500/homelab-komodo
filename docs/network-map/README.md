@@ -11,7 +11,7 @@ containerstatus og helse er verifisert.
 ## ⛔ PÅLAGT: NODE-SAMMENDRAGET — MÅ IKKE FJERNES
 
 **Det finnes ETT element som er beskyttet uten unntak:** node-sammendraget —
-de fire maskinene (pc1 · Gaming, pc6 · Tower, pc9 · Minipc, pc8 · pve) med
+de fire maskinene (pc1 · Gaming, pc6 · Tower, pc9 · Minipc, pc8 · Minipc) med
 **CPU, RAM og Disk** øverst i «📋 Serviceoversikt». Det er `#node-resources` i
 `nettverkskart.html` og fylles live fra `GET http://10.0.0.135:9118/nodes`.
 
@@ -83,7 +83,7 @@ med vilje. De kommer opp ved behov — slett dem ikke.
 
 ## CPU-er (live fra Proxmox /nodes/*/status)
 
-- pc7 (OPNsense) = N150, pc8 (pve) = N150, pc9 = N100, pc6 = **Core 3 N355**,
+- pc7 (Proxmox · OPNsense VM191) = N150, pc8 (Proxmox · OPNsense-reserve VM190) = N150, pc9 = N100, pc6 = **Core 3 N355**,
   pc1 = Ryzen 9 3900X, pc3 = Apple M1, pc4 = Ryzen 7 5800X; pc2/pc10 inaktive.
 
 ## Verdier å ikke lure seg på

@@ -49,11 +49,11 @@
     - OPNsense:
         icon: opnsense.png
         href: http://10.0.0.1/
-        description: 10.0.0.1:80 · Router / firewall
+        description: 10.0.0.1:80 · Router / firewall · VM191 på pc7 · reserve VM190 på pc8
     - Home Assistant:
         icon: home-assistant.png
         href: http://10.0.0.7:8123/
-        description: 10.0.0.7:8123 · VM100 · pve (pc8) · smarthus
+        description: 10.0.0.7:8123 · VM100 · pc9 · smarthus
 - Proxmox:
     - pc1:
         icon: proxmox.png
@@ -67,10 +67,14 @@
         icon: proxmox.png
         href: https://10.0.0.103:8006/
         description: 10.0.0.103:8006 · Proxmox · avlastning, iVentoy/UniFi/Paperless/Roon/Immich · 2.5G USB
-    - pve (pc8):
+    - pc7:
+        icon: proxmox.png
+        href: https://10.0.0.107:8006/
+        description: 10.0.0.107:8006 · Proxmox · bod · OPNsense VM191 (primær ruter)
+    - pc8:
         icon: proxmox.png
         href: https://10.0.0.102:8006/
-        description: 10.0.0.102:8006 · Proxmox master · HA
+        description: 10.0.0.102:8006 · Proxmox · bod · OPNsense-reserve VM190 (stoppet)
     - Unraid Tower:
         icon: unraid.png
         href: http://10.0.0.101/
@@ -154,10 +158,10 @@
         icon: si:netdata
         href: http://10.0.0.120:19999/
         description: 10.0.0.120:19999 · Proxmox pc6 · 32 GB
-    - Netdata pve:
+    - Netdata pc8:
         icon: si:netdata
         href: http://10.0.0.102:19999/
-        description: 10.0.0.102:19999 · Proxmox master · 16 GB
+        description: 10.0.0.102:19999 · Proxmox pc8 · 16 GB
     - Netdata pc9:
         icon: si:netdata
         href: http://10.0.0.103:19999/
@@ -229,10 +233,10 @@
         description: 10.0.0.124:5800 · CT104 · pc6 · treemap over Unraid media
 
 - Network & Utilities:
-    - Pi-hole pc8:
+    - Pi-hole pc6:
         icon: pi-hole.png
         href: http://10.0.0.115:8080/admin/
-        description: 10.0.0.115:8080 · CT115 · pve (pc8)
+        description: 10.0.0.115:8080 · CT101 · pc6
     - Pi-hole pc9:
         icon: pi-hole.png
         href: http://10.0.0.116:8080/admin/
