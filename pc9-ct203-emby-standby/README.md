@@ -1,6 +1,6 @@
 # PC9 CT203 — Emby warm standby
 
-This is the independent Emby standby on **PC9 / CT203 / 10.0.0.127:8096**.
+This is the independent Emby standby on **PC9 / CT203 / 10.0.0.203:8096**.
 
 ## Safety model
 

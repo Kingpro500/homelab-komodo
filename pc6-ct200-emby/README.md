@@ -3,7 +3,7 @@
 ## Topology
 
 - **CT200 / PC6 / 10.0.0.150:8096** is the active, primary Emby server.
-- **CT203 / PC9 / 10.0.0.127:8096** is a warm standby, deployed by Komodo as `pc9-ct203-emby-standby`.
+- **CT203 / PC9 / 10.0.0.203:8096** is a warm standby, deployed by Komodo as `pc9-ct203-emby-standby`.
 - Both use the same Tower media export read-only; this remains a shared dependency.
 - The servers never share `/config`, SQLite databases, or a server identity.
 
