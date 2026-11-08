@@ -48,7 +48,7 @@ oppdager den uansett hvilken playbook/mappe du kjører fra (en rot-plassert
 cd ansible
 # 1) Read-only clusterstatus (API-token)
 ansible-playbook -i inventory/proxmox.yml playbooks/cluster_status.yml
-ansible-playbook -i inventory/proxmox.yml playbooks/cluster_status.yml -e target=pve
+ansible-playbook -i inventory/proxmox.yml playbooks/cluster_status.yml -e target=pc8
 
 # 2) Driftsrapport fra alle CT-er (SSH, read-only)
 ansible-playbook -i inventory/ssh.yml playbooks/driftsrapport.yml

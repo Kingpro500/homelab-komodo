@@ -3,7 +3,7 @@
 # Treffer clusteret via API-token (hermes@pve!monitor, PVEAuditor) lokalt
 # fra kontrollmaskinen (10.0.0.135). Ingenting installeres på nodene.
 - name: CyberCluster status (read-only)
-  hosts: pve
+  hosts: pc8
   gather_facts: false
   become: false
   tasks:

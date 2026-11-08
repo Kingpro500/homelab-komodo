@@ -66,7 +66,7 @@ dokumentert i [`docs/network-map/README.md`](../docs/network-map/README.md) og
 
 ## Proxmox-nodeene øverst
 
-«Proxmox»-gruppa (pc1, pc6, pc9, pve(pc8), Unraid Tower) ligger **øverst** i
+«Proxmox»-gruppa (pc1, pc6, pc7, pc8, pc9, Unraid Tower) ligger **øverst** i
 dashbordet — de fire maskinene i én rad (4 kolonner). Hver er en ren tile
 (ikon + lenke til node-UI-et + beskrivelse) med live docker-status der noden
 kjører CT109.

@@ -45,7 +45,8 @@ const CDN = {
   'pc1': 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/proxmox.svg',
   'pc6': 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/proxmox.svg',
   'pc9': 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/proxmox.svg',
-  'pve (pc8)': 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/proxmox.svg',
+  'pc7': 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/proxmox.svg',
+  'pc8': 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/proxmox.svg',
   'Ollama': 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/ollama.svg',
   'Spend OpenRouter': 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/openrouter.svg',
   'Pi-hole pc8': 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/pihole.svg',
@@ -60,7 +61,7 @@ const CDN = {
   'Netdata Cloud': 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/netdata.svg',
   'Netdata Tower': 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/netdata.svg',
   'Netdata pc6': 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/netdata.svg',
-  'Netdata pve': 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/netdata.svg',
+  'Netdata pc8': 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/netdata.svg',
   'Netdata pc9': 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/netdata.svg',
   'Grafana CT109': 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/grafana.svg',
   // Scanopy has no icon in Simple Icons or selfh.st; falls back to a generic
