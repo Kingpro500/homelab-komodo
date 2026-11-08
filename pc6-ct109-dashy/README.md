@@ -1,5 +1,9 @@
 # Dashy — pc6 CT109
 
+## ⏸️ Status: PAUSE (8. nov 2026)
+
+Brukeren har satt Dashy (og Homepage) på pause. Endringen i `config/conf.yml` fra PR #78 (ny flis «Proxmox pc7» = OPNsense VM191, «Proxmox pc8» = OPNsense-reserve VM190) er merget men **ikke deployet**; Komodo-stacken `pc6-ct109-dashy` står med status unknown. Ikke redeploy før brukeren tar opp saken igjen. Se [AGENTS.md](../AGENTS.md) og nettverkskartet «Planlagt v2.156».
+
 - **Komodo server / stack:** `pc6-ct109-node` / `pc6-ct109-dashy`
 - **Address:** `http://10.0.0.128:3011`
 
