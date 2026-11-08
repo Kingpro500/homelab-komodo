@@ -1,6 +1,6 @@
 # Instruksjoner for Claude
 
-Les også [AGENTS.md](AGENTS.md).
+Les også [AGENTS.md](AGENTS.md) – den har åpne saker (bl.a. Homepage på pause).
 
 ## ⚠️ Nettverkskartet ligger IKKE i GitHub
 
