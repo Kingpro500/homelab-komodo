@@ -1,5 +1,17 @@
 # Nettverkskart — Homelab 10.0.0.0/24
 
+## ⚠️ Nettverkskartet ligger IKKE i GitHub
+
+**Nettverkskartet (`docs/network-map/`) redigeres og publiseres kun via Gitea på CT120.**
+
+- Kilde: `CT120:/opt/moved-services/nettkart-repo/docs/network-map/nettverkskart.html` (origin = Gitea `http://10.0.0.176:3000/Kingpro500/homelab-komodo.git`, CT118).
+- Publisering: kjør `/usr/local/sbin/nettkart-publish` på CT120 etter commit. Skriptet pusher til Gitea, validerer versjon + endringsnotat og publiserer atomisk.
+- Gjeldende regler: `PUBLISHING.md` i Gitea-kopien (samme mappe på CT120).
+- Kopien av `docs/network-map/` i **dette GitHub-repoet er utdatert og brukes ikke**. Ikke rediger den, ikke publiser fra den, og ikke deploy kartet med Komodo/GitHub.
+- Alt annet (Komodo-stacker, Homepage, Dashy, Ansible, kode, øvrig dokumentasjon) ligger i **GitHub**.
+
+
+
 Frittstående startside (HTML) over hele homelab-et. Åpne `nettverkskart.html`
 eller se den live på **http://10.0.0.124:3020/** (nginx i CT120 på PC6).
 
@@ -11,7 +23,7 @@ containerstatus og helse er verifisert.
 ## ⛔ PÅLAGT: NODE-SAMMENDRAGET — MÅ IKKE FJERNES
 
 **Det finnes ETT element som er beskyttet uten unntak:** node-sammendraget —
-de fire maskinene (pc1 · Gaming, pc6 · Tower, pc9 · Minipc, pc8 · Minipc) med
+de fire maskinene (pc1 · Gaming, pc6 · Tower, pc9 · Minipc, pc8 · pve) med
 **CPU, RAM og Disk** øverst i «📋 Serviceoversikt». Det er `#node-resources` i
 `nettverkskart.html` og fylles live fra `GET http://10.0.0.135:9118/nodes`.
 
@@ -83,7 +95,7 @@ med vilje. De kommer opp ved behov — slett dem ikke.
 
 ## CPU-er (live fra Proxmox /nodes/*/status)
 
-- pc7 (Proxmox · OPNsense VM191) = N150, pc8 (Proxmox · OPNsense-reserve VM190) = N150, pc9 = N100, pc6 = **Core 3 N355**,
+- pc7 (OPNsense) = N150, pc8 (pve) = N150, pc9 = N100, pc6 = **Core 3 N355**,
   pc1 = Ryzen 9 3900X, pc3 = Apple M1, pc4 = Ryzen 7 5800X; pc2/pc10 inaktive.
 
 ## Verdier å ikke lure seg på
