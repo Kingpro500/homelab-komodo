@@ -4,6 +4,18 @@ This is the operational source of truth for Codex access checks. It documents
 access paths and verification steps, never secret values. Update it whenever
 an integration, host, or credential location changes.
 
+## Repository boundary — read first
+
+| Repository | Used for | Nothing else |
+| --- | --- | --- |
+| **GitHub** `git@github.com:Kingpro500/homelab-komodo.git` | Everything: stacks, automation, scripts, operational documentation and **this runbook** | — |
+| **Gitea** `http://10.0.0.176:3000/Kingpro500/homelab-komodo.git` | **Only** the network map (`docs/network-map/nettverkskart.html` and its versions) and the monitoring page (`docs/network-map/daily-report.html`), published through `nettkart-publish` on PC6/CT120 | Do not commit or push anything else there, not even on a branch |
+
+This runbook is maintained **only in GitHub**. The Gitea repository still
+contains older copies of other files, including a short `ACCESS-RUNBOOK.md`.
+Those copies are not authoritative and must not be edited or used as a source.
+
+
 ## Mandatory agent behaviour
 
 1. Read this runbook before saying access is missing or a homelab system is
@@ -277,6 +289,58 @@ endpoint. A successful `DeployStack` acceptance only means Core queued the
 operation, not that the service is ready. This procedure and the file-path
 correction were verified while deploying UISP to `pc9-ct124-uisp` on
 6 November 2026.
+
+## Claude (Cowork) access route
+
+Claude in the Claude desktop app (Cowork) reaches the homelab through a local
+MCP server on Roger's Mac mini (`rogers-mac-mini-local`). Claude's own Cowork
+Linux VM cannot reach the LAN: its egress proxy answers `10.0.0.0/24` and SSH
+with `403 blocked-by-allowlist`, and the account egress setting does not
+change that.
+
+| Item | Value |
+| --- | --- |
+| MCP server | `homelab-ssh`, tool `ssh_run` |
+| Server file | `~/.local/share/homelab-ssh-mcp/homelab-ssh-mcp.pl` on the Mac (core Perl and `/usr/bin/ssh`, no dependencies) |
+| Registration | `~/Library/Application Support/Claude/claude_desktop_config.json` (`mcpServers.homelab-ssh`) |
+| Source and installer | `~/Documents/claude-homelab/` (`install.sh` copies the server out of `~/Documents`, which macOS privacy protection blocks for Claude's child processes) |
+| Targets | allowlisted in the server: `pc6` 10.0.0.120, `pve` 10.0.0.102, `pc9` 10.0.0.103; guests only through `pct exec` / `qm` |
+| Identity | currently the shared deployment key `~/.ssh/codex_fleet_deploy` as `root`; a dedicated Claude key is planned so each agent can be revoked separately |
+| Audit | every command and exit code is appended to `~/.local/share/homelab-ssh-mcp/ssh-audit.log` on the Mac |
+| GitHub | working clone `/root/claude-work/homelab-komodo` on PC6 (HTTPS); token stored by Roger in `/root/.config/git/github-credentials` (mode `0600`, git `credential.helper store`) |
+
+API credentials: Claude does not read the Mac's `~/.codex/secure/` files and
+none are copied for it. OPNsense, UniFi and EdgeSwitch data come from the
+secured material on Hermes CT130 (`/home/hermes/.hermes/.env`, `unifi.env`,
+`edgeswitch.env`); NetBox from CT120. Values are never printed.
+
+Live-verified 8 November 2026 (read-only): `hostname` on pc6, pve and pc9;
+`pvecm status` quorate (pc1 offline); `pct exec 130` metrics on `:9130`;
+`pct exec 120` Docker containers up; CT200 Emby `HTTP 200` on
+`10.0.0.150:8096`; GitHub `git ls-remote` with the stored credential.
+`git` was installed on PC6 from Debian packages for this route.
+
+Claude follows the same rules as every other agent: read-only verification
+first; changes, restarts, deploys and credential work only on an explicit
+request; branch `agent/claude/<task>` and a pull request on GitHub for
+repository changes.
+
+## Facts merged from the former Gitea runbook copy
+
+These were only in the Gitea copy (commits `1a1751f`, `248cbab`) and are kept
+here so that copy can be retired:
+
+- Hermes CT130 also holds secured EdgeSwitch material and runs a read-only
+  collector for port health, errors/drops and PoE. It does not change switch
+  configuration.
+- Hermes' OPNsense route was re-verified on 6 November 2026 with the read-only
+  `/api/core/system/status` call; `opnsense_status_sampler_up 1` confirmed the
+  runtime sampler.
+- Prometheus, rules, targets, alert state and Blackbox probes: PC9/CT104.
+  Long-term observability data and correlation: ClickHouse on PC6/CT117.
+- Stop rule: if the user says **stop**, terminate running work immediately and
+  do not continue credential discovery or configuration changes.
+
 
 ## Network map and NetBox
 
