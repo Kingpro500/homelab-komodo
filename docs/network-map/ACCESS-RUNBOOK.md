@@ -318,7 +318,7 @@ committed or written to NetBox or the map; only the file locations are listed.
 | UniFi Network | 10.0.0.132:8443 (PC7 CT115) | Hermes `unifi.env` (`UNIFI_URL/USERNAME/PASSWORD`) | 2026-11-09 (login 200) |
 | EdgeSwitch 8 | **10.0.0.19** (DHCP since 2026-11-09; was 10.0.0.32) | Hermes `edgeswitch.env`; collector fails until the address is fixed (Kea reservation planned) | 2026-11-09 |
 | EdgeRouter 8 | not found on LAN 2026-11-09 | Hermes `edgerouter.env` (`EDGEROUTER_USERNAME/PASSWORD`, no host) | credentials only |
-| UISP | 10.0.0.17 (PC7 CT124, static) | PC8 `/root/.config/claude/uisp.env` (`UISP_URL`, `UISP_TOKEN`, header `x-auth-token`); UISP has no adopted devices yet | 2026-11-09 (200) |
+| UISP | 10.0.0.17 (PC7 CT124, static) | PC8 `/root/.config/claude/uisp.env` (`UISP_URL`, `UISP_TOKEN`, header `x-auth-token`); EdgeSwitch ES-8-150W adopted 2026-11-09 (CLI `service unms key` + `service unms`, saved with `write memory`; config backup in Hermes `/home/hermes/.hermes/backups/`) | 2026-11-09 (200) |
 | Home Assistant | 10.0.0.7:8123 (PC9 VM100) | Hermes `.env`: `HASS_URL`, `HASS_TOKEN` | 2026-11-09 (200) |
 | Emby | 10.0.0.150:8096 (PC6 CT200) | Hermes `.env`: `EMBY_API_KEY` | 2026-11-09 (200) |
 | Unraid | 10.0.0.101 (PC6 VM201) | Hermes `.env`: `UNRAID_URL`, `UNRAID_API_KEY` (GraphQL); root shell via `qm guest exec 201` | 2026-11-09 (200) |
