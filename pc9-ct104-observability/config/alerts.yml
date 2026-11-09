@@ -77,13 +77,25 @@ groups:
         labels: {severity: warning, service: observability, node: pc9}
         annotations: {summary: "A PC9 observability component is unavailable"}
       # Proxmox guest rules are deduplicated by guest identity.
+      # VM201/VM191/VM190 use PCI passthrough without guest agent: Proxmox always
+      # reports 100 % memory for them. OPNsense memory is alerted from its own API below.
+      - alert: OPNsenseMemoryHigh
+        expr: ((opnsense_memory_used_bytes - opnsense_memory_arc_bytes) / opnsense_memory_total_bytes) * 100 >= 85
+        for: 10m
+        labels: {severity: warning, service: opnsense}
+        annotations: {summary: "OPNsense memory usage (excluding ZFS ARC) is above 85%"}
+      - alert: OPNsenseResourcesExporterDown
+        expr: absent(opnsense_resources_up) or opnsense_resources_up == 0
+        for: 10m
+        labels: {severity: warning, service: opnsense}
+        annotations: {summary: "OPNsense memory exporter on Hermes (10.0.0.135:9133) is not reporting"}
       - alert: GuestMemoryHigh
-        expr: max by (name, node, type, vmid) ((proxmox_guest_mem_used_bytes{name!="pc6-vm201-unraid"} / proxmox_guest_mem_total_bytes{name!="pc6-vm201-unraid"}) * 100) >= 90
+        expr: max by (name, node, type, vmid) ((proxmox_guest_mem_used_bytes{name!~"pc6-vm201-unraid|pc7-vm191-opnsense|pc8-vm190-opnsense-backup"} / proxmox_guest_mem_total_bytes{name!~"pc6-vm201-unraid|pc7-vm191-opnsense|pc8-vm190-opnsense-backup"}) * 100) >= 90
         for: 10m
         labels: {severity: warning, service: proxmox}
         annotations: {summary: "Proxmox guest memory usage is high"}
       - alert: GuestMemoryCritical
-        expr: max by (name, node, type, vmid) ((proxmox_guest_mem_used_bytes{name!="pc6-vm201-unraid"} / proxmox_guest_mem_total_bytes{name!="pc6-vm201-unraid"}) * 100) >= 97
+        expr: max by (name, node, type, vmid) ((proxmox_guest_mem_used_bytes{name!~"pc6-vm201-unraid|pc7-vm191-opnsense|pc8-vm190-opnsense-backup"} / proxmox_guest_mem_total_bytes{name!~"pc6-vm201-unraid|pc7-vm191-opnsense|pc8-vm190-opnsense-backup"}) * 100) >= 97
         for: 5m
         labels: {severity: critical, service: proxmox}
         annotations: {summary: "Proxmox guest memory usage is critical"}
