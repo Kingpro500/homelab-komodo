@@ -292,38 +292,53 @@ correction were verified while deploying UISP to `pc9-ct124-uisp` on
 
 ## Claude (Cowork) access route
 
-Claude in the Claude desktop app (Cowork) reaches the homelab through a local
-MCP server on Roger's Mac mini (`rogers-mac-mini-local`). Claude's own Cowork
-Linux VM cannot reach the LAN: its egress proxy answers `10.0.0.0/24` and SSH
-with `403 blocked-by-allowlist`, and the account egress setting does not
-change that.
+Claude runs in the Claude desktop app (Cowork). Its own cloud/VM sandbox cannot
+reach the LAN (`403 blocked-by-allowlist`), so every homelab action goes through
+a local MCP server on Roger's Mac mini. **Before saying any access is missing,
+check this table and test the listed route.** No secret value is ever printed,
+committed or written to NetBox or the map; only the file locations are listed.
+
+### Transport
 
 | Item | Value |
 | --- | --- |
-| MCP server | `homelab-ssh`, tool `ssh_run` |
-| Server file | `~/.local/share/homelab-ssh-mcp/homelab-ssh-mcp.pl` on the Mac (core Perl and `/usr/bin/ssh`, no dependencies) |
-| Registration | `~/Library/Application Support/Claude/claude_desktop_config.json` (`mcpServers.homelab-ssh`) |
-| Source and installer | `~/Documents/claude-homelab/` (`install.sh` copies the server out of `~/Documents`, which macOS privacy protection blocks for Claude's child processes) |
-| Targets | allowlisted in the server: `pc6` 10.0.0.120, `pve` 10.0.0.102, `pc9` 10.0.0.103; guests only through `pct exec` / `qm` |
-| Identity | currently the shared deployment key `~/.ssh/codex_fleet_deploy` as `root`; a dedicated Claude key is planned so each agent can be revoked separately |
-| Audit | every command and exit code is appended to `~/.local/share/homelab-ssh-mcp/ssh-audit.log` on the Mac |
-| GitHub | working clone `/root/claude-work/homelab-komodo` on PC6 (HTTPS); token stored by Roger in `/root/.config/git/github-credentials` (mode `0600`, git `credential.helper store`) |
+| MCP server | `homelab-ssh`, tool `ssh_run`, on the Mac (`~/.local/share/homelab-ssh-mcp/homelab-ssh-mcp.pl`, core Perl + `/usr/bin/ssh`) |
+| Installer / source | `~/Documents/claude-homelab/install.sh` (copies the server out of `~/Documents`, which macOS blocks for Claude's child processes) |
+| Targets | `pc1` 10.0.0.112, `pc6` 10.0.0.120, `pc7` 10.0.0.107, `pc8` 10.0.0.102, `pc9` 10.0.0.103 (root); guests via `pct exec`, Unraid VM201 via `qm guest exec 201` |
+| SSH identity | Claude's own key `~/.ssh/claude_fleet` on the Mac (copy of `/root/.ssh/claude_fleet` on PC8); public key in the cluster-wide `/etc/pve/priv/authorized_keys`. Created 2026-11-09; revoke by removing the `claude-cowork` line |
+| Audit | every command and exit code: `~/.local/share/homelab-ssh-mcp/ssh-audit.log` on the Mac |
 
-API credentials: Claude does not read the Mac's `~/.codex/secure/` files and
-none are copied for it. OPNsense, UniFi and EdgeSwitch data come from the
-secured material on Hermes CT130 (`/home/hermes/.hermes/.env`, `unifi.env`,
-`edgeswitch.env`); NetBox from CT120. Values are never printed.
+### Systems and credential references
 
-Live-verified 8 November 2026 (read-only): `hostname` on pc6, pve and pc9;
-`pvecm status` quorate (pc1 offline); `pct exec 130` metrics on `:9130`;
-`pct exec 120` Docker containers up; CT200 Emby `HTTP 200` on
-`10.0.0.150:8096`; GitHub `git ls-remote` with the stored credential.
-`git` was installed on PC6 from Debian packages for this route.
+| System | Address | Route / credential reference | Verified |
+| --- | --- | --- | --- |
+| Proxmox CLI | all nodes | root SSH above | 2026-11-09 |
+| Proxmox API | 10.0.0.120:8006 | Hermes `.env`: `PROXMOX_URL`, `PROXMOX_TOKEN_ID`, `PROXMOX_TOKEN_SECRET` | 2026-11-09 (200) |
+| OPNsense API | 10.0.0.1 (VM191 on PC7) | Hermes CT130 `/home/hermes/.hermes/.env`: `OPNSENSE_URL/API_KEY/API_SECRET`; real memory exporter `10.0.0.135:9133` | 2026-11-09 |
+| UniFi Network | 10.0.0.132:8443 (PC7 CT115) | Hermes `unifi.env` (`UNIFI_URL/USERNAME/PASSWORD`) | 2026-11-09 (login 200) |
+| EdgeSwitch 8 | **10.0.0.19** (DHCP since 2026-11-09; was 10.0.0.32) | Hermes `edgeswitch.env`; collector fails until the address is fixed (Kea reservation planned) | 2026-11-09 |
+| EdgeRouter 8 | not found on LAN 2026-11-09 | Hermes `edgerouter.env` (`EDGEROUTER_USERNAME/PASSWORD`, no host) | credentials only |
+| UISP | 10.0.0.17 (PC7 CT124, static) | PC8 `/root/.config/claude/uisp.env` (`UISP_URL`, `UISP_TOKEN`, header `x-auth-token`); UISP has no adopted devices yet | 2026-11-09 (200) |
+| Home Assistant | 10.0.0.7:8123 (PC9 VM100) | Hermes `.env`: `HASS_URL`, `HASS_TOKEN` | 2026-11-09 (200) |
+| Emby | 10.0.0.150:8096 (PC6 CT200) | Hermes `.env`: `EMBY_API_KEY` | 2026-11-09 (200) |
+| Unraid | 10.0.0.101 (PC6 VM201) | Hermes `.env`: `UNRAID_URL`, `UNRAID_API_KEY` (GraphQL); root shell via `qm guest exec 201` | 2026-11-09 (200) |
+| Komodo Core | 10.0.0.117:9120 (PC8 CT110) | `/root/claude-kapi.sh /read/... '{json}'` inside CT110 (logs in with `compose.env` admin, JWT process-local); Hermes `.env` also has `KOMODO_API_KEY/SECRET` | 2026-11-09 |
+| n8n | 10.0.0.119:5678 (PC8 CT310) | API key labelled `hermes` in the n8n database / Hermes `.env` `N8N_API_KEY`; header `X-N8N-API-KEY` | 2026-11-08 |
+| NetBox | 10.0.0.124:8001 (PC6 CT120) | Django shell: `docker exec netbox-app /opt/netbox/venv/bin/python manage.py shell` | 2026-11-09 |
+| Network map | Gitea 10.0.0.176:3000 | CT120 `/opt/moved-services/nettkart-repo` + `/usr/local/sbin/nettkart-publish` (credentials in `/etc/nettkart/`) | 2026-11-09 (v2.163) |
+| GitHub push | github.com | deploy key `claude-cowork-pc6` (`/root/.ssh/claude_github_deploy` on PC6, clone `/root/claude-work/homelab-komodo`) | 2026-11-09 |
+| GitHub PR/merge | api.github.com | fine-grained token PC8 `/root/.config/claude/github.env` (`GITHUB_TOKEN`); Hermes `.env` `GITHUB_TOKEN` (admin) as fallback | 2026-11-09 (#82–#85) |
+| Prometheus / Alertmanager | 10.0.0.126:9090 / :9093 (PC9 CT104) | `docker exec` in CT104; silences with `amtool` | 2026-11-09 |
+| Pi-hole | .115 (PC6 CT101), .118 (PC9 CT103), .116 (PC1 CT102) | `docker exec` in the CT | 2026-11-08 |
+| Uptime Kuma | CT120, PC9 CT106 | `sqlite3 /app/data/kuma.db` in the container | 2026-11-08 |
 
-Claude follows the same rules as every other agent: read-only verification
-first; changes, restarts, deploys and credential work only on an explicit
-request; branch `agent/claude/<task>` and a pull request on GitHub for
-repository changes.
+### Rules for Claude
+
+Read-only verification first. Changes, restarts, moves and credential work only
+on an explicit request from Roger. Never delete stacks, servers, containers, CTs
+or data because they look unused; ask first. Repository work uses
+`agent/claude/<task>` branches and pull requests; the network map is updated and
+published after every homelab change.
 
 ## Facts merged from the former Gitea runbook copy
 
