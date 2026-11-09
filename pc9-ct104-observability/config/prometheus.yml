@@ -40,6 +40,9 @@ scrape_configs:
     scrape_interval: 30s
     static_configs:
       - targets: ["network-interface-exporter:9122"]
+  - job_name: opnsense-resources
+    static_configs:
+      - targets: ["10.0.0.135:9133"]
   - job_name: opnsense-crash-status
     scrape_interval: 30s
     static_configs:
