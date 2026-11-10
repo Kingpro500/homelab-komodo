@@ -247,8 +247,8 @@
         description: 10.0.0.134:26000 · CT111 · pc9
     - UniFi Network:
         icon: unifi.png
-        href: https://10.0.0.132:8443/
-        description: 10.0.0.132:8443 · CT155 · pc9
+        href: https://10.0.0.196:8443/
+        description: 10.0.0.196:8443 · CT115 · pc7
     - Browser-pool:
         icon: mdi-web
         href: http://10.0.0.158:3001/

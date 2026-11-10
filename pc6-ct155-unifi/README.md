@@ -1,7 +1,7 @@
 # UniFi Network Application — pc6 CT155
 
 - **CT / node:** CT155 on pc6
-- **IP:** `10.0.0.132`
+- **IP:** `10.0.0.196`
 - **Runtime data:** `/opt/unifi`
 - **Network mode:** host, required by UniFi discovery and adoption traffic
 

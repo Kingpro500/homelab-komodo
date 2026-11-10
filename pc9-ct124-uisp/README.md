@@ -2,8 +2,8 @@
 
 Komodo-managed UISP for EdgeSwitch/EdgeMAX administration on PC9/CT124.
 
-- Host: `pc9-ct124-uisp` (`10.0.0.17`)
-- URL after deployment: `https://10.0.0.17/`
+- Host: `pc9-ct124-uisp` (`10.0.0.195`)
+- URL after deployment: `https://10.0.0.195/`
 - Image: `nico640/docker-unms:3.1.70` (third-party packaging; not Ubiquiti-supported)
 - Persistent state: `./data`
 

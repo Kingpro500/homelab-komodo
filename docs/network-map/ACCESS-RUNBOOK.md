@@ -149,10 +149,10 @@ remains inside CT120 and must never be printed or exported. Read current objects
 first and make idempotent, narrowly scoped changes. This route created and
 verified the UniFi passive mirror topology on 5 November 2026.
 
-## UniFi Network — `10.0.0.132:8443`
+## UniFi Network — `10.0.0.196:8443`
 
 **Known path:** the UniFi Network controller is administered at
-`https://10.0.0.132:8443/`. Its local Codex-host credential reference is
+`https://10.0.0.196:8443/`. Its local Codex-host credential reference is
 `/Users/rogerlillefosse/.codex/secure/homelab-unifi.env`; the file is local,
 not versioned, and must remain mode `0600`. An administrator user, `admin`,
 is configured for Codex use. Never copy the password or other file contents
@@ -175,12 +175,12 @@ PC9 alerts when collection has been unavailable for five minutes or switch
 mirror port 4 has no link for two minutes; alerts are diagnostic only.
 The same exporter now includes USW port 1/4 error and drop counters; PC9
 alerts only on a sustained increase. PC9 independently probes controller HTTPS
-on `10.0.0.132:8443` (availability only; the local controller certificate is
+on `10.0.0.196:8443` (availability only; the local controller certificate is
 not used as a trust anchor for this diagnostic probe).
 
-## EdgeSwitch 8 — `10.0.0.32`
+## EdgeSwitch 8 — `10.0.0.190`
 
-**Known path:** management is HTTPS at `https://10.0.0.32/`.  The local,
+**Known path:** management is HTTPS at `https://10.0.0.190/` (Kea reservation since 2026-11-10; was .32/.19).  The local,
 unversioned credential reference is
 `~/.codex/secure/homelab-edgeswitch.env` (mode `0600`); it contains only the
 URL and login values and must never be displayed, copied into this runbook, or
@@ -315,10 +315,12 @@ committed or written to NetBox or the map; only the file locations are listed.
 | Proxmox CLI | all nodes | root SSH above | 2026-11-09 |
 | Proxmox API | 10.0.0.120:8006 | Hermes `.env`: `PROXMOX_URL`, `PROXMOX_TOKEN_ID`, `PROXMOX_TOKEN_SECRET` | 2026-11-09 (200) |
 | OPNsense API | 10.0.0.1 (VM191 on PC7) | Hermes CT130 `/home/hermes/.hermes/.env`: `OPNSENSE_URL/API_KEY/API_SECRET`; real memory exporter `10.0.0.135:9133` | 2026-11-09 |
-| UniFi Network | 10.0.0.132:8443 (PC7 CT115) | Hermes `unifi.env` (`UNIFI_URL/USERNAME/PASSWORD`) | 2026-11-09 (login 200) |
-| EdgeSwitch 8 | **10.0.0.19** (DHCP since 2026-11-09; was 10.0.0.32) | Hermes `edgeswitch.env`; collector fails until the address is fixed (Kea reservation planned) | 2026-11-09 |
-| EdgeRouter 8 | not found on LAN 2026-11-09 | Hermes `edgerouter.env` (`EDGEROUTER_USERNAME/PASSWORD`, no host) | credentials only |
-| UISP | 10.0.0.17 (PC7 CT124, static) | PC8 `/root/.config/claude/uisp.env` (`UISP_URL`, `UISP_TOKEN`, header `x-auth-token`); EdgeSwitch ES-8-150W adopted 2026-11-09 (CLI `service unms key` + `service unms`, saved with `write memory`; config backup in Hermes `/home/hermes/.hermes/backups/`) | 2026-11-09 (200) |
+| UniFi Network | 10.0.0.196:8443 (PC7 CT115, static; was .132), `unifi.lan.local` | Hermes `unifi.env` (`UNIFI_URL/USERNAME/PASSWORD`) | 2026-11-10 (login 200) |
+| EdgeSwitch 8 | 10.0.0.190 (Kea reservation, MAC 74:ac:b9:d0:21:64) | Hermes `edgeswitch.env`; CLI runner `/home/hermes/es-cli.sh` (default host .190) | 2026-11-10 |
+| EdgeRouter X (switch, bod) | 10.0.0.191 (static, switch0) via USW Flex 2.5G | GUI login `rogeredgemax` (password held by Roger, not stored); old router config backup PC8 `/root/backups/edgerouter-x/` | 2026-11-10 |
+| USW Flex 2.5G 5 | 10.0.0.192 (Kea reservation) | managed by UniFi Network | 2026-11-10 |
+| UniFi AC Pro | 10.0.0.193 (Kea reservation) | managed by UniFi Network; device SSH via UniFi site mgmt settings | 2026-11-10 |
+| UISP | 10.0.0.195 (PC7 CT124, static; was .17), `uisp.lan.local` | PC8 `/root/.config/claude/uisp.env` (`UISP_URL`, `UISP_TOKEN`, header `x-auth-token`); EdgeSwitch ES-8-150W adopted 2026-11-09 (CLI `service unms key` + `service unms`, saved with `write memory`; config backup in Hermes `/home/hermes/.hermes/backups/`)  Re-adopted 2026-11-10 after IP change (EdgeSwitch + EdgeRouter X). | 2026-11-10 (200) |
 | Home Assistant | 10.0.0.7:8123 (PC9 VM100) | Hermes `.env`: `HASS_URL`, `HASS_TOKEN` | 2026-11-09 (200) |
 | Emby | 10.0.0.150:8096 (PC6 CT200) | Hermes `.env`: `EMBY_API_KEY` | 2026-11-09 (200) |
 | Unraid | 10.0.0.101 (PC6 VM201) | Hermes `.env`: `UNRAID_URL`, `UNRAID_API_KEY` (GraphQL); root shell via `qm guest exec 201` | 2026-11-09 (200) |
