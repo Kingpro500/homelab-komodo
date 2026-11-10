@@ -7,3 +7,22 @@ modules:
   tcp_connect:
     prober: tcp
     timeout: 10s
+  # WAN probes (jobs blackbox-wan-icmp-pc9 / blackbox-wan-dns-pc9).
+  # Scrape timeout for these jobs is 4s, so module timeouts must stay below it.
+  icmp:
+    prober: icmp
+    timeout: 3s
+    icmp:
+      preferred_ip_protocol: ip4
+      ip_protocol_fallback: false
+  dns_udp:
+    prober: dns
+    timeout: 3s
+    dns:
+      transport_protocol: udp
+      preferred_ip_protocol: ip4
+      ip_protocol_fallback: false
+      query_name: cloudflare.com
+      query_type: A
+      valid_rcodes:
+        - NOERROR
