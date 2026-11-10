@@ -1,20 +1,21 @@
+# pc9-ct135-loki: sentral loggagring (VictoriaLogs). Mappenavnet beholdes = Komodo-stacknavn.
 services:
-  loki:
-    image: grafana/loki:3.5.0
-    container_name: loki
+  victorialogs:
+    image: victoriametrics/victoria-logs:v1.53.0
+    container_name: victorialogs
     restart: unless-stopped
-    command: -config.file=/etc/loki/loki.yml
+    command:
+      - -storageDataPath=/vlogs
+      - -retentionPeriod=30d
+      - -httpListenAddr=:9428
     ports:
-      - "3100:3100"
+      - "9428:9428"
     volumes:
-      - ./loki.yml:/etc/loki/loki.yml:ro
-      - loki-data:/loki
+      - vlogs-data:/vlogs
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:3100/ready | grep -q ready"]
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:9428/health"]
       interval: 30s
       timeout: 5s
-      retries: 5
-      start_period: 30s
-
+      retries: 3
 volumes:
-  loki-data:
+  vlogs-data:
