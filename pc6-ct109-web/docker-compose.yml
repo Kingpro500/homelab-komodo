@@ -6,7 +6,7 @@
 # Webroten ligger bevisst UTENFOR Komodo sin Git-checkout, slik at en
 # PullStack/DeployStack aldri kan overskrive eller slette det levende kartet.
 #
-# Denne stacken leverer bare nginx + default.conf. LAN-alene (ingen WAN-portforward).
+# Denne stacken leverer nginx + default.conf, og Oslo Børs-siden (oslo-bors.html) fra GitHub. LAN-alene (ingen WAN-portforward).
 services:
   nettkart:
     image: nginx:alpine
@@ -17,3 +17,5 @@ services:
     volumes:
       - /srv/nettkart/www:/usr/share/nginx/html:ro
       - ./default.conf:/etc/nginx/conf.d/default.conf:ro
+      # Oslo Børs (C64-emulator): kilde i GitHub, ikke i Gitea. Egen mappe utenfor kart-webroten.
+      - ./oslo-bors.html:/usr/share/nginx/oslo/oslo-bors.html:ro
