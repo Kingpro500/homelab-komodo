@@ -33,9 +33,9 @@ for C in $(pct list | awk 'NR>1 && $2=="running"{print $1}'); do
   if [ "$CUR" = "$VER" ]; then printf '  OK    CT%s %s er %s\n' "$C" "$NAME" "$CUR"; OK=$((OK+1)); continue; fi
   if [ "$(printf '%s\n%s\n' "$CUR" "$VER" | sort -V | tail -1)" = "$CUR" ]; then printf '  MERK  CT%s %s er %s, nyere enn mål %s – endres ikke\n' "$C" "$NAME" "$CUR" "$VER"; OK=$((OK+1)); continue; fi
   if [ "$SJEKK" = 1 ]; then printf '  NY    CT%s %s: %s -> %s\n' "$C" "$NAME" "$CUR" "$VER"; continue; fi
-  T0=$(date '+%Y-%m-%d %H:%M:%S')
+  T0=$(date +%s)   # epoke: uavhengig av tidssonen i CT-en (mange CT-er går på UTC, nodene på norsk tid)
   if X "curl -fsSL https://raw.githubusercontent.com/moghtech/komodo/$VER/scripts/setup-periphery.py -o /root/setup-periphery.py && python3 /root/setup-periphery.py --version $VER >/var/log/periphery-update.log 2>&1 && systemctl daemon-reload && systemctl restart periphery"; then
-    L=""; for i in $(seq 1 30); do L=$(X "journalctl -u periphery --no-pager --since '$T0' | grep -E 'Logged in to Komodo Core|Failed to login' | tail -1"); [ -n "$L" ] && break; sleep 2; done
+    L=""; for i in $(seq 1 30); do L=$(X "journalctl -u periphery --no-pager --since '@$T0' | grep -E 'Logged in to Komodo Core|Failed to login' | tail -1"); [ -n "$L" ] && break; sleep 2; done
     NEWV="v$(X '/usr/local/bin/periphery --version 2>/dev/null' | awk '{print $2}')"
     case "$L" in *"Logged in"*) printf '  OK    CT%s %s: %s -> %s, innlogget\n' "$C" "$NAME" "$CUR" "$NEWV"; UPD=$((UPD+1));;
       *) printf '  FEIL  CT%s %s: %s -> %s, ingen innlogging (%s)\n' "$C" "$NAME" "$CUR" "$NEWV" "${L:-ingen logg}"; FAIL=$((FAIL+1));; esac
