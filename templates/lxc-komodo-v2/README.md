@@ -15,14 +15,17 @@ IP-adressen står i Proxmox-beskrivelsen og README, ikke i navnet.
 ## Ny CT – én kommando på Proxmox-noden
 
 ```bash
-ct-new <ctid> <tjeneste> [ram_mb] [disk_gb] [cores] [ip]
-ct-new 127 uptime                 # 1024 MB, 8 GB, 1 kjerne, første ledige IP i .204-.254
-ct-new 128 immich 4096 32 2       # større CT
+ct-new <tjeneste> [ram_mb] [disk_gb] [kjerner]
+ct-new uptime                     # neste ledige ID, 1 kjerne, 1024 MB, 8 GB, første ledige IP i .204-.254
+ct-new immich 4096 32 2           # større CT
+ct-new 130 immich                 # med bestemt ID
 ```
+
+Størrelsen kan endres i Proxmox etterpå (Resources).
 
 `ct-new` (`scripts/ct-new.sh`) gjør:
 
-1. Sjekker at ID-en er ledig i klyngen og finner en ledig fast IP i `10.0.0.204–254`
+1. Tar neste ledige ID i klyngen (eller den du oppgir) og finner en ledig fast IP i `10.0.0.204–254`
    (utenfor Kea-poolen `.2–.99`; `.185–.199` er reservert for nettverksutstyr).
 2. Lager CT-en: Debian 13 (laster ned template ved behov), unprivileged,
    `nesting=1,keyctl=1`, `onboot=1`, `vmbr0` med brannmur, gateway `10.0.0.1`,

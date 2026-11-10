@@ -1,12 +1,14 @@
 #!/bin/bash
-# Run on a Proxmox node:  ct-new <ctid> <tjeneste> [ram_mb] [disk_gb] [cores] [ip]
-#   ct-new 127 uptime              -> 1024 MB, 8 GB, 1 core, first free IP in 10.0.0.204-254
-#   ct-new 128 immich 4096 32 2    -> bigger CT
-# Creates a standard Debian 13 LXC and then runs ct-komodo (Komodo + stack if it exists in Git).
+# Run on a Proxmox node. Bare navnet er nok – resten har standardverdier og kan endres i Proxmox etterpå:
+#   ct-new uptime                  -> neste ledige ID, 1 kjerne, 1024 MB, 8 GB, første ledige IP i 10.0.0.204-254
+#   ct-new immich 4096 32 2        -> navn + ram_mb disk_gb kjerner
+#   ct-new 130 immich [ram] [disk] [kjerner] [ip]   (gammel form med fast ID fungerer fortsatt)
+# Lager en standard Debian 13-LXC og kjører ct-komodo (Komodo + stack hvis den finnes i Git).
 set -euo pipefail
-ID="${1:?Bruk: ct-new <ctid> <tjeneste> [ram_mb] [disk_gb] [cores] [ip]}"
-SVC=$(echo "${2:?tjeneste mangler}" | tr '[:upper:]' '[:lower:]' | tr -c 'a-z0-9-\n' '-')
-RAM="${3:-1024}"; DISK="${4:-8}"; CORES="${5:-1}"; IP="${6:-}"
+[ $# -ge 1 ] || { echo "Bruk: ct-new <tjeneste> [ram_mb] [disk_gb] [kjerner]   eller   ct-new <ctid> <tjeneste> ..."; exit 1; }
+if [[ "$1" =~ ^[0-9]+$ ]]; then ID="$1"; shift; else ID=$(pvesh get /cluster/nextid); fi
+SVC=$(echo "${1:?tjeneste mangler}" | tr '[:upper:]' '[:lower:]' | tr -c 'a-z0-9-\n' '-')
+RAM="${2:-1024}"; DISK="${3:-8}"; CORES="${4:-1}"; IP="${5:-}"
 NODE=$(hostname -s | tr '[:upper:]' '[:lower:]')
 ok(){ printf '  OK    %s\n' "$1"; }; die(){ printf '  FEIL  %s\n' "$1"; exit 1; }
 echo "== Ny CT $ID på $NODE: ${NODE}-ct${ID}-${SVC}"
