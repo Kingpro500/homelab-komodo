@@ -8,7 +8,7 @@
 # Onboarding key is read from /root/.config/komodo/onboarding.key on the node (mode 600).
 set -euo pipefail
 command -v jq >/dev/null || { apt-get -qq update && apt-get -qq install -y jq; } >/dev/null 2>&1 || { echo "FEIL: jq mangler på noden"; exit 1; }
-RAW=https://raw.githubusercontent.com/Kingpro500/homelab-komodo/main/scripts
+RAW=https://raw.githubusercontent.com/Kingpro500/homelab-komodo/${HOMELAB_REF:-main}/scripts
 ID="${1:?Bruk: ct-komodo.sh <ctid> [tjeneste]}"
 KEY=/root/.config/komodo/onboarding.key
 pct status "$ID" >/dev/null 2>&1 || { echo "FEIL: CT $ID finnes ikke på $(hostname -s)"; exit 1; }
@@ -44,7 +44,7 @@ else
 fi
 
 # 3) Komodo-stack fra Git, hvis mappen finnes
-REPO=https://raw.githubusercontent.com/Kingpro500/homelab-komodo/main
+REPO=https://raw.githubusercontent.com/Kingpro500/homelab-komodo/${HOMELAB_REF:-main}
 API=/root/.config/komodo/api.env
 IPADDR=$(pct config "$ID" | sed -n 's/^net0:.*ip=\([0-9.]*\).*/\1/p')
 if curl -fsI "$REPO/$NAME/docker-compose.yml" >/dev/null 2>&1; then
