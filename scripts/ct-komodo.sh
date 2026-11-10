@@ -33,13 +33,13 @@ for i in $(seq 1 30); do pct exec "$ID" -- true 2>/dev/null && break; sleep 2; d
 echo "  OK    Proxmox: DNS lan.local, onboot=1, CT kjører"
 
 # 1) grunnoppsett i CT-en
-pct exec "$ID" -- bash -c "printf 'search lan.local\nnameserver 10.0.0.115\nnameserver 10.0.0.118\nnameserver 10.0.0.1\n' >/etc/resolv.conf; command -v curl >/dev/null || { apt-get -qq update && apt-get -qq install -y curl; } >/dev/null; curl -fsSL $RAW/ct-fix.sh | bash"
+pct exec "$ID" -- env LANG=C.UTF-8 LC_ALL=C.UTF-8 bash -c "printf 'search lan.local\nnameserver 10.0.0.115\nnameserver 10.0.0.118\nnameserver 10.0.0.1\n' >/etc/resolv.conf; command -v curl >/dev/null || { apt-get -qq update && apt-get -qq install -y curl; } >/dev/null; curl -fsSL $RAW/ct-fix.sh | bash"
 # 2) Docker + Komodo Periphery (hoppes over hvis CT-en allerede er registrert med samme navn)
 if pct exec "$ID" -- sh -c "systemctl is-active --quiet periphery && grep -q '^connect_as = \"$NAME\"' /etc/komodo/periphery.config.toml" 2>/dev/null; then
   echo "  OK    periphery kjører allerede som $NAME – registrering hoppes over"
 else
   pct push "$ID" "$KEY" /root/.komodo-onboarding.key --perms 600
-  pct exec "$ID" -- env CONNECT_AS="$NAME" bash -c "curl -fsSL $RAW/komodo-bootstrap.sh | bash"
+  pct exec "$ID" -- env LANG=C.UTF-8 LC_ALL=C.UTF-8 CONNECT_AS="$NAME" bash -c "curl -fsSL $RAW/komodo-bootstrap.sh | bash"
 fi
 
 # 3) Komodo-stack fra Git, hvis mappen finnes
