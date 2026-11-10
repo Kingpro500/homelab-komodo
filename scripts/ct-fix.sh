@@ -6,6 +6,8 @@
 # set to: domain lan.local, servers 10.0.0.115 10.0.0.118.
 export DEBIAN_FRONTEND=noninteractive
 FAIL=0
+LOG=/var/log/ct-fix.log
+: > "$LOG"
 ok(){ printf '  OK    %s\n' "$1"; }
 bad(){ printf '  FEIL  %s\n' "$1"; FAIL=1; }
 echo "== CT-fiks $(hostname) $(date '+%F %T')"
@@ -26,16 +28,14 @@ apt-get clean
 USE=$(df --output=pcent / | tail -1 | tr -dc 0-9)
 [ "$USE" -lt 90 ] && ok "rotdisk ${USE}% brukt" || bad "rotdisk ${USE}% full – utvid disken eller rydd før oppdatering"
 
-echo "-- 4. Reparer og oppdater pakker"
-dpkg --configure -a
-apt-get -f install -y
-if apt-get update && apt-get -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold full-upgrade -y; then
-  ok "pakker oppdatert"
-else
-  bad "apt feilet – se meldingen over"
-fi
-apt-get install -y curl jq ca-certificates dnsutils iputils-ping nano htop
-apt-get autoremove -y
+echo "-- 4. Reparer og oppdater pakker (logg: $LOG)"
+APT="apt-get -qq -o Dpkg::Use-Pty=0 -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold"
+step(){ local msg="$1"; shift; if "$@" >>"$LOG" 2>&1; then ok "$msg"; else bad "$msg – siste linjer i loggen:"; tail -n 15 "$LOG" | sed 's/^/        /'; fi; }
+step "avbrutte installasjoner reparert" sh -c "dpkg --configure -a && $APT -f install -y"
+step "pakkelister hentet" $APT update
+step "alle pakker oppdatert" $APT full-upgrade -y
+step "verktøy installert (curl jq dig ping nano htop)" $APT install -y curl jq ca-certificates dnsutils iputils-ping nano htop
+step "ubrukte pakker fjernet" $APT autoremove -y
 
 echo "-- 5. Tidssone"
 ln -sf /usr/share/zoneinfo/Europe/Oslo /etc/localtime
