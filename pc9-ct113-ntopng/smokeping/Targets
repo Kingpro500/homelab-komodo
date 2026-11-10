@@ -112,6 +112,11 @@ menu = Home Assistant
 title = Home Assistant (pc9 VM100)
 host = 10.0.0.7
 
+++ NetAlertX
+menu = NetAlertX
+title = NetAlertX (pc8 CT126)
+host = 10.0.0.177
+
 + Internet
 menu = Internet
 title = External connectivity

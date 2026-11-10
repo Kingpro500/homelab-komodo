@@ -1,114 +1,71 @@
-# Docker LXC + Komodo V2 template
+# Docker LXC + Komodo V2 – standard (fra 10. nov 2026)
 
-Use this template for each new Docker workload that belongs in an isolated
-Proxmox LXC. It is based on the working CT 104 and CT 152 setup.
+Alle nye Docker-arbeidslaster får sin egen unprivileged Debian 13-LXC, registrert i
+Komodo med **systemd-Periphery**. Applikasjonen deployes som en Komodo-stack fra dette
+repoet. Første CT etter denne malen: `pc8-ct126-netalertx`.
 
-## Naming
+## Navn
 
-- **Komodo server:** `pc6-ct153-immich`
-- **Komodo stack / repository directory:** `pc6-ct153-immich`
-- **LXC hostname:** a short service name, for example `immich`.
+- **Komodo-server og stack:** `<node>-ct<id>-<tjeneste>`, f.eks. `pc8-ct126-netalertx`
+- **Mappe i repoet:** samme navn, med `docker-compose.yml` (og gjerne `README.md`)
+- **Vertsnavn i CT-en:** bare tjenesten, f.eks. `netalertx`
 
-The name is `host` + `ct` + `workload`. The IP belongs in the description and
-README, not in the resource name; it can then change without a rename.
+IP-adressen står i Proxmox-beskrivelsen og README, ikke i navnet.
 
-## Proxmox baseline
+## Ny CT – én kommando på Proxmox-noden
 
-Create an unprivileged Debian LXC with a fixed LAN address. Required options:
-
-```text
-unprivileged: 1
-features: nesting=1,keyctl=1
-net0: bridge=vmbr0,firewall=1,gw=10.0.0.1,ip=10.0.0.X/24
+```bash
+ct-new <ctid> <tjeneste> [ram_mb] [disk_gb] [cores] [ip]
+ct-new 127 uptime                 # 1024 MB, 8 GB, 1 kjerne, første ledige IP i .204-.254
+ct-new 128 immich 4096 32 2       # større CT
 ```
 
-Use 2 CPU / 4 GB RAM as a small default; size storage and memory for the
-workload. Add GPU devices and Tower mounts only when the application needs
-them. Media stays on Tower and is mounted into the CT; it is never copied.
+`ct-new` (`scripts/ct-new.sh`) gjør:
 
-## Bootstrap once
+1. Sjekker at ID-en er ledig i klyngen og finner en ledig fast IP i `10.0.0.204–254`
+   (utenfor Kea-poolen `.2–.99`; `.185–.199` er reservert for nettverksutstyr).
+2. Lager CT-en: Debian 13 (laster ned template ved behov), unprivileged,
+   `nesting=1,keyctl=1`, `onboot=1`, `vmbr0` med brannmur, gateway `10.0.0.1`,
+   DNS `lan.local` + `10.0.0.115 10.0.0.118`, tidssone Europe/Oslo og nodens
+   `authorized_keys`.
+3. Starter den og kjører `ct-komodo` (under).
 
-1. Install Docker and the Compose implementation used by the CT.
-2. Create `/opt/komodo/periphery/` and copy `periphery-compose.yml` to
-   `/opt/komodo/periphery-compose.yml`.
-3. Copy Core's public key to `/opt/komodo/periphery/core.pub` (read-only for
-   the container). This is required for reconnects after a Core restart.
-4. Create `/opt/komodo/periphery/.env` from `periphery.env.example`, replacing
-   only the CT address. This file is private runtime state and is not in Git.
-5. Create a **short-lived V2** onboarding key in Komodo and append it as
-   `PERIPHERY_ONBOARDING_KEY` temporarily.
-6. Start Periphery with:
+## Eksisterende CT – registrer i Komodo
 
-   ```sh
-   cd /opt/komodo
-   docker-compose --env-file periphery/.env -f periphery-compose.yml up -d
-   ```
-
-7. Confirm that the new server is `OK` in Komodo. Remove the onboarding key
-   from `.env`, delete the onboarding key in Komodo, then recreate Periphery
-   using the same command. The `periphery-data` volume preserves its identity.
-8. Add the application stack in Git and deploy it through Komodo. Do not start
-   the application with a separate, unmanaged Compose command.
-
-## Deployment SSH access
-
-Every managed LXC must receive the approved `codex_fleet_deploy` public key
-during bootstrap. This permits remote recovery, configuration transfer and
-Docker administration when the Proxmox web UI is unavailable. It is separate
-from the limited diagnostic key and never belongs in Git, a Compose file or a
-Komodo variable.
-
-Install it before the service is considered ready:
-
-```sh
-install -d -m 700 /root/.ssh
-install -m 600 /dev/null /root/.ssh/authorized_keys
-# Append the approved public key exactly once.
+```bash
+ct-komodo <ctid> [tjeneste]       # tjeneste = CT-ens vertsnavn hvis utelatt
 ```
 
-Confirm non-interactive login from the administration Mac using the private
-key at `~/.ssh/codex_fleet_deploy`. Record only that access is working; never
-commit keys or their private material.
+`ct-komodo` (`scripts/ct-komodo.sh`) gjør:
 
-## Guardrails
+1. Proxmox: DNS, vertsnavn, `nesting/keyctl`, `onboot=1` (restart bare ved behov).
+2. Kjører `scripts/ct-fix.sh` i CT-en (nettverk, DNS, apt-reparasjon, oppdatering).
+3. Kjører `scripts/komodo-bootstrap.sh`: Docker CE + Periphery v2.3.3 (systemd).
+   Hoppes over hvis CT-en allerede kjører Periphery med samme navn. Stopper hvis det
+   finnes en Periphery-*container* – to agenter på samme CT gir reconnect-løkke i Core.
+4. Finnes `<navn>/docker-compose.yml` i repoet, opprettes stacken i Komodo og deployes.
+   Ellers: lag mappen, og kjør `ct-komodo <ctid>` igjen.
+5. Skriver ut ferdige linjer for Smokeping og nettverkskart.
 
-- Never commit `.env`, API credentials, onboarding keys, database passwords,
-  application databases, uploads, or media.
-- Never remove `periphery-data` for routine repairs or upgrades. It changes the
-  server identity and requires a new V2 onboarding flow.
-- If a restored node fails only after Core restarts, compare its Periphery
-  public-key fingerprint with the server record. Repair a mismatch with a
-  short-lived **privileged V2 onboarding key**; do not replace the volume.
-- Before retiring Tower containers, validate the new service and keep the old
-  service stopped as rollback until acceptance.
+## Hemmeligheter (aldri i Git – repoet er offentlig)
 
-## Native systemd Periphery
+På hver node, mode 600:
 
-Some existing CTs use the native `periphery.service` instead of the Docker
-Periphery container. Keep that installation model when maintaining those CTs;
-do not install a second Periphery agent beside it.
+- `/root/.config/komodo/onboarding.key` – onboarding-nøkkel (kopieres inn i CT-en og slettes etter bruk)
+- `/root/.config/komodo/api.env` – `KOMODO_URL`, `KOMODO_API_KEY`, `KOMODO_API_SECRET` (for stack-opprettelse)
 
-The persistent identity is normally
-`/etc/komodo/keys/periphery.key`. Preserve it across repairs and make the
-configured `connect_as` match the existing Komodo Server name exactly, for
-example:
+Kommandoene `ct-new` og `ct-komodo` ligger i `/usr/local/sbin/` på alle noder og henter
+alltid siste skript fra `main`.
 
-```toml
-core_address = "http://10.0.0.117:9120"
-connect_as = "pc9-ct116-pihole"
-```
+## Etter registrering
 
-For an identity mismatch, use a short-lived **privileged V2** onboarding key
-only for the repair. Put the private onboarding key in
-`/etc/komodo/onboarding.key` with mode `600`, then create the temporary systemd
-drop-in `/etc/systemd/system/periphery.service.d/onboard.conf`:
+- Legg CT-en inn i Smokeping (`pc9-ct113-ntopng/smokeping/Targets`) og nettverkskartet.
+- Media ligger på Tower og monteres inn ved behov; kopieres aldri.
+- Nødretting av en CT som mangler oppdateringer eller har nettverksfeil: se
+  «CT-fiks» i `docs/network-map/ACCESS-RUNBOOK.md`.
 
-```ini
-[Service]
-Environment=PERIPHERY_ONBOARDING_KEY_FILE=/etc/komodo/onboarding.key
-```
+## Gammel metode (skal ryddes)
 
-Run `systemctl daemon-reload && systemctl restart periphery`, verify the
-`Logged in to Komodo Core` log line, and then remove both temporary files,
-delete the onboarding key in Komodo, and restart Periphery once more. Do not
-remove `/etc/komodo/keys/periphery.key`.
+Eldre CT-er (bl.a. CT110, CT115, CT310) kjører Periphery som Docker-container
+(`periphery-compose.yml` og `periphery.env.example` i denne mappen). De beholdes til de
+ryddes over til systemd-Periphery én for én. Bland aldri de to på samme CT.
