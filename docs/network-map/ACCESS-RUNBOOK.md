@@ -186,9 +186,15 @@ sender ett push per ny versjon via `homelab-alerts` (stilletid 23–06, maks ett
 
 Rekkefølge ved ny versjon (Periphery skal aldri være eldre enn Core):
 
-1. **Core (CT110 på pc8):** oppdater bildetaggen i Core sin compose i `/opt/komodo`
-   (`ferretdb.compose.yaml` / `compose.env`), og kjør `docker compose pull && docker compose up -d`.
-   CT110 sin egen Periphery-container følger med her.
+1. **Core (CT110 på pc8):** Core og Core-hostens Periphery bruker taggen `2`
+   (`COMPOSE_KOMODO_IMAGE_TAG="2"` i `/opt/komodo/compose.env`), dvs. siste 2.x. Oppdater med
+
+   ```bash
+   cd /opt/komodo && docker compose -p komodo --env-file compose.env \
+     -f ferretdb.compose.yaml -f compose.performance.yaml pull
+   docker compose -p komodo --env-file compose.env \
+     -f ferretdb.compose.yaml -f compose.performance.yaml up -d
+   ```
 2. **Periphery i alle CT-er** – på en hvilken som helst node:
 
    ```bash
