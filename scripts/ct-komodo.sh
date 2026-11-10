@@ -72,7 +72,7 @@ fi
 # 4) Overvåking – ferdige linjer å legge inn
 cat <<SNIP
 
-== Legg inn i overvåking (lim inn / be Claude gjøre det)
+== Til overvåking (valgfritt, kan legges inn senere)
 Smokeping (pc9-ct113-ntopng/smokeping/Targets, under + Services):
 ++ ${SVC^}
 menu = ${SVC}
