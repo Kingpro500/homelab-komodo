@@ -41,6 +41,11 @@ scrape_configs:
     scrape_interval: 30s
     static_configs:
       - targets: ["network-interface-exporter:9122"]
+  - job_name: homeassistant-memory
+    scrape_interval: 30s
+    scrape_timeout: 20s
+    static_configs:
+      - targets: ["10.0.0.120:9103"]
   - job_name: opnsense-resources
     static_configs:
       - targets: ["10.0.0.135:9133"]
