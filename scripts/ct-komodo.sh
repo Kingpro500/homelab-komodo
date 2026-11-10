@@ -7,6 +7,7 @@
 # (needs /root/.config/komodo/api.env with KOMODO_URL, KOMODO_API_KEY, KOMODO_API_SECRET).
 # Onboarding key is read from /root/.config/komodo/onboarding.key on the node (mode 600).
 set -euo pipefail
+command -v jq >/dev/null || { apt-get -qq update && apt-get -qq install -y jq; } >/dev/null 2>&1 || { echo "FEIL: jq mangler på noden"; exit 1; }
 RAW=https://raw.githubusercontent.com/Kingpro500/homelab-komodo/main/scripts
 ID="${1:?Bruk: ct-komodo.sh <ctid> [tjeneste]}"
 KEY=/root/.config/komodo/onboarding.key
