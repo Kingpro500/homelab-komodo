@@ -50,4 +50,4 @@ pct create "$ID" "$TPL" \
 ok "CT $ID opprettet (${CORES} kjerne(r), ${RAM} MB RAM, ${DISK} GB disk)"
 pct start "$ID"; for i in $(seq 1 30); do pct exec "$ID" -- true 2>/dev/null && break; sleep 2; done
 ok "CT $ID startet"
-exec bash <(curl -fsSL https://raw.githubusercontent.com/Kingpro500/homelab-komodo/main/scripts/ct-komodo.sh) "$ID" "$SVC"
+exec bash <(curl -fsSL "https://raw.githubusercontent.com/Kingpro500/homelab-komodo/${HOMELAB_REF:-main}/scripts/ct-komodo.sh") "$ID" "$SVC"
