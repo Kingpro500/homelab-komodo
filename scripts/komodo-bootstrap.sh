@@ -5,7 +5,7 @@
 # /root/.komodo-onboarding.key. The key is never stored in this repository.
 set -euo pipefail
 CONNECT_AS="${CONNECT_AS:?CONNECT_AS mangler, f.eks. pc8-ct126-netalertx}"
-KOMODO_VERSION="${KOMODO_VERSION:-v2.3.3}"
+V=$(curl -fsS -m10 http://10.0.0.117:9120/version 2>/dev/null | tr -d "[:space:]"); KOMODO_VERSION="${KOMODO_VERSION:-v${V:-2.3.3}}"; KOMODO_VERSION="v${KOMODO_VERSION#v}"
 CORE_ADDRESS="${CORE_ADDRESS:-http://10.0.0.117:9120}"
 CORE_PUBLIC_KEY="${CORE_PUBLIC_KEY:-MCowBQYDK2VuAyEAysGhIUE9ukbCPqQjzedsIownzCgPfCEmJMpQaSXqOGs=}"
 KEYFILE=/root/.komodo-onboarding.key
