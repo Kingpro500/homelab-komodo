@@ -1,0 +1,46 @@
+# NetAlertX – oppdager nye/ukjente enheter på LAN 10.0.0.0/24.
+# Kjører på pc8 CT126 (10.0.0.177), Komodo-server pc8-ct126-netalertx.
+# Basert på NetAlertX sin anbefalte compose. sysctls-blokken er fjernet: Docker
+# tillater ikke sysctl i host-nettverk inne i LXC, og CT-en har bare ett nettkort.
+services:
+  netalertx:
+    container_name: netalertx
+    image: ghcr.io/netalertx/netalertx:26.10.28
+    network_mode: host
+    read_only: true
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+      - NET_BIND_SERVICE
+      - CHOWN
+      - SETUID
+      - SETGID
+    volumes:
+      - type: volume
+        source: netalertx_data
+        target: /data
+        read_only: false
+      - type: bind
+        source: /etc/localtime
+        target: /etc/localtime
+        read_only: true
+    tmpfs:
+      - "/tmp:uid=20211,gid=20211,mode=1700,rw,noexec,nosuid,nodev,async,noatime,nodiratime"
+    environment:
+      LISTEN_ADDR: 0.0.0.0
+      PORT: 20211
+      GRAPHQL_PORT: 20212
+    mem_limit: 768m
+    mem_reservation: 256m
+    cpu_shares: 512
+    pids_limit: 512
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+    restart: unless-stopped
+
+volumes:
+  netalertx_data:
