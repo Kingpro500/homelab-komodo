@@ -6,7 +6,7 @@ GitOps-kilde for Komodo-stacker og driftsdokumentasjon. **Nettverkskartet ligger
 
 - [Komodo stack-deployment runbook](docs/komodo-stack-deployment-runbook.md)
 - [Inventar](docs/INVENTORY.md)
-- Nettverkskart: **Gitea/CT120** (`/usr/local/sbin/nettkart-publish`) – GitHub-kopien i `docs/network-map/` er utdatert, se [AGENTS.md](AGENTS.md)
+- Nettverkskart: **Gitea/CT120** (`/usr/local/sbin/nettkart-publish`) – finnes **ikke** i GitHub, se [AGENTS.md](AGENTS.md)
 - [ntfy-stack](pc6-ct109-ntfy/README.md) — CT109 / 10.0.0.166:2586
 - [Hermes AI Matrix-bot](docs/hermes-matrix-ai.md)
 

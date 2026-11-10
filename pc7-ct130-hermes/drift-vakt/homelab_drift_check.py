@@ -122,6 +122,16 @@ def check_github():
               str(exc)[:200], "Sjekk GITHUB_TOKEN i ~/.hermes/.env på CT130 og nettverk/DNS ut fra CT130.")
         return access, None
 
+    try:
+        gh("/repos/%s/contents/docs/network-map?ref=main" % REPO)
+        issue("github:map-copy", "kritisk", "GitHub",
+              "docs/network-map finnes i GitHub main — kartet skal KUN ligge i Gitea", "",
+              "Fjern mappen fra GitHub i én PR. Rett kartet i Gitea-kilden på CT120.")
+    except urllib.error.HTTPError as exc:
+        if exc.code != 404:
+            issue("github:map-copy-check", "advarsel", "GitHub",
+                  "Kunne ikke sjekke om docs/network-map finnes i GitHub (HTTP %d)" % exc.code, "", "")
+
     for pr in gh("/repos/%s/pulls?state=open&per_page=100" % REPO):
         h = age_hours(pr["created_at"])
         if h >= PR_MAX_HOURS:

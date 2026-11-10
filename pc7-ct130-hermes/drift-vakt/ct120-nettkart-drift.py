@@ -14,7 +14,8 @@ import subprocess
 from datetime import datetime, timezone
 
 SRC = "/opt/moved-services/nettkart-repo"          # Gitea-kilden (eneste kartkilde)
-LIVE_DIR = "/opt/komodo/stacks/pc6-ct120-web/docs/network-map"  # nginx leser denne
+LIVE_DIR = "/srv/nettkart/www"          # nginx-webrot, utenfor alle Git-kopier
+KOMODO_CHECKOUT = "/opt/komodo/stacks/pc6-ct120-web"
 OUT = os.path.join(LIVE_DIR, "nettkart-drift.json")
 issues = []
 
@@ -56,15 +57,18 @@ if hashlib.sha256(head_map).digest() != hashlib.sha256(live_map).digest():
         "live %d byte, commit %d byte" % (len(live_map), len(head_map)),
         "Kjør /usr/local/sbin/nettkart-publish på CT120. Ikke rediger live-mappen direkte.")
 
-# Kjent konstruksjonsfeil (funn 2026-11-10): live-mappen er samtidig Komodo sin
-# GitHub-checkout av stacken pc6-ct120-web. En PullStack/DeployStack der kan
-# overskrive det levende kartet med den gamle GitHub-kopien.
-web = git("status", "--porcelain", "--", "docs/network-map", cwd="/opt/komodo/stacks/pc6-ct120-web").stdout
-if web.strip():
-    add("map:komodo-checkout", "advarsel",
-        "Live-kartmappen er også Komodo-checkouten til pc6-ct120-web (funn 2026-11-10)",
-        "En PullStack/DeployStack av pc6-ct120-web kan overskrive det levende kartet med GitHub-kopien.",
-        "Ikke kjør PullStack/DeployStack på pc6-ct120-web. Roger avgjør varig løsning.")
+# Webroten skal ligge utenfor Komodo-checkouten (flyttet 10. nov 2026).
+mount = subprocess.run(["docker", "inspect", "nettkart", "--format",
+                        "{{range .Mounts}}{{if eq .Destination \"/usr/share/nginx/html\"}}{{.Source}}{{end}}{{end}}"],
+                       capture_output=True, text=True, timeout=30).stdout.strip()
+if mount != LIVE_DIR:
+    add("map:nginx-mount", "kritisk", "nginx (nettkart) serverer ikke %s, men %s" % (LIVE_DIR, mount or "ukjent"),
+        "Det levende kartet kan bli overskrevet fra en Git-kopi.",
+        "Deploy pc6-ct120-web fra GitHub main (compose monterer /srv/nettkart/www).")
+if os.path.isdir(os.path.join(KOMODO_CHECKOUT, "docs", "network-map")):
+    add("map:github-copy", "kritisk", "docs/network-map finnes igjen i Komodo-checkouten (GitHub-kopi av kartet)",
+        KOMODO_CHECKOUT + "/docs/network-map",
+        "Fjern docs/network-map fra GitHub i én PR. Kartet skal bare ligge i Gitea.")
 
 result = {"generated": datetime.now(timezone.utc).isoformat(timespec="seconds"),
           "source": SRC, "issues": issues}

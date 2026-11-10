@@ -68,11 +68,12 @@ Per-tile-`widget:`-blokker (8 mellomrom under `description`):
 ## Nettverkskart
 
 Tilen «Nettverkskart» (`.128:3020`) peker på den interne websiden som serverer
-det interaktive LAN-kartet (`docs/network-map/`), servert av `pc6-ct109-web`
-(nginx). Kartet henter levende tjenestestatus + av/på-knapper fra
+det interaktive LAN-kartet. Kilden er Gitea-kopien på CT120
+(`/opt/moved-services/nettkart-repo/docs/network-map/`), webroten er `CT120:/srv/nettkart/www`, og nginx
+leveres av Komodo-stacken `pc6-ct120-web` (`pc6-ct109-web/`). Kartet henter levende tjenestestatus + av/på-knapper fra
 `homelab-audit` (CT157:9118). **Hele metoden, data-kildene og token-oppsettet er
-dokumentert i [`docs/network-map/README.md`](../docs/network-map/README.md) og
-`pc6-ct109-web/README.md`.**
+dokumentert i `docs/network-map/README.md` og `PUBLISHING.md` i Gitea-kopien på CT120, og
+i `pc6-ct109-web/README.md`.**
 
 ## Proxmox-nodeene øverst
 

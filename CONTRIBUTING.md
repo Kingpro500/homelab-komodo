@@ -7,7 +7,7 @@
 - Kilde: `CT120:/opt/moved-services/nettkart-repo/docs/network-map/nettverkskart.html` (origin = Gitea `http://10.0.0.176:3000/Kingpro500/homelab-komodo.git`, CT118).
 - Publisering: kjør `/usr/local/sbin/nettkart-publish` på CT120 etter commit. Skriptet pusher til Gitea, validerer versjon + endringsnotat og publiserer atomisk.
 - Gjeldende regler: `PUBLISHING.md` i Gitea-kopien (samme mappe på CT120).
-- Kopien av `docs/network-map/` i **dette GitHub-repoet er utdatert og brukes ikke**. Ikke rediger den, ikke publiser fra den, og ikke deploy kartet med Komodo/GitHub.
+- `docs/network-map/` **finnes ikke i GitHub** (fjernet 10. nov 2026). Ikke opprett mappen igjen og ikke legg kart-HTML i GitHub — drift-vakten slår **kritisk** alarm hvis den dukker opp. Levende webrot er `CT120:/srv/nettkart/www`, utenfor alle Git-kopier; bare `nettkart-publish` (og kartets egne tjenester på CT120) skriver dit. Komodo-stacken `pc6-ct120-web` leverer bare nginx.
 - Alt annet (Komodo-stacker, Homepage, Dashy, Ansible, kode, øvrig dokumentasjon) ligger i **GitHub**.
 
 
