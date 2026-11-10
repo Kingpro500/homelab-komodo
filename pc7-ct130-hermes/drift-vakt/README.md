@@ -45,6 +45,18 @@ opp i advarselen**, ikke med nytt arbeid oppå.
 5. Kjør vakten på nytt og sjekk at kartet viser grønt eller bare grått:
    `pct exec 130 -- su - hermes -c 'python3 ~/.hermes/scripts/homelab_drift_check.py --no-notify'` (på pc7).
 
+## Blokkert publisering — `homelab-blokkert`
+
+Når en agent ikke får publisert, merget eller deployet noe, skal den melde det her i stedet for å stoppe stille.
+
+| Kommando (på pc6 eller CT120) | Hva |
+| --- | --- |
+| `homelab-blokkert meld "<hva>" "<rute prøvd>" "<nøyaktig feil>" --av <agent>` | Ny sak. Vises som **kritisk** («⛔ Blokkert publisering») i drift-vakten og øverst i kartet |
+| `homelab-blokkert liste` | Åpne saker med id |
+| `homelab-blokkert løst <id> "<hvordan>"` | Lukk saken når publiseringen er fullført |
+
+Sakene ligger i `CT120:/var/lib/homelab-blokkert/blokkert.json` (ingen hemmeligheter). `nettkart-drift` leser filen, og drift-vakten i Hermes tar dem med. Kommandoen oppdaterer drift-JSON med en gang.
+
 ## Installasjon (filene i denne mappen er kilden)
 
 Hermes, CT130 på **pc7** (`10.0.0.107`):
@@ -67,3 +79,12 @@ Den skriver `nettkart-drift.json` i webroten `/srv/nettkart/www`. Hermes leser f
 `http://10.0.0.124:3020/nettkart-drift.json`.
 
 Banneret i kartet (`#drift-banner`) ligger i Gitea-kilden, jf. `PUBLISHING.md`, regel 11.
+
+### homelab-blokkert
+
+```sh
+# CT120
+install -m 755 homelab-blokkert /usr/local/sbin/homelab-blokkert
+# pc6-verten (videresender til CT120)
+install -m 755 homelab-blokkert.pc6-wrapper /usr/local/sbin/homelab-blokkert
+```

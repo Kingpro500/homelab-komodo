@@ -86,6 +86,20 @@ if stray:
     add("map:webroot-extra", "advarsel", "Ukjente filer i webroten %s" % LIVE_DIR, ", ".join(stray[:8]),
         "Webroten fylles bare av nettkart-publish. Flytt filene ut, eller legg dem i Gitea og publiser.")
 
+# Blokkert publisering: åpne saker meldt med `homelab-blokkert meld` (se README).
+BLOCKED_DB = "/var/lib/homelab-blokkert/blokkert.json"
+try:
+    with open(BLOCKED_DB, encoding="utf-8") as fh:
+        blocked = json.load(fh)
+except (FileNotFoundError, ValueError):
+    blocked = []
+for b in blocked:
+    if b.get("løst"):
+        continue
+    add("blokkert:" + b["id"], "kritisk", "⛔ Blokkert publisering: %s" % b["hva"],
+        "Meldt %s av %s. Rute prøvd: %s. Feil: %s" % (b["meldt"], b["av"], b["rute"], b["feil"]),
+        "Rett ruten og fullfør publiseringen, og kjør så `homelab-blokkert løst %s` på pc6 eller CT120." % b["id"])
+
 result = {"generated": datetime.now(timezone.utc).isoformat(timespec="seconds"),
           "source": SRC, "issues": issues}
 tmp = OUT + ".tmp"

@@ -1,0 +1,4 @@
+#!/bin/sh
+# pc6-verten: /usr/local/sbin/homelab-blokkert — videresender til CT120 (kartets drift-vakt).
+# Kilde: GitHub Kingpro500/homelab-komodo, pc7-ct130-hermes/drift-vakt/.
+exec pct exec 120 -- /usr/local/sbin/homelab-blokkert "$@"

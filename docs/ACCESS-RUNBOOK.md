@@ -32,6 +32,13 @@ Those copies are not authoritative and must not be edited or used as a source.
    repeat known access details or debate whether an integration exists.
 5. Read-only verification is normal diagnostics. Any change, restart, deploy,
    credential rotation, or configuration write still requires a task request.
+6. If a publish, merge or deploy still cannot be completed after trying the
+   documented routes, start the reply with `⛔ KAN IKKE PUBLISERE:` (what, route
+   tried, exact error) and register it at once with
+   `homelab-blokkert meld "<what>" "<route>" "<exact error>" --av <agent>` on pc6
+   or CT120. It stays critical in the drift guard until
+   `homelab-blokkert løst <id>`. Never report work as done when it is only
+   committed or pushed to a branch.
 
 ## Credential references and scope
 
