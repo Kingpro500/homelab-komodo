@@ -1,5 +1,14 @@
 # Instruksjoner for Claude
 
+## 🎬 Emby går foran alt
+
+Roger har bestemt: **Emby (CT200 på pc6, 10.0.0.150) er prioritet 1 og går foran alt annet** – foran andre oppgaver, nye funksjoner og øvrig opprydding.
+
+- Ved konflikt mellom oppgaver eller regler vinner det som holder Emby oppe, overvåket og varslet.
+- Endringer som bare beskytter Emby (overvåking, varsler, feilretting) kan tas selv om drift-vakten er kritisk, men si det tydelig til Roger.
+- Emby skal aldri restartes, flyttes eller oppgraderes uten stream-sjekk og uten at Roger vet det.
+- Prioritet 2 er nettverksstabilitet.
+
 ## 🚨 Start HVER økt med disse to sjekkene
 
 ### ⛔ Kan du ikke publisere, merge eller deploye? Si det tydelig, og meld det
