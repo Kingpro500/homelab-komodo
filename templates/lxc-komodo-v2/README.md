@@ -50,6 +50,11 @@ ct-komodo <ctid> [tjeneste]       # tjeneste = CT-ens vertsnavn hvis utelatt
    Ellers: lag mappen, og kjør `ct-komodo <ctid>` igjen.
 5. Skriver ut ferdige linjer for Smokeping og nettverkskart.
 
+## Oppdatering
+
+Ny Komodo-versjon varsles av n8n («Komodo-versjonsvakt»). Oppgrader Core først, deretter
+`ct-periphery-update --alle`. Se «Oppdatere Komodo» i `docs/network-map/ACCESS-RUNBOOK.md`.
+
 ## Hemmeligheter (aldri i Git – repoet er offentlig)
 
 På hver node, mode 600:
