@@ -8,7 +8,7 @@ services:
       - NET_ADMIN
     command:
       - --community
-      - --interface=eth0
+      - --interface=eth1
       - --http-port=3000
       - --local-networks=10.0.0.0/24
     volumes:
@@ -34,6 +34,7 @@ services:
       - /opt/smokeping/config:/config
       - /opt/smokeping/data:/data
       - ./smokeping/Targets:/config/Targets
+      - ./smokeping/Slaves:/config/Slaves
     logging:
       driver: json-file
       options:
