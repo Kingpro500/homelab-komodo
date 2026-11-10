@@ -80,6 +80,12 @@ så Komodo ser samme server og alle stack-stier er uendret. App-containere kjør
 Den gamle Periphery-containeren stoppes med `restart=no` (beholdes for tilbakerulling).
 Ruller automatisk tilbake hvis serveren ikke blir `Ok` innen 90 sekunder.
 
+**Viktig (rettet 10. nov):** systemd-Periphery leser ellers nøkkelen fra
+`${root_directory}/keys/periphery.key` og lager en *ny* nøkkel der når root er `/opt/komodo`.
+Skriptet setter derfor `private_key = "file:/etc/komodo/keys/periphery.key"` og krever en fersk
+«Logged in to Komodo Core» i loggen før det godtar migreringen (Komodo-status kan henge igjen fra
+den gamle containeren).
+
 Migrert: CT101, CT102 (pc1), CT103, CT106, CT111, CT115 (→ `pc7-ct115-unifi`),
 CT120 (→ `pc6-ct120-monitoring`), CT200, CT203, CT220, CT250, CT310.
 CT112 omdøpt til `pc7-ct112-ntp`.

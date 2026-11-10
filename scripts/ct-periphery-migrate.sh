@@ -41,6 +41,9 @@ X "curl -fsSL https://raw.githubusercontent.com/moghtech/komodo/$VER/scripts/set
 X "python3 /root/setup-periphery.py --version $VER --config-url https://raw.githubusercontent.com/moghtech/komodo/$VER/config/periphery.config.toml --core-address $CORE --connect-as $NAME --core-public-keys $CORE_PUB >/var/log/periphery-migrate.log 2>&1" || die "setup-periphery.py feilet (se /var/log/periphery-migrate.log i CT-en)"
 X "systemctl stop periphery 2>/dev/null; mkdir -p /etc/komodo/keys && cp $KEYSRC/periphery.key $KEYSRC/periphery.pub /etc/komodo/keys/ && chmod 600 /etc/komodo/keys/*"
 X "sed -i 's#^root_directory = .*#root_directory = \"$ROOTDIR\"#' /etc/komodo/periphery.config.toml && grep -q '^root_directory = \"$ROOTDIR\"' /etc/komodo/periphery.config.toml" || die "kunne ikke sette root_directory"
+# Periphery bruker ellers ${root_directory}/keys/periphery.key og lager en NY nøkkel der.
+# Pek eksplisitt på den kopierte nøkkelen, så identiteten er den samme som i containeren.
+X "C=/etc/komodo/periphery.config.toml; if grep -q '^private_key = ' \$C; then sed -i 's#^private_key = .*#private_key = \"file:/etc/komodo/keys/periphery.key\"#' \$C; else sed -i 's#^root_directory = .*#&\\nprivate_key = \"file:/etc/komodo/keys/periphery.key\"#' \$C; fi; grep -q '^private_key = \"file:/etc/komodo/keys/periphery.key\"' \$C" || die "kunne ikke sette private_key"
 ok "systemd-Periphery $VER installert med samme nøkkel og root $ROOTDIR"
 
 if [ "$NAME" != "$OLD" ]; then
@@ -50,11 +53,16 @@ fi
 X "docker update --restart=no $C >/dev/null && docker stop $C >/dev/null" || rollback
 X "systemctl daemon-reload && systemctl enable --now periphery" || rollback
 ok "gammel container stoppet (beholdt, restart=no), systemd-Periphery startet"
-for i in $(seq 1 45); do
-  ST=$(kapi read '{"type":"ListServers","params":{}}' | jq -r --arg i "$SID" '.[]|select(.id==$i)|.info.state' 2>/dev/null || true)
-  [ "$ST" = Ok ] && break; sleep 2
+# Komodo-status kan henge igjen fra den gamle containeren – krev en fersk innlogging i loggen.
+LOGIN=""
+for i in $(seq 1 30); do
+  LOGIN=$(X "journalctl -u periphery --no-pager --since '-3 min' | grep -E 'Logged in to Komodo Core|Failed to login' | tail -1" || true)
+  case "$LOGIN" in *"Logged in"*) break;; *"Failed to login"*) break;; esac; sleep 2
 done
-[ "${ST:-}" = Ok ] || rollback
+case "$LOGIN" in *"Logged in"*) ;; *) echo "        ${LOGIN:-ingen innlogging i loggen}" | cut -c1-200; rollback;; esac
+sleep 4
+ST=$(kapi read '{"type":"ListServers","params":{}}' | jq -r --arg i "$SID" '.[]|select(.id==$i)|.info.state' 2>/dev/null || true)
+[ "$ST" = Ok ] || rollback
 ok "$NAME er Ok i Komodo"
 X "docker ps --format '        {{.Names}}: {{.Status}}' | grep -v periphery" || true
 echo "== FERDIG: $NAME kjører nå systemd-Periphery. Gammel container '$C' er stoppet og kan fjernes senere."
