@@ -1,0 +1,12 @@
+[Unit]
+Description=Drift-vakt: committet/merget men ikke publisert/deployet (homelab)
+Documentation=https://github.com/Kingpro500/homelab-komodo/blob/main/pc7-ct130-hermes/drift-vakt/README.md
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=hermes
+WorkingDirectory=/home/hermes
+ExecStart=/usr/bin/python3 /home/hermes/.hermes/scripts/homelab_drift_check.py
+TimeoutStartSec=300

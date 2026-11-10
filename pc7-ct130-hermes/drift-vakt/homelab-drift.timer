@@ -1,0 +1,10 @@
+[Unit]
+Description=Kjør drift-vakten hvert 15. minutt
+
+[Timer]
+OnBootSec=3min
+OnUnitActiveSec=15min
+Persistent=true
+
+[Install]
+WantedBy=timers.target
