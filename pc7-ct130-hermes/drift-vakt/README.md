@@ -23,6 +23,8 @@ opp i advarselen**, ikke med nytt arbeid oppå.
 | **Kritisk** | Komodo-stack: filer i stackens mappe er endret i `main` etter `deployed_hash` (merget, men ikke deployet) |
 | **Kritisk** | Kartkilden på CT120 (`/opt/moved-services/nettkart-repo`): ucommittede endringer, commits som ikke er pushet/publisert, gren ≠ `main`, eller live-kartet ≠ siste commit |
 | **Kritisk** | GitHub- eller Komodo-API svarer ikke fra Hermes |
+| **Kritisk** | Gitea-repoet inneholder filer utenfor `docs/network-map/` (+ README/AGENTS/CLAUDE) — Gitea skal kun ha kartet |
+| Advarsel | Ukjente filer i webroten `/srv/nettkart/www` |
 | **Kritisk** | `docs/network-map/` finnes i GitHub (kartet skal kun ligge i Gitea), eller nginx på CT120 monterer ikke `/srv/nettkart/www` |
 | Advarsel | Åpen PR eldre enn 24 t |
 | Advarsel | Gren med commits som ikke er i `main`, uten PR, eldre enn 3 døgn |
