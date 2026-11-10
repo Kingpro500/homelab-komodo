@@ -126,7 +126,7 @@ pages:
                 url: http://10.0.0.116:8080/admin/
                 icon: si:pihole
               - title: UniFi
-                url: https://10.0.0.132:8443/
+                url: https://10.0.0.196:8443/
                 icon: si:ubiquiti
                 allow-insecure: true
               - title: Proxmox pc8
@@ -206,7 +206,7 @@ pages:
                   - title: Pi-hole pc9
                     url: http://10.0.0.116:8080/admin/
                   - title: UniFi
-                    url: https://10.0.0.132:8443/
+                    url: https://10.0.0.196:8443/
                   - title: Paperless
                     url: http://10.0.0.131:8000/
 

@@ -139,7 +139,7 @@ sections:
         description: CT116
         icon: si:pihole
       - title: UniFi
-        url: https://10.0.0.132:8443/
+        url: https://10.0.0.196:8443/
         description: CT155
         icon: si:ubiquiti
       - title: Paperless
