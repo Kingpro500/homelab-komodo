@@ -6,13 +6,22 @@
 # Lager en standard Debian 13-LXC og kjører ct-komodo (Komodo + stack hvis den finnes i Git).
 set -euo pipefail
 [ $# -ge 1 ] || { echo "Bruk: ct-new <tjeneste> [ram_mb] [disk_gb] [kjerner]   eller   ct-new <ctid> <tjeneste> ..."; exit 1; }
-if [[ "$1" =~ ^[0-9]+$ ]]; then ID="$1"; shift; else ID=$(pvesh get /cluster/nextid); fi
+if [[ "$1" =~ ^[0-9]+$ ]]; then ID="$1"; AUTOID=0; shift; else ID=$(pvesh get /cluster/nextid); AUTOID=1; fi
 SVC=$(echo "${1:?tjeneste mangler}" | tr '[:upper:]' '[:lower:]' | tr -c 'a-z0-9-\n' '-')
 RAM="${2:-1024}"; DISK="${3:-8}"; CORES="${4:-1}"; IP="${5:-}"
 NODE=$(hostname -s | tr '[:upper:]' '[:lower:]')
 ok(){ printf '  OK    %s\n' "$1"; }; die(){ printf '  FEIL  %s\n' "$1"; exit 1; }
 echo "== Ny CT $ID på $NODE: ${NODE}-ct${ID}-${SVC}"
 
+# Klyngelås rundt valg av ID/IP og pct create, så to samtidige ct-new ikke tar samme IP
+LOCK=/etc/pve/priv/lock/ct-new
+GOT=0
+for i in $(seq 1 60); do mkdir "$LOCK" 2>/dev/null && { GOT=1; break; }
+  [ -d "$LOCK" ] && [ $(( $(date +%s) - $(stat -c %Y "$LOCK" 2>/dev/null || date +%s) )) -gt 300 ] && rmdir "$LOCK" 2>/dev/null
+  [ "$i" = 1 ] && echo "  ...   venter på en annen ct-new i klyngen"; sleep 3; done
+[ "$GOT" = 1 ] || die "fikk ikke klyngelås $LOCK (en annen ct-new kjører?)"
+trap 'rmdir "$LOCK" 2>/dev/null' EXIT
+if [ "$AUTOID" = 1 ]; then ID=$(pvesh get /cluster/nextid); fi
 pvesh get /cluster/nextid --vmid "$ID" >/dev/null 2>&1 || die "CT/VM-ID $ID er allerede i bruk i klyngen"
 used(){ grep -qsE "ip=$1/" /etc/pve/nodes/*/lxc/*.conf /etc/pve/nodes/*/qemu-server/*.conf || ping -c1 -W1 "$1" >/dev/null 2>&1; }
 if [ -z "$IP" ]; then
@@ -47,6 +56,7 @@ pct create "$ID" "$TPL" \
   --onboot 1 --timezone Europe/Oslo --ssh-public-keys "$KEYS" \
   --description "${NODE}-ct${ID}-${SVC} · $IP · opprettet $(date +%F) med ct-new" >/dev/null \
   || die "pct create feilet"
+rmdir "$LOCK" 2>/dev/null; trap - EXIT
 ok "CT $ID opprettet (${CORES} kjerne(r), ${RAM} MB RAM, ${DISK} GB disk)"
 pct start "$ID"; for i in $(seq 1 30); do pct exec "$ID" -- true 2>/dev/null && break; sleep 2; done
 ok "CT $ID startet"
