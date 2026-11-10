@@ -53,7 +53,7 @@ ct-komodo <ctid> [tjeneste]       # tjeneste = CT-ens vertsnavn hvis utelatt
 ## Oppdatering
 
 Ny Komodo-versjon varsles av n8n («Komodo-versjonsvakt»). Oppgrader Core først, deretter
-`ct-periphery-update --alle`. Se «Oppdatere Komodo» i `docs/network-map/ACCESS-RUNBOOK.md`.
+`ct-periphery-update --alle`. Se «Oppdatere Komodo» i `docs/ACCESS-RUNBOOK.md`.
 
 ## Hemmeligheter (aldri i Git – repoet er offentlig)
 
@@ -70,7 +70,7 @@ alltid siste skript fra `main`.
 - Legg CT-en inn i Smokeping (`pc9-ct113-ntopng/smokeping/Targets`) og nettverkskartet.
 - Media ligger på Tower og monteres inn ved behov; kopieres aldri.
 - Nødretting av en CT som mangler oppdateringer eller har nettverksfeil: se
-  «CT-fiks» i `docs/network-map/ACCESS-RUNBOOK.md`.
+  «CT-fiks» i `docs/ACCESS-RUNBOOK.md`.
 
 ## Gammel metode – migrert 10. nov 2026
 

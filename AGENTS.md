@@ -21,7 +21,7 @@ Din egen sandkasse (Codex cloud, Claude Cowork o.l.) kan mangle `gh`-login eller
 | PR/merge (reserve) | Fine-grained token på pc8: `/root/.config/claude/github.env` | samme |
 | Codex | `git@github.com:Kingpro500/homelab-komodo.git` med Codex sin egen SSH-identitet (se ACCESS-RUNBOOK) | `git ls-remote origin HEAD` |
 
-Drift-vakten tester GitHub-API-et hvert 15. minutt. `github_access.ok: true` i `/drift` betyr at tilgangen virker, og at feilen ligger i din egen sandkasse. Rapporter **ruten som feilet og den nøyaktige feilmeldingen**, aldri bare «ingen tilgang». Aldri vis, kopier eller committ tokenverdier. Mer: [docs/network-map/ACCESS-RUNBOOK.md](docs/network-map/ACCESS-RUNBOOK.md).
+Drift-vakten tester GitHub-API-et hvert 15. minutt. `github_access.ok: true` i `/drift` betyr at tilgangen virker, og at feilen ligger i din egen sandkasse. Rapporter **ruten som feilet og den nøyaktige feilmeldingen**, aldri bare «ingen tilgang». Aldri vis, kopier eller committ tokenverdier. Mer: [docs/ACCESS-RUNBOOK.md](docs/ACCESS-RUNBOOK.md).
 
 Før arbeid i pc6-klonen: `git switch main && git pull --ff-only`.
 
@@ -44,5 +44,5 @@ Brukeren har bevisst satt Homepage- og Dashy-arbeidet på pause. Ikke redeploy H
 - Kilde: `CT120:/opt/moved-services/nettkart-repo/docs/network-map/nettverkskart.html` (origin = Gitea `http://10.0.0.176:3000/Kingpro500/homelab-komodo.git`, CT118).
 - Publisering: kjør `/usr/local/sbin/nettkart-publish` på CT120 etter commit. Skriptet pusher til Gitea, validerer versjon + endringsnotat og publiserer atomisk.
 - Gjeldende regler: `PUBLISHING.md` i Gitea-kopien (samme mappe på CT120).
-- Kopien av `docs/network-map/` i **dette GitHub-repoet er utdatert og brukes ikke**. (funn 2026-11-10: unntak/motsigelse — `docs/network-map/ACCESS-RUNBOOK.md` sier selv at den vedlikeholdes KUN i GitHub; Roger avgjør om den skal flyttes ut av `docs/network-map/`.) Ikke rediger den, ikke publiser fra den, og ikke deploy kartet med Komodo/GitHub.
+- `docs/network-map/` **finnes ikke i GitHub** (fjernet 10. nov 2026). Ikke opprett mappen igjen og ikke legg kart-HTML i GitHub — drift-vakten slår **kritisk** alarm hvis den dukker opp. Levende webrot er `CT120:/srv/nettkart/www`, utenfor alle Git-kopier; bare `nettkart-publish` (og kartets egne tjenester på CT120) skriver dit. Komodo-stacken `pc6-ct120-web` leverer bare nginx.
 - Alt annet (Komodo-stacker, Homepage, Dashy, Ansible, kode, øvrig dokumentasjon) ligger i **GitHub**.

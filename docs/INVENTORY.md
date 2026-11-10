@@ -10,7 +10,7 @@ replaced by pointers to the systems that hold the live truth.
 | Assets, IP addresses, interfaces, cables and dependencies | NetBox `http://netbox.lan.local:8001/` (synced from Proxmox nightly by `netbox-proxmox-sync.timer` on PC6, 04:30) |
 | How each service is deployed (compose and config) | This repository, one directory per Komodo stack |
 | Which Komodo server/stack runs where | Komodo Core `http://10.0.0.117:9120/` |
-| Access routes and agent rules | `docs/network-map/ACCESS-RUNBOOK.md` |
+| Access routes and agent rules | `docs/ACCESS-RUNBOOK.md` |
 | Network map and monitoring page | Gitea (published by `nettkart-publish` on PC6/CT120) |
 
 ## DNS (verified 2026-11-08)

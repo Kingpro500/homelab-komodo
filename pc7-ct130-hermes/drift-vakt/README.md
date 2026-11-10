@@ -23,6 +23,7 @@ opp i advarselen**, ikke med nytt arbeid oppå.
 | **Kritisk** | Komodo-stack: filer i stackens mappe er endret i `main` etter `deployed_hash` (merget, men ikke deployet) |
 | **Kritisk** | Kartkilden på CT120 (`/opt/moved-services/nettkart-repo`): ucommittede endringer, commits som ikke er pushet/publisert, gren ≠ `main`, eller live-kartet ≠ siste commit |
 | **Kritisk** | GitHub- eller Komodo-API svarer ikke fra Hermes |
+| **Kritisk** | `docs/network-map/` finnes i GitHub (kartet skal kun ligge i Gitea), eller nginx på CT120 monterer ikke `/srv/nettkart/www` |
 | Advarsel | Åpen PR eldre enn 24 t |
 | Advarsel | Gren med commits som ikke er i `main`, uten PR, eldre enn 3 døgn |
 | Advarsel | Lokale kloner (Hermes `~/homelab-komodo`) som er skitne, står på feil gren eller er bak/foran `main` |
@@ -60,7 +61,7 @@ CT120 på **pc6**:
 | `ct120-nettkart-drift.py` | `/usr/local/sbin/nettkart-drift` (0755) |
 | `nettkart-drift.cron` | `/etc/cron.d/nettkart-drift` |
 
-Den skriver `nettkart-drift.json` i den levende kartmappen. Hermes leser filen via
+Den skriver `nettkart-drift.json` i webroten `/srv/nettkart/www`. Hermes leser filen via
 `http://10.0.0.124:3020/nettkart-drift.json`.
 
 Banneret i kartet (`#drift-banner`) ligger i Gitea-kilden, jf. `PUBLISHING.md`, regel 11.

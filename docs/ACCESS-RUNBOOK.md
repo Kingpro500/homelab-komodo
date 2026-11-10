@@ -5,7 +5,7 @@ access paths and verification steps, never secret values. Update it whenever
 an integration, host, or credential location changes.
 
 > **Start here:** GitHub access routes and the drift guard are at the top of
-> [AGENTS.md](../../AGENTS.md). A failing `gh`/`GH_TOKEN` in your own sandbox is
+> [AGENTS.md](../AGENTS.md). A failing `gh`/`GH_TOKEN` in your own sandbox is
 > not a lost homelab route — try the fixed routes listed there first.
 
 ## Repository boundary — read first
@@ -15,7 +15,8 @@ an integration, host, or credential location changes.
 | **GitHub** `git@github.com:Kingpro500/homelab-komodo.git` | Everything: stacks, automation, scripts, operational documentation and **this runbook** | — |
 | **Gitea** `http://10.0.0.176:3000/Kingpro500/homelab-komodo.git` | **Only** the network map (`docs/network-map/nettverkskart.html` and its versions) and the monitoring page (`docs/network-map/daily-report.html`), published through `nettkart-publish` on PC6/CT120 | Do not commit or push anything else there, not even on a branch |
 
-This runbook is maintained **only in GitHub**. The Gitea repository still
+This runbook is maintained **only in GitHub**, at `docs/ACCESS-RUNBOOK.md`
+(moved out of `docs/network-map/` on 10 November 2026; that folder no longer exists in GitHub). The Gitea repository still
 contains older copies of other files, including a short `ACCESS-RUNBOOK.md`.
 Those copies are not authoritative and must not be edited or used as a source.
 
