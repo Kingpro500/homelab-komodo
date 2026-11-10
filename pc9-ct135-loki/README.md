@@ -1,10 +1,9 @@
-# pc9-ct135-loki
+# pc9-ct135-loki – sentral loggagring (VictoriaLogs)
 
-Sentral loggagring (Loki 3.5) for hjemmelaben.
+CT135 på pc9, 10.0.0.211. Kjører VictoriaLogs (port 9428, 30 dagers retention).
+Stack-/mappenavnet «loki» er historisk (byttet fra Loki til VictoriaLogs) og beholdes for å matche Komodo-serveren.
 
-- Node/CT: pc9 · CT135 · 10.0.0.211 · 2 kjerner, 2 GB RAM, 20 GB disk (laget med `ct-new`)
-- Endepunkt: `http://10.0.0.211:3100` (`/ready`, `/loki/api/v1/push`)
-- Retention: 30 dager (compactor), lagring på volumet `loki-data`
-- Agent: Grafana Alloy sender hit (Promtail er avviklet). Alloy rulles ut per CT i egen endring.
-- Visning: Grafana på CT109 (10.0.0.128:3000) → legg til datakilde Loki `http://10.0.0.211:3100`.
-- Ingen autentisering; kun tilgjengelig på LAN.
+- UI: http://10.0.0.211:9428/select/vmui
+- Helse: http://10.0.0.211:9428/health
+- Loki-kompatibel push: http://10.0.0.211:9428/insert/loki/api/v1/push (Alloy `loki.write`)
+- Grafana: VictoriaLogs-datakilde-plugin (victoriametrics-logs-datasource)

@@ -130,10 +130,10 @@
         description: 10.0.0.128:3000 · CT109 · pc6 · visualisering
         server: ct109
         container: grafana
-    - Loki:
-        icon: di:loki
-        href: http://10.0.0.211:3100/ready
-        description: 10.0.0.211:3100 · CT135 · pc9 · loggagring
+    - VictoriaLogs:
+        icon: di:victoriametrics
+        href: http://10.0.0.211:9428/select/vmui
+        description: 10.0.0.211:9428 · CT135 · pc9 · loggagring
     - Nettverkskart:
         icon: mdi:sitemap
         href: http://10.0.0.128:3020/
