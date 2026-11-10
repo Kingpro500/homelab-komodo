@@ -1,0 +1,4 @@
+# Legger USB-nettverksadapteren (r8152) tilbake i vmbr0 når den kobler seg inn igjen etter en USB-frakobling.
+# Bakgrunn: 10. nov 2026 20:56 koblet adapteren på pc7 seg ut og inn av seg selv, men ble ikke lagt tilbake i
+# broen — pc7 var borte til omstart. Kilde: GitHub homelab-komodo proxmox-hosts/usb-nic-watchdog/
+ACTION=="add", SUBSYSTEM=="net", DRIVERS=="r8152", RUN+="/usr/bin/systemd-run --no-block --on-active=5 --unit=usb-nic-rebridge-%k /bin/sh -c 'logger -t usb-nic-rebridge \"%k koblet inn igjen, kjører ifreload -a\"; /usr/sbin/ifreload -a'"

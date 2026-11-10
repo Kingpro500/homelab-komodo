@@ -1,0 +1,14 @@
+[Unit]
+Description=Tilbakestill USB-nettverksadapteren (r8152) når nettet er dødt
+Documentation=https://github.com/Kingpro500/homelab-komodo/tree/main/proxmox-hosts/usb-nic-watchdog
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/sbin/usb-nic-watchdog
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
