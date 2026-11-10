@@ -1,0 +1,7 @@
+services:
+  core:
+    environment:
+      KOMODO_MONITORING_INTERVAL: 5-min
+  ferretdb:
+    environment:
+      FERRETDB_LOG_LEVEL: warn
