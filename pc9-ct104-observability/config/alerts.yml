@@ -6,6 +6,16 @@ groups:
         for: 2m
         labels: {severity: critical, service: emby, node: pc6}
         annotations: {summary: "Emby is unavailable from PC9"}
+      - alert: EmbyProbeMissing
+        expr: absent(probe_success{instance="http://10.0.0.150:8096/web/"})
+        for: 5m
+        labels: {severity: critical, service: emby, node: pc6}
+        annotations: {summary: "Emby HTTP probe result is missing", description: "EmbyUnavailable cannot fire without probe_success; check the blackbox exporter on CT104."}
+      - alert: BlackboxExporterDown
+        expr: sum(up{job=~"blackbox-.*"}) == 0 or absent(up{job=~"blackbox-.*"})
+        for: 3m
+        labels: {severity: critical, service: monitoring, node: pc9}
+        annotations: {summary: "Blackbox exporter on CT104 is down", description: "All blackbox probes fail to scrape, so Emby/WAN/DNS/media availability alerts are blind. Check the blackbox container on pc9 CT104."}
       - alert: EmbyDown
         expr: emby_up{instance="emby"} == 0
         for: 2m
