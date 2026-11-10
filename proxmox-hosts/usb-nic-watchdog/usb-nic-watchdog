@@ -57,7 +57,7 @@ alive(){
 
 notify(){ # best effort, aldri blokkerende
   curl -s -m 5 -o /dev/null -H 'Content-Type: application/json' -X POST "$N8N" \
-    -d "{\"source\":\"usb-nic-watchdog\",\"host\":\"$(hostname)\",\"event\":\"$1\",\"detail\":\"$2\"}" || true
+    -d "{\"source\":\"usb-nic-watchdog\",\"type\":\"usb-lan\",\"severity\":\"warning\",\"title\":\"USB-LAN på $(hostname): $1\",\"message\":\"$2\",\"host\":\"$(hostname)\"}" || true
 }
 
 reset_usb(){

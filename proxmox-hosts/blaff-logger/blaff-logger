@@ -1,0 +1,247 @@
+#!/usr/bin/env python3
+"""blaff-logger — fanger nettverksblaff i sekundet de skjer.
+
+Kjører på pc6 (utenfor boden) og pc8 (inne i boden). Hvert sekund: ping til nettverksutstyr,
+noder og internett + pakke-/kringkastingsrate, feil og link på opplinken. Holder de siste
+PRE sekundene i minnet. Ved blaff (>=2 mål borte i 2 s, OPNsense/internett borte i 2 s,
+linkbrudd eller kringkastingsstorm) starter den et opptak av kringkastingstrafikken, og
+skriver etterpå en rapport med 30 s før/etter, varighet, hvilke mål som var borte, topp-rate
+og hvilke MAC-adresser som sendte mest (peker rett på kilden ved en sløyfe).
+
+Rapport: /var/log/blaff/<tid>.json (+ .pcap). Sammendrag til n8n /webhook/events; med
+ALERT=1 også push via /webhook/homelab-alerts (aldri 23–06). Køes i /var/lib/blaff/spool
+hvis n8n ikke svarer (n8n står selv i boden).
+
+Kilde: GitHub Kingpro500/homelab-komodo, proxmox-hosts/blaff-logger/
+"""
+import collections, glob, json, os, socket, statistics, subprocess, threading, time, urllib.request
+from datetime import datetime
+
+HOST = socket.gethostname()
+TARGETS = {"OPNsense": "10.0.0.1", "EdgeSwitch": "10.0.0.190", "ERX": "10.0.0.191",
+           "Flex2.5G": "10.0.0.192", "AP": "10.0.0.193", "pc6": "10.0.0.120", "pc7": "10.0.0.107",
+           "pc8": "10.0.0.102", "pc9": "10.0.0.103", "internett": "1.1.1.1"}
+TARGETS.update(json.loads(os.environ.get("EXTRA_TARGETS", "{}")))  # kun for test
+CORE = {"OPNsense", "internett"}
+PRE, POST, END_CLEAR, MAX_EVENT = (int(os.environ.get(k, d)) for k, d in
+                                   (("PRE", 30), ("POST", 30), ("END_CLEAR", 10), ("MAX_EVENT", 600)))
+N8N_EVENTS = os.environ.get("N8N_EVENTS", "http://10.0.0.119:5678/webhook/events")
+N8N_ALERT = os.environ.get("N8N_ALERT", "http://10.0.0.119:5678/webhook/homelab-alerts")
+ALERT = os.environ.get("ALERT", "0") == "1"
+LOGDIR, SPOOL = "/var/log/blaff", "/var/lib/blaff/spool"
+KEEP_DAYS = 30
+os.makedirs(LOGDIR, exist_ok=True); os.makedirs(SPOOL, exist_ok=True)
+
+
+def log(msg):
+    print("blaff-logger: " + msg, flush=True)
+
+
+def uplink():
+    if os.environ.get("IFACE"):
+        return os.environ["IFACE"]
+    for p in sorted(os.listdir("/sys/class/net/vmbr0/brif")):
+        if not p.startswith(("veth", "tap", "fwpr", "fwln")):
+            return p
+    return "vmbr0"
+
+
+IFACE = uplink()
+
+
+def stat(name):
+    try:
+        with open("/sys/class/net/%s/statistics/%s" % (IFACE, name)) as fh:
+            return int(fh.read())
+    except OSError:
+        return 0
+
+
+MC = [0]  # kringkasting+multicast-rammer talt direkte (mange USB-drivere teller ikke multicast)
+
+
+def count_mc():
+    while True:
+        try:
+            sk = socket.socket(socket.AF_PACKET, socket.SOCK_RAW, socket.htons(3))
+            sk.bind((IFACE, 0))
+            while True:
+                b = sk.recv(16)
+                if b and b[0] & 1:
+                    MC[0] += 1
+        except OSError:
+            time.sleep(5)
+
+
+def carrier():
+    try:
+        with open("/sys/class/net/%s/carrier" % IFACE) as fh:
+            return fh.read().strip() == "1"
+    except OSError:
+        return False
+
+
+def ping_all():
+    procs = {n: subprocess.Popen(["ping", "-n", "-c1", "-W1", ip], stdout=subprocess.PIPE,
+                                 stderr=subprocess.DEVNULL, text=True) for n, ip in TARGETS.items()}
+    rtt = {}
+    for n, p in procs.items():
+        out, _ = p.communicate()
+        rtt[n] = None
+        if p.returncode == 0 and "time=" in out:
+            rtt[n] = float(out.split("time=")[1].split()[0])
+    return rtt
+
+
+def post(url, payload):
+    req = urllib.request.Request(url, data=json.dumps(payload).encode(), method="POST",
+                                 headers={"Content-Type": "application/json"})
+    urllib.request.urlopen(req, timeout=5).read()
+
+
+def send(kind, payload):
+    url = N8N_ALERT if kind == "alert" else N8N_EVENTS
+    try:
+        post(url, payload)
+    except Exception:  # noqa: BLE001
+        with open(os.path.join(SPOOL, "%d-%s.json" % (time.time() * 1000, kind)), "w") as fh:
+            json.dump({"url": url, "payload": payload}, fh)
+
+
+def flush_spool():
+    for f in sorted(glob.glob(SPOOL + "/*.json"))[:20]:
+        if time.time() - os.path.getmtime(f) > 7 * 86400:
+            os.remove(f); continue
+        try:
+            with open(f) as fh:
+                d = json.load(fh)
+            post(d["url"], d["payload"]); os.remove(f)
+        except Exception:  # noqa: BLE001
+            return
+
+
+def cleanup():
+    cut = time.time() - KEEP_DAYS * 86400
+    for f in glob.glob(LOGDIR + "/*"):
+        if os.path.getmtime(f) < cut:
+            os.remove(f)
+
+
+def summarize_pcap(path):
+    try:
+        out = subprocess.run(["tcpdump", "-nn", "-e", "-r", path], capture_output=True, text=True,
+                             timeout=60).stdout.splitlines()
+    except Exception:  # noqa: BLE001
+        return {}
+    src = collections.Counter(); kind = collections.Counter()
+    for line in out:
+        parts = line.split()
+        if len(parts) > 3:
+            src[parts[1]] += 1
+            kind["ARP" if " ARP" in line else "IPv6" if "IPv6" in line else "IPv4" if "IPv4" in line else "annet"] += 1
+    return {"pakker": len(out), "topp_avsender_mac": src.most_common(5), "typer": kind.most_common()}
+
+
+def main():
+    threading.Thread(target=count_mc, daemon=True).start()
+    log("startet på %s, opplink %s, mål %s, push=%s" % (HOST, IFACE, ",".join(TARGETS), ALERT))
+    ring = collections.deque(maxlen=PRE)
+    base_mc = collections.deque(maxlen=300); base_rx = collections.deque(maxlen=300)
+    fail = collections.Counter()
+    stat_mc = lambda: MC[0]  # noqa: E731
+    prev = {k: stat(k) for k in ("rx_packets", "tx_packets", "rx_errors", "rx_dropped")}; prev["multicast"] = stat_mc()
+    prev_t, prev_car = time.time(), carrier()
+    event = None; post_left = 0; clear_for = 0; last_spool = 0; last_clean = 0
+    while True:
+        t0 = time.time()
+        rtt = ping_all()
+        now = time.time(); dt = max(now - prev_t, 0.5)
+        cur = {k: (stat_mc() if k == "multicast" else stat(k)) for k in prev}
+        rate = {k: round((cur[k] - prev[k]) / dt) for k in cur}
+        prev, prev_t = cur, now
+        car = carrier()
+        down = sorted(n for n, v in rtt.items() if v is None)
+        for n in TARGETS:
+            fail[n] = fail[n] + 1 if n in down else 0
+        s = {"t": datetime.now().isoformat(timespec="seconds"), "carrier": car,
+             "rx_pps": rate["rx_packets"], "tx_pps": rate["tx_packets"], "mc_pps": rate["multicast"],
+             "rx_err": rate["rx_errors"], "rx_drop": rate["rx_dropped"], "nede": down,
+             "rtt_ms": {k: v for k, v in rtt.items() if v is not None}}
+        mc_med = statistics.median(base_mc) if base_mc else 0
+        rx_med = statistics.median(base_rx) if base_rx else 0
+        storm = len(base_mc) > 60 and (s["mc_pps"] > max(3000, 8 * mc_med) or s["rx_pps"] > max(50000, 10 * rx_med))
+        lost2 = [n for n in TARGETS if fail[n] >= 2]
+        trigger = []
+        if len(lost2) >= 2: trigger.append("%d mål borte" % len(lost2))
+        if CORE & set(lost2): trigger.append("OPNsense/internett borte")
+        if car != prev_car: trigger.append("link %s" % ("opp" if car else "NED"))
+        if storm: trigger.append("kringkastingsstorm %d pps" % s["mc_pps"])
+        prev_car = car
+
+        if event is None:
+            if not trigger:
+                base_mc.append(s["mc_pps"]); base_rx.append(s["rx_pps"])
+            if trigger:
+                ts = datetime.now().strftime("%Y%m%dT%H%M%S")
+                pcap = os.path.join(LOGDIR, "%s-%s.pcap" % (HOST, ts))
+                cap = subprocess.Popen(["timeout", "20", "tcpdump", "-i", IFACE, "-nn", "-e", "-c", "20000",
+                                        "-w", pcap, "broadcast or multicast or arp"],
+                                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                event = {"host": HOST, "iface": IFACE, "start": s["t"], "ts": ts, "trigger": set(trigger),
+                         "baseline": {"mc_pps": mc_med, "rx_pps": rx_med}, "pre": list(ring), "under": [],
+                         "post": [], "pcap": pcap, "cap": cap, "lost": collections.Counter(), "t0": now}
+                log("BLAFF start %s: %s" % (s["t"], ", ".join(trigger)))
+        if event is not None:
+            if post_left == 0:
+                event["under"].append(s); event["trigger"].update(trigger)
+                for n in down: event["lost"][n] += 1
+                clear_for = 0 if (trigger or down and len(down) >= 2) else clear_for + 1
+                if clear_for >= END_CLEAR or now - event["t0"] > MAX_EVENT:
+                    event["end"] = s["t"]; post_left = POST
+            else:
+                event["post"].append(s); post_left -= 1
+                if post_left == 0:
+                    finish(event); event = None; fail.clear()
+        ring.append(s)
+        if now - last_spool > 60: flush_spool(); last_spool = now
+        if now - last_clean > 3600: cleanup(); last_clean = now
+        time.sleep(max(0, 1 - (time.time() - t0)))
+
+
+def finish(e):
+    try:
+        e["cap"].wait(timeout=25)
+    except Exception:  # noqa: BLE001
+        e["cap"].kill()
+    under = e["under"][:-END_CLEAR] or e["under"]
+    dur = len(under)
+    rep = {"host": e["host"], "iface": e["iface"], "start": e["start"], "slutt": e["end"],
+           "varighet_s": dur, "utløser": sorted(e["trigger"]), "baseline": e["baseline"],
+           "mål_borte_s": dict(e["lost"].most_common()),
+           "link_brudd": any(not x["carrier"] for x in e["under"]),
+           "topp": {"rx_pps": max((x["rx_pps"] for x in e["under"]), default=0),
+                    "mc_pps": max((x["mc_pps"] for x in e["under"]), default=0),
+                    "rx_err": sum(x["rx_err"] for x in e["under"]), "rx_drop": sum(x["rx_drop"] for x in e["under"])},
+           "kringkasting": summarize_pcap(e["pcap"]), "pcap": e["pcap"],
+           "målinger": {"før": e["pre"], "under": e["under"], "etter": e["post"]}}
+    path = os.path.join(LOGDIR, "%s-%s.json" % (e["host"], e["ts"]))
+    with open(path, "w") as fh:
+        json.dump(rep, fh, ensure_ascii=False, indent=1)
+    top = rep["kringkasting"].get("topp_avsender_mac") or []
+    lost = ", ".join("%s %ds" % kv for kv in list(rep["mål_borte_s"].items())[:6]) or "ingen"
+    text = ("%s %s: %d s. Borte: %s. Link brutt: %s. Topp kringkasting %d pps (normalt %d). Mest fra: %s. Rapport %s"
+            % (e["host"], e["start"][11:], dur, lost, "ja" if rep["link_brudd"] else "nei", rep["topp"]["mc_pps"],
+               rep["baseline"]["mc_pps"], ", ".join("%s (%d)" % (m, c) for m, c in top[:3]) or "–", path))
+    log("BLAFF slutt: " + text)
+    summary = {k: v for k, v in rep.items() if k != "målinger"}
+    send("event", {"source": "blaff-logger", "type": "nettverksblaff", "severity": "warning",
+                   "title": "Nettverksblaff %s %s, %d s" % (e["host"], e["start"][11:], dur), "message": text, **summary})
+    hour = datetime.now().hour
+    if ALERT and not (hour >= 23 or hour < 6):
+        send("alert", {"status": "firing", "job": "blaff-logger", "alerts": [{
+            "status": "firing", "labels": {"alertname": "Nettverksblaff", "severity": "warning", "node": e["host"]},
+            "annotations": {"summary": "Nettverksblaff %s, %d s" % (e["start"][11:], dur), "description": text}}]})
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,16 @@
+[Unit]
+Description=Blaff-logger: fanger nettverksblaff i sekundet (ping, kringkasting, link) og rapporterer til n8n
+Documentation=https://github.com/Kingpro500/homelab-komodo/tree/main/proxmox-hosts/blaff-logger
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+Environment=ALERT=1   # pc6: 1 (push), pc8: 0 (bare logg)
+ExecStart=/usr/bin/python3 /usr/local/sbin/blaff-logger
+Restart=always
+RestartSec=10
+Nice=-5
+
+[Install]
+WantedBy=multi-user.target
