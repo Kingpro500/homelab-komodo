@@ -4,7 +4,7 @@ probe = FPing
 
 menu = Homelab
 title = Homelab latency
-remark = Latency and packet loss from CT113 on pc9
+remark = Latency and packet loss measured from CT113 (pc6-ct113-smokeping-ntopng, 10.0.0.171) on pc6
 
 + Infrastructure
 menu = Infrastructure
@@ -12,18 +12,8 @@ title = Core infrastructure
 
 ++ OPNsense
 menu = OPNsense
-title = OPNsense gateway
+title = OPNsense gateway (pc7 VM191)
 host = 10.0.0.1
-
-++ pc8
-menu = pc8
-title = Proxmox pc8
-host = 10.0.0.102
-
-++ pc9
-menu = pc9
-title = Proxmox pc9
-host = 10.0.0.103
 
 ++ pc1
 menu = pc1
@@ -35,28 +25,101 @@ menu = pc6
 title = Proxmox pc6
 host = 10.0.0.120
 
+++ pc7
+menu = pc7
+title = Proxmox pc7 (USB 2.5G LAN via USW Flex)
+host = 10.0.0.107
+
+++ pc8
+menu = pc8
+title = Proxmox pc8 (USB 2.5G LAN via USW Flex)
+host = 10.0.0.102
+
+++ pc9
+menu = pc9
+title = Proxmox pc9
+host = 10.0.0.103
+
++ NetworkGear
+menu = Network gear
+title = Switches and access point
+
+++ EdgeSwitch
+menu = EdgeSwitch
+title = EdgeSwitch ES-8-150W (stue)
+host = 10.0.0.190
+
+++ EdgeRouterX
+menu = EdgeRouter X
+title = EdgeRouter X as switch (bod)
+host = 10.0.0.191
+
+++ USWFlex
+menu = USW Flex 2.5G
+title = UniFi USW Flex 2.5G 5 (bod)
+host = 10.0.0.192
+
+++ ACPro
+menu = AC Pro
+title = UniFi AC Pro (gang)
+host = 10.0.0.193
+
 + NetworkServices
 menu = Network services
-title = DNS and time services
+title = DNS, time and controllers
 
-++ PiHolePC8
-menu = Pi-hole pc8
-title = Pi-hole pc8
+++ PiHolePC6
+menu = Pi-hole pc6
+title = Pi-hole pc6 CT101
 host = 10.0.0.115
+
+++ PiHolePC1
+menu = Pi-hole pc1
+title = Pi-hole pc1 CT102
+host = 10.0.0.116
 
 ++ PiHolePC9
 menu = Pi-hole pc9
-title = Pi-hole pc9
-host = 10.0.0.116
+title = Pi-hole pc9 CT103 (reserve)
+host = 10.0.0.118
 
 ++ TimeServer
 menu = Time server
-title = Local NTP server
+title = Local NTP server (pc7 CT112)
 host = 10.0.0.170
+
+++ UISP
+menu = UISP
+title = UISP (pc7 CT124)
+host = 10.0.0.195
+
+++ UniFi
+menu = UniFi Network
+title = UniFi Network controller (pc7 CT115)
+host = 10.0.0.196
+
++ Services
+menu = Services
+title = Key services
+
+++ Emby
+menu = Emby
+title = Emby (pc6)
+host = 10.0.0.150
+
+++ HomeAssistant
+menu = Home Assistant
+title = Home Assistant (pc9 VM100)
+host = 10.0.0.7
 
 + Internet
 menu = Internet
 title = External connectivity
+
+++ ISPGateway
+menu = NextGenTel gateway
+title = NextGenTel first hop (WAN gateway)
+host = 89.10.228.1
 
 ++ Cloudflare
 menu = Cloudflare
