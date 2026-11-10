@@ -41,6 +41,7 @@ echo "-- 5. Tidssone"
 ln -sf /usr/share/zoneinfo/Europe/Oslo /etc/localtime
 echo Europe/Oslo > /etc/timezone
 ok "tidssone Europe/Oslo, klokka er $(date '+%T')"
+locale -a 2>/dev/null | grep -qiE "^(en_US\.utf-?8)$" || { echo "LANG=C.UTF-8" > /etc/default/locale; export LANG=C.UTF-8; ok "locale C.UTF-8 (en_US.UTF-8 finnes ikke)"; }
 
 echo "-- 6. Kontroll"
 curl -fsS -m10 -o /dev/null https://deb.debian.org && ok "HTTPS ut på internett" || bad "HTTPS ut feiler"
