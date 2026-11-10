@@ -8,7 +8,7 @@ Gjelder alle agenter og alle steder: GitHub (PR/merge), Komodo (deploy), Gitea/n
 
 1. **Prøv de dokumenterte rutene først** (se Tilgang under og `docs/ACCESS-RUNBOOK.md`). En feilende `gh`/`GH_TOKEN` i din egen sandkasse betyr ikke at tilgangen mangler.
 2. **Når det likevel ikke går, skal svaret til Roger begynne med** `⛔ KAN IKKE PUBLISERE:` etterfulgt av hva det gjelder, hvilken rute du prøvde, og den nøyaktige feilmeldingen. Ikke gjem det nederst i svaret.
-3. **Meld det i drift-vakten med en gang**, fra pc6 (homelab-ssh) eller CT120:
+3. **Meld det i drift-vakten med en gang**, fra pc6 (homelab-ssh) eller CT120 (`pc6-ct120-monitoring`):
    ```sh
    homelab-blokkert meld "<hva>" "<rute prøvd>" "<nøyaktig feil>" --av <agent>
    ```
