@@ -67,8 +67,23 @@ alltid siste skript fra `main`.
 - Nødretting av en CT som mangler oppdateringer eller har nettverksfeil: se
   «CT-fiks» i `docs/network-map/ACCESS-RUNBOOK.md`.
 
-## Gammel metode (skal ryddes)
+## Gammel metode – migrert 10. nov 2026
 
-Eldre CT-er (bl.a. CT110, CT115, CT310) kjører Periphery som Docker-container
-(`periphery-compose.yml` og `periphery.env.example` i denne mappen). De beholdes til de
-ryddes over til systemd-Periphery én for én. Bland aldri de to på samme CT.
+CT-er med Periphery som Docker-container ble flyttet til systemd-Periphery med
+
+```bash
+ct-periphery-migrate <ctid> [nytt-servernavn]
+```
+
+Skriptet gjenbruker containerens private nøkkel og `root_directory` (`/opt/komodo`),
+så Komodo ser samme server og alle stack-stier er uendret. App-containere kjører videre.
+Den gamle Periphery-containeren stoppes med `restart=no` (beholdes for tilbakerulling).
+Ruller automatisk tilbake hvis serveren ikke blir `Ok` innen 90 sekunder.
+
+Migrert: CT101, CT102 (pc1), CT103, CT106, CT111, CT115 (→ `pc7-ct115-unifi`),
+CT120 (→ `pc6-ct120-monitoring`), CT200, CT203, CT220, CT250, CT310.
+CT112 omdøpt til `pc7-ct112-ntp`.
+
+**Unntak:** CT110 (Komodo Core) beholder Periphery fra Core sin egen compose
+(`komodo-periphery-1`, kobler til `ws://core:9120`). Den deler nøkkelvolum med Core og
+gjenskapes ved `docker compose up`; den tas ved neste Core-oppgradering.
