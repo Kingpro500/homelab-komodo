@@ -31,6 +31,7 @@ for C in $(pct list | awk 'NR>1 && $2=="running"{print $1}'); do
   CUR="v$(X '/usr/local/bin/periphery --version 2>/dev/null' | awk '{print $2}')"
   NAME=$(X "sed -n 's/^connect_as = \"\(.*\)\"/\1/p' /etc/komodo/periphery.config.toml" 2>/dev/null)
   if [ "$CUR" = "$VER" ]; then printf '  OK    CT%s %s er %s\n' "$C" "$NAME" "$CUR"; OK=$((OK+1)); continue; fi
+  if [ "$(printf '%s\n%s\n' "$CUR" "$VER" | sort -V | tail -1)" = "$CUR" ]; then printf '  MERK  CT%s %s er %s, nyere enn mål %s – endres ikke\n' "$C" "$NAME" "$CUR" "$VER"; OK=$((OK+1)); continue; fi
   if [ "$SJEKK" = 1 ]; then printf '  NY    CT%s %s: %s -> %s\n' "$C" "$NAME" "$CUR" "$VER"; continue; fi
   T0=$(date '+%Y-%m-%d %H:%M:%S')
   if X "curl -fsSL https://raw.githubusercontent.com/moghtech/komodo/$VER/scripts/setup-periphery.py -o /root/setup-periphery.py && python3 /root/setup-periphery.py --version $VER >/var/log/periphery-update.log 2>&1 && systemctl daemon-reload && systemctl restart periphery"; then

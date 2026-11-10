@@ -178,6 +178,37 @@ alerts only on a sustained increase. PC9 independently probes controller HTTPS
 on `10.0.0.196:8443` (availability only; the local controller certificate is
 not used as a trust anchor for this diagnostic probe).
 
+## Oppdatere Komodo (Core + Periphery)
+
+n8n-arbeidsflyten **Komodo-versjonsvakt** sjekker hver dag kl. 09:20 siste release på
+GitHub (`moghtech/komodo`) mot versjonen Core kjører (`http://10.0.0.117:9120/version`) og
+sender ett push per ny versjon via `homelab-alerts` (stilletid 23–06, maks ett push i timen).
+
+Rekkefølge ved ny versjon (Periphery skal aldri være eldre enn Core):
+
+1. **Core (CT110 på pc8):** Core og Core-hostens Periphery bruker taggen `2`
+   (`COMPOSE_KOMODO_IMAGE_TAG="2"` i `/opt/komodo/compose.env`), dvs. siste 2.x. Oppdater med
+
+   ```bash
+   cd /opt/komodo && docker compose -p komodo --env-file compose.env \
+     -f ferretdb.compose.yaml -f compose.performance.yaml pull
+   docker compose -p komodo --env-file compose.env \
+     -f ferretdb.compose.yaml -f compose.performance.yaml up -d
+   ```
+2. **Periphery i alle CT-er** – på en hvilken som helst node:
+
+   ```bash
+   ct-periphery-update --alle --sjekk   # vis hva som er utdatert
+   ct-periphery-update --alle           # oppdater alle til Core sin versjon
+   ```
+
+   Skriptet kjører Komodo sitt offisielle `setup-periphery.py --version <Core-versjon>` på nytt
+   (beholder config), restarter og krever fersk «Logged in to Komodo Core». Periphery som er
+   nyere enn Core røres ikke. Nye CT-er (`ct-new`/`ct-komodo`) får automatisk Core sin versjon.
+
+Kommandoer på nodene (`/usr/local/sbin/`, henter alltid siste commit på `main`):
+`ct-new`, `ct-komodo`, `ct-periphery-migrate`, `ct-periphery-update`.
+
 ## CT-fiks: grunnoppsett og nødretting for Debian-LXC
 
 Brukes på alle nye CT-er før Komodo-registrering, og på eksisterende CT-er som mangler oppdateringer eller har nettverks-/DNS-trøbbel. Trygg å kjøre flere ganger; skriver `OK`/`FEIL` per steg og stopper ikke ved første feil. Kilde: `scripts/ct-fix.sh`.
