@@ -18,7 +18,7 @@ if [ "$ALLE" = 1 ]; then
   ME=$(hostname -s)
   awk '/^ *name:/{n=$2} /ring0_addr:/{print n, $2}' /etc/pve/corosync.conf | while read -r NAME IP; do
     if [ "$NAME" = "$ME" ]; then ct-periphery-update "$VER" $FLAGS
-    else timeout 600 ssh -o BatchMode=yes -o ConnectTimeout=6 -o HostKeyAlias="$NAME" "root@$IP" "ct-periphery-update $VER $FLAGS" || echo "== $NAME: FEIL – fikk ikke kjørt (ssh/node nede?)"; fi
+    else timeout 600 ssh -o BatchMode=yes -o ConnectTimeout=6 "root@$IP" "ct-periphery-update $VER $FLAGS" || echo "== $NAME: FEIL – fikk ikke kjørt (ssh/node nede?)"; fi
   done
   exit 0
 fi
