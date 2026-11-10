@@ -178,6 +178,71 @@ alerts only on a sustained increase. PC9 independently probes controller HTTPS
 on `10.0.0.196:8443` (availability only; the local controller certificate is
 not used as a trust anchor for this diagnostic probe).
 
+## CT-fiks: grunnoppsett og nødretting for Debian-LXC
+
+Brukes på alle nye CT-er før Komodo-registrering, og på eksisterende CT-er som mangler oppdateringer eller har nettverks-/DNS-trøbbel. Trygg å kjøre flere ganger; skriver `OK`/`FEIL` per steg og stopper ikke ved første feil. Kilde: `scripts/ct-fix.sh`.
+
+**Vanlig bruk (én linje, som root i CT-en):**
+
+```bash
+printf 'search lan.local\nnameserver 10.0.0.115\nnameserver 10.0.0.118\nnameserver 10.0.0.1\n' >/etc/resolv.conf; command -v curl >/dev/null || { apt-get update && apt-get install -y curl; }; curl -fsSL https://raw.githubusercontent.com/Kingpro500/homelab-komodo/main/scripts/ct-fix.sh | bash
+```
+
+DNS satt av skriptet varer til neste CT-omstart. Sett også CT-ens DNS i Proxmox (DNS domain `lan.local`, DNS servers `10.0.0.115 10.0.0.118`), f.eks. `pct set <id> --nameserver "10.0.0.115 10.0.0.118" --searchdomain lan.local` på verten.
+
+**Reserve uten internett/GitHub (lim inn hele blokken):** samme innhold som `scripts/ct-fix.sh`.
+
+```bash
+bash <<'CTFIX'
+export DEBIAN_FRONTEND=noninteractive
+FAIL=0
+ok(){ printf '  OK    %s\n' "$1"; }
+bad(){ printf '  FEIL  %s\n' "$1"; FAIL=1; }
+echo "== CT-fiks $(hostname) $(date '+%F %T')"
+
+echo "-- 1. Nettverk"
+ip -4 -br addr show scope global
+GW=$(ip -4 route show default | awk '{print $3; exit}')
+[ -n "$GW" ] && ok "default gateway $GW" || bad "ingen default gateway – sjekk Network i Proxmox"
+ping -c2 -W2 10.0.0.1 >/dev/null 2>&1 && ok "OPNsense 10.0.0.1 svarer" || bad "når ikke 10.0.0.1"
+
+echo "-- 2. DNS"
+printf 'search lan.local\nnameserver 10.0.0.115\nnameserver 10.0.0.118\nnameserver 10.0.0.1\n' > /etc/resolv.conf
+getent hosts komodo.lan.local >/dev/null && ok "lokal DNS (komodo.lan.local)" || bad "lokal DNS"
+getent hosts deb.debian.org  >/dev/null && ok "ekstern DNS" || bad "ekstern DNS"
+
+echo "-- 3. Disk"
+apt-get clean
+USE=$(df --output=pcent / | tail -1 | tr -dc 0-9)
+[ "$USE" -lt 90 ] && ok "rotdisk ${USE}% brukt" || bad "rotdisk ${USE}% full – utvid disken eller rydd før oppdatering"
+
+echo "-- 4. Reparer og oppdater pakker"
+dpkg --configure -a
+apt-get -f install -y
+if apt-get update && apt-get -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold full-upgrade -y; then
+  ok "pakker oppdatert"
+else
+  bad "apt feilet – se meldingen over"
+fi
+apt-get install -y curl jq ca-certificates dnsutils iputils-ping nano htop
+apt-get autoremove -y
+
+echo "-- 5. Tidssone"
+ln -sf /usr/share/zoneinfo/Europe/Oslo /etc/localtime
+echo Europe/Oslo > /etc/timezone
+ok "tidssone Europe/Oslo, klokka er $(date '+%T')"
+
+echo "-- 6. Kontroll"
+curl -fsS -m10 -o /dev/null https://deb.debian.org && ok "HTTPS ut på internett" || bad "HTTPS ut feiler"
+if command -v docker >/dev/null; then
+  systemctl is-active --quiet docker && ok "Docker kjører" || bad "Docker kjører ikke"
+  docker ps --format '        {{.Names}}: {{.Status}}'
+fi
+[ -f /var/run/reboot-required ] && echo "  MERK  omstart anbefalt – kjør 'pct reboot <id>' fra verten"
+[ "$FAIL" = 0 ] && echo "== ALT OK" || echo "== NOE FEILET – lim inn utskriften til Claude"
+CTFIX
+```
+
 ## EdgeSwitch 8 — `10.0.0.190`
 
 **Known path:** management is HTTPS at `https://10.0.0.190/` (Kea reservation since 2026-11-10; was .32/.19).  The local,
