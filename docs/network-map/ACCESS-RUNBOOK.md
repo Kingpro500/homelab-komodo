@@ -4,6 +4,10 @@ This is the operational source of truth for Codex access checks. It documents
 access paths and verification steps, never secret values. Update it whenever
 an integration, host, or credential location changes.
 
+> **Start here:** GitHub access routes and the drift guard are at the top of
+> [AGENTS.md](../../AGENTS.md). A failing `gh`/`GH_TOKEN` in your own sandbox is
+> not a lost homelab route — try the fixed routes listed there first.
+
 ## Repository boundary — read first
 
 | Repository | Used for | Nothing else |
@@ -46,7 +50,7 @@ artifacts, not credential sources. Do not inspect or publish them.
 
 ## OPNsense — pc7, `10.0.0.1`
 
-**Known working path:** Hermes, CT130 on PC6 (`10.0.0.120`). The API
+**Known working path:** Hermes, CT130 on PC6 (`10.0.0.120`). (funn 2026-11-10: CT130 ligger nå på pc7, `10.0.0.107`; rute fra pc6: `ssh root@10.0.0.107` og `pct exec 130`.) The API
 credentials are held only in `/home/hermes/.hermes/.env` inside CT130. They
 must never be displayed, copied, or committed.
 
@@ -105,7 +109,7 @@ vice versa.
 | CT101 Pi-hole | via PC6 `pct exec 101` | Guest diagnostics through PC6; no claim of a separate direct SSH route | Live-verified 6 November 2026 |
 | CT113 Smokeping/ntopng | via PC6 `pct exec 113` | Guest diagnostics through PC6 | Live-verified 6 November 2026 |
 | CT120 NetBox/network map | via PC6 `pct exec 120` | Guest diagnostics and the documented NetBox maintenance route | Live-verified 6 November 2026 |
-| CT130 Hermes | via PC6 `pct exec 130` | Guest diagnostics; preferred path for OPNsense and UniFi monitoring | Live-verified 6 November 2026 |
+| CT130 Hermes | via PC6 `pct exec 130` (funn 2026-11-10: nå på pc7 — `ssh root@10.0.0.107` fra pc6, så `pct exec 130`) | Guest diagnostics; preferred path for OPNsense and UniFi monitoring | Live-verified 6 November 2026 |
 | PC9 / CT106 / CT108 | direct `codex-fleet-readonly` path where installed | Forced-command, read-only diagnostics only; no shell, Docker socket, file reads, restarts, or package management | Historically verified; re-check before claiming a current direct session |
 | PVE / CT115 | direct `codex-fleet-readonly` path where installed | Forced-command, read-only diagnostics only | Historically verified; re-check before claiming a current direct session |
 | PC1 | Proxmox visibility through MCP when online | No current SSH claim; node was previously unavailable | Do not infer direct SSH access |
@@ -337,7 +341,7 @@ into the Gitea map publisher, and do not publish an unreviewed dirty worktree.
 
 ## Komodo control plane
 
-Komodo Core is hosted on PC9/CT110 (`10.0.0.117:9120`). Use the managed
+Komodo Core is hosted on PC9/CT110 (`10.0.0.117:9120`). (funn 2026-11-10: CT110 ligger nå på pc8, samme IP.) Use the managed
 Proxmox SSH route for host/container diagnostics. No separate Codex-held
 Komodo API credential is currently registered in the local secure-reference
 catalog; do not infer the service is unavailable from that fact, and do not

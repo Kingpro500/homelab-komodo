@@ -1,0 +1,2 @@
+# Drift-vakt, kartdelen (kilde: GitHub homelab-komodo pc7-ct130-hermes/drift-vakt/)
+*/10 * * * * root /usr/bin/python3 /usr/local/sbin/nettkart-drift >/dev/null 2>&1
