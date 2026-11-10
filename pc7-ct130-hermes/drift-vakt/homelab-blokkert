@@ -1,0 +1,101 @@
+#!/usr/bin/env python3
+"""homelab-blokkert — meld tydelig fra når noe IKKE kan publiseres, merges eller deployes.
+
+Kjører på CT120 (/usr/local/sbin/homelab-blokkert). På pc6-verten finnes en
+wrapper med samme navn som kaller denne via `pct exec 120`, slik at alle agenter
+som når pc6 over SSH kan bruke den.
+
+Åpne saker ligger i /var/lib/homelab-blokkert/blokkert.json. nettkart-drift tar
+dem med som KRITISK, og de vises øverst i nettverkskartet og på telefonen til de
+er markert løst. Ingen hemmeligheter skal skrives hit.
+
+Bruk:
+  homelab-blokkert meld "<hva>" "<rute prøvd>" "<nøyaktig feil>" [--av <agent>]
+  homelab-blokkert liste
+  homelab-blokkert løst <id> ["<hvordan>"]
+
+Kilde: GitHub Kingpro500/homelab-komodo, pc7-ct130-hermes/drift-vakt/.
+"""
+import fcntl
+import json
+import os
+import subprocess
+import sys
+import uuid
+from datetime import datetime, timezone
+
+DB = "/var/lib/homelab-blokkert/blokkert.json"
+
+
+def now():
+    return datetime.now(timezone.utc).isoformat(timespec="seconds")
+
+
+def load():
+    try:
+        with open(DB, encoding="utf-8") as fh:
+            return json.load(fh)
+    except FileNotFoundError:
+        return []
+
+
+def save(items):
+    tmp = DB + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as fh:
+        json.dump(items, fh, ensure_ascii=False, indent=1)
+    os.chmod(tmp, 0o644)
+    os.replace(tmp, DB)
+
+
+def refresh():
+    # Oppdater kartets drift-JSON med en gang, ikke vent på cron.
+    subprocess.run(["/usr/bin/python3", "/usr/local/sbin/nettkart-drift"], capture_output=True, timeout=120)
+
+
+def main(argv):
+    if len(argv) < 2 or argv[1] not in ("meld", "liste", "løst", "lost"):
+        print(__doc__)
+        return 2
+    os.makedirs(os.path.dirname(DB), exist_ok=True)
+    with open(DB + ".lock", "w") as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        items = load()
+        cmd = argv[1]
+        if cmd == "meld":
+            args = argv[2:]
+            who = "ukjent"
+            if "--av" in args:
+                i = args.index("--av")
+                who = args[i + 1] if i + 1 < len(args) else who
+                args = args[:i] + args[i + 2:]
+            if len(args) < 3 or not all(a.strip() for a in args[:3]):
+                print("Mangler felt: meld \"<hva>\" \"<rute prøvd>\" \"<nøyaktig feil>\"", file=sys.stderr)
+                return 2
+            item = {"id": uuid.uuid4().hex[:8], "hva": args[0][:300], "rute": args[1][:300],
+                    "feil": args[2][:600], "av": who[:60], "meldt": now(), "løst": None}
+            items.append(item)
+            save(items)
+            print("⛔ Registrert som blokkert publisering (id %s). Vises i drift-vakten til den er løst." % item["id"])
+        elif cmd == "liste":
+            for it in items:
+                if not it.get("løst"):
+                    print("%s  %s  [%s]  %s | rute: %s | feil: %s" % (it["id"], it["meldt"], it["av"], it["hva"], it["rute"], it["feil"]))
+            return 0
+        else:
+            if len(argv) < 3:
+                print("Bruk: homelab-blokkert løst <id> [\"<hvordan>\"]", file=sys.stderr)
+                return 2
+            hit = [it for it in items if it["id"] == argv[2] and not it.get("løst")]
+            if not hit:
+                print("Fant ingen åpen sak med id %s" % argv[2], file=sys.stderr)
+                return 1
+            hit[0]["løst"] = now()
+            hit[0]["hvordan"] = (argv[3] if len(argv) > 3 else "")[:300]
+            save(items)
+            print("Sak %s markert løst." % argv[2])
+    refresh()
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv))

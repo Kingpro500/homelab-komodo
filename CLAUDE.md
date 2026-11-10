@@ -2,6 +2,20 @@
 
 ## 🚨 Start HVER økt med disse to sjekkene
 
+### ⛔ Kan du ikke publisere, merge eller deploye? Si det tydelig, og meld det
+
+Gjelder alle agenter og alle steder: GitHub (PR/merge), Komodo (deploy), Gitea/nettverkskartet (`nettkart-publish`) og alt annet som skal ut i drift.
+
+1. **Prøv de dokumenterte rutene først** (se Tilgang under og `docs/ACCESS-RUNBOOK.md`). En feilende `gh`/`GH_TOKEN` i din egen sandkasse betyr ikke at tilgangen mangler.
+2. **Når det likevel ikke går, skal svaret til Roger begynne med** `⛔ KAN IKKE PUBLISERE:` etterfulgt av hva det gjelder, hvilken rute du prøvde, og den nøyaktige feilmeldingen. Ikke gjem det nederst i svaret.
+3. **Meld det i drift-vakten med en gang**, fra pc6 (homelab-ssh) eller CT120:
+   ```sh
+   homelab-blokkert meld "<hva>" "<rute prøvd>" "<nøyaktig feil>" --av <agent>
+   ```
+   Saken blir kritisk øverst i nettverkskartet og på telefonen til den er løst, også om du stopper eller økten avsluttes.
+4. **Skriv aldri «ferdig», «publisert» eller «deployet»** om noe som bare er committet eller pushet til en gren.
+5. Når det er fikset: `homelab-blokkert løst <id> "<hvordan>"`. Åpne saker: `homelab-blokkert liste`.
+
 ### 1. Drift-vakten — rydd før du bygger nytt
 
 Les `http://10.0.0.135:9118/drift`, eller se toppen av nettverkskartet http://10.0.0.124:3020/.
