@@ -1,0 +1,14 @@
+*** Slaves ***
+secrets=/etc/smokeping/smokeping_secrets
+
++pc7
+display_name=pc7 (USB-LAN via Flex)
+color=d62728
+
++pc8
+display_name=pc8 (USB-LAN via Flex)
+color=1f77b4
+
++pc9
+display_name=pc9 (EdgeSwitch stue)
+color=2ca02c

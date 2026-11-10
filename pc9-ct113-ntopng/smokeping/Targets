@@ -1,10 +1,11 @@
 *** Targets ***
 
 probe = FPing
+slaves = pc7 pc8 pc9
 
 menu = Homelab
 title = Homelab latency
-remark = Latency and packet loss measured from CT113 (pc6-ct113-smokeping-ntopng, 10.0.0.171) on pc6
+remark = Latency and packet loss measured from CT113 on pc6 (master) and from slaves on pc7, pc8 and pc9
 
 + Infrastructure
 menu = Infrastructure

@@ -1,0 +1,23 @@
+# Smokeping-slave på pc9 (CT134). Måler de samme målene som masteren på pc6/CT113
+# og sender resultatene dit, slik at vi ser om en endring gjelder hele nettet eller én node.
+# SHARED_SECRET ligger kun lokalt i /opt/smokeping-slave/secret.env (aldri i Git).
+services:
+  smokeping:
+    image: lscr.io/linuxserver/smokeping:latest
+    container_name: smokeping-slave
+    hostname: pc9
+    restart: unless-stopped
+    environment:
+      PUID: "1000"
+      PGID: "1000"
+      TZ: Europe/Oslo
+      MASTER_URL: http://10.0.0.171:3001/smokeping/smokeping.cgi
+      CACHE_DIR: /tmp
+    env_file:
+      - path: /opt/smokeping-slave/secret.env
+        required: false
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
