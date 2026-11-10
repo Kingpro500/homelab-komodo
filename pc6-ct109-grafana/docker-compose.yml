@@ -7,6 +7,7 @@ services:
       - "3000:3000"
     environment:
       GF_SERVER_ROOT_URL: http://10.0.0.128:3000
+      GF_INSTALL_PLUGINS: victoriametrics-logs-datasource
     volumes:
       - "${GRAFANA_DATA_PATH:?Set in Komodo}:/var/lib/grafana"
       # Declarative data sources + dashboards, applied on every start. Only these

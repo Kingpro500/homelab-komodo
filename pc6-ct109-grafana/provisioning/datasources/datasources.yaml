@@ -15,3 +15,11 @@ datasources:
     orgName: "Main Org"
     basicAuth: false
     isDefault: true
+
+  - name: VictoriaLogs
+    uid: victorialogs
+    type: victoriametrics-logs-datasource
+    access: proxy
+    url: http://10.0.0.211:9428
+    orgName: "Main Org"
+    isDefault: false
