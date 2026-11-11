@@ -11,6 +11,16 @@ groups:
         for: 5m
         labels: {severity: critical, service: emby, node: pc6}
         annotations: {summary: "Emby HTTP probe result is missing", description: "EmbyUnavailable cannot fire without probe_success; check the blackbox exporter on CT104."}
+      - alert: EmbyStandbyUnavailable
+        expr: probe_success{instance="http://10.0.0.203:8096/System/Info/Public"} == 0
+        for: 5m
+        labels: {severity: warning, service: emby-standby, node: pc9}
+        annotations: {summary: "Emby warm standby (CT203) is unavailable", description: "Failover target pc9-ct203-emby-standby does not answer. Primary Emby is unaffected, but there is no standby. Diagnose read-only first; never restart Emby primary while streams are active."}
+      - alert: EmbyStandbyProbeMissing
+        expr: absent(probe_success{instance="http://10.0.0.203:8096/System/Info/Public"})
+        for: 10m
+        labels: {severity: warning, service: emby-standby, node: pc9}
+        annotations: {summary: "Emby standby HTTP probe result is missing", description: "EmbyStandbyUnavailable cannot fire without probe_success; check the blackbox exporter and prometheus.yml."}
       - alert: BlackboxExporterDown
         expr: sum(up{job=~"blackbox-.*"}) == 0 or absent(up{job=~"blackbox-.*"})
         for: 3m

@@ -13,3 +13,10 @@ The `network-interface` Prometheus job scrapes the read-only exporter at
 
 The exporter now runs as `network-interface-exporter` inside this same CT104
 Komodo stack and reads only `/sys/class/net/*` counters and carrier state.
+
+## Emby warm standby (CT203)
+
+Prometheus probes `http://10.0.0.203:8096/System/Info/Public` (job `blackbox-http`).
+Alerts `EmbyStandbyUnavailable` (5 min) and `EmbyStandbyProbeMissing` (10 min) are
+warnings: the primary Emby on CT200 is unaffected, but there is no failover target.
+Diagnose read-only first; never restart Emby while streams are active.
