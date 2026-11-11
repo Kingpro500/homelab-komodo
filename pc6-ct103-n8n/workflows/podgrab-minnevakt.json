@@ -1,0 +1,153 @@
+{
+  "name": "Podgrab minnevakt",
+  "nodes": [
+    {
+      "id": "pg-sched",
+      "name": "Hvert 10. minutt",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 10
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "pg-hook",
+      "name": "Kjør nå (webhook)",
+      "webhookId": "podgrab-minnevakt-kjor",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        200
+      ],
+      "parameters": {
+        "path": "podgrab-minnevakt-kjor",
+        "httpMethod": "POST",
+        "responseMode": "onReceived",
+        "options": {}
+      }
+    },
+    {
+      "id": "pg-get",
+      "name": "Les container-metrikker",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 3000,
+      "position": [
+        260,
+        100
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "http://10.0.0.135:9120/metrics",
+        "options": {
+          "timeout": 15000,
+          "response": {
+            "response": {
+              "responseFormat": "text"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "pg-code",
+      "name": "Vurder Podgrab-minne",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        520,
+        100
+      ],
+      "parameters": {
+        "jsCode": "\n// Podgrab minnevakt: read-only. Leser container-minne fra Hermes-eksportøren (Komodo-stats), ingen hemmeligheter.\n// Varsler via homelab-alerts. Gjør INGEN restart/stopp; Podgrab har mem_limit 768m i compose.\nconst WATCH = [{ server: 'pc6-ct109-node', container: 'podgrab', warnPct: 60, critPct: 85, trendMbPerHour: 100 }];\nconst COOLDOWN_MS = 6 * 3600 * 1000;\nconst FALLBACK_LIMIT = 805306368;\nconst raw = String(($input.first().json.data !== undefined ? $input.first().json.data : $input.first().json) || '');\nconst sd = $getWorkflowStaticData('global');\nsd.mem = sd.mem || {};\nconst now = Date.now();\nconst out = [];\nconst metric = (name, srv, ctr) => {\n  const re = new RegExp('^' + name + '\\\\{server=\"' + srv + '\",container=\"' + ctr + '\"\\\\} ([0-9.eE+]+)$', 'm');\n  const m = raw.match(re);\n  return m ? Number(m[1]) : null;\n};\nfor (const w of WATCH) {\n  const key = w.server + '/' + w.container;\n  const st = sd.mem[key] = sd.mem[key] || { hist: [], level: 'ok', notified: {}, missing: 0 };\n  const usage = metric('komodo_container_mem_usage_bytes', w.server, w.container);\n  const limit = metric('komodo_container_mem_limit_bytes', w.server, w.container) || FALLBACK_LIMIT;\n  const mb = (b) => Math.round(b / 1048576);\n  const send = (type, title, text) => {\n    const last = Number(st.notified[type] || 0);\n    if (now - last < COOLDOWN_MS && type !== 'recovered') return;\n    st.notified[type] = now;\n    out.push({ json: { username: 'Podgrab minnevakt', text: title, attachments: [{ title, text }] } });\n  };\n  if (usage === null) {\n    st.missing += 1;\n    if (st.missing === 3) send('missing', 'Podgrab minnevakt: måling mangler',\n      'Fant ikke komodo_container_mem_usage_bytes for ' + key + ' på http://10.0.0.135:9120/metrics i 3 kjøringer på rad (30 min). Sjekk homelab-metrics.service og Komodo.');\n    continue;\n  }\n  st.missing = 0;\n  const pct = usage / limit * 100;\n  const prev = st.hist.length ? st.hist[st.hist.length - 1] : null;\n  st.hist.push({ t: now, u: usage });\n  st.hist = st.hist.filter((h) => now - h.t <= 3 * 3600 * 1000).slice(-24);\n  // Startet på nytt etter å ha vært nær taket (OOM-kill / restart)?\n  if (prev && prev.u / limit * 100 >= 70 && pct < 30) {\n    send('restart', 'Podgrab er trolig startet på nytt (minnetak nådd)',\n      key + ': forrige måling ' + mb(prev.u) + ' MiB, nå ' + mb(usage) + ' MiB av ' + mb(limit) + ' MiB. Lekkasje i Podgrab; containeren startet selv på nytt (restart: unless-stopped).');\n  }\n  // Trend: >trendMbPerHour MiB/time over minst 45 min og 6 prøver\n  let trend = false, perHour = 0;\n  if (st.hist.length >= 6) {\n    const a = st.hist[0], b = st.hist[st.hist.length - 1];\n    const hrs = (b.t - a.t) / 3600000;\n    if (hrs >= 0.75) { perHour = (b.u - a.u) / 1048576 / hrs; trend = perHour > w.trendMbPerHour && pct > 25; }\n  }\n  const twoHigh = prev && prev.u / limit * 100 >= w.warnPct && pct >= w.warnPct;\n  let level = 'ok';\n  if (pct >= w.critPct) level = 'crit';\n  else if (twoHigh || trend) level = 'warn';\n  if (level === 'crit') send('crit', 'Podgrab nær minnetaket: ' + Math.round(pct) + ' %',\n    key + ' bruker ' + mb(usage) + ' av ' + mb(limit) + ' MiB. Rask restart/OOM er nær. Ingen automatisk handling er gjort.');\n  else if (level === 'warn') send('warn', 'Podgrab-minne vokser (' + Math.round(pct) + ' %)',\n    key + ' bruker ' + mb(usage) + ' av ' + mb(limit) + ' MiB' + (trend ? ' (≈' + Math.round(perHour) + ' MiB/time)' : '') + '. Mulig lekkasje. Ingen automatisk handling er gjort.');\n  if (level === 'ok' && st.level !== 'ok') {\n    send('recovered', 'Podgrab-minne tilbake til normalt', key + ' bruker nå ' + mb(usage) + ' MiB (' + Math.round(pct) + ' %).');\n  }\n  st.level = level;\n}\nreturn out;\n"
+      }
+    },
+    {
+      "id": "pg-send",
+      "name": "Send via homelab-alerts",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "position": [
+        780,
+        100
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://10.0.0.119:5678/webhook/homelab-alerts",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Hvert 10. minutt": {
+      "main": [
+        [
+          {
+            "node": "Les container-metrikker",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Kjør nå (webhook)": {
+      "main": [
+        [
+          {
+            "node": "Les container-metrikker",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Les container-metrikker": {
+      "main": [
+        [
+          {
+            "node": "Vurder Podgrab-minne",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vurder Podgrab-minne": {
+      "main": [
+        [
+          {
+            "node": "Send via homelab-alerts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "timezone": "Europe/Oslo",
+    "executionOrder": "v1"
+  },
+  "id": "1XBR4tgHzIu57tra",
+  "active": true
+}
