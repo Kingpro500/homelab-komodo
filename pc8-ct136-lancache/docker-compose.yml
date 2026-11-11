@@ -21,6 +21,7 @@ services:
     volumes:
       - /data/lancache/cache:/data/cache
       - /data/lancache/logs:/data/logs
+      - ./05_nobody_group.sh:/hooks/entrypoint-pre.d/05_nobody_group.sh:ro
     logging:
       driver: json-file
       options:
