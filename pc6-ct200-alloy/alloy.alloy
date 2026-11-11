@@ -29,3 +29,25 @@ loki.write "vl" {
     url = "http://10.0.0.211:9428/insert/loki/api/v1/push"
   }
 }
+
+// Emby skriver det meste til loggfiler, ikke stdout. Leses read-only; Emby berøres ikke.
+local.file_match "emby" {
+  path_targets = [
+    {"__path__" = "/emby-logs/embyserver.txt",           "host" = "pc6-ct200", "container" = "emby", "log" = "server"},
+    {"__path__" = "/emby-logs/ffmpeg-transcode-*.txt",   "host" = "pc6-ct200", "container" = "emby", "log" = "ffmpeg"},
+  ]
+}
+
+loki.source.file "emby" {
+  targets    = local.file_match.emby.targets
+  forward_to = [loki.process.emby.receiver]
+}
+
+// ffmpeg-loggene inneholder fremdriftslinjer; behold bare feil/avvik.
+loki.process "emby" {
+  stage.match {
+    selector = "{log=\"ffmpeg\"} !~ \"(?i)(error|fail|invalid|unable|conversion|cannot|broken pipe|timed out)\""
+    action   = "drop"
+  }
+  forward_to = [loki.write.vl.receiver]
+}

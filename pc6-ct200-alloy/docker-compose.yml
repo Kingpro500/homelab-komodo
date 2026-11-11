@@ -11,6 +11,7 @@ services:
     volumes:
       - ./alloy.alloy:/etc/alloy/config.alloy:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /opt/emby/EmbyServer/logs:/emby-logs:ro
       - alloy-data:/var/lib/alloy/data
     logging:
       driver: json-file

@@ -1,0 +1,26 @@
+groups:
+  - name: log-alerts
+    type: vlogs
+    interval: 1m
+    rules:
+      - alert: EmbyFfmpegErrorsInLogs
+        expr: '_time:10m host:pc6-ct200 container:emby log:ffmpeg | stats by (host) count() as hits | filter hits:>=3'
+        for: 0m
+        labels: {severity: warning, service: emby, node: pc6, source: victorialogs}
+        annotations:
+          summary: "Emby ffmpeg logs show repeated errors"
+          description: "{{ $value }} error lines from Emby ffmpeg logs in 10 min. Read-only: inspect VictoriaLogs ({host=\"pc6-ct200\",log=\"ffmpeg\"}); never restart Emby while streams are active."
+      - alert: EmbyServerErrorBurst
+        expr: '_time:10m host:pc6-ct200 container:emby log:server ~"(?i)\\berror\\b" | stats by (host) count() as hits | filter hits:>=20'
+        for: 0m
+        labels: {severity: warning, service: emby, node: pc6, source: victorialogs}
+        annotations:
+          summary: "Emby server log shows an error burst"
+          description: "{{ $value }} error lines in embyserver.txt in 10 min. Inspect read-only before any action."
+      - alert: TunarrErrorBurst
+        expr: '_time:10m host:pc6-ct250 container:tunarr ~"(?i)\\b(error|fatal)\\b" | stats by (host) count() as hits | filter hits:>=10'
+        for: 0m
+        labels: {severity: warning, service: tunarr, node: pc6, source: victorialogs}
+        annotations:
+          summary: "Tunarr logs show an error burst"
+          description: "{{ $value }} error/fatal lines from Tunarr in 10 min."
