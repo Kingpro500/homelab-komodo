@@ -241,6 +241,14 @@
         icon: di:unifi
         href: https://10.0.0.196:8443/
         description: 10.0.0.196:8443 · CT115 · pc7
+    - Lancache:
+        icon: mdi-cached
+        href: http://10.0.0.212/lancache-heartbeat
+        description: 10.0.0.212:80/443 · CT136 · pc8 · 100 GB cache på Unraid
+    - Squid:
+        icon: mdi-server-network
+        href: http://10.0.0.212:3128/
+        description: 10.0.0.212:3128 · CT136 · pc8 · proxy, 20 GB
     - Browser-pool:
         icon: mdi-web
         href: http://10.0.0.158:3001/
