@@ -1,0 +1,10 @@
+[Unit]
+Description=FLUX.2 klein web
+After=network.target
+[Service]
+Environment=HF_HUB_OFFLINE=1
+WorkingDirectory=/opt/flux
+ExecStart=/opt/flux/venv/bin/uvicorn app:app --host 0.0.0.0 --port 7860
+Restart=on-failure
+[Install]
+WantedBy=multi-user.target
