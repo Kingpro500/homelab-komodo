@@ -1,4 +1,4 @@
-# Komodo Core — PC9 CT110
+# Komodo Core — pc8 CT110 (/opt/komodo)
 
 This directory mirrors the production Compose layout on CT110 without storing
 credentials. Production uses project name `komodo` and these two files:

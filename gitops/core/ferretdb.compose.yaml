@@ -1,6 +1,6 @@
 ###################################
 # KOMODO COMPOSE - FERRETDB V2
-# Source of truth for PC9 CT110.
+# Source of truth for pc8 CT110 (/opt/komodo).
 ###################################
 
 services:
