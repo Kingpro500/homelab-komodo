@@ -40,15 +40,14 @@ if pct exec "$ID" -- sh -c "docker inspect -f '{{.State.Running}}' komodo-periph
   echo "  OK    periphery kjører allerede som $NAME – registrering hoppes over"
 else
   # Gammel Komodo-server med samme navn (CT-ID gjenbrukt) blokkerer onboarding ("not able to fix existing servers").
-  # Periphery kjører ikke her, så en NotOk-server med dette navnet er en rest etter en slettet CT: fjern den.
-  # Er den Ok, avbryt i stedet for å slette noe som lever.
+  # Navnet inneholder node og CT-ID, og Periphery kjører ikke i denne CT-en: serveren er en rest og slettes, uansett vist status
+  # (Komodo viser Ok lenge etter at Periphery er borte).
   if [ -s /root/.config/komodo/api.env ]; then
     ( set -a; . /root/.config/komodo/api.env; set +a
       kcall(){ curl -fsS -m20 -H "Content-Type: application/json" -H "X-Api-Key: $KOMODO_API_KEY" -H "X-Api-Secret: $KOMODO_API_SECRET" -X POST "$KOMODO_URL/$1" -d "$2"; }
       OLD=$(kcall read '{"type":"ListServers","params":{}}' | jq -r --arg n "$NAME" '.[]|select(.name==$n)|"\(.id) \(.info.state)"')
       while read -r SID ST; do
         [ -n "$SID" ] || continue
-        if [ "$ST" = "Ok" ]; then echo "FEIL: Komodo-serveren $NAME er Ok, men CT $ID har ingen Periphery. Sjekk manuelt, ingenting slettet."; exit 3; fi
         kcall write "$(jq -nc --arg i "$SID" '{type:"DeleteServer",params:{id:$i}}')" >/dev/null && echo "  OK    gammel Komodo-server $NAME ($ST) slettet før registrering"
       done <<< "$OLD" ) || exit $?
   fi
