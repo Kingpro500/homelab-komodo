@@ -51,6 +51,16 @@ Før arbeid i pc6-klonen: `git switch main && git pull --ff-only`.
 
 Les også [AGENTS.md](AGENTS.md) – den har åpne saker (bl.a. Homepage på pause).
 
+## 🆕 Ny CT: bruk en tom CT Roger har laget, ikke `ct-new` selv
+
+Agenter oppretter **ikke** nye CT-er på egen hånd. Rekkefølge:
+
+1. **Gjenbruk** en ledig, tom CT som allerede er registrert i Komodo (sjekk `ListServers` mot Proxmox og kartet; en CT med innhold, `test`-CT eller arkiv-CT er ikke «tom» før Roger har bekreftet det).
+2. Finnes ingen: **be Roger opprette en tom CT** (`ct-new <tjeneste> [ram] [disk] [kjerner]` på noden, som registrerer den i Komodo), og vent til serveren er `Ok` i Komodo.
+3. Ta så over CT-en: endre størrelse (`pct set`/`pct resize`), lag stack-mappen `<node>-ct<id>-<tjeneste>/` via PR, opprett stacken på den eksisterende Komodo-serveren (`CreateStack` → `PullStack` → `DeployStack`). Ikke kjør `ct-komodo` på nytt for å gi CT-en nytt navn; det lager en ekstra Komodo-server.
+4. Pin image på versjon/digest før deploy (`DeployStack` kjører `compose pull`; `:latest` kan gi uønsket oppgradering).
+5. Oppdater Homepage og nettverkskartet i samme runde.
+
 ## ⚠️ Gitea eller GitHub: lokale sider i Gitea, alt annet i GitHub
 
 **Gitea inneholder kun de lokale sidene: nettverkskartet og advarselsiden. Alt annet ligger i GitHub.**
