@@ -1,0 +1,22 @@
+# ComfyUI (adult-capable modell) på pc1. GPU delt med de andre pc1-CT-ene: kjør bare én generator om gangen.
+# Alt tungt (ComfyUI, venv, modeller, output) ligger på Tower via /models; ingenting committes.
+services:
+  comfyui:
+    image: python:3.12-slim
+    container_name: comfyui
+    restart: unless-stopped
+    ports:
+      - "8188:8188"
+    devices:
+      - /dev/nvidia0
+      - /dev/nvidiactl
+      - /dev/nvidia-uvm
+      - /dev/nvidia-uvm-tools
+    volumes:
+      - /models:/models
+      - /usr/lib/x86_64-linux-gnu/libcuda.so.1:/usr/lib/x86_64-linux-gnu/libcuda.so.1:ro
+      - /usr/lib/x86_64-linux-gnu/libnvidia-ml.so.1:/usr/lib/x86_64-linux-gnu/libnvidia-ml.so.1:ro
+    working_dir: /models
+    environment:
+      HF_HUB_ENABLE_HF_TRANSFER: "0"
+    entrypoint: ["/bin/sh", "/models/start.sh"]
