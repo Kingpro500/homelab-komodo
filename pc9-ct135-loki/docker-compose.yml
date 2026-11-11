@@ -22,5 +22,18 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
+  alloy:
+    image: grafana/alloy:v1.10.0
+    container_name: alloy
+    restart: unless-stopped
+    command: ["run", "--server.http.listen-addr=127.0.0.1:12345", "--storage.path=/var/lib/alloy/data", "/etc/alloy/config.alloy"]
+    hostname: pc9-ct135
+    volumes:
+      - ./alloy.alloy:/etc/alloy/config.alloy:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - alloy-data:/var/lib/alloy/data
+    depends_on:
+      - victorialogs
 volumes:
   vlogs-data:
+  alloy-data:
