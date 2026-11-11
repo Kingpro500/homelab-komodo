@@ -1,0 +1,84 @@
+{
+  "name": "Nettverkskart-vakt",
+  "nodes": [
+    {
+      "id": "1",
+      "name": "Daglig 08:30",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "days",
+              "triggerAtHour": 8,
+              "triggerAtMinute": 30
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "2",
+      "name": "Sammenlign Proxmox mot kart",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        260,
+        0
+      ],
+      "parameters": {
+        "jsCode": "// Kartvakt: sammenligner CT/VM i Proxmox med nettverkskartet og sjekker hull i versjonsnotatene.\n// Varsler én gang per funn (static data); nullstilles når funnet er rettet.\nconst PVE = 'REDACTED_PVE_URL';\nconst PH = {Authorization: 'PVEAPIToken=REDACTED_PVE_TOKEN_ID=REDACTED_PVE_TOKEN_SECRET'};\nconst MAP = 'http://10.0.0.124:3020';\nconst res = await this.helpers.httpRequest({url: PVE + '/api2/json/cluster/resources?type=vm', headers: PH, json: true, skipSslVerification: true});\nconst pve = res.data.map(v => ({id: String(v.vmid), name: v.name || ''}));\nconst map = await this.helpers.httpRequest({url: MAP + '/', json: false});\nconst notes = await this.helpers.httpRequest({url: MAP + '/endringer.html', json: false});\nconst onMap = new Set([...String(map).matchAll(/data-vmid=\"(\\d+)\"/g)].map(m => m[1]));\nconst findings = {};\nfor (const v of pve) if (!onMap.has(v.id)) findings['mangler-' + v.id] = 'CT/VM ' + v.id + ' (' + v.name + ') finnes i Proxmox, men mangler i nettverkskartet.';\nconst cur = parseInt((String(map).match(/versjon <b>2\\.(\\d+)/) || [])[1] || '0');\nconst have = new Set([...(String(map) + String(notes)).matchAll(/<b>[^<]*?v2\\.(\\d+)/g)].map(m => parseInt(m[1])));\nfor (let n = cur - 30; n <= cur; n++) if (n > 0 && !have.has(n)) findings['hull-' + n] = 'Kartversjon v2.' + n + ' mangler endringsnotat (hull i loggen).';\nconst st = $getWorkflowStaticData('global');\nconst sent = st.sent || {};\nconst nye = [];\nfor (const [k, t] of Object.entries(findings)) if (!sent[k]) { sent[k] = Date.now(); nye.push(t); }\nfor (const k of Object.keys(sent)) if (!findings[k]) delete sent[k];\nst.sent = sent;\nst.sist = {tid: new Date().toISOString(), kart: cur, proxmox: pve.length, funn: Object.keys(findings).length};\nif (!nye.length) return [];\nreturn [{json: {alerts: [{labels: {name: 'kartvakt', alertname: 'kartvakt'}, annotations: {summary: 'Nettverkskart: ' + nye.length + ' avvik', description: nye.join(' ')}}]}}];\n"
+      }
+    },
+    {
+      "id": "3",
+      "name": "Send via homelab-alerts",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        520,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://10.0.0.119:5678/webhook/homelab-alerts",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Daglig 08:30": {
+      "main": [
+        [
+          {
+            "node": "Sammenlign Proxmox mot kart",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sammenlign Proxmox mot kart": {
+      "main": [
+        [
+          {
+            "node": "Send via homelab-alerts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
