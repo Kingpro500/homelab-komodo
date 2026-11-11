@@ -40,6 +40,7 @@ services:
       - -notifier.url=http://10.0.0.126:9093
       - -external.url=http://10.0.0.211:8880
       - -httpListenAddr=:8880
+      - -configCheckInterval=1m
     ports:
       - "8880:8880"
     volumes:
