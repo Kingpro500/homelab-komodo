@@ -4,7 +4,7 @@ services:
   squid:
     image: ubuntu/squid:latest
     container_name: squid
-    restart: unless-stopped
+    restart: "no"  # pauset: starter ikke automatisk (frigjør Unraid-plass først)
     ports:
       - "3128:3128"
     environment:
