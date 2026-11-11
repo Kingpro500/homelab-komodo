@@ -1,0 +1,26 @@
+# Lancache (monolithic) på pc8/CT136 (10.0.0.212). Cacher HTTP-nedlastinger fra spill-CDN-er (Steam, Epic, Blizzard, ...).
+# Cache og logger ligger på Unraid (proxmox-iso/lancache), montert i CT-en som /data/lancache. Aldri på CT-rootfs.
+# DNS: Pi-hole peker cache-domenene til 10.0.0.212 (se README). lancache-dns brukes ikke.
+services:
+  lancache:
+    image: lancachenet/monolithic:latest
+    container_name: lancache
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      CACHE_DISK_SIZE: 100g
+      CACHE_INDEX_SIZE: 125m
+      CACHE_MAX_AGE: 3650d
+      MIN_FREE_DISK: 10g
+      UPSTREAM_DNS: 10.0.0.1
+      TZ: Europe/Oslo
+    volumes:
+      - /data/lancache/cache:/data/cache
+      - /data/lancache/logs:/data/logs
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
