@@ -2,7 +2,7 @@
 
 ## ⚠️ Nettverkskartet ligger IKKE i GitHub
 
-**Nettverkskartet (`docs/network-map/`) redigeres og publiseres kun via Gitea på CT120.**
+**Nettverkskartet (`docs/network-map/`) redigeres og publiseres kun via Gitea på CT120 (`pc6-ct120-monitoring`).**
 
 - Kilde: `CT120:/opt/moved-services/nettkart-repo/docs/network-map/nettverkskart.html` (origin = Gitea `http://10.0.0.176:3000/Kingpro500/homelab-komodo.git`, CT118).
 - Publisering: kjør `/usr/local/sbin/nettkart-publish` på CT120 etter commit. Skriptet pusher til Gitea, validerer versjon + endringsnotat og publiserer atomisk.
