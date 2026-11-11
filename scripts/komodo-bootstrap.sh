@@ -43,7 +43,7 @@ PD=/opt/komodo/periphery
 install -d -m 0755 /opt/komodo "$PD"
 run "compose-mal hentet" curl -fsSL "https://raw.githubusercontent.com/Kingpro500/homelab-komodo/${HOMELAB_REF:-main}/templates/lxc-komodo-v2/periphery-compose.yml" -o "$PD/compose.yml"
 sed -i "s#komodo-periphery:[0-9][0-9.]*#komodo-periphery:${KOMODO_VERSION#v}#" "$PD/compose.yml"
-printf '%s\n' "$CORE_PUBLIC_KEY" > "$PD/core.pub"
+printf '%s' "$CORE_PUBLIC_KEY" > "$PD/core.pub"  # uten linjeskift: ellers 'not base64' i Periphery
 umask 077
 printf 'PERIPHERY_CORE_ADDRESS=%s\nPERIPHERY_CONNECT_AS=%s\nPERIPHERY_ONBOARDING_KEY=%s\n' "$CORE_ADDRESS" "$CONNECT_AS" "$ONBOARDING_KEY" > "$PD/.env"
 umask 022
