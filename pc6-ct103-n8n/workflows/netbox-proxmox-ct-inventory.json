@@ -1,0 +1,166 @@
+{
+  "name": "NetBox – opprett nye Proxmox-CT-er",
+  "nodes": [
+    {
+      "id": "278cbf80-0d41-4d3a-8d39-92e61cb1aafb",
+      "name": "Hourly inventory",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        200,
+        300
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "66ca076f-d738-45ff-8398-4412970472b4",
+      "name": "Proxmox inventory",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        460,
+        300
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "https://10.0.0.102:8006/api2/json/cluster/resources?type=vm",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "options": {
+          "allowUnauthorizedCerts": true
+        }
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "rHPpMppTnNxVvCsk",
+          "name": "Proxmox inventory read (n8n)"
+        }
+      }
+    },
+    {
+      "id": "be422729-179a-4259-a408-ec48aedcd17e",
+      "name": "NetBox inventory",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        720,
+        300
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "http://10.0.0.124:8001/api/virtualization/virtual-machines/?limit=1000",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "options": {}
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "fF1LC5ShHlg21p0n",
+          "name": "NetBox VM create v2 (n8n)"
+        }
+      }
+    },
+    {
+      "id": "9f90b011-5229-4486-8871-743befafa71a",
+      "name": "VMID-safe candidates",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        980,
+        300
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const px = $('Proxmox inventory').first().json.data;\nconst nb = $input.first().json;\nif (!Array.isArray(px) || !Array.isArray(nb.results) || nb.next || nb.count !== nb.results.length) throw new Error('Incomplete inventory; refusing writes');\n// NetBox contains stale node prefixes: match VMID across names, not just full name.\nconst ids = new Set(); const names = new Set(nb.results.map(x => x.name));\nfor (const v of nb.results) { const m = v.name.match(/(?:^|-)ct(\\d+)(?:-|$)/i); if (m) ids.add(Number(m[1])); }\nconst known = new Set(); const out = [];\nfor (const p of px) {\n  if (p.type !== 'lxc' || p.vmid < 144 || !p.name || !['running','stopped'].includes(p.status)) continue;\n  const m = p.name.match(/(?:^|-)ct(\\d+)(?:-|$)/i);\n  if (!m || Number(m[1]) !== p.vmid || !/^(?:pc\\d+-)?ct\\d+-[a-z]/i.test(p.name) || /-tom$/i.test(p.name) || ids.has(p.vmid) || known.has(p.vmid) || names.has(p.name)) continue;\n  if (!Number.isFinite(p.maxmem) || !Number.isFinite(p.maxdisk) || !Number.isFinite(p.maxcpu)) continue;\n  known.add(p.vmid);\n  out.push({json:{vmid:p.vmid,payload:{name:p.name,cluster:1,site:1,status:p.status==='running'?'active':'offline',vcpus:p.maxcpu,memory:Math.round(p.maxmem/1048576),disk:Math.round(p.maxdisk/1073741824),comments:`Proxmox LXC ${p.vmid} on ${p.node}; IP not automatically registered.`}}});\n}\nreturn out;\n"
+      }
+    },
+    {
+      "id": "89ded7b2-a970-4c6c-975d-b342d298cf11",
+      "name": "Create NetBox VM",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1230,
+        300
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://10.0.0.124:8001/api/virtualization/virtual-machines/",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.payload) }}",
+        "options": {}
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "fF1LC5ShHlg21p0n",
+          "name": "NetBox VM create v2 (n8n)"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Proxmox inventory": {
+      "main": [
+        [
+          {
+            "node": "NetBox inventory",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "NetBox inventory": {
+      "main": [
+        [
+          {
+            "node": "VMID-safe candidates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "VMID-safe candidates": {
+      "main": [
+        [
+          {
+            "node": "Create NetBox VM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hourly inventory": {
+      "main": [
+        [
+          {
+            "node": "Proxmox inventory",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all"
+  },
+  "active": true,
+  "id": "VhwISm6PTWWraqo2"
+}
