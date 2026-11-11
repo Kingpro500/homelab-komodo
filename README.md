@@ -13,3 +13,13 @@ GitOps-kilde for Komodo-stacker og driftsdokumentasjon. **Kun de lokale sidene (
 
 Følg runbookens repo-cache-preflight før PullStack og deploy. Secrets lagres i
 Komodo Environment, aldri i Git.
+
+## Periphery-standard for CT-er
+
+Nye CT-er får Komodo Periphery som Docker-container i `/opt/komodo/periphery/`.
+Systemd-Periphery i eldre CT-er er ikke feil; de migreres kontrollert senere.
+Hver tilgjengelige CT skal ha én Komodo-server med navnet
+`<node>-ct<id>-<navn>` og status `Ok`, uten duplikater. Sjekk gjestens
+faktiske agent og Proxmox mot Komodo før ny registrering. CT110 (Core) har
+Periphery i Core sin Compose. Se [AGENTS.md](AGENTS.md) for kontrollene og
+nettverkskartet for verifisert tilstand per CT.

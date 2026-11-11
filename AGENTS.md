@@ -23,7 +23,7 @@ pct exec <ctid> -- systemctl is-active periphery              # gammel (systemd)
 # og i Komodo: serveren <node>-ct<id>-<navn> har state Ok
 ```
 
-Registrer aldri en server på nytt før dette er sjekket – det lager duplikater. Unntak: CT110 (Core) har Periphery i Core sin compose.
+**Felles regel:** Nye CT-er bruker Docker-Periphery i `/opt/komodo/periphery/`. Eksisterende systemd-Periphery i eldre CT-er er ikke en feil; migrering til container-standarden gjøres senere, kontrollert og uten å avbryte tjenester. Komodo skal ha **én** server per CT med navn `<node>-ct<id>-<navn>` og status `Ok` når CT-en er tilgjengelig. Sjekk Proxmox, gjestens Periphery og Komodo-registeret mot hverandre før du registrerer noe på nytt; et gammelt registertreff eller `Ok` alene beviser ikke at agenten er riktig eller at CT-en kjører. Duplikater skal undersøkes og ryddes kontrollert, ikke opprettes. En stoppet eller utilgjengelig CT merkes «ikke verifisert», ikke som bekreftet feil. Unntak: CT110 (Core) har Periphery i Core sin Compose.
 
 ## 🚨 Start HVER økt med disse to sjekkene
 
