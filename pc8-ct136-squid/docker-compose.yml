@@ -1,0 +1,19 @@
+# Squid forward-proxy på pc8/CT136 (10.0.0.212:3128). Cache på Unraid (proxmox-iso/squid) via /data/squid.
+# Kun for klienter som eksplisitt bruker proxyen; ingen SSL-bump.
+services:
+  squid:
+    image: ubuntu/squid:latest
+    container_name: squid
+    restart: unless-stopped
+    ports:
+      - "3128:3128"
+    environment:
+      TZ: Europe/Oslo
+    volumes:
+      - ./squid.conf:/etc/squid/squid.conf:ro
+      - /data/squid:/var/spool/squid
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
