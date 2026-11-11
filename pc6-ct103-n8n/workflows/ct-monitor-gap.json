@@ -1,0 +1,151 @@
+{
+  "name": "CT-opprettelse: kart og SmokePing gapvarsel",
+  "nodes": [
+    {
+      "id": "550d9af7-eb2c-42d4-bf11-9649f2979ef8",
+      "name": "Hver time",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        80
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "3282c5d5-f18b-47e5-a5d3-250a58a871f5",
+      "name": "Kjør nå",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        280
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ct-monitor-gap",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "webhookId": "62756e7c-f813-4197-8bb3-d35664bd433b"
+    },
+    {
+      "id": "0b138ae0-80c3-4cff-a26d-4207942b1c46",
+      "name": "Proxmox-inventar",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        220,
+        180
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "https://10.0.0.102:8006/api2/json/cluster/resources?type=vm",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "options": {
+          "allowUnauthorizedCerts": true
+        }
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "REDACTED_CREDENTIAL_ID",
+          "name": "REDACTED_PROXMOX_READ_CREDENTIAL"
+        }
+      }
+    },
+    {
+      "id": "12c22d46-d430-483c-b657-a8232d76b6b8",
+      "name": "Finn nye CT-er som mangler overvåking",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        470,
+        180
+      ],
+      "parameters": {
+        "jsCode": "// Varsle når NYE CT-er mangler kart eller SmokePing-target. Første kjøring er bare baseline.\nconst input = $input.first().json;\nconst rows = input.data;\nif (!Array.isArray(rows) || rows.length < 10) throw new Error('Proxmox-inventar ufullstendig; ingen oppdatering');\nconst cts = rows.filter(r => r.type === 'lxc' && Number.isInteger(Number(r.vmid)) && r.node && r.name)\n  .map(r => ({id: Number(r.vmid), node: r.node, name: r.name, status: r.status}));\nconst mapHtml = await this.helpers.httpRequest({url:'http://10.0.0.124:3020/',json:false,timeout:15000});\nconst targets = await this.helpers.httpRequest({url:'https://raw.githubusercontent.com/Kingpro500/homelab-komodo/main/pc9-ct113-ntopng/smokeping/Targets',json:false,timeout:15000});\nconst map = String(mapHtml), cfg = String(targets);\nif (!map.includes('data-vmid=') || !cfg.includes('+ Services')) throw new Error('Ufullstendig kart/Targets: ingen baseline eller varsel');\nconst mapped = new Set([...map.matchAll(/data-vmid=\"(\\d+)\"/g)].map(m=>Number(m[1])));\nconst monitored = new Set([...cfg.matchAll(/^\\+\\+\\s+Ct(\\d+)\\s*$/gm)].map(m=>Number(m[1])));\nconst current = new Set(cts.map(c=>c.id));\nconst state = $getWorkflowStaticData('global');\nif (!state.baseline) {\n state.baseline = [...current]; state.first_seen = new Date().toISOString();\n state.last_scan = {at:state.first_seen,count:cts.length,mode:'baseline'};\n return [];\n}\nconst known = new Set(state.baseline);\nconst sent = state.sent || {};\nconst alerts = [];\nfor (const c of cts) {\n if (known.has(c.id)) continue;\n // Et ID som gjenbrukes etter at det ble slettet, må oppdages på nytt.\n const key = `${c.node}:${c.id}:${c.name}`;\n const gaps = [];\n if (!mapped.has(c.id)) gaps.push('nettverkskart');\n if (!monitored.has(c.id)) gaps.push('SmokePing Targets');\n if (gaps.length && !sent[key]) {\n   alerts.push(`${c.node} CT${c.id} (${c.name}) mangler ${gaps.join(' og ')}. Sjekk gjestens IP i Proxmox, lag target i GitHub og deploy via Komodo; ingen tom appstack.`);\n   sent[key] = new Date().toISOString();\n }\n if (!gaps.length) { known.add(c.id); delete sent[key]; }\n}\n// CT-er som er slettet skal ikke skjule en senere gjenbruk av samme VMID.\nstate.baseline = [...known].filter(id=>current.has(id));\nstate.sent = sent;\nstate.last_scan = {at:new Date().toISOString(),count:cts.length,detected:alerts.length};\nif (!alerts.length) return [];\nreturn [{json:{alerts:[{labels:{name:'ct-provisioning',alertname:'ct-monitor-gap'},annotations:{summary:`Nye CT-er: ${alerts.length} overvåkingsavvik`,description:alerts.join(' ')}}]}}];",
+        "mode": "runOnceForAllItems"
+      }
+    },
+    {
+      "id": "5327a349-9c62-48c7-aa75-dce155aa3446",
+      "name": "Varsle via homelab-alerts",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        760,
+        180
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://10.0.0.119:5678/webhook/homelab-alerts",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Hver time": {
+      "main": [
+        [
+          {
+            "node": "Proxmox-inventar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Kjør nå": {
+      "main": [
+        [
+          {
+            "node": "Proxmox-inventar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Proxmox-inventar": {
+      "main": [
+        [
+          {
+            "node": "Finn nye CT-er som mangler overvåking",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Finn nye CT-er som mangler overvåking": {
+      "main": [
+        [
+          {
+            "node": "Varsle via homelab-alerts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "executionOrder": "v1"
+  },
+  "notes": "Export without credentials. Rebind Proxmox inventory read-only httpHeaderAuth after import; live workflow id tcGXngBIsipFnbv0."
+}
