@@ -1,7 +1,7 @@
 # Docker LXC + Komodo V2 – standard (fra 10. nov 2026)
 
 Alle nye Docker-arbeidslaster får sin egen unprivileged Debian 13-LXC, registrert i
-Komodo med **systemd-Periphery**. Applikasjonen deployes som en Komodo-stack fra dette
+Komodo med **Periphery som Docker-container** (fra 11. nov; systemd-varianten er avviklet for nye CT-er). Applikasjonen deployes som en Komodo-stack fra dette
 repoet. Første CT etter denne malen: `pc8-ct126-netalertx`.
 
 ## Navn
@@ -43,9 +43,9 @@ ct-komodo <ctid> [tjeneste]       # tjeneste = CT-ens vertsnavn hvis utelatt
 
 1. Proxmox: DNS, vertsnavn, `nesting/keyctl`, `onboot=1` (restart bare ved behov).
 2. Kjører `scripts/ct-fix.sh` i CT-en (nettverk, DNS, apt-reparasjon, oppdatering).
-3. Kjører `scripts/komodo-bootstrap.sh`: Docker CE + Periphery v2.3.3 (systemd).
+3. Kjører `scripts/komodo-bootstrap.sh`: Docker CE + Periphery som container (`/opt/komodo/periphery`, compose fra denne mappa).
    Hoppes over hvis CT-en allerede kjører Periphery med samme navn. Stopper hvis det
-   finnes en Periphery-*container* – to agenter på samme CT gir reconnect-løkke i Core.
+   finnes en systemd-Periphery – to agenter på samme CT gir reconnect-løkke i Core.
 4. Finnes `<navn>/docker-compose.yml` i repoet, opprettes stacken i Komodo og deployes.
    Ellers: lag mappen, og kjør `ct-komodo <ctid>` igjen.
 5. Skriver ut ferdige linjer for Smokeping og nettverkskart.
@@ -72,7 +72,9 @@ alltid siste skript fra `main`.
 - Nødretting av en CT som mangler oppdateringer eller har nettverksfeil: se
   «CT-fiks» i `docs/ACCESS-RUNBOOK.md`.
 
-## Gammel metode – migrert 10. nov 2026
+## Gammel metode (systemd) – 10. nov 2026
+
+> 11. nov: standarden er snudd tilbake til Periphery-container for nye CT-er. CT-ene under kjører fortsatt systemd-Periphery og er ikke flyttet tilbake ennå. `ct-periphery-update` oppdaterer bare systemd-varianten.
 
 CT-er med Periphery som Docker-container ble flyttet til systemd-Periphery med
 

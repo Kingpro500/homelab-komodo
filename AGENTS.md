@@ -15,13 +15,11 @@ Agenter oppretter **ikke** nye CT-er på egen hånd. Rekkefølge:
 
 ## 🔌 Har en CT Komodo Periphery? Sjekk riktig sted
 
-Standarden er **systemd-Periphery** (laget av `ct-new`/`ct-komodo`/`komodo-bootstrap`). Da ligger alt i `/etc/komodo` (`root_directory = "/etc/komodo"`), og **`/opt/komodo` finnes ikke**. Fravær av `/opt/komodo` betyr altså IKKE at Periphery mangler (den mappa hørte til det gamle container-oppsettet).
-
-Riktig sjekk (kun lesing):
+Standarden for **nye CT-er** er **Periphery som Docker-container** (`ct-new` → `ct-komodo` → `komodo-bootstrap`, mal: `templates/lxc-komodo-v2/periphery-compose.yml`). Filer ligger i `/opt/komodo/periphery/`, Komodo-root er `/opt/komodo`. Eldre CT-er (migrert til systemd 10. nov) har systemd-Periphery med alt i `/etc/komodo`; de er IKKE feil, men skal over til container-standarden (se README). Sjekk begge:
 
 ```sh
-pct exec <ctid> -- systemctl is-active periphery          # active
-pct exec <ctid> -- /usr/local/bin/periphery --version     # samme versjon som Core
+pct exec <ctid> -- docker ps --filter name=komodo-periphery   # ny standard
+pct exec <ctid> -- systemctl is-active periphery              # gammel (systemd)
 # og i Komodo: serveren <node>-ct<id>-<navn> har state Ok
 ```
 
