@@ -6,7 +6,10 @@ from transformers import BitsAndBytesConfig as TBnb, Qwen3ForCausalLM
 M="/models/FLUX.2-klein-4B"; OUT="/models/output"; TH=OUT+"/thumbs"
 os.makedirs(TH,exist_ok=True)
 state={"mode":None,"pipe":None}
+_ll=threading.Lock()
 def load(mode):
+    with _ll: return _load(mode)
+def _load(mode):
     if state["mode"]==mode: return state["pipe"]
     state["pipe"]=None; state["mode"]=None; gc.collect(); torch.cuda.empty_cache()
     if mode=="fast":
@@ -37,6 +40,10 @@ def worker():
         except Exception as e:
             j.update(status="error",error=str(e)[:300]); gc.collect(); torch.cuda.empty_cache()
         cur["id"]=None
+def warm():
+    try: load("fast")
+    except Exception as e: print("warm-up feilet:",e,flush=True)
+threading.Thread(target=warm,daemon=True).start()
 threading.Thread(target=worker,daemon=True).start()
 app=FastAPI()
 def snap(): return sorted(({"id":i,**{k:v for k,v in j.items() if k!="prompt"},"prompt":j["prompt"][:80]} for i,j in jobs.items() if j["status"] in("queued","running","error")),key=lambda x:x["id"])

@@ -18,3 +18,4 @@ Ikke en Docker-stack: systemd-tjeneste `flux` i CT144 (Debian 13), venv `/opt/fl
 - Jobbkø (`/submit`, `/status`): én jobb om gangen, køen vises på siden. Køen ligger i minnet og tømmes ved restart av `flux`.
 - Galleri på forsiden: Oppgrader (samme prompt/seed i full modell), Bruk prompt, Slett (`DELETE /img/<navn>`, fjerner PNG, JSON og miniatyr).
 - Ingen innlogging: alle på LAN kan slette.
+- Kjapp-modellen forhåndslastes i bakgrunnen ved oppstart (ca. 2–4 min før første bilde er raskt).
