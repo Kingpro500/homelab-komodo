@@ -2,7 +2,7 @@ name: pc9-ct203-emby-standby
 
 services:
   emby:
-    image: emby/embyserver:4.10.0.40
+    image: emby/embyserver:4.10.2.0
     container_name: emby-standby
     network_mode: host
     restart: unless-stopped
