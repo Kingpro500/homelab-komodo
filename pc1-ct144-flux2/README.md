@@ -11,3 +11,10 @@ Ikke en Docker-stack: systemd-tjeneste `flux` i CT144 (Debian 13), venv `/opt/fl
 - Backup av gammel config: `/root/144.conf.bak-2026-11-11` på pc1.
 - FLUX.2 Dev (32B) er ikke installert: krever ~64 GB bf16 + gated HF-lisens og > 16 GB RAM.
 - Bruker GPU: stopp `flux` (`systemctl stop flux`) før CT350 (ollama) brukes.
+
+## Lagring, galleri, kø (v2)
+- Standard 1920x1080 (høyde rundes til 1072, må være delbar på 16). Maks 2048.
+- Alle bilder lagres som PNG + JSON (prompt, seed, steg, modus) i `/models/output` = Tower-isos/flux-models/output, miniatyrer i `thumbs/`.
+- Jobbkø (`/submit`, `/status`): én jobb om gangen, køen vises på siden. Køen ligger i minnet og tømmes ved restart av `flux`.
+- Galleri på forsiden: Oppgrader (samme prompt/seed i full modell), Bruk prompt, Slett (`DELETE /img/<navn>`, fjerner PNG, JSON og miniatyr).
+- Ingen innlogging: alle på LAN kan slette.
