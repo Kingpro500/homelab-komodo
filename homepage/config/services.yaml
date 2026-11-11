@@ -126,10 +126,8 @@
         description: 10.0.0.117:8001 · CT110 · pc9 · IPAM/DCIM
     - Grafana:
         icon: di:grafana
-        href: http://10.0.0.128:3000/
-        description: 10.0.0.128:3000 · CT109 · pc6 · visualisering
-        server: ct109
-        container: grafana
+        href: http://10.0.0.166:3000/
+        description: 10.0.0.166:3000 · CT392 · pc6 · visualisering
     - VictoriaLogs:
         icon: di:victoriametrics
         href: http://10.0.0.211:9428/select/vmui
@@ -182,12 +180,6 @@
         description: 10.0.0.128:3015 · CT109 · start/stop/restart alle containere
         server: ct109
         container: dockctl
-    - Grafana CT109:
-        icon: di:grafana
-        href: http://10.0.0.128:3000/
-        description: 10.0.0.128:3000 · CT109 · pc6
-        server: ct109
-        container: grafana
     - Speedtest Tracker:
         icon: di:speedtest-tracker
         href: http://10.0.0.128:8765/
