@@ -1,0 +1,22 @@
+<!doctype html><meta charset=utf-8><title>__TITLE__</title>
+<body style="font-family:sans-serif;max-width:1100px;margin:1.5em auto;background:#111;color:#eee">
+<h2>__TITLE__</h2>
+<form id=f><textarea name=prompt rows=3 style="width:100%" placeholder="Beskriv bildet..."></textarea><br>
+Bredde <input name=w value=1920 size=5> Høyde <input name=h value=1080 size=5> Steg <input name=steps value=0 size=3> (0 = auto) Seed <input name=seed value=42 size=8> (-1 = tilfeldig)<br>
+<button value=fast>Kjapp (turbo, utkast)</button> <button value=hq>Bedre (full modell, treg)</button></form>
+<div id=q style="margin:.8em 0;color:#fc6"></div>
+<div id=g style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px"></div>
+<script>
+let b='fast';f.querySelectorAll('button').forEach(x=>x.onclick=()=>b=x.value);
+async function send(d){await fetch('/submit',{method:'POST',body:d});poll()}
+f.onsubmit=e=>{e.preventDefault();const d=new FormData(f);d.set('mode',b);send(d)};
+function up(n){const m=window.G.find(x=>x.name==n);const d=new FormData();for(const k of['prompt','w','h','steps','seed'])d.set(k,m[k]);d.set('mode','hq');send(d)}
+function use(n){const m=window.G.find(x=>x.name==n);for(const k of['prompt','w','h','steps','seed'])f[k].value=m[k]}
+async function del(n){if(!confirm("Slette bildet for godt?"))return;await fetch("/img/"+n,{method:"DELETE"});last="";poll()}
+let last='';
+async function poll(){const s=await (await fetch('/status')).json();
+ q.innerHTML=s.jobs.length?s.jobs.map(j=>`#${j.id} ${j.status=='running'?'<b>genererer</b>':j.status=='error'?'FEIL: '+j.error:'i kø'} · ${j.mode=='fast'?'kjapp':'full'} ${j.w}x${j.h} · ${j.prompt}`).join('<br>')+`<br><small>Modell lastet: ${s.loaded||'ingen'}. Første bilde etter oppstart/modusbytte er tregt.</small>`:'';
+ const g=await (await fetch('/gallery')).json();const key=JSON.stringify(g.map(x=>x.name));
+ if(key!=last){last=key;window.G=g;document.getElementById('g').innerHTML=g.map(m=>`<div style="background:#1c1c1c;padding:6px;border-radius:6px"><a href="/img/${m.name}" target=_blank><img src="/img/${m.name}?thumb=1" style="width:100%"></a><div style="font-size:.8em;color:#aaa">${m.mode=='fast'?'kjapp':'full'} ${m.w}x${m.h} · seed ${m.seed} · ${m.secs}s<br>${m.prompt.replace(/</g,'&lt;').slice(0,100)}</div><button onclick="up('${m.name}')">Oppgrader</button> <button onclick="use('${m.name}')">Bruk prompt</button> <button onclick="del('${m.name}')">Slett</button></div>`).join('')}}
+poll();setInterval(poll,3000);
+</script>

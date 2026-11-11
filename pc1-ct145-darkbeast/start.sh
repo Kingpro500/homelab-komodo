@@ -12,4 +12,8 @@ M=ComfyUI/models
 dl $H/nafishasan60/Darkbeast_Krea2v3/resolve/main/darkBeast330_int8convrot_heur.safetensors $M/diffusion_models/darkBeast330_int8convrot_heur.safetensors
 dl $H/Comfy-Org/Krea-2/resolve/main/text_encoders/qwen3vl_4b_fp8_scaled.safetensors $M/text_encoders/qwen3vl_4b_fp8_scaled.safetensors
 dl $H/Comfy-Org/Krea-2/resolve/main/vae/qwen_image_vae.safetensors $M/vae/qwen_image_vae.safetensors
+[ -f venv/.viewer ] || { venv/bin/pip install -q fastapi uvicorn pillow python-multipart && touch venv/.viewer; }
+dl https://huggingface.co/Comfy-Org/Krea-2/resolve/main/loras/krea2_turbo_lora_rank_64_bf16.safetensors $M/loras/krea2_turbo_lora_rank_64_bf16.safetensors
+mkdir -p /models/gallery
+(cd /models/viewer && exec /models/venv/bin/uvicorn app:app --host 0.0.0.0 --port 7860) &
 exec venv/bin/python ComfyUI/main.py --listen 0.0.0.0 --port 8188 --lowvram --output-directory /models/output

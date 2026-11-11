@@ -12,4 +12,8 @@ M=ComfyUI/models
 dl $H/moodyKrea2Mix_v3-Global-FP8.safetensors $M/diffusion_models/moodyKrea2Mix_v3-Global-FP8.safetensors
 dl $H/qwen3VL4BAbliteratedComfyui_FP8.safetensors $M/text_encoders/qwen3VL4BAbliteratedComfyui_FP8.safetensors
 dl $H/qwenImageVAE_BF16.safetensors $M/vae/qwenImageVAE_BF16.safetensors
+[ -f venv/.viewer ] || { venv/bin/pip install -q fastapi uvicorn pillow python-multipart && touch venv/.viewer; }
+dl https://huggingface.co/Comfy-Org/Krea-2/resolve/main/loras/krea2_turbo_lora_rank_64_bf16.safetensors $M/loras/krea2_turbo_lora_rank_64_bf16.safetensors
+mkdir -p /models/gallery
+(cd /models/viewer && exec /models/venv/bin/uvicorn app:app --host 0.0.0.0 --port 7860) &
 exec venv/bin/python ComfyUI/main.py --listen 0.0.0.0 --port 8188 --lowvram --output-directory /models/output

@@ -97,12 +97,12 @@
         description: 10.0.0.219:7860 · CT144 · pc1 · FLUX.2 klein (Kjapp/Oppgrader)
     - Dark Beast Krea 2:
         icon: mdi-image-filter-hdr
-        href: http://10.0.0.220:8188/
-        description: 10.0.0.220:8188 · CT145 · pc1 · ComfyUI + Dark Beast Krea 2 v3
+        href: http://10.0.0.220:7860/
+        description: 10.0.0.220:7860 · CT145 · pc1 · ComfyUI + Dark Beast Krea 2 v3
     - ComfyUI voksen:
         icon: mdi-image-multiple
-        href: http://10.0.0.221:8188/
-        description: 10.0.0.221:8188 · CT146 · pc1 · ComfyUI + Krea2 NSFW-mix
+        href: http://10.0.0.221:7860/
+        description: 10.0.0.221:7860 · CT146 · pc1 · ComfyUI + Krea2 NSFW-mix
     - Hermes AI Matrix:
         icon: mdi:message-processing
         href: http://10.0.0.120/
