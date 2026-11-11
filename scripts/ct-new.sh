@@ -2,12 +2,13 @@
 # Run on a Proxmox node. Bare navnet er nok – resten har standardverdier og kan endres i Proxmox etterpå:
 #   ct-new uptime                  -> neste ledige ID, 1 kjerne, 1024 MB, 8 GB, første ledige IP i 10.0.0.204-254
 #   ct-new immich 4096 32 2        -> navn + ram_mb disk_gb kjerner
-#   ct-new 130 immich [ram] [disk] [kjerner] [ip]   (gammel form med fast ID fungerer fortsatt)
+#   ct-new 136                     -> CT 136 med navnet ct136 (navn kan endres etterpå)
+#   ct-new 130 immich [ram] [disk] [kjerner] [ip]   (fast ID + navn)
 # Lager en standard Debian 13-LXC og kjører ct-komodo (Komodo + stack hvis den finnes i Git).
 set -euo pipefail
 [ $# -ge 1 ] || { echo "Bruk: ct-new <tjeneste> [ram_mb] [disk_gb] [kjerner]   eller   ct-new <ctid> <tjeneste> ..."; exit 1; }
 if [[ "$1" =~ ^[0-9]+$ ]]; then ID="$1"; AUTOID=0; shift; else ID=$(pvesh get /cluster/nextid); AUTOID=1; fi
-SVC=$(echo "${1:?tjeneste mangler}" | tr '[:upper:]' '[:lower:]' | tr -c 'a-z0-9-\n' '-')
+SVC=$(echo "${1:-ct$ID}" | tr '[:upper:]' '[:lower:]' | tr -c 'a-z0-9-\n' '-')
 RAM="${2:-1024}"; DISK="${3:-8}"; CORES="${4:-1}"; IP="${5:-}"
 NODE=$(hostname -s | tr '[:upper:]' '[:lower:]')
 ok(){ printf '  OK    %s\n' "$1"; }; die(){ printf '  FEIL  %s\n' "$1"; exit 1; }
