@@ -1,0 +1,21 @@
+# pc6-ct250-alloy: sender Docker-logger fra Tunarr primary til VictoriaLogs (10.0.0.211:9428).
+# Egen stack, slik at Tunarr primary-stacken aldri berøres. Alloy leser kun Docker-loggene (docker.sock read-only).
+services:
+  alloy:
+    image: grafana/alloy:v1.10.0
+    container_name: alloy
+    restart: unless-stopped
+    hostname: pc6-ct250
+    command: ["run", "--server.http.listen-addr=127.0.0.1:12345", "--storage.path=/var/lib/alloy/data", "/etc/alloy/config.alloy"]
+    mem_limit: 256m
+    volumes:
+      - ./alloy.alloy:/etc/alloy/config.alloy:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - alloy-data:/var/lib/alloy/data
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "2"
+volumes:
+  alloy-data:
