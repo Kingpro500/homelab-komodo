@@ -79,18 +79,18 @@ if curl -fsI "$REPO/$NAME/docker-compose.yml" >/dev/null 2>&1; then
     echo "  MERK  $API mangler – stacken må lages i Komodo for hånd"
   fi
 else
-  echo "  MERK  ingen mappe $NAME/ i GitHub ennå – lag docker-compose.yml der, og kjør ct-komodo $ID igjen"
+  echo "  INFO  ingen applikasjonsstack for $NAME i GitHub ennå – normal tilstand for en ny, tom CT."
+  echo "        Opprett Compose/README når tjenesten er bestemt, og knytt stacken til eksisterende Komodo-server; ikke kjør ct-komodo på nytt bare for dette."
 fi
 
-# 4) Overvåking – ferdige linjer å legge inn
+# 4) Overvåking og inventar: registrering er egne leveranser, ikke valgfri pynt.
+# n8n varsler om nye CT-er som mangler kart/SmokePing; n8n skriver ikke GitHub eller Gitea.
 cat <<SNIP
 
-== Til overvåking (valgfritt, kan legges inn senere)
-Smokeping (pc9-ct113-ntopng/smokeping/Targets, under + Services):
-++ ${SVC^}
-menu = ${SVC}
-title = ${NAME} ($IPADDR)
-host = $IPADDR
-
-Nettverkskart / INVENTORY: ${NAME} · ${IPADDR} · $(pct config "$ID" | awk '/^cores:/{c=$2}/^memory:/{m=$2}END{print c" kjerne(r), "m" MB"}')
+== Registrering (påkrevd, kontroller at den er publisert)
+SmokePing: pc9-ct113-ntopng/smokeping/Targets i GitHub (mål ${IPADDR}; deploy via Komodo).
+Nettverkskart: publiseres separat i Gitea på CT120 med nettkart-publish.
+NetBox: timesynk i n8n oppretter inventarpost; kontroller resultatet i NetBox.
+Gapvarsel: n8n-flyten «CT-opprettelse: kart og SmokePing gapvarsel» kontrollerer nye CT-er hver time.
+CT: ${NAME} · ${IPADDR} · $(pct config "$ID" | awk '/^cores:/{c=$2}/^memory:/{m=$2}END{print c" kjerne(r), "m" MB"}')
 SNIP
