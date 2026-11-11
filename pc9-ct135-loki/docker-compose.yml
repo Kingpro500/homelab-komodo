@@ -8,8 +8,13 @@ services:
       - -storageDataPath=/vlogs
       - -retentionPeriod=30d
       - -httpListenAddr=:9428
+      - -syslog.listenAddr.udp=:514
+      - -syslog.listenAddr.tcp=:514
+      - -syslog.timezone=Europe/Oslo
     ports:
       - "9428:9428"
+      - "514:514/udp"
+      - "514:514/tcp"
     volumes:
       - vlogs-data:/vlogs
     healthcheck:
