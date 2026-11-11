@@ -16,8 +16,8 @@ services:
       MIN_FREE_DISK: 10g
       UPSTREAM_DNS: 10.0.0.1
       TZ: Europe/Oslo
-      # Unraid-share monteres uten chown-rett fra uprivilegert CT; nginx kjører derfor som root.
-      WEBUSER: root
+      # Unraid-sharet eies av nobody (65534) i CT-en og tillater ikke chown; nginx kjører derfor som samme bruker.
+      WEBUSER: nobody
     volumes:
       - /data/lancache/cache:/data/cache
       - /data/lancache/logs:/data/logs
