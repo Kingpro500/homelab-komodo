@@ -30,6 +30,7 @@ opp i advarselen**, ikke med nytt arbeid oppå.
 | Advarsel | Gren med commits som ikke er i `main`, uten PR, eldre enn 3 døgn |
 | Advarsel | Lokale kloner (Hermes `~/homelab-komodo`) som er skitne, står på feil gren eller er bak/foran `main` |
 | Advarsel | Komodo `remote_errors` på en stack |
+| Advarsel / **Kritisk** | Node-lagring (`local-lvm` thin-pool, `local` m.fl.; ikke NFS) via Proxmox-API: advarsel ≥ 80 %, kritisk ≥ 90 % (kritisk gir push). Thin-pool er overtegnet, så full pool stopper alle gjester på noden. Terskler: `STORAGE_WARN`/`STORAGE_CRIT` i skriptet |
 | Kjent (grå) | Bevisst pausede stacker (`KNOWN` i skriptet) og ferdige/forlatte grener som kan ryddes |
 
 ## Rutine når advarselen er rød eller gul
