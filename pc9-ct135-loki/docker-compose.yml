@@ -17,11 +17,6 @@ services:
       - "514:514/tcp"
     volumes:
       - vlogs-data:/vlogs
-    healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:9428/health"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
   alloy:
     image: grafana/alloy:v1.10.0
     container_name: alloy
