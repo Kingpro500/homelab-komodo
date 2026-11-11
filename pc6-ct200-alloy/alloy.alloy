@@ -1,0 +1,31 @@
+// Docker-logger -> VictoriaLogs (Loki-kompatibel push). Emby primary (pc6 CT200).
+discovery.docker "c" {
+  host = "unix:///var/run/docker.sock"
+}
+
+discovery.relabel "c" {
+  targets = discovery.docker.c.targets
+
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex         = "/(.*)"
+    target_label  = "container"
+  }
+
+  rule {
+    target_label = "host"
+    replacement  = constants.hostname
+  }
+}
+
+loki.source.docker "c" {
+  host       = "unix:///var/run/docker.sock"
+  targets    = discovery.relabel.c.output
+  forward_to = [loki.write.vl.receiver]
+}
+
+loki.write "vl" {
+  endpoint {
+    url = "http://10.0.0.211:9428/insert/loki/api/v1/push"
+  }
+}
