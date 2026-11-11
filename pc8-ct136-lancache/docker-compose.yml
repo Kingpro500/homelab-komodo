@@ -5,7 +5,7 @@ services:
   lancache:
     image: lancachenet/monolithic:latest
     container_name: lancache
-    restart: unless-stopped
+    restart: "no"  # pauset: starter ikke automatisk (frigjør Unraid-plass først)
     ports:
       - "80:80"
       - "443:443"
