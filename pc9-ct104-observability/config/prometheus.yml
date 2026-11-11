@@ -17,6 +17,7 @@ scrape_configs:
     static_configs:
       - targets:
           - http://10.0.0.150:8096/web/
+          - http://10.0.0.203:8096/System/Info/Public
           - http://10.0.0.123:8005/web/
           - http://10.0.0.123:8005/api/channels.m3u
           - http://10.0.0.123:8005/api/xmltv.xml
