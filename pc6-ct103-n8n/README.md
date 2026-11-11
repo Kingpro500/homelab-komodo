@@ -53,7 +53,7 @@ running service.
 | PC1 GPU-vakt | Prometheus/Alertmanager webhook | [docs/pc1-gpu-vakt.md](docs/pc1-gpu-vakt.md) | [workflows/pc1-gpu-vakt.json](workflows/pc1-gpu-vakt.json) |
 | PC1 AI-heng-vakt | hvert minutt; tre mislykkede Ollama-sjekker | [docs/pc1-ai-heng-vakt.md](docs/pc1-ai-heng-vakt.md) | [workflows/pc1-ai-heng-vakt.json](workflows/pc1-ai-heng-vakt.json) |
 | PC1 full heng – varsel | hvert minutt; fem uavhengige feilrunder | [docs/pc1-full-heng-varsel.md](docs/pc1-full-heng-varsel.md) | [workflows/pc1-full-heng-varsel.json](workflows/pc1-full-heng-varsel.json) |
-| Komodo-versjonsvakt - containere | daglig 05:15 + webhook | [docs/komodo-versjonsvakt-containere.md](docs/komodo-versjonsvakt-containere.md) | [workflows/komodo-versjonsvakt-containere.json](workflows/komodo-versjonsvakt-containere.json) |
+| Komodo-versjonsvakt | daglig 05:15 + webhook | [docs/komodo-versjonsvakt.md](docs/komodo-versjonsvakt.md) | [workflows/komodo-versjonsvakt.json](workflows/komodo-versjonsvakt.json) |
 
 Driftsprinsipper for hvordan n8n-automasjoner bygges, sikres og gjenopprettes
 er samlet i [docs/operations/n8n-workflows.md](../docs/operations/n8n-workflows.md).

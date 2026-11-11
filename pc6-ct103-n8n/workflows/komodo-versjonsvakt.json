@@ -1,5 +1,5 @@
 {
- "name": "Komodo-versjonsvakt - containere",
+ "name": "Komodo-versjonsvakt",
  "nodes": [
   {
    "parameters": {
@@ -119,6 +119,38 @@
     -200
    ],
    "webhookId": "versjoner-kjor"
+  },
+  {
+   "parameters": {
+    "rule": {
+     "interval": [
+      {
+       "field": "days",
+       "triggerAtHour": 9,
+       "triggerAtMinute": 20
+      }
+     ]
+    }
+   },
+   "name": "Daglig 09:20",
+   "type": "n8n-nodes-base.scheduleTrigger",
+   "typeVersion": 1.2,
+   "position": [
+    0,
+    400
+   ]
+  },
+  {
+   "parameters": {
+    "jsCode": "\n// Sammenligner siste Komodo-release på GitHub med versjonen Core kjører.\n// Varsler én gang per ny versjon (lagres i workflow static data).\nconst rel = await this.helpers.httpRequest({ url: 'https://api.github.com/repos/moghtech/komodo/releases/latest', headers: { 'User-Agent': 'homelab-n8n', 'Accept': 'application/vnd.github+json' }, json: true });\nconst latest = String(rel.tag_name || '').replace(/^v/, '');\nconst core = String(await this.helpers.httpRequest({ url: 'http://10.0.0.117:9120/version', json: false })).trim().replace(/^v/, '');\nconst state = $getWorkflowStaticData('global');\nif (!latest || !core || latest === core || state.last_notified === latest) return [];\nstate.last_notified = latest;\nreturn [{ json: { username: 'Komodo', text: 'Ny Komodo-versjon', attachments: [{\n  title: `Ny Komodo-versjon v${latest}`,\n  text: `Komodo v${latest} er ute (Core kjører v${core}). Slik oppdaterer du: 1) oppgrader Core på CT110, 2) kjør «ct-periphery-update --alle» på en node. Se ACCESS-RUNBOOK «Oppdatere Komodo». ${rel.html_url || ''}`\n}] } }];\n"
+   },
+   "name": "Sjekk ny Komodo-versjon",
+   "type": "n8n-nodes-base.code",
+   "typeVersion": 2,
+   "position": [
+    260,
+    400
+   ]
   }
  ],
  "connections": {
@@ -171,6 +203,28 @@
     [
      {
       "node": "Samle versjoner",
+      "type": "main",
+      "index": 0
+     }
+    ]
+   ]
+  },
+  "Daglig 09:20": {
+   "main": [
+    [
+     {
+      "node": "Sjekk ny Komodo-versjon",
+      "type": "main",
+      "index": 0
+     }
+    ]
+   ]
+  },
+  "Sjekk ny Komodo-versjon": {
+   "main": [
+    [
+     {
+      "node": "Send via homelab-alerts",
       "type": "main",
       "index": 0
      }
