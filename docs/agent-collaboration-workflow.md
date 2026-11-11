@@ -1,16 +1,19 @@
 # Samarbeidsflyt for flere AI-agenter
 
-## ⚠️ Nettverkskartet ligger IKKE i GitHub
+## ⚠️ Gitea eller GitHub: lokale sider i Gitea, alt annet i GitHub
 
-**Nettverkskartet (`docs/network-map/`) redigeres og publiseres kun via Gitea på CT120.**
+**Gitea inneholder kun de lokale sidene: nettverkskartet og advarselsiden. Alt annet ligger i GitHub.**
 
-- Kilde: `CT120:/opt/moved-services/nettkart-repo/docs/network-map/nettverkskart.html` (origin = Gitea `http://10.0.0.176:3000/Kingpro500/homelab-komodo.git`, CT118).
-- Publisering: kjør `/usr/local/sbin/nettkart-publish` på CT120 etter commit. Skriptet pusher til Gitea, validerer versjon + endringsnotat og publiserer atomisk.
-- Gjeldende regler: `PUBLISHING.md` i Gitea-kopien (samme mappe på CT120).
-- `docs/network-map/` **finnes ikke i GitHub** (fjernet 10. nov 2026). Ikke opprett mappen igjen og ikke legg kart-HTML i GitHub — drift-vakten slår **kritisk** alarm hvis den dukker opp. Levende webrot er `CT120:/srv/nettkart/www`, utenfor alle Git-kopier; bare `nettkart-publish` (og kartets egne tjenester på CT120) skriver dit. Komodo-stacken `pc6-ct120-web` leverer bare nginx.
-- Alt annet (Komodo-stacker, Homepage, Dashy, Ansible, kode, øvrig dokumentasjon) ligger i **GitHub**.
+| Hva | Fil (i Gitea) | Kilde |
+| --- | --- | --- |
+| Nettverkskart | `docs/network-map/nettverkskart.html` | **Gitea** |
+| Advarselsiden (daglig helserapport) | `docs/network-map/daily-report.html` | **Gitea** |
+| Alt annet: Komodo-stacker, Homepage, Dashy, Ansible, n8n, scripts, drift-vakt, spill (f.eks. Oslo Børs), dokumentasjon | | **GitHub** |
 
-
+- Gitea: `http://10.0.0.176:3000/Kingpro500/homelab-komodo.git` (CT118). Arbeidskopi: `CT120:/opt/moved-services/nettkart-repo`.
+- Publisering: commit, så `/usr/local/sbin/nettkart-publish` på CT120. Krever at CT118 og CT120 kjører.
+- Gjeldende regler: `README.md`/`AGENTS.md` og `docs/network-map/PUBLISHING.md` i Gitea-kopien.
+- Legg aldri annet enn lokale sider i Gitea, og legg aldri kartet eller advarselsiden i GitHub.
 
 ## Mål
 

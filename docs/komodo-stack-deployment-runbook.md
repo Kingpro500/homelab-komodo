@@ -1,5 +1,7 @@
 # Komodo stack-deployment runbook
 
+> **Kilde:** Komodo-stacker deployes kun fra GitHub. Gitea (CT118) inneholder bare de lokale sidene (nettverkskartet og advarselsiden) og skal aldri brukes som Komodo-repo. Se [AGENTS.md](../AGENTS.md).
+
 ## Formål
 
 Alle stacker skal kunne synkroniseres, valideres og deployes uten å gjette hvilken
