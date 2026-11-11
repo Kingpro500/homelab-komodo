@@ -1,7 +1,7 @@
 #!/bin/sh
 # Bootstrap: kjøres ved hver oppstart, hopper over det som finnes. Ligger i repoet og kopieres til /models/start.sh.
 set -e
-cd /models
+cd /models; mkdir -p /models/tmp /models/pipcache
 command -v git >/dev/null || { apt-get update -qq && apt-get install -y -qq git curl libgl1 libglib2.0-0 >/dev/null; }
 [ -d venv ] || python -m venv venv
 [ -d ComfyUI ] || git clone --depth 1 https://github.com/comfyanonymous/ComfyUI.git
