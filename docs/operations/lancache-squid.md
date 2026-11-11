@@ -9,4 +9,4 @@
 - Plassert på pc8 fordi pc7 har lite ledig RAM. Cachen ligger på Unraid, så Emby-lagringen berøres ikke.
 - Pi-hole-integrasjon: legg cache-domenene (uklans/cache-domains) som `address=/<domene>/10.0.0.212` i `misc.dnsmasq_lines`. Pi-hole beholdes, `lancache-dns` brukes ikke.
 - Rollback: fjern dnsmasq-linjene, klientene går direkte ut igjen.
-- Homepage er satt på pause (AGENTS.md), så flis legges inn når pausen oppheves. Nettverkskartet føres i Gitea.
+- Homepage-flis og nettverkskart-oppføring (Gitea) gjenstår og føres inn i samme runde som deploy.
