@@ -3,6 +3,20 @@
 > 🔑 **Hva har agentene tilgang til?** Verifisert tilgangsmatrise: [`docs/hermes-access.md`](docs/hermes-access.md) (Hermes-sesjoner: skillen `hermes-access-matrix`). Fremgangsmåte og ruter: [`docs/ACCESS-RUNBOOK.md`](docs/ACCESS-RUNBOOK.md).
 > **Vedlikeholdsplikt:** endrer du en tilgang, vert, nøkkel eller credential-plassering, oppdater `docs/ACCESS-RUNBOOK.md` og `docs/hermes-access.md` i samme PR.
 
+## 🔌 Har en CT Komodo Periphery? Sjekk riktig sted
+
+Standarden er **systemd-Periphery** (laget av `ct-new`/`ct-komodo`/`komodo-bootstrap`). Da ligger alt i `/etc/komodo` (`root_directory = "/etc/komodo"`), og **`/opt/komodo` finnes ikke**. Fravær av `/opt/komodo` betyr altså IKKE at Periphery mangler (den mappa hørte til det gamle container-oppsettet).
+
+Riktig sjekk (kun lesing):
+
+```sh
+pct exec <ctid> -- systemctl is-active periphery          # active
+pct exec <ctid> -- /usr/local/bin/periphery --version     # samme versjon som Core
+# og i Komodo: serveren <node>-ct<id>-<navn> har state Ok
+```
+
+Registrer aldri en server på nytt før dette er sjekket – det lager duplikater. Unntak: CT110 (Core) har Periphery i Core sin compose.
+
 ## 🚨 Start HVER økt med disse to sjekkene
 
 ### ⛔ Kan du ikke publisere, merge eller deploye? Si det tydelig, og meld det
