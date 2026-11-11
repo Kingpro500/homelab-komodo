@@ -7,6 +7,7 @@ services:
     restart: unless-stopped
     ports:
       - "8188:8188"
+      - "7860:7860"
     devices:
       - /dev/nvidia0
       - /dev/nvidiactl
@@ -14,10 +15,16 @@ services:
       - /dev/nvidia-uvm-tools
     volumes:
       - /models:/models
+      - ./app.py:/models/viewer/app.py:ro
+      - ./page.html:/models/viewer/page.html:ro
       - /usr/lib/x86_64-linux-gnu/libcuda.so.1:/usr/lib/x86_64-linux-gnu/libcuda.so.1:ro
       - /usr/lib/x86_64-linux-gnu/libnvidia-ml.so.1:/usr/lib/x86_64-linux-gnu/libnvidia-ml.so.1:ro
     working_dir: /models
     environment:
+      UNET: darkBeast330_int8convrot_heur.safetensors
+      TE: qwen3vl_4b_fp8_scaled.safetensors
+      VAE: qwen_image_vae.safetensors
+      TITLE: "Dark Beast Krea 2 v3"
       TMPDIR: /models/tmp
       PIP_CACHE_DIR: /models/pipcache
       HF_HUB_ENABLE_HF_TRANSFER: "0"
