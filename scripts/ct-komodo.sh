@@ -39,6 +39,18 @@ pct exec "$ID" -- env LANG=C.UTF-8 LC_ALL=C.UTF-8 bash -c "printf 'search lan.lo
 if pct exec "$ID" -- sh -c "docker inspect -f '{{.State.Running}}' komodo-periphery 2>/dev/null | grep -q true && grep -q '^PERIPHERY_CONNECT_AS=$NAME\$' /opt/komodo/periphery/.env || systemctl is-active --quiet periphery && grep -q '^connect_as = \"$NAME\"' /etc/komodo/periphery.config.toml" 2>/dev/null; then
   echo "  OK    periphery kjører allerede som $NAME – registrering hoppes over"
 else
+  # Gammel Komodo-server med samme navn (CT-ID gjenbrukt) blokkerer onboarding ("not able to fix existing servers").
+  # Navnet inneholder node og CT-ID, og Periphery kjører ikke i denne CT-en: serveren er en rest og slettes, uansett vist status
+  # (Komodo viser Ok lenge etter at Periphery er borte).
+  if [ -s /root/.config/komodo/api.env ]; then
+    ( set -a; . /root/.config/komodo/api.env; set +a
+      kcall(){ curl -fsS -m20 -H "Content-Type: application/json" -H "X-Api-Key: $KOMODO_API_KEY" -H "X-Api-Secret: $KOMODO_API_SECRET" -X POST "$KOMODO_URL/$1" -d "$2"; }
+      OLD=$(kcall read '{"type":"ListServers","params":{}}' | jq -r --arg n "$NAME" '.[]|select(.name==$n)|"\(.id) \(.info.state)"')
+      while read -r SID ST; do
+        [ -n "$SID" ] || continue
+        kcall write "$(jq -nc --arg i "$SID" '{type:"DeleteServer",params:{id:$i}}')" >/dev/null && echo "  OK    gammel Komodo-server $NAME ($ST) slettet før registrering"
+      done <<< "$OLD" ) || exit $?
+  fi
   pct push "$ID" "$KEY" /root/.komodo-onboarding.key --perms 600
   pct exec "$ID" -- env LANG=C.UTF-8 LC_ALL=C.UTF-8 CONNECT_AS="$NAME" bash -c "curl -fsSL $RAW/komodo-bootstrap.sh | bash"
 fi
