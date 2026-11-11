@@ -243,6 +243,43 @@ def git(path, *args, timeout=60):
     return subprocess.run(["git", "-C", path, *args], capture_output=True, text=True, timeout=timeout)
 
 
+STORAGE_WARN, STORAGE_CRIT = 80.0, 90.0
+STORAGE_SKIP = {"nfs", "cifs", "pbs"}  # NFS dekkes av n8n «Lagring – full-fremskrivning»
+
+
+def check_storage():
+    """Node-lagring (lvmthin `local-lvm`, `local` m.fl.) via Proxmox-API. Advarsel >=80 %, kritisk >=90 %."""
+    base = ENV.get("PROXMOX_URL", "").rstrip("/")
+    if not base:
+        return
+    import ssl
+    ctx = ssl.create_default_context()
+    ctx.check_hostname = False
+    ctx.verify_mode = ssl.CERT_NONE
+    req = urllib.request.Request(base + "/api2/json/cluster/resources?type=storage", headers={
+        "Authorization": "PVEAPIToken=%s=%s" % (ENV.get("PROXMOX_TOKEN_ID", ""), ENV.get("PROXMOX_TOKEN_SECRET", ""))})
+    try:
+        with urllib.request.urlopen(req, timeout=20, context=ctx) as r:
+            rows = json.load(r)["data"]
+    except Exception as exc:  # noqa: BLE001
+        issue("storage:api", "advarsel", "Lagring", "Proxmox-API svarer ikke for lagringssjekk", str(exc)[:200],
+              "Sjekk PROXMOX_URL/token i Hermes .env og at pc8 (10.0.0.102) er oppe.")
+        return
+    for s in rows:
+        if s.get("plugintype") in STORAGE_SKIP or not s.get("maxdisk"):
+            continue
+        pct = 100.0 * s["disk"] / s["maxdisk"]
+        if pct < STORAGE_WARN:
+            continue
+        free = (s["maxdisk"] - s["disk"]) / 1e9
+        lvl = "kritisk" if pct >= STORAGE_CRIT else "advarsel"
+        note = " Thin-pool kan gå full og stoppe alle gjester på noden." if s.get("plugintype") == "lvmthin" else ""
+        issue("storage:%s:%s" % (s["node"], s["storage"]), lvl, "Lagring",
+              "%s/%s er %.0f %% full (%.1f GB ledig)" % (s["node"], s["storage"], pct, free),
+              "Terskler: advarsel %.0f %%, kritisk %.0f %%.%s" % (STORAGE_WARN, STORAGE_CRIT, note),
+              "Frigjør plass (gamle snapshots, ubrukte disker/ISO) eller utvid. Slett ikke gjestedisker uten å spørre Roger.")
+
+
 def check_clones():
     for path in LOCAL_CLONES:
         if not os.path.isdir(os.path.join(path, ".git")):
@@ -313,6 +350,7 @@ def main():
     check_komodo(main_sha)
     check_map()
     check_clones()
+    check_storage()
     order = {"kritisk": 0, "advarsel": 1, "kjent": 2}
     ISSUES.sort(key=lambda i: (order.get(i["level"], 9), i["area"], i["key"]))
     levels = {i["level"] for i in ISSUES}
