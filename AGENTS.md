@@ -1,5 +1,8 @@
 # Instruksjoner for AI-agenter (Codex, Claude, Hermes)
 
+> 🔑 **Hva har agentene tilgang til?** Verifisert tilgangsmatrise: [`docs/hermes-access.md`](docs/hermes-access.md) (Hermes-sesjoner: skillen `hermes-access-matrix`). Fremgangsmåte og ruter: [`docs/ACCESS-RUNBOOK.md`](docs/ACCESS-RUNBOOK.md).
+> **Vedlikeholdsplikt:** endrer du en tilgang, vert, nøkkel eller credential-plassering, oppdater `docs/ACCESS-RUNBOOK.md` og `docs/hermes-access.md` i samme PR.
+
 ## 🚨 Start HVER økt med disse to sjekkene
 
 ### ⛔ Kan du ikke publisere, merge eller deploye? Si det tydelig, og meld det

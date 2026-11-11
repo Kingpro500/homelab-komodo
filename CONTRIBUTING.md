@@ -28,6 +28,10 @@ git switch -c agent/<agent>/<task>
 
 Use a separate `git worktree` for each concurrent agent. Keep commits focused and do not include unrelated generated files.
 
+## Access documentation must stay current
+
+Changing an access path, host, SSH key or credential location requires updating `docs/ACCESS-RUNBOOK.md` and `docs/hermes-access.md` in the same PR. See [AGENTS.md](AGENTS.md).
+
 ## Required checks
 
 Before opening a PR or handing work to the integrator:

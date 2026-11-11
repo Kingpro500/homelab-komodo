@@ -8,6 +8,8 @@ an integration, host, or credential location changes.
 > [AGENTS.md](../AGENTS.md). A failing `gh`/`GH_TOKEN` in your own sandbox is
 > not a lost homelab route — try the fixed routes listed there first.
 
+> **Verified matrix:** what each agent can actually reach (SSH, APIs, tokens by name only) is in [hermes-access.md](hermes-access.md). Keep both files current: any change to an integration, host, key or credential location must update this runbook and the matrix in the same PR. Re-verify the matrix with read-only tests after infrastructure changes.
+
 ## Repository boundary — read first
 
 | Repository | Used for | Nothing else |
