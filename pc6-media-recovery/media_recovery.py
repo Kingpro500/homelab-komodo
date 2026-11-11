@@ -31,21 +31,12 @@ def fetch(url,limit=1048576):
   if r.status not in (200,206):raise RuntimeError('HTTP status')
   return r.read(limit)
 def hls(base):
+ # Lightweight check: API + web UI only. Opening a real HLS stream here started an
+ # ffmpeg transcode on every probe (every 5 min), which never went idle.
  channels=json.loads(fetch(base+'/api/channels'))
  if not channels:raise RuntimeError('no channels configured')
- ch=channels[0]['id'];url=base+'/stream/channels/'+ch+'?streamMode=hls'
- deadline=time.monotonic()+45
- while time.monotonic()<deadline:
-  text=fetch(url).decode()
-  if not text.startswith('#EXTM3U'):raise RuntimeError('not HLS')
-  uris=[x.strip() for x in text.splitlines() if x.strip() and not x.startswith('#')]
-  if not uris:time.sleep(2);continue
-  target=urllib.parse.urljoin(url,uris[0])
-  if '.m3u8' in target:url=target;continue
-  data=fetch(target,65536)
-  if len(data)<1024 or not (data[0]==71 or b'ftyp' in data[:64] or b'moof' in data[:64] or b'styp' in data[:64]):raise RuntimeError('not a video segment')
-  return {'channel':ch,'bytes':len(data)}
- raise RuntimeError('HLS segment timeout')
+ fetch(base+'/web/',4096)
+ return {'channel':channels[0]['id'],'channels':len(channels),'api':True}
 def probe(fn):
  try:return {'ok':True,'detail':fn()}
  except Exception as e:return {'ok':False,'detail':str(e)[:220]}

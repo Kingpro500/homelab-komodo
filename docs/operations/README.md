@@ -10,3 +10,4 @@ Start her for vedvarende driftsregler.
   BBS-prioritet.
 
 GitHub-repository: `Kingpro500/homelab-komodo`, under `docs/operations/`.
+- [PC6 minnekollaps 2026-11-09](pc6-oom-incident-2026-11-09.md)
