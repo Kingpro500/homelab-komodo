@@ -5,6 +5,7 @@
 #   ct-new 136                     -> CT 136 med navnet ct136 (navn kan endres etterpå)
 #   ct-new 130 immich [ram] [disk] [kjerner] [ip]   (fast ID + navn)
 # Lager en standard Debian 13-LXC og kjører ct-komodo (Komodo + stack hvis den finnes i Git).
+# MERK til agenter: ikke kjør dette selv. Bruk en tom, Komodo-registrert CT, eller be Roger opprette en (se AGENTS.md, «Ny CT»).
 set -euo pipefail
 [ $# -ge 1 ] || { echo "Bruk: ct-new <tjeneste> [ram_mb] [disk_gb] [kjerner]   eller   ct-new <ctid> <tjeneste> ..."; exit 1; }
 if [[ "$1" =~ ^[0-9]+$ ]]; then ID="$1"; AUTOID=0; shift; else ID=$(pvesh get /cluster/nextid); AUTOID=1; fi

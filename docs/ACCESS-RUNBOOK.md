@@ -220,6 +220,8 @@ Rekkefølge ved ny versjon (Periphery skal aldri være eldre enn Core):
    (beholder config), restarter og krever fersk «Logged in to Komodo Core». Periphery som er
    nyere enn Core røres ikke. Nye CT-er (`ct-new`/`ct-komodo`) får automatisk Core sin versjon.
 
+**Regel:** agenter kjører ikke `ct-new` selv. Gjenbruk en tom, Komodo-registrert CT eller be Roger lage en (se `AGENTS.md`, «Ny CT»).
+
 Kommandoer på nodene (`/usr/local/sbin/`, henter alltid siste commit på `main`):
 `ct-new`, `ct-komodo`, `ct-periphery-migrate`, `ct-periphery-update`.
 

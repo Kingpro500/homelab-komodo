@@ -3,6 +3,16 @@
 > 🔑 **Hva har agentene tilgang til?** Verifisert tilgangsmatrise: [`docs/hermes-access.md`](docs/hermes-access.md) (Hermes-sesjoner: skillen `hermes-access-matrix`). Fremgangsmåte og ruter: [`docs/ACCESS-RUNBOOK.md`](docs/ACCESS-RUNBOOK.md).
 > **Vedlikeholdsplikt:** endrer du en tilgang, vert, nøkkel eller credential-plassering, oppdater `docs/ACCESS-RUNBOOK.md` og `docs/hermes-access.md` i samme PR.
 
+## 🆕 Ny CT: bruk en tom CT Roger har laget, ikke `ct-new` selv
+
+Agenter oppretter **ikke** nye CT-er på egen hånd. Rekkefølge:
+
+1. **Gjenbruk** en ledig, tom CT som allerede er registrert i Komodo (sjekk `ListServers` mot Proxmox og kartet; en CT med innhold, `test`-CT eller arkiv-CT er ikke «tom» før Roger har bekreftet det).
+2. Finnes ingen: **be Roger opprette en tom CT** (`ct-new <tjeneste> [ram] [disk] [kjerner]` på noden, som registrerer den i Komodo), og vent til serveren er `Ok` i Komodo.
+3. Ta så over CT-en: endre størrelse (`pct set`/`pct resize`), lag stack-mappen `<node>-ct<id>-<tjeneste>/` via PR, opprett stacken på den eksisterende Komodo-serveren (`CreateStack` → `PullStack` → `DeployStack`). Ikke kjør `ct-komodo` på nytt for å gi CT-en nytt navn; det lager en ekstra Komodo-server.
+4. Pin image på versjon/digest før deploy (`DeployStack` kjører `compose pull`; `:latest` kan gi uønsket oppgradering).
+5. Oppdater Homepage og nettverkskartet i samme runde.
+
 ## 🔌 Har en CT Komodo Periphery? Sjekk riktig sted
 
 Standarden er **systemd-Periphery** (laget av `ct-new`/`ct-komodo`/`komodo-bootstrap`). Da ligger alt i `/etc/komodo` (`root_directory = "/etc/komodo"`), og **`/opt/komodo` finnes ikke**. Fravær av `/opt/komodo` betyr altså IKKE at Periphery mangler (den mappa hørte til det gamle container-oppsettet).
