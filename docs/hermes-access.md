@@ -45,5 +45,11 @@ Test kjørt av Hermes (bruker `hermes` på hermes-verten, uid 1000). Kun variabe
 - Browserbase mangler nøkkel; ingen GUI/nettleserstyring utenom desktop-preview.
 - Hemmeligheter som ikke ligger i .env. Subagenter kan ikke spørre brukeren.
 
+## Gitea / nettverkskart (verifisert live 2026-11-11)
+- Gitea 10.0.0.176:3000 (CT118 pc6, running): web 200, repo krever innlogging (anonym 404, `git ls-remote` uten creds feiler). Hermes har INGEN Gitea-variabler i `.env`; tilgang går via pc6-ct120-monitoring (`/etc/nettkart/git-credentials`, `gitea-sync.token`), kun root på pc6.
+- pc6-ct120-monitoring (CT120 på pc6, 10.0.0.120; kartets arbeidskopi + nettkart-publish): `/opt/moved-services/nettkart-repo` ren, i synk med origin/main (v2.214), `git fetch` OK. `/usr/local/sbin/nettkart-publish` finnes og er kjørbar. Ikke kjørt (ville publisert); ingen dry-run-flagg.
+- Live 10.0.0.124:3020 viser v2.214 (lik repo), PUBLISHING.md 200.
+- Regler: se skill `nettverkskart-vedlikehold`, live PUBLISHING.md, GitHub AGENTS.md/docs/ACCESS-RUNBOOK.md. Kun kart + daily-report i Gitea, alt annet i GitHub.
+
 ## Sånn re-verifiserer du
 SSH: `ssh -i ~/.ssh/id_ed25519_hermes -o IdentitiesOnly=yes -o BatchMode=yes root@<ip> id -un`. API: `set -a; . ~/.hermes/.env; set +a` og curl mot URL-ene over; skriv aldri ut verdier.
