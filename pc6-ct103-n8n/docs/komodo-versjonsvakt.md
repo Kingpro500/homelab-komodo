@@ -1,4 +1,4 @@
-# Komodo-versjonsvakt - containere
+# Komodo-versjonsvakt
 
 n8n-workflow (id `eMw6l7rR36t7v9gu`, aktiv). Sammenligner installert versjon for kjørende Docker-containere (hentet via Komodo API) med siste GitHub-release, og mater «Versjoner»-panelet i nettverkskartet.
 
@@ -15,3 +15,6 @@ Komodo API-nøkkel/-hemmelighet og GitHub-token ligger i Code-noden i n8n (ekspo
 
 ## Erstatter
 Tidligere Python-skript `versjoner.py`/`pushver.sh` + cron på Hermes-maskinen (fjernet).
+
+## Samlet (2026-11-11)
+Workflowen inneholder også den tidligere «Komodo-versjonsvakt» (id `r5OS5Ub1Asd6P59U`, nå deaktivert, ikke slettet): daglig 09:20 sammenlignes siste Komodo-release på GitHub med Core (`http://10.0.0.117:9120/version`), og ny versjon varsles én gang via homelab-alerts. Static data for dette er ny, så ett varsel kan komme første gang.
