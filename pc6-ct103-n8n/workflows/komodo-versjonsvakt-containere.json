@@ -1,0 +1,186 @@
+{
+ "name": "Komodo-versjonsvakt - containere",
+ "nodes": [
+  {
+   "parameters": {
+    "rule": {
+     "interval": [
+      {
+       "field": "days",
+       "triggerAtHour": 5,
+       "triggerAtMinute": 15
+      }
+     ]
+    }
+   },
+   "name": "Daglig 05:15",
+   "type": "n8n-nodes-base.scheduleTrigger",
+   "typeVersion": 1.2,
+   "position": [
+    0,
+    0
+   ]
+  },
+  {
+   "parameters": {
+    "jsCode": "\n// Samler installert vs nyeste versjon for Docker-containere (Komodo) mot GitHub-releases.\n// Lagrer resultat i workflow static data; webhook \"versjoner\" leverer det til nettverkskartet.\nconst KOMODO = 'http://10.0.0.117:9120';\nconst H = {'X-Api-Key': 'REDACTED_KOMODO_KEY', 'X-Api-Secret': 'REDACTED_KOMODO_SECRET', 'Content-Type': 'application/json'};\nconst GHTOKEN = 'REDACTED_GITHUB_TOKEN';\nconst GH = {\"pihole/pihole\": \"pi-hole/docker-pi-hole\", \"moghtech/komodo-periphery\": \"moghtech/komodo\", \"semaphoreui/semaphore\": \"semaphoreui/semaphore\", \"gitea/gitea\": \"go-gitea/gitea\", \"prom/alertmanager\": \"prometheus/alertmanager\", \"prom/prometheus\": \"prometheus/prometheus\", \"prom/node-exporter\": \"prometheus/node_exporter\", \"grafana/alloy\": \"grafana/alloy\", \"emby/embyserver\": \"MediaBrowser/Emby.Releases\", \"chrisbenincasa/tunarr\": \"chrisbenincasa/tunarr\", \"goauthentik/server\": \"goauthentik/authentik\", \"netalertx/netalertx\": \"netalertx/NetAlertX\", \"linuxserver/bazarr\": \"morpheus65535/bazarr\", \"cleanuparr/cleanuparr\": \"Cleanuparr/Cleanuparr\", \"flaresolverr/flaresolverr\": \"FlareSolverr/FlareSolverr\", \"gethomepage/homepage\": \"gethomepage/homepage\", \"akhilrex/podgrab\": \"akhilrex/podgrab\", \"binhex/arch-prowlarr\": \"Prowlarr/Prowlarr\", \"binhex/arch-radarr\": \"Radarr/Radarr\", \"binhex/arch-sonarr\": \"Sonarr/Sonarr\", \"binhex/arch-readarr\": \"Readarr/Readarr\", \"seerr-team/seerr\": \"seerr-team/seerr\", \"linuxserver/speedtest-tracker\": \"alexjustesen/speedtest-tracker\", \"ntop/ntopng\": \"ntop/ntopng\", \"jbartlett777/diskspeed\": \"jbartlett777/DiskSpeed\", \"alexta69/metube\": \"alexta69/metube\", \"germannewsmaker/myspeed\": \"gnmyt/myspeed\", \"netboxcommunity/netbox\": \"netbox-community/netbox\", \"smallstep/step-ca\": \"smallstep/certificates\", \"louislam/uptime-kuma\": \"louislam/uptime-kuma\", \"kieraneglin/pinchflat\": \"kieraneglin/pinchflat\", \"henrygd/beszel\": \"henrygd/beszel\", \"crazymax/diun\": \"crazy-max/diun\", \"amir20/dozzle\": \"amir20/dozzle\", \"jasongdove/ersatztv\": \"ErsatzTV/ErsatzTV\", \"twinproduction/gatus\": \"TwiN/gatus\", \"robsmallridge/grovemap\": \"robsmallridge/grovemap\", \"linuxserver/healthchecks\": \"healthchecks/healthchecks\", \"corentinth/it-tools\": \"CorentinTh/it-tools\", \"kopia/kopia\": \"kopia/kopia\", \"berriai/litellm\": \"BerriAI/litellm\", \"qdrant/qdrant\": \"qdrant/qdrant\", \"analogj/scrutiny\": \"AnalogJ/scrutiny\", \"vaultwarden/server\": \"dani-garcia/vaultwarden\", \"containrrr/watchtower\": \"containrrr/watchtower\", \"clickhouse/clickhouse-server\": \"ClickHouse/ClickHouse\", \"binhex/arch-deluge\": \"deluge-torrent/deluge\", \"gitea\": \"go-gitea/gitea\"};\nconst SKIP = ['postgres','redis','nginx','alpine','node','ferretdb','mysql','mariadb','komodo-core'];\nconst komodo = (type, params) => this.helpers.httpRequest({method:'POST', url: KOMODO + '/read', headers: H, body: {type, params}, json: true, timeout: 30000});\nconst core = img => { let i = img.split('@')[0]; const last = i.split('/').pop(); if (last.includes(':')) i = i.slice(0, i.lastIndexOf(':'));\n  for (const p of ['docker.io/library/','docker.io/','lscr.io/','ghcr.io/','docker.gitea.com/']) if (i.startsWith(p)) i = i.slice(p.length); return i.toLowerCase(); };\nconst tag = img => { const last = img.split('@')[0].split('/').pop(); return last.includes(':') ? last.split(':').slice(1).join(':') : ''; };\nconst clean = v => String(v || '').trim().replace(/^(v|release-|version-)/, '').replace('-stable', '');\nconst vkey = v => (v.match(/\\d+/g) || []).map(Number);\nconst cache = {};\nconst gh = async (repo) => {\n  if (repo in cache) return cache[repo];\n  const h = {'User-Agent':'homelab-n8n','Accept':'application/vnd.github+json'}; if (GHTOKEN) h.Authorization = 'Bearer ' + GHTOKEN;\n  let res = null;\n  try { res = clean((await this.helpers.httpRequest({url:`https://api.github.com/repos/${repo}/releases/latest`, headers:h, json:true, timeout:20000})).tag_name); }\n  catch (e) { try { const t = await this.helpers.httpRequest({url:`https://api.github.com/repos/${repo}/tags?per_page=1`, headers:h, json:true, timeout:20000}); res = t.length ? clean(t[0].name) : null; } catch (e2) { res = null; } }\n  cache[repo] = res; return res;\n};\nconst rows = [];\nconst servers = await komodo('ListServers', {});\nfor (const sv of servers) {\n  if (sv.info.state !== 'Ok') continue;\n  let cs; try { cs = await komodo('ListDockerContainers', {server: sv.id}); } catch (e) { continue; }\n  for (const c of cs) {\n    if (c.state !== 'running') continue;\n    const img = c.image || ''; const k = core(img);\n    if (SKIP.includes(k.split('/').pop()) || k.startsWith('sha256')) continue;\n    let inst = '';\n    try { const ins = await komodo('InspectDockerContainer', {server: sv.id, container: c.name}); const lab = (ins.Config || {}).Labels || {};\n      inst = lab['org.opencontainers.image.version'] || lab['build_version'] || ''; if (inst.includes('Linuxserver')) inst = inst.split(' ').pop(); } catch (e) {}\n    const t = tag(img);\n    if (/\\d+\\.\\d+/.test(t)) inst = t; else if (!/\\d/.test(inst || '')) inst = /\\d/.test(t) ? t : '';\n    inst = clean(inst);\n    const repo = GH[k]; const lat = repo ? await gh(repo) : null;\n    let status;\n    if (!inst || !lat) status = 'ukjent';\n    else { const a = vkey(inst), b = vkey(lat); const n = Math.min(a.length, b.length); status = 'ok';\n      for (let i = 0; i < n; i++) { if (a[i] > b[i]) break; if (a[i] < b[i]) { status = 'gammel'; break; } } }\n    rows.push({server: sv.name, navn: c.name, image: k, installert: inst, nyeste: lat || '', status});\n  }\n}\nconst ord = {gammel:0, ukjent:1, ok:2};\nrows.sort((x, y) => ord[x.status]-ord[y.status] || x.server.localeCompare(y.server) || x.navn.localeCompare(y.navn));\nconst d = new Date(Date.now() + 3600*1000);\nconst out = {generert: d.toISOString().slice(0,16).replace('T',' '), antall: rows.length, rader: rows};\nconst st = $getWorkflowStaticData('global');\nconst prev = new Set(st.red || []);\nconst nowRed = rows.filter(r => r.status === 'gammel').map(r => r.navn + '@' + r.server + ':' + r.nyeste);\nconst fresh = rows.filter(r => r.status === 'gammel' && !prev.has(r.navn + '@' + r.server + ':' + r.nyeste));\nst.data = out; st.red = nowRed;\n// Varsler kun om NYE utdaterte (dedupe: samme navn+nyeste varsles én gang)\nif (!fresh.length || !prev.size && st.first !== false && (st.first = false) === false && false) return [];\nconst lines = fresh.slice(0, 15).map(r => `• ${r.navn} (${r.server}): ${r.installert} → ${r.nyeste}`).join('\\n');\nreturn [{json: {username: 'Versjonsvakt', text: 'Nye oppdateringer tilgjengelig', attachments: [{title: `${fresh.length} container(e) har ny versjon`, text: lines + (fresh.length > 15 ? `\\n…og ${fresh.length-15} til` : '') + '\\nOversikt: http://10.0.0.124:3020/ (Versjoner nederst)'}]}}];\n"
+   },
+   "name": "Samle versjoner",
+   "type": "n8n-nodes-base.code",
+   "typeVersion": 2,
+   "position": [
+    260,
+    0
+   ]
+  },
+  {
+   "parameters": {
+    "method": "POST",
+    "url": "http://10.0.0.119:5678/webhook/homelab-alerts",
+    "sendBody": true,
+    "specifyBody": "json",
+    "jsonBody": "={{ JSON.stringify($json) }}",
+    "options": {}
+   },
+   "name": "Send via homelab-alerts",
+   "type": "n8n-nodes-base.httpRequest",
+   "typeVersion": 4.2,
+   "position": [
+    520,
+    0
+   ]
+  },
+  {
+   "parameters": {
+    "path": "versjoner",
+    "httpMethod": "GET",
+    "responseMode": "responseNode",
+    "options": {}
+   },
+   "name": "Kartet henter",
+   "type": "n8n-nodes-base.webhook",
+   "typeVersion": 2,
+   "position": [
+    0,
+    200
+   ],
+   "webhookId": "versjoner-kart"
+  },
+  {
+   "parameters": {
+    "jsCode": "const st = $getWorkflowStaticData('global');\nreturn [{json: st.data || {generert:'', antall:0, rader:[]}}];"
+   },
+   "name": "Les siste resultat",
+   "type": "n8n-nodes-base.code",
+   "typeVersion": 2,
+   "position": [
+    260,
+    200
+   ]
+  },
+  {
+   "parameters": {
+    "respondWith": "json",
+    "responseBody": "={{ JSON.stringify($json) }}",
+    "options": {
+     "responseHeaders": {
+      "entries": [
+       {
+        "name": "Access-Control-Allow-Origin",
+        "value": "*"
+       },
+       {
+        "name": "Cache-Control",
+        "value": "no-store"
+       }
+      ]
+     }
+    }
+   },
+   "name": "Svar",
+   "type": "n8n-nodes-base.respondToWebhook",
+   "typeVersion": 1.1,
+   "position": [
+    520,
+    200
+   ]
+  },
+  {
+   "parameters": {
+    "path": "versjoner-oppdater",
+    "httpMethod": "POST",
+    "options": {}
+   },
+   "name": "Kjør nå (webhook)",
+   "type": "n8n-nodes-base.webhook",
+   "typeVersion": 2,
+   "position": [
+    0,
+    -200
+   ],
+   "webhookId": "versjoner-kjor"
+  }
+ ],
+ "connections": {
+  "Daglig 05:15": {
+   "main": [
+    [
+     {
+      "node": "Samle versjoner",
+      "type": "main",
+      "index": 0
+     }
+    ]
+   ]
+  },
+  "Samle versjoner": {
+   "main": [
+    [
+     {
+      "node": "Send via homelab-alerts",
+      "type": "main",
+      "index": 0
+     }
+    ]
+   ]
+  },
+  "Kartet henter": {
+   "main": [
+    [
+     {
+      "node": "Les siste resultat",
+      "type": "main",
+      "index": 0
+     }
+    ]
+   ]
+  },
+  "Les siste resultat": {
+   "main": [
+    [
+     {
+      "node": "Svar",
+      "type": "main",
+      "index": 0
+     }
+    ]
+   ]
+  },
+  "Kjør nå (webhook)": {
+   "main": [
+    [
+     {
+      "node": "Samle versjoner",
+      "type": "main",
+      "index": 0
+     }
+    ]
+   ]
+  }
+ },
+ "settings": {
+  "timezone": "Europe/Oslo",
+  "executionOrder": "v1",
+  "executionTimeout": 900
+ }
+}
