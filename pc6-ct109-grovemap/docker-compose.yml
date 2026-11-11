@@ -9,6 +9,6 @@ services:
       SCAN_CACHE_TTL: "3600"
       SCAN_ON_START: "false"
     volumes:
-      - /scan/media:/data/media:ro
-      - /scan/photos:/data/photos:ro
-      - /scan/backups:/data/backups:ro
+      - /media:/data/media:ro
+      - /photos:/data/photos:ro
+      - /backups:/data/backups:ro
