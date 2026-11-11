@@ -1,4 +1,4 @@
-# MeTube on Proxmox CT120 (pc6).
+# MeTube on Proxmox CT123 (pc6).
 # Pinchflat moved to the dedicated pc6-ct172-pinchflat stack.
 services:
   metube:
