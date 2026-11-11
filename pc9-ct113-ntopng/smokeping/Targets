@@ -118,6 +118,11 @@ menu = NetAlertX
 title = NetAlertX (pc8 CT126)
 host = 10.0.0.177
 
+++ Ct121
+menu = ct121
+title = pc6-ct121-ct121 (10.0.0.226)
+host = 10.0.0.226
+
 + Internet
 menu = Internet
 title = External connectivity
