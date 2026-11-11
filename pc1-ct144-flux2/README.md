@@ -1,4 +1,4 @@
-# pc1 / CT144 – FLUX.2 klein 4B (lokal bildegenerering)
+# pc1 / CT144 (ct144-flux2) – FLUX.2 klein 4B (lokal bildegenerering)
 
 Ikke en Docker-stack: systemd-tjeneste `flux` i CT144 (Debian 13), venv `/opt/flux/venv` (torch cu128 + diffusers fra git).
 - Web: http://10.0.0.219:7860 (enkel prompt-side, `POST /gen`). Ingen autentisering, kun LAN.
