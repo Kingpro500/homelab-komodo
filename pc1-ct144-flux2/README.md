@@ -1,0 +1,10 @@
+# pc1 / CT144 – FLUX.2 klein 4B (lokal bildegenerering)
+
+Ikke en Docker-stack: systemd-tjeneste `flux` i CT144 (Debian 13), venv `/opt/flux/venv` (torch cu128 + diffusers fra git).
+- Web: http://10.0.0.219:7860 (enkel prompt-side, `POST /gen`). Ingen autentisering, kun LAN.
+- Modell: `/models/FLUX.2-klein-4B` (CT) = NFS `Tower-isos/flux-models` (15 GB, Apache-2.0, ikke gated). Offline (`HF_HUB_OFFLINE=1`).
+- GPU: RTX 3070 8 GB delt med pc1. Transformeren (~8 GB bf16) passer ikke sammen med resten, så `enable_sequential_cpu_offload()` brukes (~1 min/bilde 1024², 4 steg). RAM 12 GB trengs.
+- CT144-endringer: rootfs 8→20 GB, 12 GB RAM, 2 GB swap, 6 kjerner, mp0 `/models`, nvidia-devicer (195/510) og bind av host `libcuda`/`libnvidia-ml` 615.71.09. Oppdateres driveren på pc1 må de to mount-linjene i `/etc/pve/lxc/144.conf` og symlinkene i CT oppdateres.
+- Backup av gammel config: `/root/144.conf.bak-2026-11-11` på pc1.
+- FLUX.2 Dev (32B) er ikke installert: krever ~64 GB bf16 + gated HF-lisens og > 16 GB RAM.
+- Bruker GPU: stopp `flux` (`systemctl stop flux`) før CT350 (ollama) brukes.
