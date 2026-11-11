@@ -84,3 +84,5 @@ services:
     volumes:
       - /data/podcasts:/assets
       - "${MEDIA_AUTOMATION_CONFIG_ROOT:?Set in Komodo}/podgrab:/config"
+    # Podgrab lekker minne (ca. 3 GB RSS observert i CT210, som har 4 GB). Tak så den ikke tar ned resten av CT-en.
+    mem_limit: 768m
