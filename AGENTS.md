@@ -32,6 +32,18 @@ Agenter oppretter **ikke** nye CT-er på egen hånd. Rekkefølge:
 4. Roger vil ha siste versjon: «oppdater» betyr oppgrader til nyeste (ikke pinn). `DeployStack` kjører `compose pull`, så `:latest` gir nyeste. Ta config-backup først og verifiser helse etterpå.
 5. Oppdater Homepage og nettverkskartet i samme runde.
 
+## 🏷️ Komodo-navn lyver — les beskrivelsen, ikke navnet
+
+Mange servere og stacker i Komodo heter fortsatt det CT-nummeret de hadde før en flytting. `pc6-ct109-*` kjører i CT210, `pc8-ct102-core` er CT110, `pc9-ct124-uisp` står på pc7. **Hver slik oppføring har en beskrivelse som sier hvor den faktisk kjører (satt 12. nov 2026). Stol på beskrivelsen og Proxmox, aldri på navnet.**
+
+**Ikke «rydd» navnene.** Et navnebytte i Komodo er ikke kosmetikk:
+
+- **Server:** navnet er identiteten agenten melder seg på med (`PERIPHERY_CONNECT_AS` i `/opt/komodo/periphery/.env` i CT-en, for de som kobler ut). Bytter du navnet i Komodo uten å endre `.env` og restarte agenten, mister Komodo kontakten med CT-en og alle stackene der.
+- **Stack:** når `project_name` er tomt, utledes Compose-prosjektet av stacknavnet. Et navnebytte gir nytt prosjekt, og de gamle containerne blir foreldreløse.
+- **Sletting av en stack som kjører** kjører `compose down --remove-orphans` på CT-en. Bare stacker som står `down`/`unknown` kan slettes uten at noe stopper.
+
+Skal et navn rettes, gjøres det for én CT om gangen sammen med Roger: sett `project_name` eksplisitt (stack) eller endre `.env` og restart agenten (server), og les tilbake at alt står `Ok` og at containerne kjører.
+
 ## 🔌 Har en CT Komodo Periphery? Sjekk riktig sted
 
 Standarden for **nye CT-er** er **Periphery som Docker-container** (`ct-new` → `ct-komodo` → `komodo-bootstrap`, mal: `templates/lxc-komodo-v2/periphery-compose.yml`). Filer ligger i `/opt/komodo/periphery/`, Komodo-root er `/opt/komodo`. Eldre CT-er (migrert til systemd 10. nov) har systemd-Periphery med alt i `/etc/komodo`; de er IKKE feil, men skal over til container-standarden (se README). Sjekk begge:
