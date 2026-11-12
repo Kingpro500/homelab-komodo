@@ -32,6 +32,38 @@ Agenter oppretter **ikke** nye CT-er på egen hånd. Rekkefølge:
 4. Roger vil ha siste versjon: «oppdater» betyr oppgrader til nyeste (ikke pinn). `DeployStack` kjører `compose pull`, så `:latest` gir nyeste. Ta config-backup først og verifiser helse etterpå.
 5. Oppdater Homepage og nettverkskartet i samme runde.
 
+## 🔗 Noen containere dør når du deployer naboen
+
+`tunarr-nfs-health-session-checker` i CT106 har `network_mode: "container:tunarr"`.
+Den låner nettverket til Tunarr-containeren, så i det Tunarr blir gjenopprettet
+forsvinner navnerommet den satt i: containeren dør med exit 137, og `docker start`
+nekter med «joining network namespace of container: No such container».
+
+**Deployer du `pc9-ct106-tunarr`, må du deploye `pc9-ct106-nfs-health` etterpå.**
+Da bygges session-checkeren på nytt mot den nye Tunarr-containeren. Sett dette i
+sammenheng hvis en nabocontainer plutselig står som Exited (137) uten logg.
+
+Let etter `network_mode: "container:` eller `service:` før du deployer noe —
+samme felle gjelder alle slike par.
+
+
+## 🧹 Avslåtte Docker-Peripheryer fra systemd-overgangen
+
+Elleve CT-er har en stoppet `komodo-periphery`-container ved siden av den aktive
+systemd-agenten, fra overgangen 10. nov 2026: CT101, CT120, CT200 og CT250 på pc6,
+CT115 på pc7, CT310 på pc8, og CT103, CT106, CT111 og CT203 på pc9. Alle har
+`restart=no`, så de starter ikke av seg selv.
+
+De fleste er harmløse — `PERIPHERY_CONNECT_AS` er tom eller lik systemd-navnet.
+**Unntaket er CT120**, der `.env` sier `pc6-ct104-media-downloaders`, et servernavn
+som ikke finnes i Komodo. Startes den manuelt, får CT120 to agenter og det dukker
+opp en falsk server. Ikke start noen av dem, og ikke slett dem uten å si det til
+Roger først — de er den eneste veien tilbake hvis systemd-agenten svikter.
+
+Uten Periphery i det hele tatt: CT130 (Hermes, trenger ingen), CT152, CT180 og
+CT137. CT137 har heller ingen Komodo-server.
+
+
 ## 🏷️ Komodo-navn lyver — les beskrivelsen, ikke navnet
 
 Mange servere og stacker i Komodo heter fortsatt det CT-nummeret de hadde før en flytting. `pc6-ct109-*` kjører i CT210, `pc8-ct102-core` er CT110, `pc9-ct124-uisp` står på pc7. **Hver slik oppføring har en beskrivelse som sier hvor den faktisk kjører (satt 12. nov 2026). Stol på beskrivelsen og Proxmox, aldri på navnet.**
