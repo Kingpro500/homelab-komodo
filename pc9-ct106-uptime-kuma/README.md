@@ -69,3 +69,24 @@ external monitoring location or provider.
 
 Manage the container through the Komodo stack `pc9-ct106-uptime-kuma`; do not
 run ad-hoc `docker compose` commands in the stack directory.
+
+## 12. november 2026 — flyttet til Git, og databasen ut av Komodos arbeidsmappe
+
+Stacken sto som `files_on_host` med compose-filen bare i
+`/opt/komodo/stacks/pc9-ct106-uptime-kuma/` og en relativ `./data`-binding.
+Den er nå koblet til dette repoet, og databasen ligger i `/opt/uptime-kuma/data`.
+
+Grunnen til at databasen måtte flytte: en Git-koblet stack kjører fra Komodos
+egen klone, så `./data` ville pekt på en tom mappe i klonen — Kuma ville startet
+med en ny, tom base. Og en database inne i `/opt/komodo/stacks/` er utsatt,
+siden det er Komodos arbeidsområde.
+
+Databasen ble kopiert med containeren stoppet (`cp -a`, `diff -r` identisk,
+`kuma.db` samme md5). Den gamle mappen
+`/opt/komodo/stacks/pc9-ct106-uptime-kuma/data` ligger urørt som sikkerhetskopi.
+
+Stien settes i Komodo:
+
+```
+UPTIME_KUMA_DATA_PATH=/opt/uptime-kuma/data
+```
