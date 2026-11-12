@@ -148,7 +148,17 @@ def main():
             "og kjør homelab-pr på nytt. Ingenting er pushet." % branch)
     tip = git("rev-parse", "HEAD")
     changed = git("diff", "--name-only", "origin/main...HEAD").splitlines()
-    git("push", "-q", "--force-with-lease", "-u", "origin", "HEAD:refs/heads/" + branch)
+    # Finnes grenen på GitHub fra før, må alt som ligger der allerede være med i det vi leverer.
+    remote = git("ls-remote", "origin", "refs/heads/" + branch).split()
+    if remote:
+        git("fetch", "-q", "origin", remote[0])
+        if git("merge-base", "--is-ancestor", remote[0], orig, check=False).returncode != 0:
+            die("grenen %s finnes på GitHub med commits som ikke er i din klone. Hent dem inn først "
+                "(git pull --rebase origin %s), og kjør homelab-pr på nytt." % (branch, branch))
+        git("push", "-q", "--force-with-lease=refs/heads/%s:%s" % (branch, remote[0]), "origin",
+            "HEAD:refs/heads/" + branch)
+    else:
+        git("push", "-q", "origin", "HEAD:refs/heads/" + branch)
 
     # PR -> squash-merge -> slett gren
     try:
