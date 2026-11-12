@@ -20,9 +20,10 @@ TOWER_MEDIA_PATH=/media
 TZ=Europe/Oslo
 ```
 
-MeTube is published at `http://10.0.0.229:8081`. The Komodo stack retains its
-historical name and repository directory `pc6-ct104-media-downloaders`, but its
-`server_id` must point to `pc6-ct123-ct123`.
+MeTube is published at `http://10.0.0.229:8081`. Its Komodo stack is named
+`pc6-ct123-metube` and belongs to server `pc6-ct123-ct123`. The Compose project
+(`media-downloaders`) and repository run directory (`pc6-ct104-media-downloaders`)
+retain their historical names to avoid an unnecessary recreation.
 
 Pinchflat documentation and Compose configuration are in
 `pc6-ct172-pinchflat/`.
