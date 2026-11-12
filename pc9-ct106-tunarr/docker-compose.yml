@@ -1,18 +1,32 @@
-# Independent Tunarr worker on pc9 / CT106.
+# Egen Tunarr-worker på pc9 / CT106 (10.0.0.122).
+#
+# Mediestiene er NFS fra Tower (10.0.0.101) og monteres read-only. De står her
+# fordi Tunarr trenger dem for kanalene sine — fjernes de, får kanalene ingen
+# filer. Stale-NFS overvåkes av stacken pc9-ct106-nfs-health i samme CT.
 services:
   tunarr:
+    # Fast på den kjente gode byggen; `latest` ødela artwork i 2026.10.3.
     image: ghcr.io/chrisbenincasa/tunarr:2026.9.3
     container_name: tunarr
     restart: unless-stopped
+    environment:
+      # Holder Emby-artwork på samme origin for klientene.
+      TUNARR_PROXY_ARTWORK: "true"
+    ports:
+      - "8005:8000"
+    volumes:
+      - "${TUNARR_CONFIG_PATH:-/opt/tunarr/config}:/config"
+      - /media/james-bond:/media/james-bond:ro
+      - /media/adam-carolla:/media/adam-carolla:ro
+      - /media/powerful-jre:/media/powerful-jre:ro
+      - /media/autotopnl:/media/autotopnl:ro
+      - /media/harrys-garage:/media/harrys-garage:ro
+      - /media/theo-von:/media/theo-von:ro
+    devices:
+      - /dev/dri/renderD128:/dev/dri/renderD128
+    mem_limit: 4g
     logging:
       driver: json-file
       options:
         max-size: "10m"
         max-file: "3"
-    ports:
-      - "8005:8000"
-    volumes:
-      - "${TUNARR_CONFIG_PATH:-/opt/tunarr/config}:/config"
-    devices:
-      - /dev/dri/renderD128:/dev/dri/renderD128
-    mem_limit: 4g

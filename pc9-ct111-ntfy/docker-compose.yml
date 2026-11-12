@@ -1,0 +1,28 @@
+# ntfy på pc9 / CT111 (10.0.0.155).
+#
+# NTFY_BASE_URL må være adressen klientene faktisk bruker — den havner i
+# lenkene og vedleggs-URL-ene ntfy sender ut. Den sto på 10.0.0.131 til
+# 12. nov 2026; CT111 fikk .155 da CT320 tok .131, så lenkene pekte på en
+# adresse som ikke svarer.
+services:
+  ntfy:
+    image: binwiederhier/ntfy:v2
+    container_name: ntfy
+    command: serve
+    restart: unless-stopped
+    environment:
+      NTFY_BASE_URL: "${NTFY_BASE_URL:?Set NTFY_BASE_URL in Komodo}"
+      NTFY_CACHE_FILE: /var/cache/ntfy/cache.db
+      NTFY_AUTH_FILE: /var/lib/ntfy/auth.db
+    ports:
+      - "80:80"
+    volumes:
+      - ntfy-cache:/var/cache/ntfy
+      - ntfy-data:/var/lib/ntfy
+
+# Navngitte volum, så de heter pc9-ct111-ntfy_ntfy-cache og
+# pc9-ct111-ntfy_ntfy-data. Derfor MÅ stacken beholde project_name
+# pc9-ct111-ntfy — et nytt prosjektnavn gir tomme volum.
+volumes:
+  ntfy-cache:
+  ntfy-data:
