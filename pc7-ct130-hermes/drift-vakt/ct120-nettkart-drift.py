@@ -79,8 +79,8 @@ if extra:
         ", ".join(extra[:8]), "Fjern dem fra Gitea i én commit; det som hører hjemme et sted, skal i GitHub.")
 
 # Webroten skal bare ha det nettkart-publish og kartets tjenester legger der.
-ALLOWED_WEB = {"nettverkskart.html", "PUBLISHING.md", "daily-report.html", "daily-report.json",
-               "nettkart-drift.json", "versions"}
+ALLOWED_WEB = {"nettverkskart.html", "endringer.html", "PUBLISHING.md",
+               "daily-report.html", "daily-report.json", "nettkart-drift.json", "versions"}
 stray = sorted(f for f in os.listdir(LIVE_DIR) if f not in ALLOWED_WEB and not f.startswith("."))
 if stray:
     add("map:webroot-extra", "advarsel", "Ukjente filer i webroten %s" % LIVE_DIR, ", ".join(stray[:8]),
