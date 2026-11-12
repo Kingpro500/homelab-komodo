@@ -1,14 +1,14 @@
 # Drift av n8n-arbeidsflyter — prinsipper
 
 Slik bygges, sikres, versjoneres og gjenopprettes n8n-arbeidsflytene i denne
-homelab. Gjelder begge de aktive workflowene i `pc6-ct103-n8n`.
+homelab. Gjelder begge de aktive workflowene i `pc8-ct310-n8n`.
 
 ## Hvor ting bor
 
 ```
 n8n (kjørende, 10.0.0.119:5678)   ← sannheten om HVA som kjører akkurat nå
 GitHub homelab-komodo              ← menneskelesbar, versjonert sannhetskilde
-  pc6-ct103-n8n/
+  pc8-ct310-n8n/
     README.md                      ← peker til workflowene + docs
     workflows/*.json               ← importbar eksport, UTEN hemmeligheter
     docs/*.md                      ← én doc per workflow

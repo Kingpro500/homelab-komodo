@@ -130,7 +130,7 @@
     ],
     "env_variabel": {
       "hva": "PAPERLESS_TOKEN maa vaere tilgjengelig som n8n-variabel.",
-      "gjor": "Komodo -> stack pc6-ct103-n8n -> Edit -> Environment -> PAPERLESS_TOKEN = <token>",
+      "gjor": "Komodo -> stack pc8-ct310-n8n -> Edit -> Environment -> PAPERLESS_TOKEN = <token>",
       "alternativ": "Hvis du vil boende i workflowen: Erstatt ={{ $env.PAPERLESS_TOKEN }} med Token <token> i Header Auth-noden.",
       "etterpaa": "Workflowene maa deaktiveres, n8n startes paa nytt, og saa aktiveres."
     }

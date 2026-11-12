@@ -1,6 +1,6 @@
 # Nettverkskart-vakt (n8n)
 
-Workflow `Nettverkskart-vakt` (id `Vpp9OIz3GzupC0JJ`), kjører daglig 08:30 på n8n (CT103). Eksport: `pc6-ct103-n8n/workflows/nettverkskart-vakt.json` (hemmeligheter erstattet med `REDACTED_*`).
+Workflow `Nettverkskart-vakt` (id `Vpp9OIz3GzupC0JJ`), kjører daglig 08:30 på n8n (CT103). Eksport: `pc8-ct310-n8n/workflows/nettverkskart-vakt.json` (hemmeligheter erstattet med `REDACTED_*`).
 
 Hva den sjekker:
 1. Alle CT/VM i Proxmox (`/cluster/resources?type=vm`) mot `data-vmid` på kartet (http://10.0.0.124:3020/). Manglende CT/VM gir varsel.
