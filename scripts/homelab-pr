@@ -152,7 +152,8 @@ def main():
     remote = git("ls-remote", "origin", "refs/heads/" + branch).split()
     if remote:
         git("fetch", "-q", "origin", remote[0])
-        if git("merge-base", "--is-ancestor", remote[0], orig, check=False).returncode != 0:
+        # Sammenlign på innhold (patch-id), så en ny kjøring etter rebase ikke stopper på seg selv.
+        if any(l.startswith("+") for l in git("cherry", "HEAD", remote[0]).splitlines()):
             die("grenen %s finnes på GitHub med commits som ikke er i din klone. Hent dem inn først "
                 "(git pull --rebase origin %s), og kjør homelab-pr på nytt." % (branch, branch))
         git("push", "-q", "--force-with-lease=refs/heads/%s:%s" % (branch, remote[0]), "origin",
