@@ -243,12 +243,13 @@ def git(path, *args, timeout=60):
     return subprocess.run(["git", "-C", path, *args], capture_output=True, text=True, timeout=timeout)
 
 
-STORAGE_WARN, STORAGE_CRIT = 80.0, 90.0
+# Lagring er alvorlig fra 80 %, men stopper ikke arbeid før den er nær full.
+STORAGE_WARN, STORAGE_CRIT = 80.0, 99.0
 STORAGE_SKIP = {"nfs", "cifs", "pbs"}  # NFS dekkes av n8n «Lagring – full-fremskrivning»
 
 
 def check_storage():
-    """Node-lagring (lvmthin `local-lvm`, `local` m.fl.) via Proxmox-API. Advarsel >=80 %, kritisk >=90 %."""
+    """Node-lagring (lvmthin `local-lvm`, `local` m.fl.) via Proxmox-API. Advarsel >=80 %, kritisk >=99 %."""
     base = ENV.get("PROXMOX_URL", "").rstrip("/")
     if not base:
         return
