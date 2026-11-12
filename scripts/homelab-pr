@@ -140,6 +140,7 @@ def main():
     if dirty:
         git("add", "-A")
         git("commit", "-q", "-m", title)
+    orig = git("rev-parse", "HEAD")
     r = git("rebase", "origin/main", check=False)
     if r.returncode != 0:
         git("rebase", "--abort", check=False)
@@ -174,7 +175,7 @@ def main():
     git("fetch", "-q", "--prune", "origin")
     notes = []
     main_ok = git("merge-base", "--is-ancestor", "main", "origin/main", check=False).returncode == 0 \
-        or git("merge-base", "--is-ancestor", "main", tip, check=False).returncode == 0
+        or git("merge-base", "--is-ancestor", "main", orig, check=False).returncode == 0
     git("switch", "-q", "--detach", "origin/main")
     if main_ok and git("branch", "-f", "main", "origin/main", check=False).returncode == 0 \
             and git("switch", "-q", "main", check=False).returncode == 0:
@@ -242,9 +243,7 @@ def deploy(env, files, merged, skip):
         rd = (cfg.get("run_directory") or "").strip("./")
         if rd and any(f.startswith(rd + "/") for f in files):
             hits[s["name"]] = info.get("state")
-    covered = set()
     for name, state in sorted(hits.items()):
-        covered |= {f for f in files if f.startswith(name + "/")}
         if skip:
             pending.append("stack %s: ikke deployet (--no-deploy)" % name)
         elif any(p in name for p in NO_AUTO_DEPLOY):
