@@ -1,6 +1,6 @@
-# Network monitoring — pc9 CT113
+# Network monitoring — CT113 (pc6)
 
-- **CT:** 113 on pc9
+- **CT:** 113 (`pc6-ct113-smokeping-ntopng`) on **pc6**. The directory name `pc9-ct113-ntopng` is historical and is kept because the Komodo stack path points to it.
 - **Ntopng:** `http://10.0.0.171:3000`
 - **SmokePing:** `http://10.0.0.171:3001/smokeping/`
 - **Deployment:** Komodo GitOps from `Kingpro500/homelab-komodo`
@@ -23,6 +23,8 @@ switch port, a dedicated capture interface, or NetFlow/sFlow/IPFIX export from
 the router or switches to a collector.
 
 ## Deferred: full-LAN traffic mirroring
+
+**Note:** The plan below was written when CT113 ran on pc9. CT113 now runs on pc6, so the NIC, bridge and cabling steps must be redone for pc6 before implementation.
 
 **Status:** Postponed until approximately 8 November 2026. Ntopng remains
 operational on `eth0` with limited visibility in the meantime.
