@@ -21,3 +21,18 @@ men remounter eller restarter ingenting.
 ## Hvorfor bildet er festet
 
 `image` står fast på `2026.9.3`. `latest` ødela artwork i 2026.10.3.
+
+## Deployer du denne, må du deploye nfs-health etterpå
+
+`tunarr-nfs-health-session-checker` i stacken `pc9-ct106-nfs-health` kjører med
+`network_mode: "container:tunarr"`. Når Tunarr gjenopprettes, forsvinner
+nettverks-navnerommet den låner: containeren dør med exit 137 og nekter å
+starte igjen med `docker start`. Det skjedde her 12. nov 2026.
+
+Rett vei tilbake er å deploye `pc9-ct106-nfs-health` i Komodo etterpå.
+
+## Minnegrensen er verdt et blikk
+
+`mem_limit: 4g` i en CT med 4 GB RAM. Tunarr kan altså i prinsippet spise alt
+minnet i CT106 og ta med seg naboene. Ikke endret 12. nov 2026 — det er Rogers
+avgjørelse om grensen skal ned eller CT-en opp.
