@@ -247,7 +247,8 @@ def deploy(env, files, merged, skip):
     except OSError:
         pass
     pending, hits = [], {}
-    for s in k("read", "ListStacks", {}):
+    # Komodo gir bare 50 om gangen uten limit.
+    for s in k("read", "ListStacks", {"limit": 1000}):
         info = s.get("info", {})
         if info.get("repo") != REPO:
             continue
