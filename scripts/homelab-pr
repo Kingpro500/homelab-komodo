@@ -1,0 +1,276 @@
+#!/usr/bin/env python3
+"""homelab-pr — eneste vei inn i GitHub-repoet Kingpro500/homelab-komodo.
+
+Én kommando gjør hele runden, så ingen gren eller PR blir liggende og Roger
+aldri trenger å merge noe selv:
+
+    cd <klonen av homelab-komodo>          # CT130: ~/homelab-komodo, pc6: /root/claude-work/homelab-komodo
+    ... gjør endringene ...
+    homelab-pr "kort tittel på endringen"
+
+Den lager gren, committer, rebaser på main, pusher, oppretter PR, squash-merger,
+sletter grenen (lokalt og på GitHub), setter klonen tilbake på main og deployer
+berørte Komodo-stacker. Til slutt skriver den nøyaktig hva som er gjort og hva
+som eventuelt IKKE er deployet.
+
+Bruk aldri rå `git push`, `gh pr` eller manuelle grener mot GitHub.
+Nettverkskartet hører IKKE hjemme her: det ligger i Gitea (Kingpro500/nettverkskart)
+og publiseres med `nettkart-publish` på CT120.
+
+Valg:  --no-deploy   merge, men ikke deploy (rapporteres som ikke deployet)
+
+Tilgang: GITHUB_TOKEN og KOMODO_* leses fra /home/hermes/.hermes/.env (på CT130),
+eller hentes derfra over SSH via pc7 (fra pc6). Verdier skrives aldri ut.
+Kilde: GitHub homelab-komodo, scripts/homelab-pr.
+"""
+import json
+import os
+import re
+import subprocess
+import sys
+import time
+import urllib.error
+import urllib.request
+
+REPO = "Kingpro500/homelab-komodo"
+HERMES_ENV = "/home/hermes/.hermes/.env"
+PC7 = "root@10.0.0.107"
+DRIFT_SRC = "pc7-ct130-hermes/drift-vakt/homelab_drift_check.py"
+# Stacker som aldri deployes automatisk (Emby: stream-sjekk og Roger først).
+NO_AUTO_DEPLOY = ("emby",)
+# Filer som ikke er Komodo-stacker, men må installeres et sted for å virke.
+INSTALL_HINTS = {
+    "pc7-ct130-hermes/drift-vakt/": "drift-vakt: installer etter pc7-ct130-hermes/drift-vakt/README.md",
+    "scripts/homelab-pr": "homelab-pr: kopier til /usr/local/bin/homelab-pr på CT130 og /usr/local/sbin/homelab-pr på pc6",
+    "scripts/gitea-nettkart-vakt": "Gitea-sperren: kopier til hooks/pre-receive.d/nettkart-vakt i nettverkskart.git på CT118",
+}
+# Installeres automatisk når skriptet kjører som hermes på CT130.
+LOCAL_INSTALL = {DRIFT_SRC: "~/.hermes/scripts/homelab_drift_check.py"}
+
+
+def die(msg):
+    print("\n⛔ KAN IKKE PUBLISERE (homelab-pr): " + msg, file=sys.stderr)
+    print("   Får du ikke rettet det: homelab-blokkert meld \"<hva>\" \"homelab-pr\" \"<feilen over>\" --av <agent>",
+          file=sys.stderr)
+    sys.exit(1)
+
+
+def git(*args, check=True):
+    r = subprocess.run(["git", *args], capture_output=True, text=True)
+    if check and r.returncode != 0:
+        die("git %s feilet: %s" % (" ".join(args), (r.stderr or r.stdout).strip()[-400:]))
+    return r.stdout.strip() if check else r
+
+
+def load_env():
+    text = ""
+    if os.access(HERMES_ENV, os.R_OK):
+        with open(HERMES_ENV, encoding="utf-8") as fh:
+            text = fh.read()
+    else:
+        r = subprocess.run(["ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=10", PC7,
+                            "pct exec 130 -- cat " + HERMES_ENV], capture_output=True, text=True)
+        if r.returncode != 0:
+            die("fikk ikke lest tilgangen fra CT130 (lokalt eller via ssh %s): %s" % (PC7, r.stderr.strip()[-200:]))
+        text = r.stdout
+    env = {}
+    for line in text.splitlines():
+        line = line.strip()
+        if "=" in line and not line.startswith("#"):
+            k, v = line.split("=", 1)
+            env[k.strip()] = v.strip().strip('"').strip("'")
+    if not env.get("GITHUB_TOKEN"):
+        die("GITHUB_TOKEN mangler i %s på CT130." % HERMES_ENV)
+    return env
+
+
+def http(method, url, headers, data=None, ok=()):
+    body = json.dumps(data).encode() if data is not None else None
+    h = {"Accept": "application/json"}
+    if body is not None:
+        h["Content-Type"] = "application/json"
+    h.update(headers)
+    req = urllib.request.Request(url, data=body, headers=h, method=method)
+    try:
+        with urllib.request.urlopen(req, timeout=30) as r:
+            raw = r.read()
+            return r.status, (json.loads(raw) if raw else None)
+    except urllib.error.HTTPError as exc:
+        raw = exc.read().decode("utf-8", "replace")
+        if exc.code in ok:
+            return exc.code, raw
+        raise RuntimeError("%s %s -> HTTP %s: %s" % (method, url.split("?")[0], exc.code, raw[:300]))
+
+
+def main():
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    flags = {a for a in sys.argv[1:] if a.startswith("--")}
+    if len(args) != 1 or not args[0].strip() or flags - {"--no-deploy"}:
+        print(__doc__)
+        return 2
+    title = args[0].strip()
+
+    os.chdir(git("rev-parse", "--show-toplevel"))
+    url = git("remote", "get-url", "origin")
+    if "github.com" not in url or "homelab-komodo" not in url:
+        die("denne klonen peker ikke på GitHub %s. Nettverkskartet publiseres med nettkart-publish på CT120, "
+            "ikke herfra." % REPO)
+    env = load_env()
+    gh_h = {"Authorization": "Bearer " + env["GITHUB_TOKEN"], "Accept": "application/vnd.github+json",
+            "X-GitHub-Api-Version": "2022-11-28"}
+    api = "https://api.github.com/repos/" + REPO
+
+    git("fetch", "-q", "--prune", "origin")
+    start = git("rev-parse", "--abbrev-ref", "HEAD")
+    dirty = git("status", "--porcelain")
+    ahead = int(git("rev-list", "--count", "origin/main..HEAD"))
+    if not dirty and ahead == 0:
+        die("ingenting å levere: ingen endringer i arbeidskopien og ingen commits foran main.")
+    touched = set(git("diff", "--name-only", "origin/main").splitlines())
+    touched |= set(git("ls-files", "--others", "--exclude-standard").splitlines())
+    if any(f.startswith("docs/network-map/") for f in touched):
+        die("docs/network-map/ hører hjemme i Gitea (Kingpro500/nettverkskart), ikke i GitHub. "
+            "Fjern mappen herfra og bruk nettkart-publish på CT120.")
+
+    branch = start
+    if start in ("main", "HEAD"):
+        slug = re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")[:40] or "endring"
+        branch = "agent/%s-%s" % (slug, time.strftime("%m%d-%H%M%S"))
+        git("switch", "-q", "-c", branch)
+    if dirty:
+        git("add", "-A")
+        git("commit", "-q", "-m", title)
+    r = git("rebase", "origin/main", check=False)
+    if r.returncode != 0:
+        git("rebase", "--abort", check=False)
+        die("grenen %s kolliderer med nyere endringer i main (rebase-konflikt). Løs konflikten i klonen "
+            "og kjør homelab-pr på nytt. Ingenting er pushet." % branch)
+    tip = git("rev-parse", "HEAD")
+    changed = git("diff", "--name-only", "origin/main...HEAD").splitlines()
+    git("push", "-q", "--force-with-lease", "-u", "origin", "HEAD:refs/heads/" + branch)
+
+    # PR -> squash-merge -> slett gren
+    try:
+        _, prs = http("GET", "%s/pulls?state=open&head=Kingpro500:%s" % (api, branch), gh_h)
+        pr = prs[0] if prs else http("POST", api + "/pulls", gh_h,
+                                     {"title": title, "head": branch, "base": "main",
+                                      "body": "Levert med homelab-pr."})[1]
+        num = pr["number"]
+        merged = None
+        for _ in range(10):
+            code, res = http("PUT", "%s/pulls/%d/merge" % (api, num), gh_h,
+                             {"merge_method": "squash", "commit_title": "%s (#%d)" % (title, num)}, ok=(405, 409))
+            if code == 200:
+                merged = res["sha"]
+                break
+            time.sleep(4)
+        if not merged:
+            die("PR #%d ble opprettet, men GitHub nekter å merge den: %s" % (num, str(res)[:300]))
+        http("DELETE", "%s/git/refs/heads/%s" % (api, branch), gh_h, ok=(404, 422))
+    except RuntimeError as exc:
+        die("GitHub-API feilet etter at grenen %s ble pushet: %s" % (branch, exc))
+
+    # Klonen tilbake på main, grenen bort.
+    git("fetch", "-q", "--prune", "origin")
+    notes = []
+    main_ok = git("merge-base", "--is-ancestor", "main", "origin/main", check=False).returncode == 0 \
+        or git("merge-base", "--is-ancestor", "main", tip, check=False).returncode == 0
+    git("switch", "-q", "--detach", "origin/main")
+    if main_ok and git("branch", "-f", "main", "origin/main", check=False).returncode == 0 \
+            and git("switch", "-q", "main", check=False).returncode == 0:
+        pass
+    else:
+        notes.append("Klonen står på origin/main (løsrevet); lokal main ble ikke flyttet. Sjekk `git status`.")
+    git("branch", "-D", branch, check=False)
+
+    print("✅ MERGET: PR #%d «%s» -> main %s. Grenen %s er slettet." % (num, title, merged[:7], branch))
+
+    # Deploy
+    pending = []
+    deployable = [f for f in changed if not f.lower().endswith(".md") and not f.startswith("docs/")]
+    for src, dst in LOCAL_INSTALL.items():
+        dst = os.path.expanduser(dst)
+        if src in changed and os.path.isdir(os.path.dirname(dst)) and os.access(os.path.dirname(dst), os.W_OK):
+            with open(src, "rb") as a, open(dst + ".tmp", "wb") as b:
+                b.write(a.read())
+            os.replace(dst + ".tmp", dst)
+            print("✅ INSTALLERT: %s -> %s" % (src, dst))
+            deployable.remove(src)
+    for prefix, hint in INSTALL_HINTS.items():
+        hit = [f for f in deployable if f.startswith(prefix)]
+        if hit:
+            pending.append(hint + " (" + ", ".join(hit[:4]) + ")")
+            deployable = [f for f in deployable if f not in hit]
+
+    if deployable:
+        try:
+            pending += deploy(env, deployable, merged, "--no-deploy" in flags)
+        except Exception as exc:  # noqa: BLE001
+            pending.append("Komodo-deploy feilet (%s: %s). Berørte filer: %s"
+                           % (type(exc).__name__, str(exc)[:200], ", ".join(deployable[:6])))
+    for n in notes:
+        print("ℹ️  " + n)
+    if pending:
+        print("\n⚠️  MERGET, MEN IKKE FERDIG — dette er IKKE deployet/installert ennå:")
+        for p in pending:
+            print("   - " + p)
+        print("   Si dette øverst i svaret til Roger. Ikke skriv «ferdig».")
+        return 3
+    print("✅ FERDIG: ingenting gjenstår.")
+    return 0
+
+
+def deploy(env, files, merged, skip):
+    base = env.get("KOMODO_ADDRESS", "http://10.0.0.117:9120").rstrip("/")
+    kh = {"X-Api-Key": env.get("KOMODO_API_KEY", ""), "X-Api-Secret": env.get("KOMODO_API_SECRET", "")}
+
+    def k(kind, typ, params):
+        return http("POST", "%s/%s/%s" % (base, kind, typ), kh, params)[1]
+
+    paused = set()
+    try:
+        with open(DRIFT_SRC, encoding="utf-8") as fh:
+            paused = set(re.findall(r'"stack:([^"]+)"\s*:', fh.read()))
+    except OSError:
+        pass
+    pending, hits = [], {}
+    for s in k("read", "ListStacks", {}):
+        info = s.get("info", {})
+        if info.get("repo") != REPO:
+            continue
+        cfg = k("read", "GetStack", {"stack": s["id"]}).get("config", {})
+        rd = (cfg.get("run_directory") or "").strip("./")
+        if rd and any(f.startswith(rd + "/") for f in files):
+            hits[s["name"]] = info.get("state")
+    covered = set()
+    for name, state in sorted(hits.items()):
+        covered |= {f for f in files if f.startswith(name + "/")}
+        if skip:
+            pending.append("stack %s: ikke deployet (--no-deploy)" % name)
+        elif any(p in name for p in NO_AUTO_DEPLOY):
+            pending.append("stack %s: deployes ALDRI automatisk (Emby: stream-sjekk og Roger først)" % name)
+        elif name in paused:
+            pending.append("stack %s: satt på pause av Roger, ikke deployet" % name)
+        elif state != "running":
+            print("ℹ️  Stack %s kjører ikke (%s) — ikke deployet, og det er riktig." % (name, state))
+        else:
+            k("execute", "DeployStack", {"stack": name})
+            ok = False
+            for _ in range(40):
+                time.sleep(10)
+                h = k("read", "GetStack", {"stack": name}).get("info", {}).get("deployed_hash") or ""
+                if h and merged.startswith(h):
+                    ok = True
+                    break
+            if ok:
+                print("✅ DEPLOYET: stack %s står på %s." % (name, merged[:7]))
+            else:
+                pending.append("stack %s: DeployStack sendt, men deployed_hash ble ikke %s innen 7 min — "
+                               "les Komodo-loggen" % (name, merged[:7]))
+    if not hits:
+        print("ℹ️  Ingen Komodo-stack bruker de endrede filene — ingenting å deploye.")
+    return pending
+
+
+if __name__ == "__main__":
+    sys.exit(main())

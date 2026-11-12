@@ -51,7 +51,8 @@ Les `http://10.0.0.135:9118/drift`, eller se toppen av nettverkskartet http://10
 
 - `level` er `kritisk` eller `advarsel`: **rydd opp i listen først.** Deploy/publiser det som er merget, og fullfør eller lukk åpne PR-er. **Ikke legg nye commits eller PR-er oppå.** Rutine: [pc7-ct130-hermes/drift-vakt/README.md](pc7-ct130-hermes/drift-vakt/README.md).
 - Ingenting skal stoppe opp: kan du ikke rydde, skriv det øverst i svaret til Roger.
-- Én oppgave = én gren `agent/<agent>/<oppgave>` = én PR = merge **og** deploy/publiser i samme runde.
+- **GitHub: bruk alltid `homelab-pr "tittel"`** i klonen (CT130 `~/homelab-komodo`, pc6 `/root/claude-work/homelab-komodo`). Den lager gren og PR, merger, sletter grenen og deployer berørte Komodo-stacker i én kommando, og sier nøyaktig hva som ikke er deployet. Aldri rå `git push`, `gh pr` eller egne grener, og aldri be Roger merge.
+- **Gitea heter `Kingpro500/nettverkskart`** (ikke `homelab-komodo`) og tar bare imot kartet på `main`; alt annet avvises av en sperre. Kartet publiseres med `nettkart-publish` på CT120.
 
 ### 2. GitHub-tilgang — den finnes. Si aldri «mistet tilgang» før du har prøvd rutene under
 
@@ -90,7 +91,7 @@ Brukeren har bevisst satt Homepage- og Dashy-arbeidet på pause. Ikke redeploy H
 | Advarselsiden (daglig helserapport) | `docs/network-map/daily-report.html` | **Gitea** |
 | Alt annet: Komodo-stacker, Homepage, Dashy, Ansible, n8n, scripts, drift-vakt, spill (f.eks. Oslo Børs), dokumentasjon | | **GitHub** |
 
-- Gitea: `http://10.0.0.176:3000/Kingpro500/homelab-komodo.git` (CT118). Arbeidskopi: `CT120:/opt/moved-services/nettkart-repo`.
+- Gitea: `http://10.0.0.176:3000/Kingpro500/nettverkskart.git` (CT118). Arbeidskopi: `CT120:/opt/moved-services/nettkart-repo`.
 - Publisering: commit, så `/usr/local/sbin/nettkart-publish` på CT120. Krever at CT118 og CT120 kjører.
 - Gjeldende regler: `README.md`/`AGENTS.md` og `docs/network-map/PUBLISHING.md` i Gitea-kopien.
 - Legg aldri annet enn lokale sider i Gitea, og legg aldri kartet eller advarselsiden i GitHub.

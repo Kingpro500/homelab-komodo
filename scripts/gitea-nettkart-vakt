@@ -1,0 +1,26 @@
+#!/bin/sh
+# nettkart-vakt — sperre i Gitea-repoet Kingpro500/nettverkskart (CT118).
+# Tar bare imot nettverkskartet, og bare på grenen main. Alt annet avvises før det lander.
+# Ligger i <repo>.git/hooks/pre-receive.d/nettkart-vakt. Kilde: GitHub homelab-komodo, scripts/gitea-nettkart-vakt.
+zero=0000000000000000000000000000000000000000
+fail() {
+  echo "" >&2
+  echo "⛔ AVVIST av Gitea (nettkart-vakt): $1" >&2
+  echo "   Dette repoet er KUN nettverkskartet (docs/network-map/). Publiser med nettkart-publish på CT120." >&2
+  echo "   Alt annet (kode, stacker, drift-vakt, dokumentasjon) skal til GitHub med homelab-pr." >&2
+  echo "" >&2
+  exit 1
+}
+while read old new ref; do
+  if [ "$new" = "$zero" ]; then
+    [ "$ref" = "refs/heads/main" ] && fail "main kan ikke slettes."
+    continue
+  fi
+  [ "$ref" = "refs/heads/main" ] || fail "bare grenen main er tillatt her (du pushet $ref). Kartet har ingen grener og ingen PR."
+  if [ "$old" != "$zero" ] && ! git merge-base --is-ancestor "$old" "$new"; then
+    fail "historikken på main kan ikke skrives om (force-push)."
+  fi
+  bad=$(git ls-tree -r --name-only "$new" | grep -v -e '^docs/network-map/' -e '^README\.md$' -e '^AGENTS\.md$' -e '^CLAUDE\.md$' | head -5 | tr '\n' ' ')
+  [ -z "$bad" ] || fail "filer utenfor docs/network-map/: $bad"
+done
+exit 0
