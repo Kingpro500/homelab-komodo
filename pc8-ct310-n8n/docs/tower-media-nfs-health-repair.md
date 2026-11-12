@@ -101,7 +101,7 @@ utenfra. Vi hevder ikke at en slik generell feilhåndterer er installert.
 
 ## Gjenoppretting / rollback
 
-Kilde: `pc6-ct103-n8n/scripts/media_recovery.py` og testfilene ved siden av.
+Kilde: `pc8-ct310-n8n/scripts/media_recovery.py` og testfilene ved siden av.
 På pc6 installeres runneren root-eid som `/usr/local/sbin/media_recovery.py`;
 `media-recovery-entrypoint` installeres 0755 som både
 `/usr/local/sbin/n8n-tower-media-repair` og `/usr/local/sbin/check-tower-media-nfs`.
@@ -137,7 +137,7 @@ historiske, supersedert og skal ikke deployes som ny løsning.
 ## Til å leke med (uten produksjonseffekt)
 
 ```sh
-cd pc6-ct103-n8n/scripts
+cd pc8-ct310-n8n/scripts
 python3 test_media_recovery.py
 node test_media_workflow.js
 ```

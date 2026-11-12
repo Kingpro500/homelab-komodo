@@ -62,7 +62,7 @@ Deretter: profilikonet → Application API Token
 (eller åpne `http://10.0.0.131:8000/api/profile/generate_auth_token`)
 
 Legg tokenen som `PAPERLESS_TOKEN` i Komodo, stack `pc6-ct154-paperless`.
-Og som `PAPERLESS_TOKEN` + `OPENROUTER_API_KEY` i stack `pc6-ct103-n8n`.
+Og som `PAPERLESS_TOKEN` + `OPENROUTER_API_KEY` i stack `pc8-ct310-n8n`.
 
 Test før du går videre:
 
