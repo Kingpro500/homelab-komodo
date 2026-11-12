@@ -167,7 +167,8 @@ def check_github():
 # --------------------------------------------------------------------------- Komodo
 def check_komodo(main_sha):
     try:
-        stacks = komodo("ListStacks")
+        # Komodo gir bare 50 om gangen uten limit; uten den ble alt etter de 50 første aldri sjekket.
+        stacks = komodo("ListStacks", {"limit": 1000})
     except Exception as exc:  # noqa: BLE001
         issue("komodo:access", "kritisk", "Komodo", "Komodo-API svarer ikke (%s)" % type(exc).__name__,
               str(exc)[:200], "Sjekk Komodo Core CT110 på pc8 (10.0.0.117:9120).")
