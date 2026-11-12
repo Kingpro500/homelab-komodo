@@ -4,9 +4,9 @@
 men aldri deployet eller publisert. Neste agent legger så nye commits oppå, og
 etter en stund vet ingen hva som faktisk kjører.
 
-**Prinsipp:** ingenting stopper opp. Avvik gir en **stor advarsel** øverst i
-nettverkskartet og en push til telefonen. **Neste arbeidsrunde starter med å rydde
-opp i advarselen**, ikke med nytt arbeid oppå.
+**Prinsipp:** vakten selv stopper ingenting, men **rød advarsel er hard stopp for agenter**:
+ingen nye commits, PR-er eller infrastrukturendringer før Roger har sagt hva som skal gjøres
+med hvert røde funn. **Gul stopper ikke arbeidet**; rydd når det er trygt. Emby går foran alt.
 
 ## Hvor du ser status
 
@@ -33,13 +33,13 @@ opp i advarselen**, ikke med nytt arbeid oppå.
 | Advarsel / **Kritisk** | Node-lagring (`local-lvm` thin-pool, `local` m.fl.; ikke NFS) via Proxmox-API: advarsel ≥ 80 %, kritisk ≥ 99 % (kritisk gir push). Thin-pool er overtegnet, så full pool stopper alle gjester på noden. Terskler: `STORAGE_WARN`/`STORAGE_CRIT` i skriptet |
 | Kjent (grå) | Bevisst pausede stacker (`KNOWN` i skriptet) og ferdige/forlatte grener som kan ryddes |
 
-## Rutine når advarselen er rød eller gul
+## Rutine når advarselen er rød (gul: samme tiltak, men uten stopp)
 
-1. **Ikke start nytt arbeid og ikke lag nye commits eller PR-er oppå.** Les listen.
+1. **Rød: stopp og spør Roger om hvert røde funn.** Gul: les listen og rydd når det er trygt.
 2. Ta punktene ovenfra (kritisk først). For hvert punkt står det et tiltak (→).
    - *Merget, men ikke deployet:* Komodo `PullStack` + `DeployStack`, verifiser `deployed_hash == latest_hash`.
    - *Kartkilden ucommittet/ikke publisert:* commit og kjør `/usr/local/sbin/nettkart-publish` på CT120.
-   - *Åpen PR / gren uten PR:* fullfør den (merge + deploy) eller lukk den. Spør Roger hvis det er uklart.
+   - *Åpen PR / gren uten PR:* fullfør den med `homelab-pr` eller lukk den. Spør Roger hvis det er uklart.
    - *Skitten klone:* få det som skal beholdes inn via PR, og sett klonen tilbake til `main`.
 3. **Aldri slett** grener, stacker, CT-er eller data for å få varselet grønt. Spør Roger.
 4. Er avviket bevisst (f.eks. pause), legg det i `KNOWN` i `homelab_drift_check.py` med en forklaring, i én PR.

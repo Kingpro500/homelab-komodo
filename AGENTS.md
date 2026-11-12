@@ -1,5 +1,20 @@
 # Instruksjoner for AI-agenter (Codex, Claude, Hermes)
 
+## ▶️ START HER — reglene som alltid gjelder
+
+Dette er den ene kilden. `CLAUDE.md`, `CONTRIBUTING.md` og `docs/agent-collaboration-workflow.md` peker hit. Står det noe annet et annet sted, gjelder dette.
+
+1. **To steder, aldri bland dem.** Nettverkskartet og advarselsiden → **Gitea** `Kingpro500/nettverkskart`. Alt annet (kode, stacker, drift-vakt, n8n, skript, dokumentasjon) → **GitHub** `Kingpro500/homelab-komodo`. Navnet `homelab-komodo` betyr alltid GitHub.
+2. **GitHub: bare `homelab-pr "tittel"`.** Gjør endringen i klonen (CT130 `~/homelab-komodo`, pc6 `/root/claude-work/homelab-komodo`) og kjør kommandoen. Den lager gren og PR, squash-merger, sletter grenen, setter klonen på `main` og deployer berørte Komodo-stacker. Aldri rå `git push`, `gh pr`, egne grener eller worktrees. Aldri be Roger merge.
+3. **Kartet: bare `nettkart-publish`.** Rediger i `CT120:/opt/moved-services/nettkart-repo`, commit på `main`, kjør `/usr/local/sbin/nettkart-publish`. Ingen grener og ingen PR; Gitea avviser dem. Regler: `docs/network-map/PUBLISHING.md` i Gitea.
+4. **Berører oppgaven begge steder,** er det to leveranser: én med `homelab-pr` og én med `nettkart-publish`.
+5. **Ferdig er det først når verktøyet sier det** (`✅ FERDIG` / `Published`). Skriver `homelab-pr` «IKKE deployet», eller feiler noe: begynn svaret til Roger med `⛔ KAN IKKE PUBLISERE:` og meld det med `homelab-blokkert` (se under).
+6. **Drift-vakten** (`http://10.0.0.135:9118/drift`, øverst i kartet): **rød = stopp** og spør Roger om hvert røde funn før du gjør noe mer. **Gul stopper ikke**; rydd når det er trygt. Lagring er gul fra 80 % og rød fra 99 %.
+7. **Emby (CT200, pc6) går foran alt,** også rød stopp. Aldri restart, flytt eller oppgrader Emby uten stream-sjekk og uten at Roger vet det. Prioritet 2 er nettverksstabilitet.
+8. **Ikke lag CT-er selv, og flytt aldri bare gjesten** (se avsnittene under).
+9. **Homepage og Dashy er på pause.** Ikke rør, ikke nevn, ikke tilby.
+10. **Rydd etter deg.** Ikke legg igjen engangsskript i `/root`, ekstra kloner eller midlertidige filer. Slett aldri andres grener, stacker, CT-er eller data uten å spørre Roger.
+
 > 🔑 **Hva har agentene tilgang til?** Verifisert tilgangsmatrise: [`docs/hermes-access.md`](docs/hermes-access.md) (Hermes-sesjoner: skillen `hermes-access-matrix`). Fremgangsmåte og ruter: [`docs/ACCESS-RUNBOOK.md`](docs/ACCESS-RUNBOOK.md).
 > **Vedlikeholdsplikt:** endrer du en tilgang, vert, nøkkel eller credential-plassering, oppdater `docs/ACCESS-RUNBOOK.md` og `docs/hermes-access.md` i samme PR.
 
@@ -29,7 +44,7 @@ pct exec <ctid> -- systemctl is-active periphery              # gammel (systemd)
 
 **Felles regel:** Nye CT-er bruker Docker-Periphery i `/opt/komodo/periphery/`. Eksisterende systemd-Periphery i eldre CT-er er ikke en feil; migrering til container-standarden gjøres senere, kontrollert og uten å avbryte tjenester. Komodo skal ha **én** server per CT med navn `<node>-ct<id>-<navn>` og status `Ok` når CT-en er tilgjengelig. Sjekk Proxmox, gjestens Periphery og Komodo-registeret mot hverandre før du registrerer noe på nytt; et gammelt registertreff eller `Ok` alene beviser ikke at agenten er riktig eller at CT-en kjører. Duplikater skal undersøkes og ryddes kontrollert, ikke opprettes. En stoppet eller utilgjengelig CT merkes «ikke verifisert», ikke som bekreftet feil. Unntak: CT110 (Core) har Periphery i Core sin Compose.
 
-## 🚨 Start HVER økt med disse to sjekkene
+## 🚨 Utdyping: blokkert publisering, drift-vakt og GitHub-tilgang
 
 ### ⛔ Kan du ikke publisere, merge eller deploye? Si det tydelig, og meld det
 
@@ -49,8 +64,8 @@ Gjelder alle agenter og alle steder: GitHub (PR/merge), Komodo (deploy), Gitea/n
 
 Les `http://10.0.0.135:9118/drift`, eller se toppen av nettverkskartet http://10.0.0.124:3020/.
 
-- `level` er `kritisk` eller `advarsel`: **rydd opp i listen først.** Deploy/publiser det som er merget, og fullfør eller lukk åpne PR-er. **Ikke legg nye commits eller PR-er oppå.** Rutine: [pc7-ct130-hermes/drift-vakt/README.md](pc7-ct130-hermes/drift-vakt/README.md).
-- Ingenting skal stoppe opp: kan du ikke rydde, skriv det øverst i svaret til Roger.
+- `level` er `kritisk` (rød): **stopp.** Ingen nye commits, PR-er eller infrastrukturendringer før Roger har sagt hva som skal gjøres med hvert røde funn. `advarsel` (gul) stopper ikke arbeidet; rydd når det er trygt. Rutine: [pc7-ct130-hermes/drift-vakt/README.md](pc7-ct130-hermes/drift-vakt/README.md).
+- Kan du ikke rydde et funn, skriv det øverst i svaret til Roger.
 - **GitHub: bruk alltid `homelab-pr "tittel"`** i klonen (CT130 `~/homelab-komodo`, pc6 `/root/claude-work/homelab-komodo`). Den lager gren og PR, merger, sletter grenen og deployer berørte Komodo-stacker i én kommando, og sier nøyaktig hva som ikke er deployet. Aldri rå `git push`, `gh pr` eller egne grener, og aldri be Roger merge.
 - **Gitea heter `Kingpro500/nettverkskart`** (ikke `homelab-komodo`) og tar bare imot kartet på `main`; alt annet avvises av en sperre. Kartet publiseres med `nettkart-publish` på CT120.
 
@@ -67,7 +82,7 @@ Din egen sandkasse (Codex cloud, Claude Cowork o.l.) kan mangle `gh`-login eller
 
 Drift-vakten tester GitHub-API-et hvert 15. minutt. `github_access.ok: true` i `/drift` betyr at tilgangen virker, og at feilen ligger i din egen sandkasse. Rapporter **ruten som feilet og den nøyaktige feilmeldingen**, aldri bare «ingen tilgang». Aldri vis, kopier eller committ tokenverdier. Mer: [docs/ACCESS-RUNBOOK.md](docs/ACCESS-RUNBOOK.md).
 
-Før arbeid i pc6-klonen: `git switch main && git pull --ff-only`.
+Før arbeid i en klone: `git switch main && git pull --ff-only`. `homelab-pr` henter selv tilgangen fra rutene over.
 
 
 ## ⏸️ Status: Homepage- og Dashy-arbeid på PAUSE (8. nov 2026)
