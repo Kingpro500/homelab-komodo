@@ -1,9 +1,12 @@
-# n8n on pc6 CT 310
+# n8n on pc8 CT310
 
-- **Host:** pc6 (`10.0.0.120`)
-- **LXC:** CT310 (`ct103-n8n`; repository path retains historical CT103)
+- **Host:** pc8 (`10.0.0.102`)
+- **LXC:** CT310 (`pc8-ct310-n8n`)
 - **IP:** `10.0.0.119`
 - **URL:** `http://10.0.0.119:5678`
+- **Komodo-server:** `pc8-ct310-n8n` (ID `6abdec74478bbf9f98ef3ca3`); systemd-Periphery i gjesten.
+- **Stack:** `pc6-ct103-n8n` (ID `6abdecb1478bbf9f98ef3cdc`), peker på serveren over og bruker denne historiske repository-stien. Den kjørende Compose-containeren har også et eldre prosjektmerke `pc1-ct103-n8n`. Ikke flytt/endre stacksti eller prosjektnavn bare for kosmetikk: dette kan gjenskape n8n og avbryte automasjonene. Verifiser eierskap og data før en kontrollert migrering.
+- **Inventaravvik:** NetBox VM ID 20 har fortsatt navn `pc6-ct310-n8n`; NetBox-credentialen i n8n kan opprette/lese VM-er, men PATCH av eksisterende objekt svarte 403. Endring i NetBox krever en identitet med VM change-tilgang.
 
 The stack uses a dedicated PostgreSQL 16 database. Its application state and
 database are stored only in `/opt/n8n` inside the LXC; values for the database
@@ -18,8 +21,9 @@ n8n and all its automations offline with it. Local LLM inference on pc1 also
 proved unusable for agent work (CPU-only, ~9 s per short reply), so the workload
 split was not worth the dependency.
 
-CT 103 now lives on pc6, a host that is always on. n8n no longer disappears when
-Windows boots.
+CT310 kjører nå på pc8; repository-katalogen og stacknavnet beholder historiske
+pc6/CT103-navn inntil en separat, kontrollert migrering. Den kjørende
+instansen på pc8 er uavhengig av pc1s Windows-oppstarter.
 
 Ollama stays in CT 156 on pc1 with autostart disabled until GPU access is fixed.
 It is independent of n8n and no longer needs to be started or stopped around it.
