@@ -62,3 +62,15 @@
 - For hvert avvik: identifiser faktisk CT/IP/Periphery og tiltenkt compose-katalog; korriger deretter én server/stack om gangen med read-back.
 - Før eventuell lagringsopprydding på pc7: ta backup og frigjør plass kun etter eksplisitt valg av trygge objekter; ikke slett gjestedisker blindt.
 - Emby-relaterte objekter må behandles med aktiv-stream-sjekk og uten restart under avspilling.
+
+## Ny kontroll: pc7-lagring og fysisk CT-inventar
+
+- `pc7/local-lvm` er `90.34 %` brukt; thin-pool `data` har `5.46 GiB` ledig og `2.98 %` metadata brukt.
+- Ingen LXC-snapshots ble funnet i `/etc/pve/lxc/*.conf` ved kontrollen.
+- Det skal ikke slettes virtuelle disker eller snapshots som «opprydding» uten å identifisere eier og ta backup.
+- Fysisk inventar bekrefter at `pc7-ct115-unifi` og `pc7-ct152` faktisk finnes på pc7, mens `pc6-ct123` og `pc6-ct200-emby` faktisk finnes på pc6.
+- Dette endrer ikke avvikene: `pc6-ct115-unifi` er fortsatt en feil/misvisende Komodo-stack når den peker på server `pc7-ct115-unifi` og run directory `pc6-ct155-unifi`; `pc6-ct123-metube` bruker fortsatt `pc6-ct104-media-downloaders`; `pc6-ct200-emby` bruker fortsatt `pc6-ct151-emby` som run directory.
+
+## Status
+
+Dette er fortsatt en read-only revisjon. Ingen Komodo-servere, stacks, Proxmox-konfigurasjoner eller disker er endret.
