@@ -61,3 +61,24 @@ TZ=Europe/Oslo
   den kjørende tjenesten (Dashy lagrer sin egen i datamappen). Lå før i
   `pc6-ct109-dashy/config/conf.yml` og inneholder den umergede endringen fra
   PR #78 som står på pause.
+
+## To innstillinger som må bli stående
+
+**`ignore_services = ["dashy","glance","heimdall"]`** på Komodo-stacken.
+Komodo leser alle fire tjenestene ut av compose-filen når den regner ut
+status, også de som ligger under profilen `pause`. Uten denne listen står
+stacken som *unhealthy* fordi tre containere er stoppet, og drift-vakten
+melder falsk alarm. Med listen står den som *running*.
+
+**`legacy_compose_cli = true`** i `/etc/komodo/periphery.config.toml` i CT392.
+CT392 har Docker 20.10.24 og bare `docker-compose` 1.29.2 — ikke
+compose-v2-tillegget (`docker compose`) som resten av homelab-et bruker.
+Uten flagget kjører Periphery `docker compose` og deployen feiler med
+*unknown shorthand flag*. Profiler virker i 1.29.2, det er testet i CT392.
+Gammel kopi: `periphery.config.toml.bak-20261112`.
+
+> **Gjeld:** CT392 (og CT210) står på Debian 11-utgaven av Docker selv om
+> systemet er Debian 12, og apt-kildene har ikke `docker-compose-v2`. Skal de
+> opp på husstandarden (docker.io 26.1.5 + docker-compose-v2 2.26.1, som CT120
+> og CT172), må apt-kildene fikses først, og da restarter Docker-motoren og
+> containerne. Ikke gjort 12. nov 2026.
