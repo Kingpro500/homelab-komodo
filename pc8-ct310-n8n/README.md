@@ -6,7 +6,7 @@
 - **URL:** `http://10.0.0.119:5678`
 - **Komodo-server:** `pc8-ct310-n8n` (ID `6abdec74478bbf9f98ef3ca3`); systemd-Periphery i gjesten.
 - **Stack:** `pc8-ct310-n8n` (samme ID `6abdecb1478bbf9f98ef3cdc`), på Komodo-serveren over. GitHub-stien, run_directory og Compose-prosjektet er `pc8-ct310-n8n`. Historiske navn `pc6-ct103-n8n` (stack/sti) og `pc1-ct103-n8n` (Compose-prosjekt) er ikke lenger aktive etter kontrollert migrering. Backup er beholdt på pc8.
-- **Inventaravvik:** NetBox VM ID 20 har fortsatt navn `pc6-ct310-n8n`; NetBox-credentialen i n8n kan opprette/lese VM-er, men PATCH av eksisterende objekt svarte 403. Endring i NetBox krever en identitet med VM change-tilgang.
+- **NetBox:** VM ID 20 heter `pc8-ct310-n8n`; gammel kobling til fysisk device `pc6` er fjernet. Det finnes ennå ingen `pc8`-device i NetBox, så VM-en har ingen host-device-tilknytning (åpent inventarfunn). Endringen er kontrollert mot Proxmox CT310 og lest tilbake i NetBox. Den begrensede n8n-credentialen gir 403 ved PATCH av VM-er; navnrettingen ble gjort administrativt etter DB-backup.
 
 The stack uses a dedicated PostgreSQL 16 database. Its application state and
 database are stored only in `/opt/n8n` inside the LXC; values for the database
