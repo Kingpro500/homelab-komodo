@@ -1,0 +1,66 @@
+# Dashboards — pc6 CT392 (10.0.0.166)
+#
+# Ett compose-prosjekt: "dashboards". Tjenestene ble flyttet hit 11. nov 2026
+# fra CT109/CT210, uten at Komodo fulgte med: stackene het fortsatt
+# pc6-ct109-grafana / -dashy / -glance / -heimdall og pekte på feil server.
+# Derfor er alle fire samlet i denne ene stacken, og Komodo-stacken har
+# project_name = "dashboards" slik at den treffer containerne som alt kjører.
+#
+# Bare grafana starter. dashy, glance og heimdall står under profilen "pause",
+# så `docker compose up -d` lar dem ligge der de ligger. Se README.md.
+services:
+  grafana:
+    image: docker.io/grafana/grafana:latest
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SERVER_ROOT_URL: "${GRAFANA_ROOT_URL:?Set GRAFANA_ROOT_URL in Komodo}"
+      GF_INSTALL_PLUGINS: victoriametrics-logs-datasource
+    volumes:
+      - "${GRAFANA_DATA_PATH:?Set GRAFANA_DATA_PATH in Komodo}:/var/lib/grafana"
+      # Datakilder og dashbord kommer fra Git og legges på ved hver start. Bare
+      # disse to undermappene monteres, så Grafanas egen provisioning er urørt.
+      - ./provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+
+  glance:
+    profiles: ["pause"]
+    image: glanceapp/glance:v0.8.6
+    container_name: glance
+    restart: unless-stopped
+    ports:
+      - "3010:8080"
+    volumes:
+      - ./glance.yml:/app/config/glance.yml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+  dashy:
+    profiles: ["pause"]
+    image: lissy93/dashy:4.7.17
+    container_name: dashy
+    restart: unless-stopped
+    ports:
+      - "3011:8080"
+    environment:
+      TZ: "${TZ:-Europe/Oslo}"
+    volumes:
+      - "${DASHY_DATA_PATH:?Set DASHY_DATA_PATH in Komodo}:/usr/src/app/data"
+
+  heimdall:
+    profiles: ["pause"]
+    image: lscr.io/linuxserver/heimdall:latest
+    container_name: heimdall
+    restart: unless-stopped
+    ports:
+      - "3012:80"
+    environment:
+      PUID: "99"
+      PGID: "100"
+      TZ: "${TZ:-Europe/Oslo}"
+      # Heimdall sperrer oppslag mot private IP-er som standard, og alt på
+      # dette dashbordet er RFC1918.
+      ALLOW_INTERNAL_REQUESTS: "true"
+    volumes:
+      - "${HEIMDALL_DATA_PATH:?Set HEIMDALL_DATA_PATH in Komodo}:/config"

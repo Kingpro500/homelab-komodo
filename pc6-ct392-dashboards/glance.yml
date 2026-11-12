@@ -60,7 +60,7 @@ pages:
             style: compact
             sites:
               - title: Homepage
-                url: http://10.0.0.128:3009/
+                url: http://10.0.0.166:3009/
                 icon: si:homepage
               - title: Komodo
                 url: http://10.0.0.117:9120/
@@ -69,10 +69,10 @@ pages:
                 url: http://10.0.0.1/
                 icon: si:opnsense
               - title: Grafana
-                url: http://10.0.0.128:3000/
+                url: http://10.0.0.166:3000/
                 icon: si:grafana
               - title: Uptime Kuma
-                url: http://10.0.0.128:3001/
+                url: http://10.0.0.166:3001/
                 icon: sh:uptime-kuma
               - title: Hermes
                 url: http://10.0.0.135:9119/
@@ -87,31 +87,31 @@ pages:
                 url: http://10.0.0.150:8096/
                 icon: si:emby
               - title: Seerr
-                url: http://10.0.0.128:5055/
+                url: http://10.0.0.166:5055/
                 icon: sh:overseerr
               - title: Audiobookshelf
-                url: http://10.0.0.128:13378/
+                url: http://10.0.0.166:13378/
                 icon: mdi-book-open-variant
               - title: Deluge
-                url: http://10.0.0.128:8112/
+                url: http://10.0.0.166:8112/
                 icon: si:deluge
               - title: Sonarr
-                url: http://10.0.0.128:8989/
+                url: http://10.0.0.166:8989/
                 icon: si:sonarr
               - title: Radarr
-                url: http://10.0.0.128:7878/
+                url: http://10.0.0.166:7878/
                 icon: si:radarr
               - title: Prowlarr
-                url: http://10.0.0.128:9696/
+                url: http://10.0.0.166:9696/
                 icon: sh:prowlarr
               - title: Bazarr
-                url: http://10.0.0.128:6767/
+                url: http://10.0.0.166:6767/
                 icon: sh:bazarr
               - title: Readarr
-                url: http://10.0.0.128:8787/
+                url: http://10.0.0.166:8787/
                 icon: sh:readarr
               - title: Grovemap
-                url: http://10.0.0.128:8080/
+                url: http://10.0.0.166:8080/
                 icon: mdi-earth
               - title: n8n
                 url: http://10.0.0.119:5678/
@@ -126,7 +126,7 @@ pages:
                 url: http://10.0.0.116:8080/admin/
                 icon: si:pihole
               - title: UniFi
-                url: https://10.0.0.196:8443/
+                url: https://10.0.0.132:8443/
                 icon: si:ubiquiti
                 allow-insecure: true
               - title: Proxmox pc8
@@ -161,7 +161,7 @@ pages:
               - title: Drift
                 links:
                   - title: Homepage
-                    url: http://10.0.0.128:3009/
+                    url: http://10.0.0.166:3009/
                   - title: Komodo
                     url: http://10.0.0.117:9120/
                   - title: Proxmox pc8
@@ -173,9 +173,9 @@ pages:
                   - title: OPNsense
                     url: http://10.0.0.1/
                   - title: Grafana
-                    url: http://10.0.0.128:3000/
+                    url: http://10.0.0.166:3000/
                   - title: Uptime Kuma
-                    url: http://10.0.0.128:3001/
+                    url: http://10.0.0.166:3001/
 
               - title: AI
                 links:
@@ -195,9 +195,9 @@ pages:
                   - title: Immich
                     url: http://10.0.0.127:2283/
                   - title: Seerr
-                    url: http://10.0.0.128:5055/
+                    url: http://10.0.0.166:5055/
                   - title: Audiobookshelf
-                    url: http://10.0.0.128:13378/
+                    url: http://10.0.0.166:13378/
 
               - title: Verktoy
                 links:
@@ -206,7 +206,7 @@ pages:
                   - title: Pi-hole pc9
                     url: http://10.0.0.116:8080/admin/
                   - title: UniFi
-                    url: https://10.0.0.196:8443/
+                    url: https://10.0.0.132:8443/
                   - title: Paperless
                     url: http://10.0.0.131:8000/
 
