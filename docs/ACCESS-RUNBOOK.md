@@ -15,7 +15,7 @@ an integration, host, or credential location changes.
 | Repository | Used for | Nothing else |
 | --- | --- | --- |
 | **GitHub** `git@github.com:Kingpro500/homelab-komodo.git` | Everything: stacks, automation, scripts, operational documentation and **this runbook** | — |
-| **Gitea** `http://10.0.0.176:3000/Kingpro500/homelab-komodo.git` | **Only** the network map (`docs/network-map/nettverkskart.html` and its versions) and the monitoring page (`docs/network-map/daily-report.html`), published through `nettkart-publish` on PC6/CT120 (`pc6-ct120-monitoring`) | Do not commit or push anything else there, not even on a branch |
+| **Gitea** `http://10.0.0.176:3000/Kingpro500/nettverkskart.git` | **Only** the network map (`docs/network-map/nettverkskart.html` and its versions) and the monitoring page (`docs/network-map/daily-report.html`), published through `nettkart-publish` on PC6/CT120 (`pc6-ct120-monitoring`) | Do not commit or push anything else there, not even on a branch |
 
 This runbook is maintained **only in GitHub**, at `docs/ACCESS-RUNBOOK.md`
 (moved out of `docs/network-map/` on 10 November 2026; that folder no longer exists in GitHub). The Gitea repository still
@@ -336,7 +336,7 @@ needed.
 
 ## Gitea network-map source and publication
 
-Gitea at `http://10.0.0.176:3000/Kingpro500/homelab-komodo.git` is exclusively
+Gitea at `http://10.0.0.176:3000/Kingpro500/nettverkskart.git` is exclusively
 the authoritative source and publisher for the network map. The clean source
 is on PC6/CT120 at `/opt/moved-services/nettkart-repo`; publication runs only
 through `/usr/local/sbin/nettkart-publish`, which pushes, validates, archives,

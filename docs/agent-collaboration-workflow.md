@@ -10,7 +10,7 @@
 | Advarselsiden (daglig helserapport) | `docs/network-map/daily-report.html` | **Gitea** |
 | Alt annet: Komodo-stacker, Homepage, Dashy, Ansible, n8n, scripts, drift-vakt, spill (f.eks. Oslo Børs), dokumentasjon | | **GitHub** |
 
-- Gitea: `http://10.0.0.176:3000/Kingpro500/homelab-komodo.git` (CT118). Arbeidskopi: `CT120:/opt/moved-services/nettkart-repo`.
+- Gitea: `http://10.0.0.176:3000/Kingpro500/nettverkskart.git` (CT118). Arbeidskopi: `CT120:/opt/moved-services/nettkart-repo`.
 - Publisering: commit, så `/usr/local/sbin/nettkart-publish` på CT120. Krever at CT118 og CT120 kjører.
 - Gjeldende regler: `README.md`/`AGENTS.md` og `docs/network-map/PUBLISHING.md` i Gitea-kopien.
 - Legg aldri annet enn lokale sider i Gitea, og legg aldri kartet eller advarselsiden i GitHub.
