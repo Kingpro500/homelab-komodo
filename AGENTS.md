@@ -3,6 +3,10 @@
 > 🔑 **Hva har agentene tilgang til?** Verifisert tilgangsmatrise: [`docs/hermes-access.md`](docs/hermes-access.md) (Hermes-sesjoner: skillen `hermes-access-matrix`). Fremgangsmåte og ruter: [`docs/ACCESS-RUNBOOK.md`](docs/ACCESS-RUNBOOK.md).
 > **Vedlikeholdsplikt:** endrer du en tilgang, vert, nøkkel eller credential-plassering, oppdater `docs/ACCESS-RUNBOOK.md` og `docs/hermes-access.md` i samme PR.
 
+## ⛔ Flytting av CT: aldri flytt bare gjesten
+
+Før enhver Proxmox-flytting, omdøping eller gjenbruk skal agenten følge den komplette kontrollen i [`docs/proxmox-komodo-github-migration-runbook.md`](docs/proxmox-komodo-github-migration-runbook.md). En flytting er ikke ferdig før Proxmox, gjestens Periphery, Komodo-server, `GetStack.config.server_id`, GitHub-kilde/run directory og tjenestehelse er verifisert samlet. `ListStacks` alene er ikke nok; hent `GetStack` for hver berørt stack. Ved avvik: stopp mutasjoner, merk nettverkskartet umiddelbart, og ikke opprett duplikatserver eller ny stack som snarvei.
+
 ## 🆕 Ny CT: bruk en tom CT Roger har laget, ikke `ct-new` selv
 
 Agenter oppretter **ikke** nye CT-er på egen hånd. Rekkefølge:
