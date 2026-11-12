@@ -1,0 +1,116 @@
+#!/usr/bin/env python3
+"""nettkart-versjon — setter versjonsnummer, endringsnotat og logglinje for kartet.
+
+Kalles av `nettkart-publish "hva er endret"`. Agenten redigerer bare selve kartet;
+dette skriptet gjør bokføringen, så numre ikke kolliderer og loggen alltid stemmer:
+
+  * neste ledige versjon i `nettverkskart.html` (bare når kartet faktisk er endret)
+  * notat øverst i `endringer.html`
+  * linje øverst i `ENDRINGSLOGG.md`
+  * commit på main
+
+    nettkart-publish "CT123 lagt til under pc6" [--av Hermes] [--berort "pc6 CT123"]
+
+Kilde: GitHub homelab-komodo, scripts/ct120/nettkart-versjon.
+"""
+import html
+import os
+import re
+import subprocess
+import sys
+import time
+
+R = os.environ.get("NK_REPO", "/opt/moved-services/nettkart-repo")
+D = R + "/docs/network-map/"
+LIVE = os.environ.get("NK_LIVE", "/srv/nettkart/www/nettverkskart.html")
+VER = re.compile(r"versjon <b>(\d+)\.(\d+)</b>")
+
+
+def die(msg):
+    print("⛔ nettkart-versjon: " + msg, file=sys.stderr)
+    sys.exit(1)
+
+
+def g(*a):
+    return subprocess.run(["git", "-C", R, *a], capture_output=True, text=True)
+
+
+def rd(p):
+    with open(p, encoding="utf-8") as fh:
+        return fh.read()
+
+
+def wr(p, t):
+    with open(p, "w", encoding="utf-8") as fh:
+        fh.write(t)
+
+
+def ver(t):
+    m = VER.search(t)
+    return (int(m.group(1)), int(m.group(2))) if m else (0, 0)
+
+
+def main(argv):
+    who, area, words = "ukjent", "", []
+    it = iter(argv)
+    for a in it:
+        if a == "--av":
+            who = next(it, who)
+        elif a in ("--berort", "--berørt"):
+            area = next(it, area)
+        elif a.startswith("-"):
+            print(__doc__)
+            return 2
+        else:
+            words.append(a)
+    text = " ".join(words).strip()
+    if len(text) < 8:
+        die("skriv hva som er endret, f.eks. nettkart-publish \"CT123 lagt til under pc6\" --av Hermes")
+    if g("rev-parse", "--abbrev-ref", "HEAD").stdout.strip() != "main":
+        die("kartkilden står ikke på main. Kartet har ingen grener: git switch main.")
+
+    src = rd(D + "nettverkskart.html")
+    live = rd(LIVE) if os.path.exists(LIVE) else ""
+    label = "dokumentasjon"
+    if src != live:
+        vs, vl = ver(src), ver(live)
+        log = rd(D + "ENDRINGSLOGG.md")
+        if vs > vl:
+            new = vs                      # agenten har alt satt et høyere nummer selv
+        else:
+            seen = [(int(a), int(b)) for a, b in re.findall(r"^\| v(\d+)\.(\d+) \|", log, re.M)]
+            top = max([vs, vl] + seen)
+            new = (top[0], top[1] + 1)
+            wr(D + "nettverkskart.html", VER.sub("versjon <b>%d.%03d</b>" % new, src, count=1))
+        v = "%d.%03d" % new
+        label = "v" + v
+        e = rd(D + "endringer.html")
+        if not re.search(r"\bv%s\b" % re.escape(v), e + src):
+            k = e.find('<div class="note">')
+            if k < 0:
+                die("fant ikke første endringsnotat i endringer.html.")
+            note = '<div class="note"><b>Aktiv v%s (%s), %s:</b> %s</div>\n' % (
+                v, time.strftime("%d.%m.%Y"), html.escape(who), html.escape(text))
+            wr(D + "endringer.html", e[:k] + note + e[k:])
+        if not re.search(r"^\| v%s \|" % re.escape(v), log, re.M):
+            k = log.find("| v")
+            if k < 0:
+                die("fant ikke første versjonslinje i ENDRINGSLOGG.md.")
+            row = "| v%s | %s | %s | %s | %s |\n" % (v, time.strftime("%Y-%m-%d %H:%M"), who.replace("|", "/"),
+                                                    text.replace("|", "/"), (area or "kart").replace("|", "/"))
+            wr(D + "ENDRINGSLOGG.md", log[:k] + row + log[k:])
+
+    g("add", "-A", "docs/network-map", "AGENTS.md", "CLAUDE.md", "README.md")
+    if g("diff", "--cached", "--quiet").returncode != 0:
+        r = g("-c", "user.name=" + who, "-c", "user.email=%s@homelab.local" % re.sub(r"[^a-z0-9]+", "-", who.lower()),
+              "commit", "-q", "-m", "Kart %s: %s" % (label, text))
+        if r.returncode != 0:
+            die("commit feilet: " + (r.stderr or r.stdout).strip()[-300:])
+        print("Bokført og committet: %s — %s" % (label, text))
+    else:
+        print("Ingen nye endringer å committe (%s)." % label)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

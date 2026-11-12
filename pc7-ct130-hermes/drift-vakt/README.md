@@ -30,7 +30,7 @@ med hvert røde funn. **Gul stopper ikke arbeidet**; rydd når det er trygt. Emb
 | Advarsel | Gren med commits som ikke er i `main`, uten PR, eldre enn 3 døgn |
 | Advarsel | Lokale kloner (Hermes `~/homelab-komodo`) som er skitne, står på feil gren eller er bak/foran `main` |
 | Advarsel | Komodo `remote_errors` på en stack |
-| Advarsel / **Kritisk** | Node-lagring (`local-lvm` thin-pool, `local` m.fl.; ikke NFS) via Proxmox-API: advarsel ≥ 80 %, kritisk ≥ 99 % (kritisk gir push). Thin-pool er overtegnet, så full pool stopper alle gjester på noden. Terskler: `STORAGE_WARN`/`STORAGE_CRIT` i skriptet |
+| Advarsel / **Kritisk** | Node-lagring (`local-lvm` thin-pool, `local` m.fl.; ikke NFS) via Proxmox-API: advarsel ≥ 80 %, kritisk ≥ 99 % (kritisk gir push). Thin-pool er overtegnet, så full pool stopper alle gjester på noden. Tersklene settes i `docs/network-map/drift-regler.json` i Gitea (kartet) og publiseres med `nettkart-publish`; `STORAGE_WARN`/`STORAGE_CRIT` i skriptet er bare reserve |
 | Kjent (grå) | Bevisst pausede stacker (`KNOWN` i skriptet) og ferdige/forlatte grener som kan ryddes |
 
 ## Rutine når advarselen er rød (gul: samme tiltak, men uten stopp)

@@ -1,0 +1,35 @@
+#!/usr/bin/env python3
+# Slår sammen lokal kartkopi med nyere origin/main uten å stoppe. Ingen endringer går tapt:
+# konflikter løses ved å beholde begge sider (union), så får sammenslåingen egen ny versjon.
+import subprocess,re,time,os
+R=os.environ.get("NK_REPO","/opt/moved-services/nettkart-repo"); D="docs/network-map/"
+def g(*a,**k):return subprocess.run(['git','-C',R]+list(a),capture_output=True,text=True,**k)
+g("fetch","-q","origin","main")
+if g('merge-base','--is-ancestor','origin/main','HEAD').returncode==0: raise SystemExit(0)
+def ver(t):
+    m=re.search(r'versjon <b>(2\.\d+)</b>',t); return int(m.group(1).split('.')[1]) if m else 0
+mine=ver(open(R+'/'+D+'nettverkskart.html').read())
+theirs=ver(g('show','origin/main:'+D+'nettverkskart.html').stdout)
+print('Slår sammen med nyere versjon fra Gitea (2.%d)'%theirs)
+for f in ('ENDRINGSLOGG.md','endringer.html'):
+    open(R+'/.git/info/attributes','a').write('') 
+r=g('merge','--no-edit','-X','patience','origin/main')
+conf=g('diff','--name-only','--diff-filter=U').stdout.split()
+for f in conf:
+    base=g('show',':1:'+f).stdout; our=g('show',':2:'+f).stdout; th=g('show',':3:'+f).stdout
+    tmp=os.environ.get('TMPDIR','/tmp')
+    for n,c in (('b',base),('o',our),('t',th)): open(f'{tmp}/nm.{n}','w').write(c)
+    out=subprocess.run(['git','merge-file','-p','--union',f'{tmp}/nm.o',f'{tmp}/nm.b',f'{tmp}/nm.t'],capture_output=True,text=True,cwd=R).stdout
+    open(R+'/'+f,'w').write(out); g('add',f)
+h=open(R+'/'+D+'nettverkskart.html').read()
+badges=re.findall(r'^.*versjon <b>2\.\d+</b>.*$',h,re.M)
+M=max(mine,theirs)+1; new='2.%d'%M
+h=re.sub(r'versjon <b>2\.\d+</b>','versjon <b>%s</b>'%new,h)
+open(R+'/'+D+'nettverkskart.html','w').write(h)
+e=open(R+'/'+D+'endringer.html').read(); k=e.index('<div class="note">')
+open(R+'/'+D+'endringer.html','w').write(e[:k]+'<div class="note"><b>Aktiv v%s (%s), automatisk sammenslåing:</b> endringer fra to økter (til og med v2.%d og v2.%d) ble slått sammen uten tap. Sjekk at begge endringene vises riktig.</div>\n'%(new,time.strftime('%d. %b %Y'),mine,theirs)+e[k:])
+l=open(R+'/'+D+'ENDRINGSLOGG.md').read(); k=l.index('| v')
+open(R+'/'+D+'ENDRINGSLOGG.md','w').write(l[:k]+'| v%s | %s | nettkart-merge | automatisk sammenslåing av v2.%d og v2.%d | alle |\n'%(new,time.strftime('%Y-%m-%d %H:%M'),mine,theirs)+l[k:])
+g('add','docs/network-map')
+print(g('-c','user.name=Hermes','-c','user.email=hermes@local','commit','-qm','Kart v%s: automatisk sammenslåing (nettkart-merge)'%new).stdout)
+print('Sammenslått til v'+new)
