@@ -6,10 +6,10 @@ Dette er den ene kilden. `CLAUDE.md`, `CONTRIBUTING.md` og `docs/agent-collabora
 
 1. **To steder, aldri bland dem.** Nettverkskartet og advarselsiden → **Gitea** `Kingpro500/nettverkskart`. Alt annet (kode, stacker, drift-vakt, n8n, skript, dokumentasjon) → **GitHub** `Kingpro500/homelab-komodo`. Navnet `homelab-komodo` betyr alltid GitHub.
 2. **GitHub: bare `homelab-pr "tittel"`.** Gjør endringen i klonen (CT130 `~/homelab-komodo`, pc6 `/root/claude-work/homelab-komodo`) og kjør kommandoen. Den lager gren og PR, squash-merger, sletter grenen, setter klonen på `main` og deployer berørte Komodo-stacker. Aldri rå `git push`, `gh pr`, egne grener eller worktrees. Aldri be Roger merge.
-3. **Kartet: bare `nettkart-publish`.** Rediger i `CT120:/opt/moved-services/nettkart-repo`, commit på `main`, kjør `/usr/local/sbin/nettkart-publish`. Ingen grener og ingen PR; Gitea avviser dem. Regler: `docs/network-map/PUBLISHING.md` i Gitea.
+3. **Kartet: bare `nettkart-publish`.** Rediger kartet i `CT120:/opt/moved-services/nettkart-repo` og kjør `nettkart-publish "hva er endret" --av <agent>`. Den setter versjonsnummer, endringsnotat og logglinje og committer selv; ikke før dem for hånd. Ingen grener og ingen PR; Gitea avviser dem. Regler: `docs/network-map/PUBLISHING.md` i Gitea.
 4. **Berører oppgaven begge steder,** er det to leveranser: én med `homelab-pr` og én med `nettkart-publish`.
 5. **Ferdig er det først når verktøyet sier det** (`✅ FERDIG` / `Published`). Skriver `homelab-pr` «IKKE deployet», eller feiler noe: begynn svaret til Roger med `⛔ KAN IKKE PUBLISERE:` og meld det med `homelab-blokkert` (se under).
-6. **Drift-vakten** (`http://10.0.0.135:9118/drift`, øverst i kartet): **rød = stopp** og spør Roger om hvert røde funn før du gjør noe mer. **Gul stopper ikke**; rydd når det er trygt. Lagring er gul fra 80 % og rød fra 99 %.
+6. **Drift-vakten** (`http://10.0.0.135:9118/drift`, øverst i kartet): **rød = stopp** og spør Roger om hvert røde funn før du gjør noe mer. **Gul stopper ikke**; rydd når det er trygt. Lagring er gul fra 80 % og rød fra 99 %; tersklene står i `docs/network-map/drift-regler.json` i Gitea og endres der.
 7. **Emby (CT200, pc6) går foran alt,** også rød stopp. Aldri restart, flytt eller oppgrader Emby uten stream-sjekk og uten at Roger vet det. Prioritet 2 er nettverksstabilitet.
 8. **Ikke lag CT-er selv, og flytt aldri bare gjesten** (se avsnittene under).
 9. **Homepage og Dashy er på pause.** Ikke rør, ikke nevn, ikke tilby.

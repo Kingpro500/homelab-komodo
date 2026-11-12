@@ -42,6 +42,7 @@ NO_AUTO_DEPLOY = ("emby",)
 INSTALL_HINTS = {
     "pc7-ct130-hermes/drift-vakt/": "drift-vakt: installer etter pc7-ct130-hermes/drift-vakt/README.md",
     "scripts/homelab-pr": "homelab-pr: kopier til /usr/local/bin/homelab-pr på CT130 og /usr/local/sbin/homelab-pr på pc6",
+    "scripts/ct120/": "kartskript: kopier til /usr/local/sbin/ på CT120 (nettkart-publish, nettkart-versjon, nettkart-merge)",
     "scripts/gitea-nettkart-vakt": "Gitea-sperren: kopier til hooks/pre-receive.d/nettkart-vakt i nettverkskart.git på CT118",
 }
 # Installeres automatisk når skriptet kjører som hermes på CT130.

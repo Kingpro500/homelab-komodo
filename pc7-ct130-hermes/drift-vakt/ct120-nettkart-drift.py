@@ -80,7 +80,7 @@ if extra:
 
 # Webroten skal bare ha det nettkart-publish og kartets tjenester legger der.
 ALLOWED_WEB = {"nettverkskart.html", "endringer.html", "PUBLISHING.md",
-               "daily-report.html", "daily-report.json", "nettkart-drift.json", "versions"}
+               "daily-report.html", "daily-report.json", "nettkart-drift.json", "drift-regler.json", "versions"}
 stray = sorted(f for f in os.listdir(LIVE_DIR) if f not in ALLOWED_WEB and not f.startswith("."))
 if stray:
     add("map:webroot-extra", "advarsel", "Ukjente filer i webroten %s" % LIVE_DIR, ", ".join(stray[:8]),

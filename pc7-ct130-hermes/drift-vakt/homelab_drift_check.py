@@ -244,12 +244,23 @@ def git(path, *args, timeout=60):
 
 
 # Lagring er alvorlig fra 80 %, men stopper ikke arbeid før den er nær full.
+# Tersklene styres fra kartet: docs/network-map/drift-regler.json i Gitea (Kingpro500/nettverkskart),
+# publisert med nettkart-publish. Verdiene under er bare reserve hvis filen ikke kan leses.
 STORAGE_WARN, STORAGE_CRIT = 80.0, 99.0
+RULES_URL = "http://10.0.0.124:3020/drift-regler.json"
 STORAGE_SKIP = {"nfs", "cifs", "pbs"}  # NFS dekkes av n8n «Lagring – full-fremskrivning»
 
 
 def check_storage():
-    """Node-lagring (lvmthin `local-lvm`, `local` m.fl.) via Proxmox-API. Advarsel >=80 %, kritisk >=99 %."""
+    """Node-lagring (lvmthin `local-lvm`, `local` m.fl.) via Proxmox-API. Terskler fra drift-regler.json."""
+    warn, crit = STORAGE_WARN, STORAGE_CRIT
+    try:
+        r = http_json(RULES_URL, timeout=10)["lagring"]
+        w, c = float(r["gul_fra_prosent"]), float(r["rod_fra_prosent"])
+        if 0 < w < c <= 100:
+            warn, crit = w, c
+    except Exception:  # noqa: BLE001
+        pass
     base = ENV.get("PROXMOX_URL", "").rstrip("/")
     if not base:
         return
@@ -270,14 +281,14 @@ def check_storage():
         if s.get("plugintype") in STORAGE_SKIP or not s.get("maxdisk"):
             continue
         pct = 100.0 * s["disk"] / s["maxdisk"]
-        if pct < STORAGE_WARN:
+        if pct < warn:
             continue
         free = (s["maxdisk"] - s["disk"]) / 1e9
-        lvl = "kritisk" if pct >= STORAGE_CRIT else "advarsel"
+        lvl = "kritisk" if pct >= crit else "advarsel"
         note = " Thin-pool kan gå full og stoppe alle gjester på noden." if s.get("plugintype") == "lvmthin" else ""
         issue("storage:%s:%s" % (s["node"], s["storage"]), lvl, "Lagring",
               "%s/%s er %.0f %% full (%.1f GB ledig)" % (s["node"], s["storage"], pct, free),
-              "Terskler: advarsel %.0f %%, kritisk %.0f %%.%s" % (STORAGE_WARN, STORAGE_CRIT, note),
+              "Terskler: advarsel %.0f %%, kritisk %.0f %% (drift-regler.json i kartet).%s" % (warn, crit, note),
               "Frigjør plass (gamle snapshots, ubrukte disker/ISO) eller utvid. Slett ikke gjestedisker uten å spørre Roger.")
 
 

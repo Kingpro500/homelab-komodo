@@ -1,0 +1,117 @@
+#!/usr/bin/env bash
+# nettkart-publish — eneste publiseringsvei for nettverkskartet (CT120).
+#   nettkart-publish "hva er endret" [--av Hermes] [--berort "pc6 CT123"]
+# Med tekst setter nettkart-versjon versjonsnummer, endringsnotat og logglinje og committer selv.
+# Uten tekst publiseres det som alt er committet (gammel bruk).
+# Kilde: GitHub homelab-komodo, scripts/ct120/nettkart-publish.
+set -euo pipefail
+
+repo=/opt/moved-services/nettkart-repo
+src="$repo/docs/network-map/nettverkskart.html"
+docsrc="$repo/docs/network-map/PUBLISHING.md"
+reportsrc="$repo/docs/network-map/daily-report.html"
+live=/srv/nettkart/www/nettverkskart.html
+doclive=/srv/nettkart/www/PUBLISHING.md
+reportlive=/srv/nettkart/www/daily-report.html
+rulesrc="$repo/docs/network-map/drift-regler.json"
+ruleslive=/srv/nettkart/www/drift-regler.json
+back=/var/lib/nettkart/backups
+
+ver(){ sed -n 's/.*versjon <b>\([0-9][0-9.]*\)<\/b>.*/\1/p' "$1" | head -1; }
+valid(){ grep -q Serviceoversikt "$1" && grep -q data-vmid= "$1" && grep -q NODE-SAMMENDRAGET "$1" && grep -q 9118/nodes "$1"; }
+newer(){ awk -v n="$1" -v o="$2" 'BEGIN{split(n,a,".");split(o,b,".");exit !((a[1]>b[1]) || (a[1]==b[1] && a[2]>b[2]))}'; }
+latest_note_version(){
+  cat "$1" "$(dirname "$1")/endringer.html" 2>/dev/null | grep -oE 'v[0-9]+\.[0-9]+' | sed 's/^v//' | sort -V | tail -1
+}
+atomic_copy(){
+  local source="$1" target="$2" stage
+  stage=$(mktemp "$(dirname "$target")/.nettkart.XXXXXX")
+  cp "$source" "$stage"
+  chmod 0644 "$stage"
+  mv -f "$stage" "$target"
+}
+
+cd "$repo"
+if [ $# -gt 0 ]; then /usr/local/sbin/nettkart-versjon "$@" || exit 1; fi
+test -z "$(git status --porcelain --untracked-files=no)" || { echo 'Commit changes first.' >&2; exit 1; }
+# Samtidige økter: er Gitea nyere, slås kopiene sammen til en ny versjon (ingen stopp).
+/usr/local/sbin/nettkart-merge || echo "ADVARSEL: sammenslåing feilet, publiserer det du har."
+
+
+next=$(ver "$src")
+old=$(ver "$live")
+test -n "$next" && valid "$src" || { echo 'Invalid map.' >&2; exit 1; }
+test -f "$docsrc" || { echo 'Missing PUBLISHING.md.' >&2; exit 1; }
+test -f "$reportsrc" || { echo 'Missing daily-report.html.' >&2; exit 1; }
+# Drift-regler (terskler for rødt/gult i drift-vakten) valideres før push.
+if [ -f "$rulesrc" ]; then
+  python3 -c 'import json,sys; r=json.load(open(sys.argv[1]))["lagring"]; assert 0 < r["gul_fra_prosent"] < r["rod_fra_prosent"] <= 100' "$rulesrc" \
+    || { echo 'Ugyldig drift-regler.json: krever 0 < gul_fra_prosent < rod_fra_prosent <= 100.' >&2; exit 1; }
+fi
+
+# A changed map must advance the visible version and carry an equally numbered
+# change note.  This is checked before Git push, so an incomplete publication
+# cannot become the published Gitea source by accident.
+if ! cmp -s "$src" "$live"; then
+  newer "$next" "$old" || { echo "Map HTML changed, but visible version $next is not newer than live $old." >&2; exit 1; }
+  notever=$(latest_note_version "$src")
+  test "$notever" = "$next" || { echo "Map HTML version $next does not match latest change note v${notever:-missing}." >&2; exit 1; }
+fi
+
+clog="$repo/docs/network-map/ENDRINGSLOGG.md"
+test -f "$clog" || { echo 'Mangler docs/network-map/ENDRINGSLOGG.md.' >&2; exit 1; }
+echo 'Siste 5 endringer (ENDRINGSLOGG.md):'; grep -m5 '^| v' "$clog"
+grep -q "^| v$next |" "$clog" || echo "ADVARSEL: ENDRINGSLOGG.md mangler linje for v$next - legg den inn øverst."
+# Advarsel (blokkerer ikke): CT/VM i Proxmox som mangler i kartet
+miss=$(pvesh get /cluster/resources --type vm --output-format json 2>/dev/null | python3 -c "
+import json,sys,re
+m=set(re.findall(r'data-vmid=\"(\d+)\"',open('$src').read()))
+print(' '.join(str(v['vmid']) for v in sorted(json.load(sys.stdin),key=lambda v:v['vmid']) if str(v['vmid']) not in m))" 2>/dev/null || true)
+[ -z "$miss" ] || echo "ADVARSEL: finnes i Proxmox, men mangler i kartet: $miss"
+git push origin HEAD:main
+
+# Statiske støttefiler fra Gitea-kilden: arkivet (versions/, lenket som «historikk») (oslo-bors.html serveres fra GitHub siden 11. nov).
+# Synkes ved hver publisering, slik at webroten aldri får en gammel kopi.
+rsync -a --delete "$repo/docs/network-map/versions/" /srv/nettkart/www/versions/
+rules_published=false
+if [ -f "$rulesrc" ] && ! cmp -s "$rulesrc" "$ruleslive"; then
+  atomic_copy "$rulesrc" "$ruleslive"
+  rules_published=true
+  echo "Published drift-regler.json."
+fi
+
+if ! newer "$next" "$old"; then
+  published_supporting=$rules_published
+  if ! cmp -s "$docsrc" "$doclive"; then
+    atomic_copy "$docsrc" "$doclive"
+    curl -fsS -o /tmp/nettkart-publish-doc-verify.txt http://127.0.0.1:3020/PUBLISHING.md
+    grep -q 'Publisering for agenter' /tmp/nettkart-publish-doc-verify.txt
+    published_supporting=true
+  fi
+  if ! cmp -s "$reportsrc" "$reportlive"; then
+    atomic_copy "$reportsrc" "$reportlive"
+    curl -fsS -o /tmp/nettkart-publish-report-verify.html http://127.0.0.1:3020/daily-report.html
+    grep -q 'Tjenestetilgjengelighet' /tmp/nettkart-publish-report-verify.html
+    published_supporting=true
+  fi
+  if "$published_supporting"; then
+    echo 'Published supporting pages.'
+    exit 0
+  fi
+  echo 'Version is not newer.' >&2
+  exit 1
+fi
+
+install -d -m 0750 "$back" /var/lib/nettkart/versions
+stamp=$(date -u +%Y%m%dT%H%M%SZ)
+cp -p "$live" "$back/nettverkskart-$old-$stamp.html"
+atomic_copy "$src" "$live"
+atomic_copy "$docsrc" "$doclive"
+atomic_copy "$reportsrc" "$reportlive"
+test ! -f "$repo/docs/network-map/endringer.html" || atomic_copy "$repo/docs/network-map/endringer.html" /srv/nettkart/www/endringer.html
+cp "$src" "/var/lib/nettkart/versions/nettverkskart-$next-$stamp.html"
+curl -fsS -o /tmp/nettkart-publish-verify.html http://127.0.0.1:3020/
+grep -q "versjon <b>$next</b>" /tmp/nettkart-publish-verify.html
+curl -fsS -o /tmp/nettkart-publish-doc-verify.txt http://127.0.0.1:3020/PUBLISHING.md
+grep -q 'Publisering for agenter' /tmp/nettkart-publish-doc-verify.txt
+echo "Published v$next."
