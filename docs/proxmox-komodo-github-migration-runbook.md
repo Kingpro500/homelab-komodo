@@ -89,7 +89,7 @@ For hver stack skal revisjonen sammenligne `GetStack.config.server_id` med `GetS
 
 ## Registrerte avvik i revisjonen 2026-11-12
 
-Dette er en arbeidsliste fra live-lesing av Proxmox og Komodo. Den skal ikke tolkes som rettet før hvert punkt er kontrollert og lukket:
+Dette er en arbeidsliste fra live-lesing av Proxmox og Komodo. Den skal ikke tolkes som rettet før hvert punkt er kontrollert og lukket. Full maskinlesbar revisjonsrapport fra 2026-11-12 ligger i `docs/proxmox-komodo-github-live-audit-2026-11-12.md`:
 
 - Komodo har servere med `NotOk` eller `Disabled`, blant annet flere `pc1`-CT-er, `pc6-ct111-iventoy`, `pc6-ct140-iventoy`, `pc6-ct150-browsers`, `pc6-ct153-immich`, `pc6-ct154-paperless`, `pc6-ct215-tubearchivist` og den gamle `pc6-ct151-emby`-registreringen.
 - Det finnes en åpenbar duplikat/gammel Emby-registrering: `pc6-ct151-emby` er `Disabled`, mens aktiv server er `pc6-ct200-emby`. Den gamle må ikke slettes før eierskap og eventuelle stacks er verifisert.
