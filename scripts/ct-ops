@@ -182,13 +182,19 @@ def periphery(node, vmid):
            "docker inspect -f '{{range .Config.Env}}{{println .}}{{end}}' \"$P\" | sed -n 's/^PERIPHERY_CONNECT_AS=/as=/p'; "
            "else echo kind=none; fi; "
            "if docker info >/dev/null 2>&1; then echo docker=ja; echo apps=$(docker ps --format '{{.Image}}' | grep -vic 'komodo-periphery'); "
-           "elif command -v docker >/dev/null 2>&1; then echo docker=feil; else echo docker=nei; echo apps=0; fi")
+           "elif command -v docker >/dev/null 2>&1; then echo docker=feil; else echo docker=nei; echo apps=0; fi; "
+           ". /etc/os-release 2>/dev/null; echo os=${VERSION_CODENAME:-ukjent}; "
+           "if dpkg-query -W -f='${Status}' docker-ce 2>/dev/null | grep -q 'ok installed'; then echo src=docker-ce; "
+           "elif dpkg-query -W -f='${Status}' docker.io 2>/dev/null | grep -q 'ok installed'; then echo src=docker.io; "
+           "elif command -v docker >/dev/null 2>&1; then echo src=annet; else echo src=ingen; fi; "
+           "echo compose=$(docker compose version --short 2>/dev/null | cut -d. -f1 | tr -d v)")
     rc, out, err = guest(node, vmid, cmd, 40)
     if rc != 0:
         return {"kind": "ukjent", "connect_as": None, "docker": "ukjent", "apps": "?", "error": (err or out).strip()[-160:]}
     d = dict(l.split("=", 1) for l in out.split() if "=" in l)
     return {"kind": d.get("kind", "ukjent"), "connect_as": d.get("as") or None, "container": d.get("container"),
-            "docker": d.get("docker", "ukjent"), "apps": d.get("apps", "?")}
+            "docker": d.get("docker", "ukjent"), "apps": d.get("apps", "?"),
+            "os": d.get("os", "ukjent"), "docker_source": d.get("src", "ukjent"), "compose": d.get("compose") or "mangler"}
 
 
 def list_servers():
@@ -261,7 +267,10 @@ def want_stack_name(stack_name, prefix):
 
 
 EXC_FILE = "scripts/ct-ops-unntak.json"
-EXC_TYPES = {"proxmox-navn", "server-navn", "ingen-server", "ekstra-server", "stack-navn", "stack-mappe", "remote-errors", "ingen-komodo"}
+# Husstandard (AGENTS.md, vedtatt 13. nov 2026): Debian 13, Docker CE fra Dockers pakkelager med
+# compose-plugin (v2 eller nyere), Komodo v2 Periphery som systemd-tjeneste.
+STD_OS, STD_DOCKER, STD_PERIPHERY = "trixie", "docker-ce", "systemd"
+EXC_TYPES = {"standard-os", "standard-docker", "standard-compose", "standard-periphery", "proxmox-navn", "server-navn", "ingen-server", "ekstra-server", "stack-navn", "stack-mappe", "remote-errors", "ingen-komodo"}
 _exc = None
 
 
@@ -316,6 +325,15 @@ def check(inv):
         dev("ingen-server", "*", "Periphery kjører (%s), men ingen Komodo-server er knyttet til den" % per["kind"])
     elif inv["status"] == "running" and per["kind"] == "none" and vmid not in NO_KOMODO:
         dev("ingen-komodo", "*", "ingen Periphery i gjesten og ingen Komodo-server")
+    if inv["status"] == "running" and per.get("os"):
+        if per["os"] not in (STD_OS, "ukjent"):
+            dev("standard-os", "*", "standard: OS er %s, skal være %s (Debian 13)" % (per["os"], STD_OS))
+        if per.get("docker_source") not in (STD_DOCKER, "ingen", "ukjent"):
+            dev("standard-docker", "*", "standard: Docker kommer fra «%s», skal være Docker CE (docker-ce)" % per["docker_source"])
+        if per.get("docker_source") not in ("ingen", "ukjent") and not (str(per.get("compose", "")).isdigit() and int(per["compose"]) >= 2):
+            dev("standard-compose", "*", "standard: «docker compose» v2 eller nyere mangler (fant %s)" % per.get("compose"))
+        if per["kind"] == "docker":
+            dev("standard-periphery", "*", "standard: Periphery kjører som container, skal være systemd-tjeneste")
     for o in inv["other_servers"]:
         dev("ekstra-server", o["name"], "ekstra Komodo-server med samme CT-nummer: «%s» (%s, %d stacker) – avklares med Roger"
             % (o["name"], o["state"], o["stacks"]))
