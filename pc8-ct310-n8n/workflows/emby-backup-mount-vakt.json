@@ -1,0 +1,154 @@
+{
+  "name": "Emby backup-mount vakt",
+  "nodes": [
+    {
+      "id": "7c2b83b8-33d2-4dc8-9ba5-5d6fd26e173a",
+      "name": "Hvert 15. minutt",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        300
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 15
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "a853f377-c3db-4e15-a74a-bdaaeb1b3e98",
+      "name": "Sjekk Tower NFS og Emby-avhengighet",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        240,
+        300
+      ],
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 5000,
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "url": "http://10.0.0.135:9118/media/check",
+        "method": "POST",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Audit-Token",
+              "value": "={{ $env.AUDIT_TOKEN }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={}",
+        "options": {
+          "timeout": 590000
+        }
+      }
+    },
+    {
+      "id": "6ce17e02-1a9e-4c72-a748-cc2af8fcb2ac",
+      "name": "Filtrer nye backup-/NFS-feil",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        520,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const sd=$getWorkflowStaticData('global'); const x=$json; const text=JSON.stringify(x).toLowerCase(); const bad=!!x.error || x.ok===false || x.notify===true || /stale file handle|read-only file system|emby.*backup|backup.*emby|nfs/.test(text); if(!bad) return []; const fp=JSON.stringify({ok:x.ok,error:x.error,reason:x.reason,notify:x.notify,matched:text.includes('stale file handle')?'stale_file_handle':text.includes('read-only file system')?'read_only':'other'}); const now=Date.now(); if(sd.lastFingerprint===fp && now-(sd.lastAlertAt||0)<6*60*60*1000) return []; sd.lastFingerprint=fp; sd.lastAlertAt=now; return [{json:{title:'Emby-backup: NFS/mount-feil',message:'Backup-mounten eller Tower-media trenger oppfølging. Det kan være Stale file handle/read-only NFS. Emby restartes ikke automatisk. Rapport: '+JSON.stringify(x).slice(0,3000)}}];"
+      }
+    },
+    {
+      "id": "124b562d-f0c6-4932-8fb9-2e497481e75a",
+      "name": "Varsle",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        800,
+        300
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "parameters": {
+        "url": "http://10.0.0.135:9118/notify",
+        "method": "POST",
+        "authentication": "none",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Audit-Token",
+              "value": "={{ $env.AUDIT_TOKEN }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({title:$json.title,message:$json.message}) }}",
+        "options": {
+          "timeout": 30000
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Hvert 15. minutt": {
+      "main": [
+        [
+          {
+            "node": "Sjekk Tower NFS og Emby-avhengighet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sjekk Tower NFS og Emby-avhengighet": {
+      "main": [
+        [
+          {
+            "node": "Filtrer nye backup-/NFS-feil",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtrer nye backup-/NFS-feil": {
+      "main": [
+        [
+          {
+            "node": "Varsle",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "executionTimeout": 600
+  }
+}
