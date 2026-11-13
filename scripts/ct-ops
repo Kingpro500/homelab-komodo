@@ -469,7 +469,11 @@ def cmd_plan_rename(vmid, service, start_stop=False, running_stacks=False):
             json.dump(plan, fh)
     status = "BLOKKERT" if blockers else ("INGEN_ENDRING" if not steps else "KLAR_FOR_GODKJENNING")
     log("plan", vmid=vmid, new=new, status=status, plan_id=plan_id)
-    return {"command": "plan-rename", "ok": not blockers, "status": status, "plan_id": plan_id, "valid_minutes": PLAN_TTL // 60,
+    kart = None
+    if plan_id:  # kartet merkes i det planen lages, ikke først når den er utført
+        set_mark(vmid, "navnebytte til %s planlagt, venter på Rogers ja" % new, "ct-ops", PLAN_TTL)
+        kart = map_refresh(vmid)
+    return {"command": "plan-rename", "map": kart, "ok": not blockers, "status": status, "plan_id": plan_id, "valid_minutes": PLAN_TTL // 60,
             "vmid": vmid, "from": inv["name"], "to": new, "steps": [s["text"] for s in steps], "blockers": blockers,
             "not_handled": skipped, "before": inv}
 
@@ -607,6 +611,8 @@ def cmd_apply(plan_id):
     vmid = plan["vmid"]
     if time.time() - plan["created"] > PLAN_TTL:
         os.remove(path)
+        marks(drop=vmid)
+        map_refresh(vmid)
         raise Stop("planen er eldre enn %d min – lag en ny plan" % (PLAN_TTL // 60))
     inv = inventory(vmid)
     if fingerprint(inv) != plan["fingerprint"]:
@@ -643,6 +649,7 @@ def cmd_apply(plan_id):
         rc, out, _ = sh(["git", "-C", CLONE, "grep", "-l", "-F", old, "origin/main", "--", "*.md", "*.yml", "*.yaml"])
         mentions = sorted({l.split(":", 1)[1] for l in out.splitlines() if ":" in l})[:25]
     # Kartets Komodo-statuslinje følger med i samme operasjon.
+    marks(drop=vmid)
     try:
         kart = cmd_map_fix([str(vmid)])
         kart = {k: kart.get(k) for k in ("status", "published_version", "changed", "still_wrong", "cannot_fix")}
@@ -722,11 +729,71 @@ def map_frame(html, vmid):
     return html[m.start():nxt if nxt > 0 else len(html)]
 
 
+MARKS = STATE + "/marks.json"
+MARK_TEXT_RE = re.compile(r"^[A-Za-z0-9æøåÆØÅ«» .,:/()→-]{3,140}$")
+
+
+def marks(drop=None, add=None):
+    """«Arbeid pågår»-merker per CT. Utløpte merker fjernes selv; kartet rettes da av neste map-fix/nattkjøring."""
+    try:
+        m = json.load(open(MARKS, encoding="utf-8"))
+    except (OSError, ValueError):
+        m = {}
+    now = time.time()
+    new = {k: v for k, v in m.items() if v.get("until", 0) > now and k != str(drop)}
+    if add:
+        new[str(add["vmid"])] = add
+    if new != m:
+        os.makedirs(STATE, exist_ok=True)
+        with open(MARKS, "w", encoding="utf-8") as fh:
+            json.dump(new, fh, ensure_ascii=False)
+    return new
+
+
+def set_mark(vmid, text, av, secs):
+    marks(add={"vmid": vmid, "text": text, "av": av, "ts": time.time(), "until": time.time() + secs})
+    log("merke-satt", vmid=vmid, text=text, av=av, minutes=int(secs // 60))
+
+
+def map_refresh(vmid):
+    """Publiserer kortet på nytt; feil her skal aldri stoppe selve operasjonen."""
+    try:
+        m = cmd_map_fix([str(vmid)])
+        return {k: m.get(k) for k in ("status", "published_version", "still_wrong", "cannot_fix")}
+    except Stop as x:
+        return {"status": "BLOKKERT", "error": str(x)}
+
+
+def cmd_mark(vmid, av, text, hours=4):
+    if vmid not in {g["vmid"] for g in px_guests() if g["type"] == "lxc"}:
+        raise Stop("CT %d finnes ikke som CT i klyngen" % vmid)
+    if not MARK_TEXT_RE.match(text) or not re.fullmatch(r"[a-z0-9-]{2,20}", av):
+        raise Stop("ugyldig merketekst eller avsender (3–140 tegn, bare bokstaver, tall og enkel tegnsetting)")
+    set_mark(vmid, text, av, hours * 3600)
+    kart = map_refresh(vmid)
+    ok = kart["status"] in ("FERDIG", "INGEN_ENDRING")
+    return {"command": "mark", "ok": ok, "status": "FERDIG" if ok else "UFULLSTENDIG", "vmid": vmid, "text": text,
+            "expires_hours": hours, "map": kart}
+
+
+def cmd_unmark(vmid):
+    had = str(vmid) in marks()
+    marks(drop=vmid)
+    log("merke-fjernet", vmid=vmid, had=had)
+    kart = map_refresh(vmid)
+    ok = kart["status"] in ("FERDIG", "INGEN_ENDRING")
+    return {"command": "unmark", "ok": ok, "status": "FERDIG" if ok else "UFULLSTENDIG", "vmid": vmid, "had_mark": had, "map": kart}
+
+
 def map_row(vmid, src, live, px, kall):
     import html as H
     inv = inventory(vmid, px, kall)
     bad, notes = check(inv)
     level, text = map_status(inv, bad, notes)
+    mk = marks().get(str(vmid))
+    if mk:  # arbeid pågår: aldri grønn, og det står først på linjen
+        level = "rød" if level == "rød" else "gul"
+        text = "⚠ ARBEID PÅGÅR: %s (%s, %s) · %s" % (mk["text"], mk["av"], time.strftime("%d.%m %H:%M", time.localtime(mk["ts"])), text)
     want = '<div class="ct-method" style="%s">%s</div>' % (MAP_STYLE % COLORS[level], H.escape(text, quote=False))
     row = {"vmid": vmid, "node": inv["node"], "name": inv["name"], "ct_status": inv["status"], "expected": {"color": level, "text": text},
            "current": None, "ok": False, "problems": [], "_want": want, "_old": None}
@@ -872,9 +939,9 @@ def main(argv):
     args = [a for a in argv if not a.startswith("--")]
     try:
         if not args or flags - {"--start-stop", "--running-stacks"}:
-            raise Stop("bruk: ct-ops audit | nightly | verify <vmid> | map-check <vmid ...|all> | map-fix <vmid ...> | plan-rename <vmid> <tjeneste> [--start-stop] [--running-stacks] | apply <plan_id>")
+            raise Stop("bruk: ct-ops audit | nightly | verify <vmid> | map-check <vmid ...|all> | map-fix <vmid ...> | mark <vmid> <av> <tekst> | unmark <vmid> | plan-rename <vmid> <tjeneste> [--start-stop] [--running-stacks] | apply <plan_id>")
         cmd = args[0]
-        if cmd in ("plan-rename", "apply", "map-fix", "nightly"):
+        if cmd in ("plan-rename", "apply", "map-fix", "nightly", "mark", "unmark"):
             os.makedirs(STATE, exist_ok=True)
             lock = open(STATE + "/lock", "w")
             try:
@@ -891,6 +958,10 @@ def main(argv):
             out = cmd_plan_rename(int(args[1]), args[2], "--start-stop" in flags, "--running-stacks" in flags)
         elif cmd in ("map-check", "map-fix") and len(args) >= 2 and all(a.isdigit() or (a == "all" and len(args) == 2) for a in args[1:]):
             out = cmd_map_check(args[1:]) if cmd == "map-check" else cmd_map_fix(args[1:])
+        elif cmd == "mark" and len(args) >= 4 and args[1].isdigit():
+            out = cmd_mark(int(args[1]), args[2], " ".join(args[3:]))
+        elif cmd == "unmark" and len(args) == 2 and args[1].isdigit():
+            out = cmd_unmark(int(args[1]))
         elif cmd == "apply" and len(args) == 2:
             out = cmd_apply(args[1])
         else:

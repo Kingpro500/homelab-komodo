@@ -77,3 +77,15 @@ Ved gjenoppretting: lag ny nøkkel, legg den offentlige delen i `authorized_keys
 opprett credentialen i n8n, importer arbeidsflyten og aktiver den.
 
 `ct-ops` erstatter det halvferdige utkastet «CT reconcile orchestrator» for navneendring og kartstatus.
+
+## «Arbeid pågår» i kartet (mark / unmark)
+
+| Forespørsel | Virkning |
+| --- | --- |
+| `{"action":"mark","vmid":320,"av":"hermes","text":"flyttes til pc8"}` | Kortet blir gult med «⚠ ARBEID PÅGÅR: flyttes til pc8 (hermes, dato)» først på linjen. Publiseres straks. |
+| `{"action":"unmark","vmid":320}` | Merket fjernes, og kortet får målt status. |
+
+- `plan-rename` setter merket selv når en plan er klar, `apply` fjerner det. En plan som går ut på tid mister merket.
+- Merker ligger i `/var/lib/ct-ops/marks.json` på pc6 og går ut etter 4 timer (plan: 30 min). Nattkjøringen retter kartet etter utløpte merker.
+- Tekst: 3–140 tegn, bokstaver, tall og enkel tegnsetting. `av`: små bokstaver, tall og bindestrek.
+- n8n leser det publiserte kartet selv og svarer bare `ok: true` når merket faktisk står (eller er borte).
