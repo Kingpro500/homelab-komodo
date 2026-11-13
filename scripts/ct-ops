@@ -177,6 +177,21 @@ def relative_paths(run_dir, files):
     return hits
 
 
+_linked_repos = {}
+
+
+def resolve_linked_repo(linked_id):
+    """Slå opp en Komodo linked_repo-ID og returner det faktiske reponavnet."""
+    if linked_id in _linked_repos:
+        return _linked_repos[linked_id]
+    try:
+        r = komodo('read', 'GetRepo', {'repo': linked_id})
+        name = r.get('config', {}).get('repo', '')
+        _linked_repos[linked_id] = name or ("linked:" + linked_id)
+    except Stop:
+        _linked_repos[linked_id] = "linked:" + linked_id
+    return _linked_repos[linked_id]
+
 # ---------- inventar ----------
 def periphery(node, vmid):
     """Leser Periphery (systemd eller container), connect_as, Docker og antall appcontainere fra gjesten."""
@@ -249,7 +264,7 @@ def inventory(vmid, px=None, kall=None, deep=True):
             if deep:
                 gs = komodo("read", "GetStack", {"stack": s["id"]})
                 c, i = gs["config"], gs["info"]
-                st.update(repo=c.get("repo") or ("linked:" + c.get("linked_repo", "") if c.get("linked_repo") else ""),
+                st.update(repo=c.get("repo") or (resolve_linked_repo(c["linked_repo"]) if c.get("linked_repo") else ""),
                           run_directory=(c.get("run_directory") or "").strip("./"), file_paths=c.get("file_paths") or [],
                           project_name=c.get("project_name") or "", deployed_project=i.get("deployed_project_name") or "",
                           missing_files=i.get("missing_files") or [], remote_errors=len(i.get("remote_errors") or []))
