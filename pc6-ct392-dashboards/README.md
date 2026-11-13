@@ -1,8 +1,9 @@
-# Dashboards — pc6 CT392 (10.0.0.166)
+# Dashboards — pc6 CT154 (10.0.0.166)
 
 | | |
 |---|---|
-| **Komodo-server** | `pc6-ct392-dashboards` (agent: systemd, `connect_as` i `/etc/komodo/periphery.config.toml`) |
+| **Proxmox-CT** | CT154 `pc6-ct154-dashboards` på pc6. Lå i CT392 fram til 13.11.2026 |
+| **Komodo-server** | `pc6-ct392-dashboards` (navnet lyver, se nederst. Agent: systemd, `connect_as` i `/etc/komodo/periphery.config.toml`) |
 | **Komodo-stack** | `pc6-ct392-dashboards`, `project_name = dashboards` |
 | **Compose-prosjekt på verten** | `dashboards` |
 
@@ -70,15 +71,36 @@ status, også de som ligger under profilen `pause`. Uten denne listen står
 stacken som *unhealthy* fordi tre containere er stoppet, og drift-vakten
 melder falsk alarm. Med listen står den som *running*.
 
-**`legacy_compose_cli = true`** i `/etc/komodo/periphery.config.toml` i CT392.
-CT392 har Docker 20.10.24 og bare `docker-compose` 1.29.2 — ikke
-compose-v2-tillegget (`docker compose`) som resten av homelab-et bruker.
-Uten flagget kjører Periphery `docker compose` og deployen feiler med
-*unknown shorthand flag*. Profiler virker i 1.29.2, det er testet i CT392.
-Gammel kopi: `periphery.config.toml.bak-20261112`.
+**`legacy_compose_cli = false`** i `/etc/komodo/periphery.config.toml` i CT154.
+CT154 er Debian 13 (trixie) med husstandarden docker.io 26.1.5 og
+`docker compose` 2.x, så flagget skal være **av**. I CT392 måtte det stå på
+`true`, fordi den hadde Docker 20.10.24 og bare `docker-compose` 1.29.2 —
+uten flagget kjørte Periphery `docker compose` og deployen feilet med
+*unknown shorthand flag*. Den gjelden er gjort opp med flyttingen.
 
-> **Gjeld:** CT392 (og CT210) står på Debian 11-utgaven av Docker selv om
-> systemet er Debian 12, og apt-kildene har ikke `docker-compose-v2`. Skal de
-> opp på husstandarden (docker.io 26.1.5 + docker-compose-v2 2.26.1, som CT120
-> og CT172), må apt-kildene fikses først, og da restarter Docker-motoren og
-> containerne. Ikke gjort 12. nov 2026.
+## 13. november 2026 — flyttet fra CT392 til CT154
+
+Grafana, de 729 MB med data i `/opt/grafana` og mappen `/opt/dashboards` ble
+flyttet til CT154, som er fersk Debian 13. Alle 1303 filer ble sammenliknet
+med `md5sum` på begge sider og var identiske før CT392 ble slått av.
+
+| | CT392 (før) | CT154 (nå) |
+|---|---|---|
+| OS | Debian 12 bookworm | Debian 13 trixie |
+| Docker | 20.10.24 | 26.1.5 |
+| Compose | `docker-compose` 1.29.2 | `docker compose` 2.x |
+| `legacy_compose_cli` | `true` | `false` |
+| IP | 10.0.0.166 | 10.0.0.166 (overtatt) |
+| Ressurser | 2 kjerner / 2 GB / 24 GB | 2 kjerner / 2 GB / 16 GB |
+
+**CT392 står igjen urørt som angrefrist.** Slått av, `onboot: 0`, og IP-en
+flyttet til 10.0.0.231 så den aldri kolliderer med CT154 om noen starter den.
+Den har fortsatt dødt gods som ikke ble med: `/opt/open-webui` (890 MB) og
+`/opt/diskspeed` (diskspeed kjører i CT120). Slett ikke CT392 uten at Roger
+sier det.
+
+**Navnegjeld:** Komodo-serveren, Komodo-stacken og denne mappen heter fortsatt
+`pc6-ct392-dashboards` selv om tjenesten bor i CT154. Periphery i CT154 kobler
+seg på med `connect_as = "pc6-ct392-dashboards"` og bruker nøklene fra CT392,
+nettopp for at Komodo ikke skulle merke flyttingen. Navnebyttet er en egen jobb
+som må tas i Komodo, GitHub og kartet samtidig — ikke rydd i det halvveis.
