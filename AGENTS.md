@@ -73,6 +73,17 @@ CT137. CT137 har heller ingen Komodo-server.
 
 Alt står i [pc8-ct310-n8n/docs/ct-ops.md](pc8-ct310-n8n/docs/ct-ops.md).
 
+## 🚧 Merk kartet FØR du rører en CT — «arbeid pågår»
+
+Kartet skal vise at noe er på gang i samme øyeblikk som arbeidet planlegges, ikke først når det er ferdig.
+
+1. **Før** du planlegger eller gjør noe som endrer en CT (sletting, flytting, pakkebytte, Komodo-endring, opprydding): `POST /webhook/ct-ops {"action":"mark","vmid":<id>,"av":"<agent>","text":"<hva som skal skje>"}`. Kortet blir gult med «⚠ ARBEID PÅGÅR: …» først på linjen.
+2. **Etter** at arbeidet er ferdig *og kontrollert*, eller avlyst: `{"action":"unmark","vmid":<id>}`. Kortet får da målt status igjen.
+3. `plan-rename` merker selv, og `apply` fjerner merket selv. Alt annet arbeid må du merke.
+4. Si ikke «merket» eller «fjernet» uten at svaret har `ok: true`; n8n leser selv kartet tilbake.
+
+Et merke går ut av seg selv etter 4 timer (plan: 30 min), og nattkjøringen rydder linjen. Det er en sikring, ikke en unnskyldning for å la være å fjerne det.
+
 ## 🏷️ Komodo-navn lyver — les beskrivelsen, ikke navnet
 
 Mange servere og stacker i Komodo heter fortsatt det CT-nummeret de hadde før en flytting. `pc6-ct109-*` kjører i CT210 (serveren heter `pc6-ct109-node`), `pc6-ct392-dashboards` kjører i CT154 siden 13. nov 2026, `pc8-ct102-core` er CT110, `pc9-ct124-uisp` står på pc7. **Hver slik oppføring har en beskrivelse som sier hvor den faktisk kjører (satt 12. nov 2026). Stol på beskrivelsen og Proxmox, aldri på navnet.**

@@ -6,6 +6,7 @@ import json, os, re, subprocess, sys, time
 
 V = r"\d{3,6}"
 ALLOWED = [r"audit", r"nightly", r"verify " + V, r"map-check (?:all|%s(?: %s){0,99})" % (V, V), r"map-fix %s(?: %s){0,99}" % (V, V),
+           r"mark %s [a-z0-9-]{2,20} [A-Za-z0-9æøåÆØÅ«» .,:/()→-]{3,140}" % V, r"unmark " + V,
            r"plan-rename %s [a-z0-9][a-z0-9-]{0,39}(?: --start-stop)?(?: --running-stacks)?" % V, r"apply p\d{3,6}-[0-9a-f]{10}"]
 raw = os.environ.get("SSH_ORIGINAL_COMMAND", "")
 cmd = re.sub(r"^\s*cd\s+\S+\s*(?:;|&&)\s*", "", raw).strip()
