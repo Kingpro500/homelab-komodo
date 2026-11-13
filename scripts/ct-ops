@@ -610,7 +610,30 @@ def do_step(step, plan, inv, done):
         if old != w:
             komodo("write", "RenameStack", {"id": sid, "name": w})
         if step["state"] == "running":
-            komodo("execute", "DeployStack", {"stack": sid})
+            # Et navnebytte skal aldri oppgradere tjenesten: deploy uten «compose pull», så flytende tagger (latest) står stille.
+            had_pull = bool(komodo("read", "GetStack", {"stack": sid})["config"].get("auto_pull"))
+            if had_pull:
+                komodo("write", "UpdateStack", {"id": sid, "config": {"auto_pull": False}})
+            try:
+                if komodo("read", "GetStack", {"stack": sid})["config"].get("auto_pull"):
+                    raise Stop("fikk ikke slått av auto_pull på «%s» – deployer ikke" % w)
+                upd = komodo("execute", "DeployStack", {"stack": sid})
+                uid = (upd.get("_id") or {}).get("$oid") or upd.get("id")
+                for _ in range(75):
+                    if not uid or upd.get("status") == "Complete":
+                        break
+                    time.sleep(8)
+                    upd = komodo("read", "GetUpdate", {"id": uid})
+                stages = [l.get("stage") for l in upd.get("logs", [])]
+                if "Compose Pull" in stages:
+                    raise Stop("stack «%s»: Komodo kjørte «Compose Pull» selv om auto_pull var av" % w)
+                if uid and not upd.get("success"):
+                    bad = [l for l in upd.get("logs", []) if not l.get("success")]
+                    why = re.sub(r"<[^>]+>", "", (bad[-1].get("stderr") or bad[-1].get("stdout") or ""))[-250:] if bad else upd.get("status")
+                    raise Stop("stack «%s»: deploy feilet i steget «%s»: %s" % (w, bad[-1].get("stage") if bad else "?", why))
+            finally:
+                if had_pull:
+                    komodo("write", "UpdateStack", {"id": sid, "config": {"auto_pull": True}})
         head = git("rev-parse", "origin/main") if step["run_directory"] == w else git("rev-parse", "HEAD")
         info = {}
         for _ in range(40):
