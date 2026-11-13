@@ -7,3 +7,4 @@
 pihole/config/
 pihole/dnsmasq.d/
 config-backups/
+__pycache__/
