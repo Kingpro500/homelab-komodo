@@ -61,7 +61,7 @@ får du førstegangs-skjermen der du lager superuser.
 Deretter: profilikonet → Application API Token
 (eller åpne `http://10.0.0.131:8000/api/profile/generate_auth_token`)
 
-Legg tokenen som `PAPERLESS_TOKEN` i Komodo, stack `pc6-ct154-paperless`.
+Legg tokenen som `PAPERLESS_TOKEN` i Komodo, stack `pc6-ct320-paperless`.
 Og som `PAPERLESS_TOKEN` + `OPENROUTER_API_KEY` i stack `pc8-ct310-n8n`.
 
 Test før du går videre:

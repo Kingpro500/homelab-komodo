@@ -20,7 +20,7 @@
     ],
     "her_lagres_token": {
       "komodo": "Paperless -> Edit -> Environment Variables -> add PAPERLESS_TOKEN",
-      "eller": "Komodo stack 'pc6-ct154-paperless' -> env-variabel paa containeren paperless-webserver",
+      "eller": "Komodo stack 'pc6-ct320-paperless' -> env-variabel paa containeren paperless-webserver",
       "advarsel": "Ikke skriv tokenen i chat med meg. Jeg trenger den ikke — n8n leser den fra env-variabelen selv."
     },
     "verifiser": "curl -H 'Authorization: Token <TOKEN>' http://10.0.0.131:8000/api/documents/?page_size=1  -> skal svare 200 (ikke 401)"

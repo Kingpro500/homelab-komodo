@@ -133,6 +133,11 @@ def px_guests():
 # ---------- repo ----------
 def git(*args):
     rc, out, err = sh(["git", "-C", CLONE, *args], 120)
+    for _ in range(3):  # et forbigående nett-/DNS-blaff skal ikke velte en kjøring som ellers er ferdig
+        if rc == 0 or args[0] not in ("fetch", "pull", "ls-remote"):
+            break
+        time.sleep(10)
+        rc, out, err = sh(["git", "-C", CLONE, *args], 120)
     if rc != 0:
         raise Stop("git %s feilet: %s" % (" ".join(args), (err or out).strip()[-300:]))
     return out.strip()
@@ -491,14 +496,42 @@ def wait_server(server_id, name, secs=240):
     return False, last
 
 
-SET_AS = ("set -e; if systemctl is-active --quiet periphery 2>/dev/null; then f=/etc/komodo/periphery.config.toml; "
-          "cp -p $f $f.bak-ctops; sed -i 's/^connect_as *=.*/connect_as = \"'\"$N\"'\"/' $f; grep -q '^connect_as = \"'\"$N\"'\"' $f; systemctl restart periphery; "
-          "else f=/opt/komodo/periphery/.env; cp -p $f $f.bak-ctops; sed -i 's/^PERIPHERY_CONNECT_AS=.*/PERIPHERY_CONNECT_AS='\"$N\"'/' $f; "
-          "grep -q '^PERIPHERY_CONNECT_AS='\"$N\"'$' $f; cd /opt/komodo/periphery && docker compose up -d --force-recreate >/dev/null 2>&1; fi")
+SET_AS = r"""
+set -e
+if systemctl is-active --quiet periphery 2>/dev/null; then
+  f=/etc/komodo/periphery.config.toml
+  [ -f "$f" ] || { echo "fant ikke $f"; exit 3; }
+  [ "$DRY" = 1 ] && { echo "systemd $f"; exit 0; }
+  cp -p "$f" "$f.bak-ctops"
+  sed -i "s/^connect_as *=.*/connect_as = \"$N\"/" "$f"
+  grep -q "^connect_as = \"$N\"" "$f" || { echo "connect_as ble ikke skrevet i $f"; exit 4; }
+  systemctl restart periphery
+else
+  # Periphery i container: oppsettet leses fra containeren selv (compose-mappe, compose-fil, env-fil), ikke antas.
+  c=$(docker ps --format '{{.Names}} {{.Image}}' | awk '/komodo-periphery/{print $1; exit}')
+  [ -n "$c" ] || { echo "fant ingen kjørende periphery-container"; exit 3; }
+  lab(){ docker inspect -f "{{index .Config.Labels \"com.docker.compose.project.$1\"}}" "$c"; }
+  wd=$(lab working_dir); cf=$(lab config_files | cut -d, -f1); ef=$(lab environment_file)
+  [ -n "$wd" ] && [ -n "$cf" ] || { echo "periphery-containeren $c er ikke startet med compose"; exit 3; }
+  case "$cf" in /*) ;; *) cf="$wd/$cf";; esac
+  case "$ef" in "") f="$wd/.env";; /*) f="$ef";; *) f="$wd/$ef";; esac
+  [ -f "$cf" ] || { echo "fant ikke compose-filen $cf"; exit 3; }
+  grep -q '^PERIPHERY_CONNECT_AS=' "$f" 2>/dev/null || { echo "PERIPHERY_CONNECT_AS står ikke i $f"; exit 3; }
+  if docker compose version >/dev/null 2>&1; then dc="docker compose"
+  elif command -v docker-compose >/dev/null 2>&1; then dc="docker-compose"
+  else echo "verken «docker compose» eller docker-compose finnes"; exit 3; fi
+  [ "$DRY" = 1 ] && { echo "container $c | $dc -f $cf --env-file $f"; exit 0; }
+  cp -p "$f" "$f.bak-ctops"
+  sed -i "s/^PERIPHERY_CONNECT_AS=.*/PERIPHERY_CONNECT_AS=$N/" "$f"
+  grep -q "^PERIPHERY_CONNECT_AS=$N\$" "$f" || { echo "navnet ble ikke skrevet i $f"; exit 4; }
+  cd "$wd" && $dc -f "$cf" --env-file "$f" up -d --force-recreate 2>&1 | tail -3
+fi
+"""
 
 
-def set_connect_as(node, vmid, name):
-    return guest(node, vmid, "N=%s; %s" % (shlex.quote(name), SET_AS), 120)
+def set_connect_as(node, vmid, name, dry=False):
+    rc, out, err = guest(node, vmid, "N=%s; DRY=%d; %s" % (shlex.quote(name), 1 if dry else 0, SET_AS), 180)
+    return rc, out, ((out or "") + " " + (err or "")).strip()[-300:]
 
 
 def do_step(step, plan, inv, done):
@@ -537,6 +570,9 @@ def do_step(step, plan, inv, done):
         p = periphery(node, vmid)
         if p.get("connect_as") != step["from"]:
             raise Stop("gjestens connect_as er «%s», planen forventet «%s» – ingenting endret" % (p.get("connect_as"), step["from"]))
+        rc, how, err = set_connect_as(node, vmid, new, dry=True)  # kan gjesten endres? sjekkes FØR noe røres
+        if rc != 0:
+            raise Stop("kan ikke bytte Periphery-navn i gjesten (%s) – ingenting endret" % err)
         komodo("write", "RenameServer", {"id": step["server_id"], "name": new})
         rc, out, err = set_connect_as(node, vmid, new)
         ok, last = (False, None) if rc != 0 else wait_server(step["server_id"], new)
