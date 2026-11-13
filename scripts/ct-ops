@@ -165,15 +165,27 @@ REL_RE = re.compile(r"""^\s*-\s*["']?\.{1,2}/|^\s*source:\s*["']?\.{1,2}/|^\s*(?
 
 
 def relative_paths(run_dir, files):
-    """True hvis compose peker på filer/mapper relativt til stackens mappe (da flytter navnebytte data-/konfigstier)."""
+    """Flagg relative stier i compose som ikke trygt følger med git mv."""
     hits = []
+    rd = run_dir.strip("./")
+    vol_re = re.compile(r'-\s*["\x27]?(\.\.?/[^:"\x27\s]+)')
     for f in files or ["compose.yaml"]:
-        txt = repo_file("%s/%s" % (run_dir.strip("./"), f))
+        txt = repo_file("%s/%s" % (rd, f))
         if txt is None:
             hits.append(f + ": finnes ikke i main")
             continue
         for m in REL_RE.finditer(txt):
-            hits.append("%s: %s" % (f, m.group(0).strip()[:60]))
+            line_end = txt.find("\n", m.start())
+            full_line = txt[m.start():(line_end if line_end > 0 else len(txt))].strip()
+            if full_line.startswith("-") and ":ro" in full_line:
+                vm = vol_re.match(full_line)
+                if vm:
+                    host_rel = vm.group(1).lstrip("./")
+                    if host_rel:
+                        rc, _, _ = sh(["git", "-C", CLONE, "cat-file", "-t", "origin/main:%s/%s" % (rd, host_rel)], 10)
+                        if rc == 0:
+                            continue
+            hits.append("%s: %s" % (f, full_line[:60]))
     return hits
 
 
