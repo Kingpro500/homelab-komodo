@@ -1,6 +1,6 @@
 # Paperless-ngx — pc6 CT154
 
-- **Komodo server / stack:** `pc6-ct154-paperless`
+- **Komodo server:** `pc6-ct320-paperless-archive` · **stack:** `pc6-ct320-paperless` (CT320 på pc6, het CT154 før)
 - **Address:** `http://10.0.0.131:8000`
 - **Runtime data:** `/opt/paperless/` inside CT154; never committed to Git.
 - **Services:** Paperless-ngx, PostgreSQL, Valkey, Gotenberg and Tika.
