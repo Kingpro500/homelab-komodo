@@ -191,10 +191,13 @@ def periphery(node, vmid):
             "docker": d.get("docker", "ukjent"), "apps": d.get("apps", "?")}
 
 
+def list_servers():
+    # Komodo gir bare 50 om gangen uten limit på toppnivå.
+    return komodo("read", "ListServers", {"limit": 1000})
+
+
 def komodo_all():
-    servers = komodo("read", "ListServers", {"query": {"limit": 1000}})
-    if len(servers) == 50:
-        servers = komodo("read", "ListServers", {"limit": 1000})
+    servers = list_servers()
     stacks = komodo("read", "ListStacks", {"limit": 1000})
     return servers, stacks
 
@@ -453,12 +456,12 @@ def cmd_plan_rename(vmid, service, start_stop=False, running_stacks=False):
             "not_handled": skipped, "before": inv}
 
 
-def wait_server(server_id, name, secs=120):
+def wait_server(server_id, name, secs=240):
     end = time.time() + secs
     last = None
     while time.time() < end:
         time.sleep(6)
-        for s in komodo("read", "ListServers", {"query": {"limit": 1000}}):
+        for s in list_servers():
             if s["id"] == server_id:
                 last = (s["name"], s["info"].get("state"))
                 if last == (name, "Ok"):
