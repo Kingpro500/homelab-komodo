@@ -64,6 +64,15 @@ Uten Periphery i det hele tatt: CT130 (Hermes, trenger ingen), CT152, CT180 og
 CT137. CT137 har heller ingen Komodo-server.
 
 
+## 🔒 Navneendring og kartstatus går gjennom n8n `/ct-ops` — aldri for hånd
+
+1. **Bytt aldri navn på en CT med `pct set --hostname`, i Komodo eller i repoet for hånd.** Bruk `POST http://10.0.0.119:5678/webhook/ct-ops`: først `plan-rename`, vis stegene til Roger, vent på et tydelig ja, så `apply`.
+2. **Endre aldri Komodo-statuslinjen (`.ct-method`) i kartet for hånd.** Bruk `map-check` og `map-fix`.
+3. **«Ferdig» betyr `ok: true` i svaret fra `/ct-ops`.** Lim inn `status` og `kvalitetssjekk` i svaret til Roger. Er `ok` false: gjengi status og avvik ordrett, og ikke prøv en annen vei.
+4. Bevisste avvik godtas bare i `scripts/ct-ops-unntak.json`, via `homelab-pr`, etter Rogers ja.
+
+Alt står i [pc8-ct310-n8n/docs/ct-ops.md](pc8-ct310-n8n/docs/ct-ops.md).
+
 ## 🏷️ Komodo-navn lyver — les beskrivelsen, ikke navnet
 
 Mange servere og stacker i Komodo heter fortsatt det CT-nummeret de hadde før en flytting. `pc6-ct109-*` kjører i CT210, `pc8-ct102-core` er CT110, `pc9-ct124-uisp` står på pc7. **Hver slik oppføring har en beskrivelse som sier hvor den faktisk kjører (satt 12. nov 2026). Stol på beskrivelsen og Proxmox, aldri på navnet.**

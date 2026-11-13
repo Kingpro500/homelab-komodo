@@ -1,0 +1,886 @@
+#!/usr/bin/env python3
+"""ct-ops — kontrollert vei for CT-operasjoner (navneendring m.m.) med tvungen sluttkontroll.
+
+Brukes av n8n-flyten «CT-ops» (webhook /ct-ops) og kan kjøres for hånd på pc6:
+
+    ct-ops audit                          # alle CT-er: Proxmox mot Komodo mot GitHub
+    ct-ops verify <vmid>                  # én CT: fasit etter en endring
+    ct-ops plan-rename <vmid> <tjeneste> [--start-stop] [--running-stacks]
+    ct-ops apply <plan_id>                # utfør en plan (gyldig i 30 min)
+    ct-ops map-check <vmid ...|all>       # nettverkskartet: stemmer Komodo-statuslinjen og fargen?
+    ct-ops map-fix <vmid ...>             # rett statuslinjen, publiser med nettkart-publish, les tilbake
+
+Alt svar er JSON på stdout. «ok»/«status» settes av det som faktisk leses tilbake fra
+Proxmox, gjesten og Komodo – aldri av at en kommando ble sendt.
+
+Regler som er bygget inn (jf. AGENTS.md og docs/proxmox-komodo-github-migration-runbook.md):
+  * Navn: <node>-ct<vmid>-<tjeneste>. Én Komodo-server per CT, samme navn, state Ok.
+  * Komodo-serveren finnes via connect_as i gjestens Periphery, ikke via navnelikhet.
+  * Servernavn byttes sammen med connect_as + restart av Periphery, med tilbakerulling.
+  * Stack: project_name låses før navnebytte. Kjørende stacker og stacker med relative
+    stier i compose røres ikke uten --running-stacks / aldri (relative stier).
+  * Rød drift-vakt stopper alle endringer. Emby, Komodo Core og n8n endres aldri herfra.
+  * Ingen sletting, ingen ny Komodo-server, ingen ny stack.
+
+Tilgang: KOMODO_* leses fra /home/hermes/.hermes/.env i CT130 (via pc7). Verdier skrives aldri ut.
+Kilde: GitHub homelab-komodo, scripts/ct-ops. Installeres som /usr/local/sbin/ct-ops på pc6.
+"""
+import fcntl, hashlib, json, os, re, shlex, subprocess, sys, time, urllib.error, urllib.request
+
+REPO = "Kingpro500/homelab-komodo"
+CLONE = "/root/claude-work/homelab-komodo"
+STATE = "/var/lib/ct-ops"
+LOG = "/var/log/ct-ops.log"
+HERMES_ENV = "/home/hermes/.hermes/.env"
+PC7 = "root@10.0.0.107"
+DRIFT_URL = "http://10.0.0.135:9118/drift"
+PLAN_TTL = 1800
+# Endres aldri herfra: Komodo Core, Emby, Emby-standby, n8n (flyten kjører der).
+PROTECTED = {110: "Komodo Core", 200: "Emby", 203: "Emby standby", 310: "n8n"}
+SVC_RE = re.compile(r"^[a-z0-9](?:[a-z0-9-]{0,38}[a-z0-9])?$")
+PREFIX_RE = re.compile(r"^pc\d+-(?:ct|vm)\d+-")
+SSH = ["ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=10"]
+
+
+class Stop(Exception):
+    pass
+
+
+def log(event, **kw):
+    try:
+        with open(LOG, "a", encoding="utf-8") as fh:
+            fh.write(json.dumps({"ts": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "event": event, **kw}, ensure_ascii=False) + "\n")
+    except OSError:
+        pass
+
+
+def sh(argv, timeout=60, inp=None):
+    r = subprocess.run(argv, capture_output=True, text=True, timeout=timeout, input=inp)
+    return r.returncode, r.stdout, r.stderr
+
+
+# ---------- tilgang ----------
+_env = None
+
+
+def env():
+    global _env
+    if _env is None:
+        if os.access(HERMES_ENV, os.R_OK):
+            text = open(HERMES_ENV, encoding="utf-8").read()
+        else:
+            rc, text, err = sh(SSH + [PC7, "pct exec 130 -- cat " + HERMES_ENV])
+            if rc != 0:
+                raise Stop("fikk ikke lest tilgangen fra CT130 via pc7: " + err.strip()[-200:])
+        _env = {}
+        for line in text.splitlines():
+            line = line.strip()
+            if "=" in line and not line.startswith("#"):
+                k, v = line.split("=", 1)
+                _env[k.strip()] = v.strip().strip('"').strip("'")
+    return _env
+
+
+def komodo(kind, typ, params=None):
+    e = env()
+    url = "%s/%s/%s" % (e.get("KOMODO_ADDRESS", "http://10.0.0.117:9120").rstrip("/"), kind, typ)
+    req = urllib.request.Request(url, data=json.dumps(params or {}).encode(), method="POST", headers={
+        "Content-Type": "application/json", "X-Api-Key": e.get("KOMODO_API_KEY", ""), "X-Api-Secret": e.get("KOMODO_API_SECRET", "")})
+    try:
+        with urllib.request.urlopen(req, timeout=40) as r:
+            raw = r.read()
+            return json.loads(raw) if raw else None
+    except urllib.error.HTTPError as x:
+        raise Stop("Komodo %s/%s -> HTTP %s: %s" % (kind, typ, x.code, x.read().decode("utf-8", "replace")[:300]))
+    except (urllib.error.URLError, TimeoutError) as x:
+        raise Stop("Komodo %s/%s svarer ikke: %s" % (kind, typ, x))
+
+
+# ---------- Proxmox ----------
+_nodes = None
+
+
+def nodes():
+    global _nodes
+    if _nodes is None:
+        rc, out, err = sh(["pvesh", "get", "/cluster/status", "--output-format", "json"])
+        if rc != 0:
+            raise Stop("pvesh cluster/status feilet: " + err.strip()[-200:])
+        _nodes = {n["name"]: n for n in json.loads(out) if n["type"] == "node"}
+    return _nodes
+
+
+def on_node(node, cmd, timeout=60):
+    n = nodes().get(node)
+    if not n:
+        raise Stop("ukjent node " + node)
+    if n.get("local"):
+        return sh(["sh", "-c", cmd], timeout)
+    return sh(SSH + ["root@" + n["ip"], cmd], timeout)
+
+
+def guest(node, vmid, cmd, timeout=60):
+    return on_node(node, "pct exec %d -- sh -c %s" % (vmid, shlex.quote(cmd)), timeout)
+
+
+def px_guests():
+    rc, out, err = sh(["pvesh", "get", "/cluster/resources", "--type", "vm", "--output-format", "json"])
+    if rc != 0:
+        raise Stop("pvesh cluster/resources feilet: " + err.strip()[-200:])
+    return json.loads(out)
+
+
+# ---------- repo ----------
+def git(*args):
+    rc, out, err = sh(["git", "-C", CLONE, *args], 120)
+    if rc != 0:
+        raise Stop("git %s feilet: %s" % (" ".join(args), (err or out).strip()[-300:]))
+    return out.strip()
+
+
+_fetched = False
+
+
+def repo_file(path):
+    global _fetched
+    if not _fetched:
+        git("fetch", "-q", "--prune", "origin")
+        _fetched = True
+    rc, out, _ = sh(["git", "-C", CLONE, "show", "origin/main:" + path])
+    return out if rc == 0 else None
+
+
+def repo_dir_exists(path):
+    repo_file("README.md")
+    rc, out, _ = sh(["git", "-C", CLONE, "ls-tree", "-d", "--name-only", "origin/main", path])
+    return rc == 0 and bool(out.strip())
+
+
+REL_RE = re.compile(r"""^\s*-\s*["']?\.{1,2}/|^\s*source:\s*["']?\.{1,2}/|^\s*(?:env_file|context|dockerfile|file):\s*["']?\.{0,2}/?[\w.-]+|^\s*env_file:\s*$""", re.M)
+
+
+def relative_paths(run_dir, files):
+    """True hvis compose peker på filer/mapper relativt til stackens mappe (da flytter navnebytte data-/konfigstier)."""
+    hits = []
+    for f in files or ["compose.yaml"]:
+        txt = repo_file("%s/%s" % (run_dir.strip("./"), f))
+        if txt is None:
+            hits.append(f + ": finnes ikke i main")
+            continue
+        for m in REL_RE.finditer(txt):
+            hits.append("%s: %s" % (f, m.group(0).strip()[:60]))
+    return hits
+
+
+# ---------- inventar ----------
+def periphery(node, vmid):
+    """Leser Periphery (systemd eller container), connect_as, Docker og antall appcontainere fra gjesten."""
+    cmd = ("P=$(docker ps --format '{{.Names}} {{.Image}}' 2>/dev/null | grep -i 'komodo-periphery' | head -1 | cut -d' ' -f1); "
+           "if systemctl is-active --quiet periphery 2>/dev/null; then echo kind=systemd; "
+           "sed -n 's/^connect_as *= *\"\\(.*\\)\"/as=\\1/p' /etc/komodo/periphery.config.toml 2>/dev/null; "
+           "elif [ -n \"$P\" ]; then echo kind=docker; echo container=$P; "
+           "docker inspect -f '{{range .Config.Env}}{{println .}}{{end}}' \"$P\" | sed -n 's/^PERIPHERY_CONNECT_AS=/as=/p'; "
+           "else echo kind=none; fi; "
+           "if docker info >/dev/null 2>&1; then echo docker=ja; echo apps=$(docker ps --format '{{.Image}}' | grep -vic 'komodo-periphery'); "
+           "elif command -v docker >/dev/null 2>&1; then echo docker=feil; else echo docker=nei; echo apps=0; fi")
+    rc, out, err = guest(node, vmid, cmd, 40)
+    if rc != 0:
+        return {"kind": "ukjent", "connect_as": None, "docker": "ukjent", "apps": "?", "error": (err or out).strip()[-160:]}
+    d = dict(l.split("=", 1) for l in out.split() if "=" in l)
+    return {"kind": d.get("kind", "ukjent"), "connect_as": d.get("as") or None, "container": d.get("container"),
+            "docker": d.get("docker", "ukjent"), "apps": d.get("apps", "?")}
+
+
+def komodo_all():
+    servers = komodo("read", "ListServers", {"query": {"limit": 1000}})
+    if len(servers) == 50:
+        servers = komodo("read", "ListServers", {"limit": 1000})
+    stacks = komodo("read", "ListStacks", {"limit": 1000})
+    return servers, stacks
+
+
+def inventory(vmid, px=None, kall=None, deep=True):
+    px = px or px_guests()
+    g = [r for r in px if r["vmid"] == vmid]
+    if not g:
+        raise Stop("CT %d finnes ikke i klyngen" % vmid)
+    g = g[0]
+    servers, stacks = kall or komodo_all()
+    inv = {"vmid": vmid, "type": g["type"], "node": g["node"], "name": g.get("name", ""), "status": g["status"],
+           "periphery": {"kind": "ikke lest", "connect_as": None}, "server": None, "other_servers": [], "stacks": []}
+    if g["type"] != "lxc":
+        return inv
+    if g["status"] == "running":
+        inv["periphery"] = periphery(g["node"], vmid)
+    by_name = {s["name"]: s for s in servers}
+    same_nr = [s for s in servers if re.search(r"-ct%d-" % vmid, s["name"])]
+    srv, how = None, None
+    ca = inv["periphery"].get("connect_as")
+    if ca and ca in by_name:
+        srv, how = by_name[ca], "connect_as i gjesten"
+    elif ca:
+        inv["periphery"]["error"] = "connect_as «%s» finnes ikke som Komodo-server" % ca
+    elif g["status"] != "running":
+        cand = [by_name[g.get("name")]] if g.get("name") in by_name else same_nr
+        if len(cand) == 1:
+            srv, how = cand[0], "antatt ut fra navn (CT stoppet, ikke verifisert i gjesten)"
+    if srv:
+        inv["server"] = {"id": srv["id"], "name": srv["name"], "state": srv["info"].get("state"), "found_by": how}
+    inv["other_servers"] = [{"id": s["id"], "name": s["name"], "state": s["info"].get("state"),
+                             "stacks": sum(1 for x in stacks if x["info"].get("server_id") == s["id"])}
+                            for s in same_nr if not srv or s["id"] != srv["id"]]
+    if srv:
+        for s in sorted((x for x in stacks if x["info"].get("server_id") == srv["id"]), key=lambda x: x["name"]):
+            st = {"id": s["id"], "name": s["name"], "state": s["info"].get("state")}
+            if deep:
+                gs = komodo("read", "GetStack", {"stack": s["id"]})
+                c, i = gs["config"], gs["info"]
+                st.update(repo=c.get("repo") or ("linked:" + c.get("linked_repo", "") if c.get("linked_repo") else ""),
+                          run_directory=(c.get("run_directory") or "").strip("./"), file_paths=c.get("file_paths") or [],
+                          project_name=c.get("project_name") or "", deployed_project=i.get("deployed_project_name") or "",
+                          missing_files=i.get("missing_files") or [], remote_errors=len(i.get("remote_errors") or []))
+            inv["stacks"].append(st)
+    return inv
+
+
+def drift_level():
+    try:
+        with urllib.request.urlopen(DRIFT_URL, timeout=10) as r:
+            d = json.load(r)
+        red = [i.get("title", "")[:140] for i in d.get("issues", []) if i.get("level") == "kritisk"]
+        return d.get("level"), red
+    except Exception as x:  # noqa: BLE001
+        return "ukjent", ["drift-vakten svarer ikke: %s" % x]
+
+
+def want_stack_name(stack_name, prefix):
+    return prefix + PREFIX_RE.sub("", stack_name) if PREFIX_RE.match(stack_name) else None
+
+
+EXC_FILE = "scripts/ct-ops-unntak.json"
+EXC_TYPES = {"proxmox-navn", "server-navn", "ingen-server", "ekstra-server", "stack-navn", "stack-mappe", "remote-errors", "ingen-komodo"}
+_exc = None
+
+
+def exceptions():
+    """Godkjente unntak fra scripts/ct-ops-unntak.json i main (endres kun via homelab-pr).
+    Hver rad: {"vmid": 200, "type": "stack-mappe", "gjelder": "pc6-ct200-emby" | "*", "grunn": "hvorfor"}."""
+    global _exc
+    if _exc is None:
+        _exc = {}
+        txt = repo_file(EXC_FILE)
+        if txt is None and os.path.exists(os.path.join(os.path.dirname(os.path.abspath(__file__)), "ct-ops-unntak.json")):
+            txt = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "ct-ops-unntak.json"), encoding="utf-8").read()
+        if txt:
+            try:
+                for e in json.loads(txt).get("unntak", []):
+                    if e.get("type") in EXC_TYPES and isinstance(e.get("vmid"), int) and str(e.get("grunn", "")).strip():
+                        _exc[(e["vmid"], e["type"], str(e.get("gjelder", "*")))] = e["grunn"].strip()
+            except (ValueError, AttributeError) as x:
+                raise Stop("unntaksfilen %s er ugyldig JSON: %s" % (EXC_FILE, x))
+    return _exc
+
+
+def check(inv):
+    """Fasit for én CT. Returnerer (avvik, merknader). Godkjente unntak flyttes fra avvik til merknader."""
+    bad, notes = [], []
+    if inv["type"] != "lxc":
+        return bad, ["VM – sjekkes ikke av ct-ops"]
+    vmid, node, name = inv["vmid"], inv["node"], inv["name"]
+    ex = exceptions()
+
+    def dev(typ, key, text):
+        why = ex.get((vmid, typ, key)) or ex.get((vmid, typ, "*")) if typ else None
+        if why:
+            notes.append("godkjent unntak (%s): %s" % (why, text))
+        else:
+            bad.append(text)
+
+    prefix = "%s-ct%d-" % (node, vmid)
+    if not (name.startswith(prefix) and SVC_RE.match(name[len(prefix):])):
+        dev("proxmox-navn", name, "Proxmox-navn «%s» følger ikke %s<tjeneste>" % (name, prefix))
+    per, srv = inv["periphery"], inv["server"]
+    if per.get("error"):
+        dev(None, None, "Periphery: " + per["error"])
+    if inv["status"] != "running":
+        notes.append("CT stoppet – Periphery og Komodo-state er ikke verifisert")
+    if srv:
+        if srv["name"] != name:
+            dev("server-navn", srv["name"], "Komodo-server heter «%s», Proxmox sier «%s»" % (srv["name"], name))
+        if inv["status"] == "running" and srv["state"] != "Ok":
+            dev(None, None, "Komodo-server «%s» har state %s" % (srv["name"], srv["state"]))
+    elif inv["status"] == "running" and per["kind"] in ("systemd", "docker"):
+        dev("ingen-server", "*", "Periphery kjører (%s), men ingen Komodo-server er knyttet til den" % per["kind"])
+    elif inv["status"] == "running" and per["kind"] == "none" and vmid not in NO_KOMODO:
+        dev("ingen-komodo", "*", "ingen Periphery i gjesten og ingen Komodo-server")
+    for o in inv["other_servers"]:
+        dev("ekstra-server", o["name"], "ekstra Komodo-server med samme CT-nummer: «%s» (%s, %d stacker) – avklares med Roger"
+            % (o["name"], o["state"], o["stacks"]))
+    for st in inv["stacks"]:
+        w = want_stack_name(st["name"], prefix)
+        if w is None:
+            notes.append("stack «%s» har ikke <node>-ct<id>-prefiks (ikke vurdert)" % st["name"])
+        elif w != st["name"]:
+            dev("stack-navn", st["name"], "stack «%s» burde hete «%s»" % (st["name"], w))
+        if "run_directory" in st:
+            if st["repo"] == REPO and w and st["run_directory"] != w:
+                dev("stack-mappe", st["name"], "stack «%s»: run_directory «%s» burde være «%s»" % (st["name"], st["run_directory"], w))
+            if st["missing_files"]:
+                dev(None, None, "stack «%s»: Komodo mangler filer %s" % (st["name"], st["missing_files"]))
+            if st["remote_errors"]:
+                dev("remote-errors", st["name"], "stack «%s»: Komodo remote_errors" % st["name"])
+    return bad, notes
+
+
+# ---------- kommandoer ----------
+def cmd_verify(vmid):
+    inv = inventory(vmid)
+    bad, notes = check(inv)
+    return {"command": "verify", "ok": not bad, "status": "OK" if not bad else "AVVIK", "vmid": vmid,
+            "deviations": bad, "notes": notes, "inventory": inv}
+
+
+def cmd_audit():
+    px, kall = px_guests(), komodo_all()
+    rows = []
+    for g in sorted((r for r in px if r["type"] == "lxc"), key=lambda r: r["vmid"]):
+        try:
+            inv = inventory(g["vmid"], px, kall, deep=True)
+            bad, notes = check(inv)
+        except Stop as x:
+            inv, bad, notes = {"node": g["node"], "name": g.get("name"), "status": g["status"], "server": None}, ["kunne ikke leses: %s" % x], []
+        rows.append({"vmid": g["vmid"], "node": inv["node"], "name": inv["name"], "status": inv["status"],
+                     "server": (inv["server"] or {}).get("name"), "ok": not bad, "deviations": bad, "notes": notes})
+    claimed = {r["server"] for r in rows if r["server"]}
+    nrs = {r["vmid"] for r in rows}
+    orphans = [{"name": s["name"], "state": s["info"].get("state")} for s in kall[0]
+               if s["name"] not in claimed and not any(re.search(r"-ct%d-" % n, s["name"]) for n in nrs)]
+    level, red = drift_level()
+    n_bad = sum(1 for r in rows if not r["ok"])
+    return {"command": "audit", "ok": n_bad == 0, "status": "OK" if n_bad == 0 else "AVVIK", "cts": len(rows), "with_deviations": n_bad,
+            "drift_vakt": level, "servers_without_ct": orphans, "rows": rows}
+
+
+def fingerprint(inv):
+    core = {"node": inv["node"], "name": inv["name"], "status": inv["status"], "per": inv["periphery"].get("connect_as"),
+            "srv": inv["server"] and [inv["server"]["id"], inv["server"]["name"]],
+            "stacks": [[s["id"], s["name"], s.get("run_directory"), s.get("project_name"), s["state"]] for s in inv["stacks"]]}
+    return hashlib.sha256(json.dumps(core, sort_keys=True).encode()).hexdigest()[:16]
+
+
+def build_plan(inv, service, start_stop, running_stacks):
+    vmid, node = inv["vmid"], inv["node"]
+    new = "%s-ct%d-%s" % (node, vmid, service)
+    prefix = "%s-ct%d-" % (node, vmid)
+    steps, blockers, skipped = [], [], []
+    if inv["type"] != "lxc":
+        blockers.append("%d er en VM; ct-ops håndterer bare CT-er" % vmid)
+    if vmid in PROTECTED:
+        blockers.append("CT%d (%s) er sperret for automatiske endringer – gjøres manuelt sammen med Roger" % (vmid, PROTECTED[vmid]))
+    if not SVC_RE.match(service) or len(new) > 63:
+        blockers.append("ugyldig tjenestenavn «%s» (små bokstaver, tall og bindestrek)" % service)
+    level, red = drift_level()
+    if level != "ok" and red:
+        blockers.append("drift-vakten er rød: %s – spør Roger om hvert røde funn først" % "; ".join(red))
+    stopped = inv["status"] != "running"
+    per, srv = inv["periphery"], inv["server"]
+    if per.get("error"):
+        blockers.append("Periphery: " + per["error"])
+    if inv["name"] != new:
+        steps.append({"do": "proxmox_hostname", "from": inv["name"], "to": new,
+                      "text": "Proxmox: hostnavn «%s» → «%s»%s" % (inv["name"], new, "" if stopped else " (gjelder inni gjesten etter neste restart; CT-en restartes ikke)")})
+    if inv["other_servers"] and not srv:
+        blockers.append("flere/uklare Komodo-servere for CT%d (%s) og ingen kan knyttes sikkert til gjesten" % (vmid, ", ".join(o["name"] for o in inv["other_servers"])))
+    need_guest = bool(srv and srv["name"] != new) or (stopped and not srv and inv["other_servers"])
+    if srv and srv["name"] != new:
+        if any(o["name"] == new for o in inv["other_servers"]):
+            blockers.append("det finnes allerede en annen Komodo-server som heter «%s»" % new)
+        if stopped and not start_stop:
+            blockers.append("CT-en er stoppet, og Komodo-serveren «%s» kan ikke bytte navn uten at Periphery i gjesten oppdateres. "
+                            "Be om planen på nytt med start_stop=true (CT-en startes, endres og stoppes igjen)." % srv["name"])
+        steps.append({"do": "komodo_server", "server_id": srv["id"], "from": srv["name"], "to": new,
+                      "text": "Komodo-server «%s» → «%s», connect_as i gjesten oppdateres og Periphery restartes; rulles tilbake hvis state ikke blir Ok" % (srv["name"], new)})
+    for st in inv["stacks"]:
+        w = want_stack_name(st["name"], prefix)
+        if w is None or (w == st["name"] and st["run_directory"] == w):
+            continue
+        ex = exceptions()
+        if all(ex.get((vmid, t, st["name"])) or ex.get((vmid, t, "*")) for t in
+               (["stack-navn"] if w != st["name"] else []) + (["stack-mappe"] if st["run_directory"] != w else [])):
+            continue
+        why = None
+        if st["repo"] != REPO:
+            why = "kilden er ikke %s (%s)" % (REPO, st["repo"] or "ukjent")
+        elif st["state"] == "running" and not running_stacks:
+            why = "stacken kjører; krever running_stacks=true i planen"
+        else:
+            rel = relative_paths(st["run_directory"], st["file_paths"])
+            if rel:
+                why = "compose bruker relative stier (%s) – navnebytte flytter mappen på verten og kan skille containerne fra data/konfig" % "; ".join(rel[:3])
+        if not why and st["run_directory"] != w and st["run_directory"] != st["name"]:
+            why = "run_directory «%s» er ikke stackens egen mappe (deles kanskje) – avklares manuelt" % st["run_directory"]
+        if not why and st["run_directory"] != w and repo_dir_exists(w):
+            why = "mappen «%s» finnes allerede i repoet" % w
+        if why:
+            skipped.append({"stack": st["name"], "wanted": w, "reason": why})
+            continue
+        steps.append({"do": "stack", "stack_id": st["id"], "from": st["name"], "to": w, "run_directory": st["run_directory"],
+                      "lock_project": st["project_name"] or st["deployed_project"] or st["name"], "state": st["state"],
+                      "text": "Stack «%s» → «%s»: lås project_name, flytt repomappen via homelab-pr, bytt navn og run_directory i Komodo%s"
+                              % (st["name"], w, ", deploy og kontroller containerne" if st["state"] == "running" else "")})
+    if stopped and start_stop and any(s["do"] == "komodo_server" for s in steps):
+        steps.insert(1 if steps and steps[0]["do"] == "proxmox_hostname" else 0,
+                     {"do": "start", "text": "Start CT%d midlertidig (stoppes igjen til slutt)" % vmid})
+        steps.append({"do": "stop", "text": "Stopp CT%d igjen" % vmid})
+    return new, steps, blockers, skipped
+
+
+def cmd_plan_rename(vmid, service, start_stop=False, running_stacks=False):
+    inv = inventory(vmid)
+    new, steps, blockers, skipped = build_plan(inv, service, start_stop, running_stacks)
+    os.makedirs(STATE + "/plans", exist_ok=True)
+    plan = {"op": "rename", "vmid": vmid, "service": service, "new_name": new, "start_stop": start_stop,
+            "running_stacks": running_stacks, "created": time.time(), "fingerprint": fingerprint(inv), "steps": steps}
+    plan_id = None
+    if steps and not blockers:
+        plan_id = "p%d-%s" % (vmid, hashlib.sha256(json.dumps(plan, sort_keys=True).encode()).hexdigest()[:10])
+        with open("%s/plans/%s.json" % (STATE, plan_id), "w", encoding="utf-8") as fh:
+            json.dump(plan, fh)
+    status = "BLOKKERT" if blockers else ("INGEN_ENDRING" if not steps else "KLAR_FOR_GODKJENNING")
+    log("plan", vmid=vmid, new=new, status=status, plan_id=plan_id)
+    return {"command": "plan-rename", "ok": not blockers, "status": status, "plan_id": plan_id, "valid_minutes": PLAN_TTL // 60,
+            "vmid": vmid, "from": inv["name"], "to": new, "steps": [s["text"] for s in steps], "blockers": blockers,
+            "not_handled": skipped, "before": inv}
+
+
+def wait_server(server_id, name, secs=120):
+    end = time.time() + secs
+    last = None
+    while time.time() < end:
+        time.sleep(6)
+        for s in komodo("read", "ListServers", {"query": {"limit": 1000}}):
+            if s["id"] == server_id:
+                last = (s["name"], s["info"].get("state"))
+                if last == (name, "Ok"):
+                    return True, last
+    return False, last
+
+
+SET_AS = ("set -e; if systemctl is-active --quiet periphery 2>/dev/null; then f=/etc/komodo/periphery.config.toml; "
+          "cp -p $f $f.bak-ctops; sed -i 's/^connect_as *=.*/connect_as = \"'\"$N\"'\"/' $f; grep -q '^connect_as = \"'\"$N\"'\"' $f; systemctl restart periphery; "
+          "else f=/opt/komodo/periphery/.env; cp -p $f $f.bak-ctops; sed -i 's/^PERIPHERY_CONNECT_AS=.*/PERIPHERY_CONNECT_AS='\"$N\"'/' $f; "
+          "grep -q '^PERIPHERY_CONNECT_AS='\"$N\"'$' $f; cd /opt/komodo/periphery && docker compose up -d --force-recreate >/dev/null 2>&1; fi")
+
+
+def set_connect_as(node, vmid, name):
+    return guest(node, vmid, "N=%s; %s" % (shlex.quote(name), SET_AS), 120)
+
+
+def do_step(step, plan, inv, done):
+    vmid, node, new = plan["vmid"], inv["node"], plan["new_name"]
+    kind = step["do"]
+    if kind == "proxmox_hostname":
+        rc, out, err = on_node(node, "pct set %d --hostname %s" % (vmid, shlex.quote(new)))
+        if rc != 0:
+            raise Stop("pct set --hostname feilet: " + (err or out).strip()[-200:])
+        now = [g for g in px_guests() if g["vmid"] == vmid][0].get("name")
+        rc, out, _ = on_node(node, "pct config %d | sed -n 's/^hostname: //p'" % vmid)
+        if out.strip() != new:
+            raise Stop("Proxmox viser «%s» etter endringen, forventet «%s»" % (out.strip() or now, new))
+        return "lest tilbake fra pct config: %s" % new
+    if kind == "start":
+        rc, out, err = on_node(node, "pct start %d" % vmid, 120)
+        if rc != 0:
+            raise Stop("pct start feilet: " + (err or out).strip()[-200:])
+        done["started"] = True
+        for _ in range(20):
+            time.sleep(6)
+            p = periphery(node, vmid)
+            if p["kind"] in ("systemd", "docker") and p.get("connect_as"):
+                if p["connect_as"] != step.get("expect_as", p["connect_as"]):
+                    break
+                return "CT startet, Periphery (%s) melder seg som «%s»" % (p["kind"], p["connect_as"])
+        raise Stop("CT startet, men Periphery kom ikke opp innen 2 min")
+    if kind == "stop":
+        rc, out, err = on_node(node, "pct shutdown %d --timeout 90" % vmid, 150)
+        rc2, out2, _ = on_node(node, "pct status %d" % vmid)
+        if "stopped" not in out2:
+            raise Stop("CT-en stoppet ikke: " + (err or out or out2).strip()[-200:])
+        done["started"] = False
+        return "pct status: stopped"
+    if kind == "komodo_server":
+        p = periphery(node, vmid)
+        if p.get("connect_as") != step["from"]:
+            raise Stop("gjestens connect_as er «%s», planen forventet «%s» – ingenting endret" % (p.get("connect_as"), step["from"]))
+        komodo("write", "RenameServer", {"id": step["server_id"], "name": new})
+        rc, out, err = set_connect_as(node, vmid, new)
+        ok, last = (False, None) if rc != 0 else wait_server(step["server_id"], new)
+        if ok:
+            return "Komodo: server «%s» state Ok; connect_as i gjesten er «%s»" % (new, new)
+        # tilbakerulling
+        rb = []
+        try:
+            komodo("write", "RenameServer", {"id": step["server_id"], "name": step["from"]})
+            rb.append("servernavn satt tilbake")
+        except Stop as x:
+            rb.append("servernavn IKKE satt tilbake: %s" % x)
+        rc2, _, e2 = set_connect_as(node, vmid, step["from"])
+        ok2, last2 = (False, None) if rc2 != 0 else wait_server(step["server_id"], step["from"])
+        rb.append("connect_as satt tilbake, state %s" % (last2,) if rc2 == 0 else "connect_as IKKE satt tilbake: " + e2.strip()[-120:])
+        raise Stop("Komodo-serveren ble ikke Ok med nytt navn (sist: %s; gjest: %s). Tilbakerulling: %s"
+                   % (last, (err or out).strip()[-120:] if rc != 0 else "ok", "; ".join(rb)))
+    if kind == "stack":
+        sid, old, w = step["stack_id"], step["from"], step["to"]
+        cur = komodo("read", "GetStack", {"stack": sid})
+        if not cur["config"].get("project_name"):
+            komodo("write", "UpdateStack", {"id": sid, "config": {"project_name": step["lock_project"]}})
+            if komodo("read", "GetStack", {"stack": sid})["config"].get("project_name") != step["lock_project"]:
+                raise Stop("fikk ikke låst project_name på «%s»" % old)
+        before = containers(node, vmid, step["lock_project"]) if step["state"] == "running" else None
+        if step["run_directory"] != w:
+            if git("status", "--porcelain") or git("rev-parse", "--abbrev-ref", "HEAD") != "main":
+                raise Stop("klonen %s er ikke ren på main – rydd den før stackmapper flyttes" % CLONE)
+            git("pull", "-q", "--ff-only")
+            git("mv", step["run_directory"], w)
+            rc, out, err = sh(["sh", "-c", "cd %s && homelab-pr --no-deploy %s" % (CLONE, shlex.quote("ct-ops: stackmappe %s → %s" % (step["run_directory"], w)))], 600)
+            if rc != 0 or "KAN IKKE PUBLISERE" in (out + err):
+                raise Stop("homelab-pr feilet for mappeflytting: " + (err or out).strip()[-300:])
+            komodo("write", "UpdateStack", {"id": sid, "config": {"run_directory": w}})
+        if old != w:
+            komodo("write", "RenameStack", {"id": sid, "name": w})
+        if step["state"] == "running":
+            komodo("execute", "DeployStack", {"stack": sid})
+        head = git("rev-parse", "origin/main") if step["run_directory"] == w else git("rev-parse", "HEAD")
+        info = {}
+        for _ in range(40):
+            time.sleep(8)
+            gs = komodo("read", "GetStack", {"stack": sid})
+            info = gs["info"]
+            named = gs["name"] == w and (gs["config"].get("run_directory") or "").strip("./") == w
+            if named and not info.get("missing_files") and (step["state"] != "running" or head.startswith(info.get("deployed_hash") or "x")):
+                break
+        else:
+            raise Stop("stack «%s»: Komodo viser ikke forventet tilstand (missing_files=%s, deployed=%s)"
+                       % (w, info.get("missing_files"), (info.get("deployed_hash") or "")[:7]))
+        if before is not None:
+            after = containers(node, vmid, step["lock_project"])
+            if sorted(before) != sorted(after) or not after:
+                raise Stop("stack «%s»: containerne før (%s) og etter (%s) stemmer ikke" % (w, before, after))
+            return "Komodo: stack «%s», run_directory «%s», containere kjører: %s" % (w, w, ", ".join(after))
+        return "Komodo: stack «%s», run_directory «%s» (kjører ikke, ikke deployet)" % (w, w)
+    raise Stop("ukjent steg " + kind)
+
+
+def containers(node, vmid, project):
+    rc, out, _ = guest(node, vmid, "docker ps --filter label=com.docker.compose.project=%s --format '{{.Names}}'" % shlex.quote(project), 40)
+    return out.split()
+
+
+def cmd_apply(plan_id):
+    if not re.fullmatch(r"p\d+-[0-9a-f]{10}", plan_id or ""):
+        raise Stop("ugyldig plan_id")
+    path = "%s/plans/%s.json" % (STATE, plan_id)
+    if not os.path.exists(path):
+        raise Stop("planen %s finnes ikke (eller er allerede brukt) – lag en ny plan" % plan_id)
+    plan = json.load(open(path, encoding="utf-8"))
+    vmid = plan["vmid"]
+    if time.time() - plan["created"] > PLAN_TTL:
+        os.remove(path)
+        raise Stop("planen er eldre enn %d min – lag en ny plan" % (PLAN_TTL // 60))
+    inv = inventory(vmid)
+    if fingerprint(inv) != plan["fingerprint"]:
+        os.remove(path)
+        raise Stop("tilstanden for CT%d er endret siden planen ble laget – lag en ny plan" % vmid)
+    level, red = drift_level()
+    if level != "ok" and red:
+        raise Stop("drift-vakten er rød: %s" % "; ".join(red))
+    os.rename(path, path + ".brukt")
+    log("apply-start", plan_id=plan_id, vmid=vmid, new=plan["new_name"])
+    results, done, failed = [], {}, None
+    for step in plan["steps"]:
+        try:
+            results.append({"step": step["text"], "ok": True, "verified": do_step(step, plan, inv, done)})
+        except Stop as x:
+            failed = str(x)
+            results.append({"step": step["text"], "ok": False, "error": failed})
+            break
+        except Exception as x:  # noqa: BLE001
+            failed = "uventet feil: %r" % x
+            results.append({"step": step["text"], "ok": False, "error": failed})
+            break
+    if failed and done.get("started"):
+        try:
+            results.append({"step": "Stopp CT%d igjen etter feil" % vmid, "ok": True, "verified": do_step({"do": "stop"}, plan, inv, done)})
+        except Stop as x:
+            results.append({"step": "Stopp CT%d igjen etter feil" % vmid, "ok": False, "error": str(x)})
+    ran = {s["step"] for s in results}
+    not_run = [s["text"] for s in plan["steps"] if s["text"] not in ran]
+    final = cmd_verify(vmid)
+    old = inv["name"]
+    mentions = []
+    if old != plan["new_name"]:
+        rc, out, _ = sh(["git", "-C", CLONE, "grep", "-l", "-F", old, "origin/main", "--", "*.md", "*.yml", "*.yaml"])
+        mentions = sorted({l.split(":", 1)[1] for l in out.splitlines() if ":" in l})[:25]
+    # Kartets Komodo-statuslinje følger med i samme operasjon.
+    try:
+        kart = cmd_map_fix([str(vmid)])
+        kart = {k: kart.get(k) for k in ("status", "published_version", "changed", "still_wrong", "cannot_fix")}
+    except Stop as x:
+        kart = {"status": "BLOKKERT", "error": str(x)}
+    kart_ok = kart["status"] in ("FERDIG", "INGEN_ENDRING")
+    status = "FEILET" if failed else ("FERDIG" if final["ok"] and kart_ok else "UFULLSTENDIG")
+    log("apply-slutt", plan_id=plan_id, vmid=vmid, status=status, failed=failed, deviations=final["deviations"])
+    return {"command": "apply", "ok": status == "FERDIG", "status": status, "plan_id": plan_id, "vmid": vmid, "from": old, "to": plan["new_name"],
+            "steps": results, "not_run": not_run, "remaining_deviations": final["deviations"], "notes": final["notes"],
+            "manual_followup": (["Navn/overskrift på CT-kortet i nettverkskartet endres for hånd (statuslinjen er oppdatert automatisk)"] if old != plan["new_name"] else [])
+                               + (["Gammelt navn «%s» omtales fortsatt i: %s" % (old, ", ".join(mentions))] if mentions else []),
+            "map": kart, "after": final["inventory"]}
+
+
+# ---------- nettverkskartet: Komodo-statuslinje per CT ----------
+MAP_CT, MAP_REPO = 120, "/opt/moved-services/nettkart-repo"
+MAP_SRC = MAP_REPO + "/docs/network-map/nettverkskart.html"
+MAP_LIVE = "/srv/nettkart/www/nettverkskart.html"
+MAP_STYLE = "font-size:10px;line-height:1.3;color:%s;margin:2px 0 5px"
+COLORS = {"grønn": "#22c55e", "gul": "#f59e0b", "rød": "#dc2626"}
+COLOR_NAMES = {"#22c55e": "grønn", "#f59e0b": "gul", "#dc2626": "rød", "var(--danger)": "rød", "#94a3b8": "grå", "var(--dim)": "grå"}
+# Kjørende CT-er som bevisst ikke har Periphery/Komodo-server (AGENTS.md).
+NO_KOMODO = {130: "Hermes trenger ingen"}
+METHOD_RE = re.compile(r'<div class="ct-method" style="([^"]*)">(.*?)</div>', re.S)
+
+
+def map_status(inv, bad, notes=None):
+    """Regel (PUBLISHING.md): rød = bekreftet feil, grønn = alt kontrollert og ingen avvik, ellers gul."""
+    if inv["status"] != "running":
+        return "gul", "CT stoppet · Docker, Periphery og Komodo-register ikke verifisert"
+    per, srv, vmid = inv["periphery"], inv["server"], inv["vmid"]
+    nok = NO_KOMODO.get(vmid) or exceptions().get((vmid, "ingen-komodo", "*"))
+    kind = {"systemd": "systemd-Periphery", "docker": "Docker-Periphery", "none": "ingen Periphery"}.get(per["kind"], "Periphery ikke lest")
+    docker = per.get("docker", "ukjent")
+    parts = ["Komodo: " + kind, "Docker: " + docker, "appcontainere: %s" % per.get("apps", "?")]
+    red = []
+    if per.get("error"):
+        red.append("Periphery melder seg med et navn Komodo ikke kjenner")
+    if docker == "feil":
+        red.append("Docker svarer ikke")
+    if srv and srv["state"] != "Ok":
+        red.append("server " + str(srv["state"]))
+    if srv:
+        reg = "Komodo-register: %s (%s)" % (srv["state"], srv["name"])
+        if srv["state"] == "Ok" and srv["name"] != inv["name"]:
+            reg += " – navn avviker fra Proxmox"
+    elif nok and per["kind"] == "none":
+        reg = "Komodo-register: ikke i bruk (%s)" % nok
+    else:
+        reg = "Komodo-register: ingen server"
+    parts.append(reg)
+    exc_n = sum(1 for n in (notes or []) if n.startswith("godkjent unntak"))
+    other = [b for b in bad if "Komodo-server heter" not in b and "har state" not in b and not b.startswith("Periphery:")]
+    if other:
+        parts.append("%d avvik (ct-ops verify %d)" % (len(other), vmid))
+    if exc_n:
+        parts.append("%d godkjent(e) unntak" % exc_n)
+    if red:
+        return "rød", " · ".join(parts)
+    green = not bad and docker in ("ja", "nei") and ((srv and srv["state"] == "Ok") or (nok and per["kind"] == "none"))
+    return ("grønn" if green else "gul"), " · ".join(parts)
+
+
+def map_read(path):
+    rc, out, err = on_node("pc6", "pct exec %d -- cat %s" % (MAP_CT, path), 40)
+    if rc != 0 or "data-vmid=" not in out:
+        raise Stop("fikk ikke lest kartet %s på CT%d: %s" % (path, MAP_CT, err.strip()[-160:]))
+    return out
+
+
+def map_frame(html, vmid):
+    m = re.search(r'<div class="vm-frame" data-vmid="%d">' % vmid, html)
+    if not m:
+        return None
+    nxt = html.find('<div class="vm-frame"', m.end())
+    return html[m.start():nxt if nxt > 0 else len(html)]
+
+
+def map_row(vmid, src, live, px, kall):
+    import html as H
+    inv = inventory(vmid, px, kall)
+    bad, notes = check(inv)
+    level, text = map_status(inv, bad, notes)
+    want = '<div class="ct-method" style="%s">%s</div>' % (MAP_STYLE % COLORS[level], H.escape(text, quote=False))
+    row = {"vmid": vmid, "node": inv["node"], "name": inv["name"], "ct_status": inv["status"], "expected": {"color": level, "text": text},
+           "current": None, "ok": False, "problems": [], "_want": want, "_old": None}
+    fr, fl = map_frame(src, vmid), map_frame(live, vmid)
+    if fr is None:
+        row["problems"].append("CT%d har ikke noe kort (data-vmid) i kartet – legges inn manuelt" % vmid)
+        return row
+    if fr != fl:
+        row["problems"].append("kildefilen og det publiserte kartet er ulike for dette kortet")
+    found = METHOD_RE.findall(fr)
+    if len(found) > 1:
+        row["problems"].append("kortet har %d statuslinjer, skal ha én" % len(found))
+        return row
+    if not found:
+        row["problems"].append("kortet mangler statuslinje (.ct-method)")
+        row["_old"] = ""
+        return row
+    style, cur_text = found[0]
+    col = (re.search(r"color:\s*([^;]+)", style) or [None, ""])[1].strip()
+    row["current"] = {"color": COLOR_NAMES.get(col, "ukjent farge " + col if col else "ingen farge"), "text": H.unescape(re.sub(r"<[^>]+>", "", cur_text))}
+    row["_old"] = '<div class="ct-method" style="%s">%s</div>' % (style, cur_text)
+    if row["current"]["color"] != level:
+        row["problems"].append("farge er %s, skal være %s" % (row["current"]["color"], level))
+    if row["current"]["text"] != text:
+        row["problems"].append("teksten stemmer ikke med målt status")
+    row["ok"] = not row["problems"]
+    return row
+
+
+def map_rows(vmids):
+    px, kall = px_guests(), komodo_all()
+    lxc = sorted(g["vmid"] for g in px if g["type"] == "lxc")
+    if vmids == ["all"]:
+        vmids = lxc
+    else:
+        vmids = [int(v) for v in vmids]
+        for v in vmids:
+            if v not in lxc:
+                raise Stop("CT %d finnes ikke som CT i klyngen" % v)
+    src, live = map_read(MAP_SRC), map_read(MAP_LIVE)
+    return [map_row(v, src, live, px, kall) for v in vmids], src == live
+
+
+def pub(row):
+    return {k: v for k, v in row.items() if not k.startswith("_")}
+
+
+def cmd_map_check(vmids):
+    rows, same = map_rows(vmids)
+    n = sum(1 for r in rows if not r["ok"])
+    return {"command": "map-check", "ok": n == 0, "status": "OK" if n == 0 else "AVVIK", "checked": len(rows), "wrong": n,
+            "source_equals_live": same, "rows": [pub(r) for r in rows]}
+
+
+MAP_PATCH = r'''
+import json, re, sys
+src = sys.argv[1]
+jobs = json.load(sys.stdin)
+h = open(src, encoding="utf-8").read()
+for j in jobs:
+    m = re.search(r'<div class="vm-frame" data-vmid="%d">' % j["vmid"], h)
+    assert m, "kort mangler: %d" % j["vmid"]
+    nxt = h.find('<div class="vm-frame"', m.end())
+    end = nxt if nxt > 0 else len(h)
+    fr = h[m.start():end]
+    if j["old"]:
+        assert fr.count(j["old"]) == 1, "statuslinjen for %d er endret siden kontrollen" % j["vmid"]
+        new = fr.replace(j["old"], j["new"])
+    else:
+        k = re.search(r'<div class="vm-h">.*?</div>', fr, re.S)
+        assert k and "ct-method" not in fr, "kan ikke sette inn statuslinje for %d" % j["vmid"]
+        new = fr[:k.end()] + j["new"] + fr[k.end():]
+    h = h[:m.start()] + new + h[end:]
+open(src, "w", encoding="utf-8").write(h)
+print("patched", len(jobs))
+'''
+
+
+def cmd_map_fix(vmids):
+    if vmids == ["all"]:
+        raise Stop("map-fix tar en liste med CT-numre, ikke «all» – kjør map-check all først og velg")
+    level, red = drift_level()
+    if level != "ok" and red:
+        raise Stop("drift-vakten er rød: %s" % "; ".join(red))
+    rows, same = map_rows(vmids)
+    if not same:
+        raise Stop("kartkilden på CT%d er ikke lik det publiserte kartet – noen har upubliserte endringer; rydd det først" % MAP_CT)
+    rc, out, err = on_node("pc6", "pct exec %d -- git -C %s status --porcelain --untracked-files=no" % (MAP_CT, MAP_REPO))
+    if rc != 0 or out.strip():
+        raise Stop("kartrepoet på CT%d er ikke rent: %s" % (MAP_CT, (out or err).strip()[:200]))
+    todo = [r for r in rows if not r["ok"] and r["_old"] is not None]
+    cannot = [pub(r) for r in rows if not r["ok"] and r["_old"] is None]
+    if not todo:
+        return {"command": "map-fix", "ok": not cannot, "status": "INGEN_ENDRING" if not cannot else "UFULLSTENDIG",
+                "changed": [], "cannot_fix": cannot, "rows": [pub(r) for r in rows]}
+    jobs = [{"vmid": r["vmid"], "old": r["_old"], "new": r["_want"]} for r in todo]
+    log("map-fix-start", vmids=[j["vmid"] for j in jobs])
+    rc, out, err = sh(["pct", "exec", str(MAP_CT), "--", "python3", "-c", MAP_PATCH, MAP_SRC], 60, json.dumps(jobs))
+    if rc != 0:
+        on_node("pc6", "pct exec %d -- git -C %s checkout -- docs/network-map/nettverkskart.html" % (MAP_CT, MAP_REPO))
+        raise Stop("kunne ikke endre kartkilden (ingenting publisert): " + (err or out).strip()[-200:])
+    ids = ", ".join("CT%d" % j["vmid"] for j in jobs)
+    msg = "Komodo-status kontrollert og rettet av ct-ops: " + "; ".join(
+        "CT%d %s→%s" % (r["vmid"], (r["current"] or {}).get("color", "mangler"), r["expected"]["color"]) for r in todo)
+    berort = " ".join(sorted({"%s CT%d" % (r["node"], r["vmid"]) for r in todo}))
+    rc, out, err = sh(["pct", "exec", str(MAP_CT), "--", "sh", "-c", "cd %s && /usr/local/sbin/nettkart-publish %s --av ct-ops --berort %s"
+                       % (MAP_REPO, shlex.quote(msg[:900]), shlex.quote(berort[:300]))], 300)
+    published = re.findall(r"Published v([0-9]+\.[0-9]+)", out)
+    if rc != 0 or not published:
+        raise Stop("⛔ KAN IKKE PUBLISERE kartet (%s): %s – kartkilden kan ha upubliserte endringer; sjekk CT%d"
+                   % (ids, (err or out).strip()[-300:], MAP_CT))
+    after, same2 = map_rows([str(j["vmid"]) for j in jobs])
+    still = [pub(r) for r in after if not r["ok"]]
+    status = "FERDIG" if not still and same2 and not cannot else "UFULLSTENDIG"
+    log("map-fix-slutt", version=published[-1], status=status)
+    return {"command": "map-fix", "ok": status == "FERDIG", "status": status, "published_version": published[-1],
+            "changed": [{"vmid": r["vmid"], "before": r["current"], "after": r["expected"]} for r in todo],
+            "read_back_ok": [r["vmid"] for r in after if r["ok"]], "still_wrong": still, "cannot_fix": cannot}
+
+
+def cmd_nightly():
+    """Nattlig: full revisjon, og kartets statuslinjer rettes der målt status har endret seg."""
+    a = cmd_audit()
+    rows, _ = map_rows(["all"])
+    wrong = [r for r in rows if not r["ok"]]
+    fixable = [str(r["vmid"]) for r in wrong if r["_old"] is not None]
+    kart = {"status": "INGEN_ENDRING", "changed": []}
+    if fixable:
+        try:
+            m = cmd_map_fix(fixable)
+            kart = {k: m.get(k) for k in ("status", "published_version", "changed", "still_wrong")}
+        except Stop as x:
+            kart = {"status": "BLOKKERT", "error": str(x), "changed": []}
+    return {"command": "nightly", "ok": a["ok"] and kart["status"] in ("FERDIG", "INGEN_ENDRING"), "status": a["status"],
+            "cts": a["cts"], "with_deviations": a["with_deviations"], "drift_vakt": a["drift_vakt"],
+            "deviations": [{"vmid": r["vmid"], "name": r["name"], "n": len(r["deviations"]), "first": r["deviations"][0]} for r in a["rows"] if not r["ok"]],
+            "servers_without_ct": a["servers_without_ct"], "map": kart,
+            "map_missing_card": [r["vmid"] for r in wrong if r["_old"] is None]}
+
+
+def main(argv):
+    flags = {a for a in argv if a.startswith("--")}
+    args = [a for a in argv if not a.startswith("--")]
+    try:
+        if not args or flags - {"--start-stop", "--running-stacks"}:
+            raise Stop("bruk: ct-ops audit | nightly | verify <vmid> | map-check <vmid ...|all> | map-fix <vmid ...> | plan-rename <vmid> <tjeneste> [--start-stop] [--running-stacks] | apply <plan_id>")
+        cmd = args[0]
+        if cmd in ("plan-rename", "apply", "map-fix", "nightly"):
+            os.makedirs(STATE, exist_ok=True)
+            lock = open(STATE + "/lock", "w")
+            try:
+                fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            except OSError:
+                raise Stop("en annen ct-ops-endring kjører allerede – vent og prøv igjen")
+        if cmd == "nightly" and len(args) == 1:
+            out = cmd_nightly()
+        elif cmd == "audit" and len(args) == 1:
+            out = cmd_audit()
+        elif cmd == "verify" and len(args) == 2 and args[1].isdigit():
+            out = cmd_verify(int(args[1]))
+        elif cmd == "plan-rename" and len(args) == 3 and args[1].isdigit():
+            out = cmd_plan_rename(int(args[1]), args[2], "--start-stop" in flags, "--running-stacks" in flags)
+        elif cmd in ("map-check", "map-fix") and len(args) >= 2 and all(a.isdigit() or (a == "all" and len(args) == 2) for a in args[1:]):
+            out = cmd_map_check(args[1:]) if cmd == "map-check" else cmd_map_fix(args[1:])
+        elif cmd == "apply" and len(args) == 2:
+            out = cmd_apply(args[1])
+        else:
+            raise Stop("ugyldige argumenter")
+    except Stop as x:
+        out = {"command": args[0] if args else None, "ok": False, "status": "BLOKKERT", "error": str(x)}
+    except Exception as x:  # noqa: BLE001
+        out = {"command": args[0] if args else None, "ok": False, "status": "FEILET", "error": "uventet feil: %r" % x}
+    print(json.dumps(out, ensure_ascii=False, indent=1))
+    return 0 if out.get("ok") else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))
