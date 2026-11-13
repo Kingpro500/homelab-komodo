@@ -1,0 +1,311 @@
+{
+  "name": "CT-ops – kontrollert CT-endring med kvalitetssjekk",
+  "nodes": [
+    {
+      "id": "ctops-1",
+      "name": "Forespørsel /ct-ops",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ct-ops",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "webhookId": "ct-ops"
+    },
+    {
+      "id": "ctops-2",
+      "name": "Valider forespørsel",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        0
+      ],
+      "parameters": {
+        "jsCode": "// Slipper bare gjennom kjente handlinger med strengt validerte verdier. Alt annet blir «avvist».\nconst b = $json.body || {};\nconst a = String(b.action || '');\nconst vm = v => /^\\d{3,6}$/.test(String(v));\nconst list = () => (b.vmids === 'all' || b.vmid === 'all') ? ['all'] : [].concat(b.vmids ?? b.vmid ?? []).map(String);\nlet command = 'avvist';\nif (a === 'audit') command = 'audit';\nelse if (a === 'verify' && vm(b.vmid)) command = 'verify ' + b.vmid;\nelse if (a === 'map-check') { const l = list(); if (l.length && l.length <= 100 && (l[0] === 'all' ? l.length === 1 : l.every(vm))) command = 'map-check ' + l.join(' '); }\nelse if (a === 'map-fix') { const l = list(); if (l.length && l.length <= 100 && l.every(vm)) command = 'map-fix ' + l.join(' '); }\nelse if (a === 'plan-rename' && vm(b.vmid) && /^[a-z0-9][a-z0-9-]{0,39}$/.test(String(b.service || '')))\n  command = `plan-rename ${b.vmid} ${b.service}` + (b.start_stop === true ? ' --start-stop' : '') + (b.running_stacks === true ? ' --running-stacks' : '');\nelse if (a === 'apply' && /^p\\d{3,6}-[0-9a-f]{10}$/.test(String(b.plan_id || ''))) command = 'apply ' + b.plan_id;\nconst error = command === 'avvist'\n  ? 'Ugyldig forespørsel. Gyldig: {action:\"audit\"} | {action:\"verify\",vmid} | {action:\"map-check\",vmids:[..]|\"all\"} | {action:\"map-fix\",vmids:[..]} | {action:\"plan-rename\",vmid,service[,start_stop,running_stacks]} | {action:\"apply\",plan_id}'\n  : null;\nreturn [{ json: { action: a, command, error, av: String(b.av || 'ukjent').slice(0, 40) } }];"
+      }
+    },
+    {
+      "id": "ctops-3",
+      "name": "Kjør ct-ops på pc6",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        440,
+        0
+      ],
+      "parameters": {
+        "authentication": "privateKey",
+        "command": "={{ $json.command }}",
+        "cwd": "/"
+      },
+      "credentials": {
+        "sshPrivateKey": {
+          "id": "vs4L7BphbF71Q7Or",
+          "name": "pc6 ct-ops (tvungen kommando)"
+        }
+      }
+    },
+    {
+      "id": "ctops-4",
+      "name": "Proxmox – n8n leser selv",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        660,
+        0
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "https://10.0.0.102:8006/api2/json/cluster/resources?type=vm",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "options": {
+          "allowUnauthorizedCerts": true,
+          "timeout": 20000
+        }
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "rHPpMppTnNxVvCsk",
+          "name": "Proxmox inventory read (n8n)"
+        }
+      },
+      "onError": "continueRegularOutput",
+      "alwaysOutputData": true
+    },
+    {
+      "id": "ctops-5",
+      "name": "Kvalitetssjekk",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        0
+      ],
+      "parameters": {
+        "jsCode": "// n8n stoler ikke på ct-ops alene: Proxmox og det publiserte kartet leses på nytt herfra.\nconst req = $('Valider forespørsel').first().json;\nconst ssh = $('Kjør ct-ops på pc6').first().json;\nlet res;\ntry { res = JSON.parse(ssh.stdout); }\ncatch (e) { res = { ok: false, status: 'FEILET', error: 'ct-ops svarte ikke med JSON: ' + String(ssh.stderr || ssh.stdout || '').slice(0, 300) }; }\nif (req.error) res.error = req.error;\nconst qc = []; let qcOk = true;\nconst pass = t => qc.push('✓ ' + t);\nconst fail = t => { qcOk = false; qc.push('✗ ' + t); };\nconst guests = ($input.first().json || {}).data || null;\nif (['apply', 'verify', 'plan-rename'].includes(req.action) && res.vmid) {\n  if (!Array.isArray(guests)) fail('n8n fikk ikke lest Proxmox selv');\n  else {\n    const me = guests.find(x => x.vmid === res.vmid);\n    const claimed = ((req.action === 'apply' ? res.after : (res.inventory || res.before)) || {}).name;\n    if (!me) fail(`CT${res.vmid} finnes ikke i Proxmox`);\n    else if (claimed && me.name !== claimed) fail(`Proxmox sier «${me.name}», ct-ops sier «${claimed}»`);\n    else if (req.action === 'apply' && res.status === 'FERDIG' && me.name !== res.to) fail(`Proxmox sier «${me.name}», men målet var «${res.to}»`);\n    else pass(`Proxmox bekrefter CT${res.vmid} = «${me.name}» på ${me.node}`);\n  }\n}\nconst HEX = { 'grønn': '#22c55e', 'gul': '#f59e0b', 'rød': '#dc2626' };\nconst changed = req.action === 'map-fix' ? (res.changed || []) : (req.action === 'apply' ? ((res.map || {}).changed || []) : []);\nif (changed.length) {\n  let html = '';\n  try { html = await this.helpers.httpRequest({ url: 'http://10.0.0.124:3020/', json: false }); } catch (e) { fail('n8n fikk ikke lest det publiserte kartet'); }\n  for (const c of (html ? changed : [])) {\n    const m = String(html).match(new RegExp('<div class=\"vm-frame\" data-vmid=\"' + c.vmid + '\">[\\\\s\\\\S]*?<div class=\"ct-method\" style=\"[^\"]*color:([^;\"]+)'));\n    const want = HEX[(c.after || {}).color];\n    if (m && m[1].trim() === want) pass(`kartet viser CT${c.vmid} som ${c.after.color}`);\n    else fail(`kartet viser ikke CT${c.vmid} som ${(c.after || {}).color}`);\n  }\n}\nconst ok = !!res.ok && qcOk;\nconst status = (res.ok && !qcOk) ? 'KVALITETSSJEKK_FEILET' : (res.status || 'FEILET');\nlet neste = null;\nif (req.action === 'plan-rename' && res.plan_id) neste = `Vis stegene til Roger og spør om godkjenning. Etter et tydelig ja: POST {\"action\":\"apply\",\"plan_id\":\"${res.plan_id}\"} innen ${res.valid_minutes} min.`;\nelse if (req.action === 'plan-rename' && (res.blockers || []).length) neste = 'Planen er blokkert. Gjengi blokkeringene til Roger; ikke prøv en annen vei.';\nelse if (req.action === 'apply' && !ok) neste = 'IKKE si ferdig. Gjengi status, steg som feilet og gjenstående avvik til Roger.';\nlet notify = null;\nconst who = `(bedt om av ${req.av})`;\nif (req.action === 'plan-rename' && res.plan_id) notify = { title: `CT-ops: plan venter – CT${res.vmid} → ${res.to}`, text: (res.steps || []).join(' | ').slice(0, 500) + ' ' + who };\nelse if (req.action === 'apply') notify = { title: `CT-ops ${status}: CT${res.vmid || '?'} → ${res.to || '?'}`, text: ((res.remaining_deviations || []).concat(qc.filter(x => x.startsWith('✗'))).join(' | ') || 'Alt lest tilbake uten avvik.').slice(0, 500) + ' ' + who };\nelse if (req.action === 'map-fix' && changed.length) notify = { title: `CT-ops ${status}: kart v${res.published_version} – ${changed.length} kort rettet`, text: changed.map(c => `CT${c.vmid} ${(c.before || {}).color || 'mangler'}→${c.after.color}`).join(', ').slice(0, 500) + ' ' + who };\nreturn [{ json: { ok, status, action: req.action, regel: 'Si «ferdig» bare når ok er true. Ellers: gjengi status og avvik ordrett.', kvalitetssjekk: qc, neste, resultat: res, _notify: notify } }];"
+      }
+    },
+    {
+      "id": "ctops-6",
+      "name": "Svar",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1100,
+        -80
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify(Object.fromEntries(Object.entries($json).filter(([k]) => k !== '_notify'))) }}",
+        "options": {}
+      }
+    },
+    {
+      "id": "ctops-7",
+      "name": "Varsel til Roger?",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1100,
+        100
+      ],
+      "parameters": {
+        "jsCode": "const n = $json._notify; if (!n) return [];\nreturn [{ json: { attachments: [{ title: n.title, text: n.text }], job: 'ct-ops' } }];"
+      }
+    },
+    {
+      "id": "ctops-8",
+      "name": "Send via homelab-alerts",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1320,
+        100
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://10.0.0.119:5678/webhook/homelab-alerts",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {}
+      }
+    },
+    {
+      "id": "ctops-9",
+      "name": "Nattlig 04:40",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        320
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "days",
+              "triggerAtHour": 4,
+              "triggerAtMinute": 40
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "ctops-10",
+      "name": "Nattlig revisjon og kartretting",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        440,
+        320
+      ],
+      "parameters": {
+        "authentication": "privateKey",
+        "command": "nightly",
+        "cwd": "/"
+      },
+      "credentials": {
+        "sshPrivateKey": {
+          "id": "vs4L7BphbF71Q7Or",
+          "name": "pc6 ct-ops (tvungen kommando)"
+        }
+      }
+    },
+    {
+      "id": "ctops-11",
+      "name": "Endret siden sist?",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        320
+      ],
+      "parameters": {
+        "jsCode": "// Varsler bare når bildet har endret seg siden forrige natt.\nlet res; try { res = JSON.parse($json.stdout); } catch (e) { res = { status: 'FEILET', error: String($json.stderr || $json.stdout || '').slice(0, 300) }; }\nconst st = $getWorkflowStaticData('global');\nconst sig = JSON.stringify([res.status, (res.deviations || []).map(d => [d.vmid, d.n]), (res.map || {}).status, res.map_missing_card, res.error || '']);\nconst mapChanged = ((res.map || {}).changed || []).length;\nif (sig === st.sig && !mapChanged) return [];\nconst first = st.sig === undefined; st.sig = sig;\nif (res.error) return [{ json: { attachments: [{ title: 'CT-ops nattlig revisjon FEILET', text: res.error }], job: 'ct-ops' } }];\nconst lines = (res.deviations || []).slice(0, 8).map(d => `CT${d.vmid}: ${d.first}`.slice(0, 110));\nreturn [{ json: { attachments: [{ title: `CT-ops: ${res.with_deviations} av ${res.cts} CT-er har avvik${first ? '' : ' (endret siden sist)'}`,\n  text: ((mapChanged ? `Kart v${res.map.published_version}: ${mapChanged} statuslinjer oppdatert. ` : '') + ((res.map || {}).status === 'BLOKKERT' ? 'Kart IKKE oppdatert: ' + res.map.error + ' ' : '') + lines.join(' | ')).slice(0, 900) }], job: 'ct-ops' } }];"
+      }
+    }
+  ],
+  "connections": {
+    "Forespørsel /ct-ops": {
+      "main": [
+        [
+          {
+            "node": "Valider forespørsel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Valider forespørsel": {
+      "main": [
+        [
+          {
+            "node": "Kjør ct-ops på pc6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Kjør ct-ops på pc6": {
+      "main": [
+        [
+          {
+            "node": "Proxmox – n8n leser selv",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Proxmox – n8n leser selv": {
+      "main": [
+        [
+          {
+            "node": "Kvalitetssjekk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Kvalitetssjekk": {
+      "main": [
+        [
+          {
+            "node": "Svar",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Varsel til Roger?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Varsel til Roger?": {
+      "main": [
+        [
+          {
+            "node": "Send via homelab-alerts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Nattlig 04:40": {
+      "main": [
+        [
+          {
+            "node": "Nattlig revisjon og kartretting",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Nattlig revisjon og kartretting": {
+      "main": [
+        [
+          {
+            "node": "Endret siden sist?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Endret siden sist?": {
+      "main": [
+        [
+          {
+            "node": "Send via homelab-alerts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "executionTimeout": 1800,
+    "timezone": "Europe/Oslo",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all"
+  }
+}
