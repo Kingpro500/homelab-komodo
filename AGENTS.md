@@ -75,7 +75,7 @@ Alt står i [pc8-ct310-n8n/docs/ct-ops.md](pc8-ct310-n8n/docs/ct-ops.md).
 
 ## 🏷️ Komodo-navn lyver — les beskrivelsen, ikke navnet
 
-Mange servere og stacker i Komodo heter fortsatt det CT-nummeret de hadde før en flytting. `pc6-ct109-*` kjører i CT210, `pc8-ct102-core` er CT110, `pc9-ct124-uisp` står på pc7. **Hver slik oppføring har en beskrivelse som sier hvor den faktisk kjører (satt 12. nov 2026). Stol på beskrivelsen og Proxmox, aldri på navnet.**
+Mange servere og stacker i Komodo heter fortsatt det CT-nummeret de hadde før en flytting. `pc6-ct109-*` kjører i CT210 (serveren heter `pc6-ct109-node`), `pc6-ct392-dashboards` kjører i CT154 siden 13. nov 2026, `pc8-ct102-core` er CT110, `pc9-ct124-uisp` står på pc7. **Hver slik oppføring har en beskrivelse som sier hvor den faktisk kjører (satt 12. nov 2026). Stol på beskrivelsen og Proxmox, aldri på navnet.**
 
 **Ikke «rydd» navnene.** Et navnebytte i Komodo er ikke kosmetikk:
 
