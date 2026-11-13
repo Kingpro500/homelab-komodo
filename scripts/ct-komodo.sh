@@ -35,7 +35,7 @@ echo "  OK    Proxmox: DNS lan.local, onboot=1, CT kjører"
 
 # 1) grunnoppsett i CT-en
 pct exec "$ID" -- env LANG=C.UTF-8 LC_ALL=C.UTF-8 bash -c "printf 'search lan.local\nnameserver 10.0.0.115\nnameserver 10.0.0.118\nnameserver 10.0.0.1\n' >/etc/resolv.conf; command -v curl >/dev/null || { apt-get -qq update && apt-get -qq install -y curl; } >/dev/null; curl -fsSL $RAW/ct-fix.sh | bash"
-# 2) Docker + Komodo Periphery som container (hoppes over hvis CT-en allerede er registrert med samme navn)
+# 2) Docker CE + Komodo Periphery som systemd-tjeneste (hoppes over hvis CT-en allerede er registrert med samme navn)
 if pct exec "$ID" -- sh -c "docker inspect -f '{{.State.Running}}' komodo-periphery 2>/dev/null | grep -q true && grep -q '^PERIPHERY_CONNECT_AS=$NAME\$' /opt/komodo/periphery/.env || systemctl is-active --quiet periphery && grep -q '^connect_as = \"$NAME\"' /etc/komodo/periphery.config.toml" 2>/dev/null; then
   echo "  OK    periphery kjører allerede som $NAME – registrering hoppes over"
 else

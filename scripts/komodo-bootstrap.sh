@@ -1,5 +1,5 @@
 #!/bin/bash
-# Installs Docker CE + Komodo Periphery (Docker-container, templates/lxc-komodo-v2/periphery-compose.yml) inside a Debian/Ubuntu CT and
+# Installs Docker CE + Komodo Periphery (systemd) inside a Debian/Ubuntu CT and
 # registers it in Komodo Core. Normally started from the Proxmox host by
 # scripts/ct-komodo.sh, which sets CONNECT_AS and pushes the onboarding key to
 # /root/.komodo-onboarding.key. The key is never stored in this repository.
@@ -20,8 +20,8 @@ run(){ local m="$1"; shift; "$@" >>"$LOG" 2>&1 && ok "$m" || die "$m"; }
 case "$ID" in debian|ubuntu) ;; *) die "ustøttet distro: $ID";; esac
 [ -n "${VERSION_CODENAME:-}" ] || die "fant ikke VERSION_CODENAME"
 echo "== Komodo-registrering: $CONNECT_AS ($ID $VERSION_CODENAME) mot $CORE_ADDRESS"
-if systemctl list-unit-files periphery.service 2>/dev/null | grep -q periphery; then
-  die "systemd-periphery finnes allerede – to agenter på samme CT gir Komodo-løkke (fjern den først)"
+if command -v docker >/dev/null && docker ps -a --format '{{.Names}}' | grep -qi periphery; then
+  die "periphery-container finnes allerede – to agenter på samme CT gir Komodo-løkke"
 fi
 ONBOARDING_KEY="${ONBOARDING_KEY:-$(cat "$KEYFILE" 2>/dev/null || true)}"
 [ -n "$ONBOARDING_KEY" ] || die "fant ingen onboarding-nøkkel ($KEYFILE)"
@@ -38,21 +38,24 @@ run "Docker installert" $APT install -y docker-ce docker-ce-cli containerd.io do
 run "Docker startet" systemctl enable --now docker
 ok "$(docker compose version)"
 
-echo "-- Komodo Periphery $KOMODO_VERSION (Docker)"
-PD=/opt/komodo/periphery
-install -d -m 0755 /opt/komodo "$PD"
-run "compose-mal hentet" curl -fsSL "https://raw.githubusercontent.com/Kingpro500/homelab-komodo/${HOMELAB_REF:-main}/templates/lxc-komodo-v2/periphery-compose.yml" -o "$PD/compose.yml"
-sed -i "s#komodo-periphery:[0-9][0-9.]*#komodo-periphery:${KOMODO_VERSION#v}#" "$PD/compose.yml"
-printf '%s' "$CORE_PUBLIC_KEY" > "$PD/core.pub"  # uten linjeskift: ellers 'not base64' i Periphery
-umask 077
-printf 'PERIPHERY_CORE_ADDRESS=%s\nPERIPHERY_CONNECT_AS=%s\nPERIPHERY_ONBOARDING_KEY=%s\n' "$CORE_ADDRESS" "$CONNECT_AS" "$ONBOARDING_KEY" > "$PD/.env"
-umask 022
+echo "-- Komodo Periphery $KOMODO_VERSION"
+run "installasjonsskript hentet" curl -fsSL "https://raw.githubusercontent.com/moghtech/komodo/$KOMODO_VERSION/scripts/setup-periphery.py" -o /root/setup-periphery.py
+systemctl stop periphery 2>/dev/null || true
+if [ -f /etc/komodo/periphery.config.toml ]; then
+  mv /etc/komodo/periphery.config.toml "/etc/komodo/periphery.config.toml.old.$(date +%Y%m%d-%H%M%S)"; ok "gammel config tatt vare på"
+fi
+run "periphery installert" python3 /root/setup-periphery.py \
+  --version "$KOMODO_VERSION" \
+  --config-url "https://raw.githubusercontent.com/moghtech/komodo/$KOMODO_VERSION/config/periphery.config.toml" \
+  --core-address "$CORE_ADDRESS" \
+  --connect-as "$CONNECT_AS" \
+  --onboarding-key "$ONBOARDING_KEY" \
+  --core-public-keys "$CORE_PUBLIC_KEY"
 unset ONBOARDING_KEY; rm -f "$KEYFILE"
-run "periphery-container startet" docker compose -f "$PD/compose.yml" --env-file "$PD/.env" -p komodo-periphery up -d
-for i in $(seq 1 30); do docker logs komodo-periphery 2>&1 | grep -q "Logged in to Komodo Core" && break; sleep 2; done
-docker logs komodo-periphery 2>&1 | grep -q "Logged in to Komodo Core" && ok "periphery logget inn i Core" || die "periphery fikk ikke kontakt med Core (docker logs komodo-periphery)"
-# Onboarding-nøkkelen er engangs: fjern den fra .env. Identiteten ligger i volumet periphery-data.
-sed -i '/^PERIPHERY_ONBOARDING_KEY=/d' "$PD/.env"
-docker compose -f "$PD/compose.yml" --env-file "$PD/.env" -p komodo-periphery up -d >>"$LOG" 2>&1 || true
-docker logs --tail 4 komodo-periphery 2>&1 | sed 's/^/        /'
+systemctl daemon-reload
+run "periphery startet" systemctl enable --now periphery
+sleep 8
+systemctl is-active --quiet periphery && ok "periphery kjører" || die "periphery kjører ikke"
+grep -E '^(core_address|connect_as)' /etc/komodo/periphery.config.toml | sed 's/^/        /'
+journalctl -u periphery --since "1 minute ago" --no-pager -n 6 | sed 's/^/        /'
 echo "== FERDIG: $CONNECT_AS skal nå vises som OK i Komodo"

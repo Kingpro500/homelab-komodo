@@ -1,5 +1,17 @@
 {
-  "_forklaring": "Godkjente unntak for ct-ops. Et unntak gjør at avviket ikke teller, så CT-en kan bli grønn i kartet. Endres kun via homelab-pr, og bare etter at Roger har sagt ja. Typer: proxmox-navn, server-navn, ingen-server, ekstra-server, stack-navn, stack-mappe, remote-errors, ingen-komodo. 'gjelder' er stack- eller servernavnet, eller * for alle av typen på den CT-en.",
-  "_eksempel": {"vmid": 200, "type": "stack-mappe", "gjelder": "pc6-ct200-emby", "grunn": "Emby flyttes ikke automatisk; mappen beholder gammelt navn inntil videre"},
-  "unntak": []
+  "_forklaring": "Godkjente unntak for ct-ops. Et unntak gjør at avviket ikke teller, så CT-en kan bli grønn i kartet. Endres kun via homelab-pr, og bare etter at Roger har sagt ja. Typer: standard-os, standard-docker, standard-compose, standard-periphery, proxmox-navn, server-navn, ingen-server, ekstra-server, stack-navn, stack-mappe, remote-errors, ingen-komodo. 'gjelder' er stack- eller servernavnet, eller * for alle av typen på den CT-en.",
+  "_eksempel": {
+    "vmid": 200,
+    "type": "stack-mappe",
+    "gjelder": "pc6-ct200-emby",
+    "grunn": "Emby flyttes ikke automatisk; mappen beholder gammelt navn inntil videre"
+  },
+  "unntak": [
+    {
+      "vmid": 110,
+      "type": "standard-periphery",
+      "gjelder": "*",
+      "grunn": "Komodo Core har Periphery i sin egen compose (dokumentert unntak i AGENTS.md)"
+    }
+  ]
 }

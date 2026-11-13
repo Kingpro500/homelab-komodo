@@ -79,23 +79,33 @@ Mange servere og stacker i Komodo heter fortsatt det CT-nummeret de hadde før e
 
 **Ikke «rydd» navnene.** Et navnebytte i Komodo er ikke kosmetikk:
 
-- **Server:** navnet er identiteten agenten melder seg på med (`PERIPHERY_CONNECT_AS` i `/opt/komodo/periphery/.env` i CT-en, for de som kobler ut). Bytter du navnet i Komodo uten å endre `.env` og restarte agenten, mister Komodo kontakten med CT-en og alle stackene der.
+- **Server:** navnet er identiteten agenten melder seg på med (`connect_as` i `/etc/komodo/periphery.config.toml`; for eldre container-Periphery: `PERIPHERY_CONNECT_AS`). Bytter du navnet i Komodo uten å endre `.env` og restarte agenten, mister Komodo kontakten med CT-en og alle stackene der.
 - **Stack:** når `project_name` er tomt, utledes Compose-prosjektet av stacknavnet. Et navnebytte gir nytt prosjekt, og de gamle containerne blir foreldreløse.
 - **Sletting av en stack som kjører** kjører `compose down --remove-orphans` på CT-en. Bare stacker som står `down`/`unknown` kan slettes uten at noe stopper.
 
 Skal et navn rettes, gjøres det for én CT om gangen sammen med Roger: sett `project_name` eksplisitt (stack) eller endre `.env` og restart agenten (server), og les tilbake at alt står `Ok` og at containerne kjører.
 
-## 🔌 Har en CT Komodo Periphery? Sjekk riktig sted
+## 📐 Husstandarden — én, og den måles (vedtatt av Roger 13. nov 2026)
 
-Standarden for **nye CT-er** er **Periphery som Docker-container** (`ct-new` → `ct-komodo` → `komodo-bootstrap`, mal: `templates/lxc-komodo-v2/periphery-compose.yml`). Filer ligger i `/opt/komodo/periphery/`, Komodo-root er `/opt/komodo`. Eldre CT-er (migrert til systemd 10. nov) har systemd-Periphery med alt i `/etc/komodo`; de er IKKE feil, men skal over til container-standarden (se README). Sjekk begge:
+Dette er den eneste standarden. Står det noe annet et sted i repoet, er det gammelt og skal rettes.
 
-```sh
-pct exec <ctid> -- docker ps --filter name=komodo-periphery   # ny standard
-pct exec <ctid> -- systemctl is-active periphery              # gammel (systemd)
-# og i Komodo: serveren <node>-ct<id>-<navn> har state Ok
-```
+| | Standard |
+| --- | --- |
+| OS | Debian 13 (trixie), unprivileged LXC |
+| Docker | **Docker CE** fra Dockers pakkelager (`docker-ce` + `docker-compose-plugin`). Ikke Debians `docker.io`. |
+| Compose | `docker compose` (plugin, v2 eller nyere). Aldri `docker-compose` 1.x. |
+| Komodo | **v2**. Periphery kobler seg *ut* til Core (`core_address`, `connect_as`, nøkkelpar). Den gamle modellen (Core kobler inn på port 8120 med passkey) brukes ikke. |
+| Periphery | **systemd-tjeneste** (`periphery.service`), config i `/etc/komodo/periphery.config.toml`. Det er dette Komodo v2 selv anbefaler. Ikke container. |
+| Navn | `<node>-ct<id>-<tjeneste>`, likt i Proxmox og som Komodo-server (`connect_as`). Én server per CT. |
 
-**Felles regel:** Nye CT-er bruker Docker-Periphery i `/opt/komodo/periphery/`. Eksisterende systemd-Periphery i eldre CT-er er ikke en feil; migrering til container-standarden gjøres senere, kontrollert og uten å avbryte tjenester. Komodo skal ha **én** server per CT med navn `<node>-ct<id>-<navn>` og status `Ok` når CT-en er tilgjengelig. Sjekk Proxmox, gjestens Periphery og Komodo-registeret mot hverandre før du registrerer noe på nytt; et gammelt registertreff eller `Ok` alene beviser ikke at agenten er riktig eller at CT-en kjører. Duplikater skal undersøkes og ryddes kontrollert, ikke opprettes. En stoppet eller utilgjengelig CT merkes «ikke verifisert», ikke som bekreftet feil. Unntak: CT110 (Core) har Periphery i Core sin Compose.
+**«Er alt riktig?» besvares av en måling, ikke en vurdering:** `ct-ops verify <vmid>` (eller `POST /webhook/ct-ops {"action":"verify","vmid":…}`). Ingen avvik = følger standarden = grønn i kartet. Si aldri «alt er ok» om en CT uten å ha kjørt den.
+
+- Nye CT-er: `ct-new` → `ct-komodo` → `scripts/komodo-bootstrap.sh` gir nøyaktig dette.
+- Eldre CT-er som avviker (Periphery i container, `docker.io`, Debian 12) er **kjente avvik, ikke feil som haster**. De vises gule og står i `ct-ops audit`. Rett dem én om gangen, etter Rogers ja: `ct-periphery-migrate <ctid>` flytter Periphery fra container til systemd uten å endre identitet.
+- Bevisste, varige unntak står i `scripts/ct-ops-unntak.json` (f.eks. CT110: Core har Periphery i sin egen compose).
+- Sjekk for hånd: `pct exec <ctid> -- systemctl is-active periphery` og `grep ^connect_as /etc/komodo/periphery.config.toml`.
+
+Historikk, så ingen snur dette igjen: systemd ble standard 10. nov, container 11. nov (PR 158, uten begrunnelse), og systemd igjen 13. nov etter kartlegging (34 av 49 CT-er kjørte systemd, 38 av 51 Docker CE) og Komodo v2-dokumentasjonen.
 
 ## 🚨 Utdyping: blokkert publisering, drift-vakt og GitHub-tilgang
 
