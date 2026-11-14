@@ -48,7 +48,7 @@ scrape_configs:
       - targets: ["10.0.0.135:9120"]
     metric_relabel_configs:
       - source_labels: [__name__]
-        regex: (emby_.*|proxmox_guest_.*)
+        regex: (emby_.*|proxmox_guest_.*|unraid_.*)
         action: keep
   - job_name: network-interface
     scrape_interval: 30s
