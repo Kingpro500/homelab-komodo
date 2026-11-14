@@ -84,7 +84,7 @@ def main():
     updated=update(old,new,day)
     if updated==old: print('uendret, publiserer ikke'); return
     write_remote(updated)
-    x=subprocess.run(['ssh','pc6','pct','exec','120','--','nettkart-publish',f'Dagsrapport {day.day}. {MONTHS[day.month-1]}','--av','hermes','--berort','CT120'],capture_output=True,text=True,timeout=300)
+    x=subprocess.run(['ssh','pc6','pct','exec','120','--','/usr/local/sbin/nettkart-publish',f'Dagsrapport {day.day}. {MONTHS[day.month-1]}','--av','hermes','--berort','CT120'],capture_output=True,text=True,timeout=300)
     if x.returncode: raise RuntimeError(x.stderr.strip() or 'publisering feilet')
     print(x.stdout)
 if __name__=='__main__':
