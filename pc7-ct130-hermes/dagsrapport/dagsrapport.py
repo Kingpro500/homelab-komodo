@@ -48,7 +48,7 @@ def read_remote():
     return x.stdout
 def write_remote(s):
     b=base64.b64encode(s.encode()).decode(); cmd=f"import sys,base64;open({REMOTE!r},'wb').write(base64.b64decode(sys.stdin.buffer.read()))"
-    x=subprocess.run(['ssh','pc6','pct','exec','120','--','python3','-c',cmd],input=b,text=True,capture_output=True,timeout=30)
+    x=subprocess.run(['ssh','pc6','pct','exec','120','--','python3','-c',shlex.quote(cmd)],input=b,text=True,capture_output=True,timeout=30)
     if x.returncode: raise RuntimeError(x.stderr.strip())
 def block(day,ps,summary):
     title=f'{day.day}. {MONTHS[day.month-1]}'
