@@ -8,6 +8,7 @@ import datetime as dt
 import html
 import json
 import re
+import shlex
 import subprocess
 import sys
 import urllib.request
@@ -129,8 +130,13 @@ def remote_read():
 
 def remote_write(text):
     payload = base64.b64encode(text.encode()).decode()
-    cmd = f"echo {payload} | base64 -d | cat > {REMOTE}"
-    r = subprocess.run(["ssh", "pc6", "pct", "exec", "120", "--", "sh", "-c", cmd], capture_output=True, text=True, timeout=30)
+    r = subprocess.run(
+        ["ssh", "pc6", "pct", "exec", "120", "--", "python3", "-c", shlex.quote(f"import sys,base64; open({REMOTE!r}, 'wb').write(base64.b64decode(sys.stdin.buffer.read()))")],
+        input=payload,
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
     if r.returncode:
         raise RuntimeError(r.stderr.strip() or "skriving til CT120 feilet")
 
