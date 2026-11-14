@@ -38,7 +38,9 @@ rollback(){
 
 X "command -v python3 >/dev/null && command -v curl >/dev/null" || X "apt-get -qq update && apt-get -qq install -y python3 curl >/dev/null" || die "kunne ikke installere python3/curl (sjekk DNS/apt i CT-en, kjør ct-fix)"
 X "curl -fsSL https://raw.githubusercontent.com/moghtech/komodo/$VER/scripts/setup-periphery.py -o /root/setup-periphery.py" || die "fikk ikke hentet setup-periphery.py"
-X "python3 /root/setup-periphery.py --version $VER --config-url https://raw.githubusercontent.com/moghtech/komodo/$VER/config/periphery.config.toml --core-address $CORE --connect-as $NAME --core-public-keys $CORE_PUB >/var/log/periphery-migrate.log 2>&1" || die "setup-periphery.py feilet (se /var/log/periphery-migrate.log i CT-en)"
+# Installereren starter tjenesten selv. Legg den eksisterende identiteten på plass før første start.
+X "mkdir -p /etc/komodo/keys && cp $KEYSRC/periphery.key $KEYSRC/periphery.pub /etc/komodo/keys/ && chmod 600 /etc/komodo/keys/*"
+X "python3 /root/setup-periphery.py --version $VER --root-directory \"$ROOTDIR\" --config-url https://raw.githubusercontent.com/moghtech/komodo/$VER/config/periphery.config.toml --core-address $CORE --connect-as $NAME --core-public-keys $CORE_PUB >/var/log/periphery-migrate.log 2>&1" || die "setup-periphery.py feilet (se /var/log/periphery-migrate.log i CT-en)"
 X "systemctl stop periphery 2>/dev/null; mkdir -p /etc/komodo/keys && cp $KEYSRC/periphery.key $KEYSRC/periphery.pub /etc/komodo/keys/ && chmod 600 /etc/komodo/keys/*"
 X "sed -i 's#^root_directory = .*#root_directory = \"$ROOTDIR\"#' /etc/komodo/periphery.config.toml && grep -q '^root_directory = \"$ROOTDIR\"' /etc/komodo/periphery.config.toml" || die "kunne ikke sette root_directory"
 # Periphery bruker ellers ${root_directory}/keys/periphery.key og lager en NY nøkkel der.
