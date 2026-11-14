@@ -62,6 +62,52 @@ def prom(expr, at):
         return None
 
 
+def prom_results(expr, at):
+    q = urllib.parse.urlencode({"query": expr, "time": "%d" % at})
+    try:
+        return get("%s/api/v1/query?%s" % (PROM, q))["data"]["result"]
+    except Exception:
+        return []
+
+
+def uptime_for_day(start, end):
+    secs = int((end - start).total_seconds())
+    if secs <= 0:
+        return {"internett": None, "dns_ekstern": None, "dns_lokal": None,
+                "gateway": None, "tjenester": None,
+                "tjenester_laveste": {"navn": None, "prosent": None}, "dekning": None}
+    at = end.timestamp()
+    rng = "[%ds]" % secs
+    step = max(1, int(secs / 5))
+    expected = max(1, int(secs / 5) * 2)
+    coverage = prom("sum(count_over_time(probe_success{job=\"blackbox-wan-icmp-pc9\",instance=~\"1.1.1.1|9.9.9.9\"}%s)) / %d" % (rng, expected), at)
+    out = {"internett": None, "dns_ekstern": None, "dns_lokal": None,
+           "gateway": None, "tjenester": None,
+           "tjenester_laveste": {"navn": None, "prosent": None},
+           "dekning": rnd(None if coverage is None else coverage * 100, 3)}
+    if coverage is None or coverage < 0.9:
+        return out
+    queries = {
+        "internett": 'avg_over_time((max(probe_success{job="blackbox-wan-icmp-pc9",instance=~"1.1.1.1|9.9.9.9"}))[%ds:15s])' % secs,
+        "dns_ekstern": 'avg_over_time((max(probe_success{job="blackbox-wan-dns-pc9",instance=~"1.1.1.1:53|9.9.9.9:53"}))[%ds:15s])' % secs,
+        "dns_lokal": 'avg_over_time(probe_success{job="blackbox-wan-dns-pc9",instance="10.0.0.1:53"}%s)' % rng,
+        "gateway": 'avg_over_time(probe_success{job="blackbox-wan-icmp-pc9",instance="10.0.0.1"}%s)' % rng,
+        "tjenester": 'avg(avg_over_time(probe_success{job=~"blackbox-http|blackbox-media-services|blackbox-tcp"}%s))' % rng,
+    }
+    for key, expr in queries.items():
+        value = prom(expr, at)
+        out[key] = rnd(None if value is None else value * 100, 3)
+    lowest = prom_results('bottomk(1, avg_over_time(probe_success{job=~"blackbox-http|blackbox-media-services|blackbox-tcp"}%s))' % rng, at)
+    if lowest:
+        metric = lowest[0].get("metric", {})
+        try:
+            value = float(lowest[0]["value"][1]) * 100
+            out["tjenester_laveste"] = {"navn": metric.get("instance"), "prosent": rnd(value, 3)}
+        except (KeyError, TypeError, ValueError):
+            pass
+    return out
+
+
 def grade(ms):
     if ms is None:
         return None
@@ -150,6 +196,7 @@ def day_row(day, now, tests):
         "opp_median": rnd(statistics.median(x["up"] for x in goodup)) if goodup else None,
         "opp_min": rnd(min(x["up"] for x in goodup)) if goodup else None,
         "ps5": ps5_for_day(start, end),
+        "oppetid": uptime_for_day(start, end),
     }
     # En dag uten noen data i det hele tatt lagres ikke (kilden fantes ikke ennå).
     if row["ping_hvile_ms"] is None and not t and row["wan_brudd"] is None:
