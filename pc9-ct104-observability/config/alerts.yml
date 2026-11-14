@@ -186,3 +186,12 @@ groups:
         annotations:
           summary: "A Tunarr NFS-health check is stalled"
           description: "A mount check has not completed for over three minutes. This may indicate a hard NFS operation is blocked; do not restart Emby."
+  - name: unraid-storage
+    rules:
+      - alert: UnraidDiskAlmostFull
+        expr: unraid_device_free_bytes{job="homelab-exporter"} < 10000000000
+        for: 30m
+        labels: {severity: warning, service: unraid}
+        annotations:
+          summary: "Unraid {{ $labels.name }} har under 10 GB ledig"
+          description: "Ledig plass er {{ $value | humanize1024 }}B. Rydd eller utvid. Se dashbordet Unraid – Lagring (Tower)."
