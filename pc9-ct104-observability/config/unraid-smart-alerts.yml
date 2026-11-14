@@ -1,0 +1,42 @@
+groups:
+  - name: unraid-smart
+    rules:
+      - alert: UnraidSmartExporterDown
+        expr: up{job="unraid-smart"} == 0
+        for: 10m
+        labels:
+          severity: warning
+          service: unraid
+        annotations:
+          summary: "SMART-eksportør på Unraid svarer ikke"
+          description: "smartctl_exporter på 10.0.0.101:9633 er nede. Start: sh /boot/config/smartctl_exporter/start.sh"
+
+      - alert: UnraidDiskSmartFailed
+        expr: smartctl_device_smart_status{job="unraid-smart"} == 0
+        for: 5m
+        labels:
+          severity: critical
+          service: unraid
+        annotations:
+          summary: "SMART FEIL: {{ $labels.device }} på Unraid"
+          description: "Disken {{ $labels.device }} rapporterer SMART-status FAILED."
+
+      - alert: UnraidDiskBadSectors
+        expr: (smartctl_device_attribute{job="unraid-smart",attribute_name=~"Reallocated_Sector_Ct|Current_Pending_Sector|Offline_Uncorrectable",attribute_value_type="raw"}) > 0
+        for: 30m
+        labels:
+          severity: warning
+          service: unraid
+        annotations:
+          summary: "Dårlige sektorer: {{ $labels.device }} ({{ $labels.attribute_name }})"
+          description: "{{ $labels.device }} har {{ $value }} i {{ $labels.attribute_name }}. Følg med, vurder bytte."
+
+      - alert: UnraidDiskHot
+        expr: smartctl_device_temperature{job="unraid-smart",temperature_type="current"} >= 50
+        for: 15m
+        labels:
+          severity: warning
+          service: unraid
+        annotations:
+          summary: "Disk varm: {{ $labels.device }} ({{ $value }} °C)"
+          description: "{{ $labels.device }} har vært ≥ 50 °C i 15 min."
