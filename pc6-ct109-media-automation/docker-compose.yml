@@ -72,7 +72,9 @@ services:
       - "8787:8787"
     volumes:
       - "${MEDIA_AUTOMATION_CONFIG_ROOT:?Set in Komodo}/readarr:/config"
-      - "/data/z downloads:/data"
+      # Same shared tree as Deluge, Sonarr, Radarr and Cleanuparr.
+      # This is required so Readarr source paths resolve identically everywhere.
+      - /data:/data
       - /data:/media
 
   podgrab:
