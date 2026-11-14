@@ -73,6 +73,17 @@ git push origin HEAD:main
 # Statiske støttefiler fra Gitea-kilden: arkivet (versions/, lenket som «historikk») (oslo-bors.html serveres fra GitHub siden 11. nov).
 # Synkes ved hver publisering, slik at webroten aldri får en gammel kopi.
 rsync -a --delete "$repo/docs/network-map/versions/" /srv/nettkart/www/versions/
+# Ekstra undersider i kartmappen (f.eks. linjekvalitet.html, diskrapporter.html) publiseres når de er endret.
+pages_published=false
+for page in "$repo"/docs/network-map/*.html; do
+  name=$(basename "$page")
+  case "$name" in nettverkskart.html|daily-report.html|endringer.html) continue ;; esac
+  if ! cmp -s "$page" "/srv/nettkart/www/$name"; then
+    atomic_copy "$page" "/srv/nettkart/www/$name"
+    pages_published=true
+    echo "Published $name."
+  fi
+done
 rules_published=false
 if [ -f "$rulesrc" ] && ! cmp -s "$rulesrc" "$ruleslive"; then
   atomic_copy "$rulesrc" "$ruleslive"
@@ -82,6 +93,7 @@ fi
 
 if ! newer "$next" "$old"; then
   published_supporting=$rules_published
+  if "$pages_published"; then published_supporting=true; fi
   if ! cmp -s "$docsrc" "$doclive"; then
     atomic_copy "$docsrc" "$doclive"
     curl -fsS -o /tmp/nettkart-publish-doc-verify.txt http://127.0.0.1:3020/PUBLISHING.md

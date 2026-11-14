@@ -1,0 +1,177 @@
+#!/usr/bin/env python3
+"""nettkart-linjekvalitet — daglig linjekvalitet til nettverkskartet (CT120).
+
+Legger INGEN ny last på linjen. Karakteren regnes ut av målinger som alt finnes:
+
+  * Ping hvert 5. sekund fra pc9 (kabel) til 1.1.1.1  (Prometheus, blackbox-wan-icmp-pc9)
+  * MySpeed sin timetest (full last ned/opp i ca. 15 s fra hvert hele klokkeslett)
+  * Fysiske WAN-brudd på OPNsense (Hermes, opnsense_wan_flaps_total)
+
+Bufferbloat = median ping mens timetesten laster linjen, minus median ping ellers.
+Karakterskalaen er den samme som Waveform bruker (økning i ms under last):
+  A+ < 5   A < 30   B < 60   C < 200   D < 400   F >= 400
+
+Skriver /srv/nettkart/www/linjekvalitet.json, som linjekvalitet.html (Gitea) tegner.
+Dager som alt er regnet ut beholdes i filen, så historikken overlever at
+Prometheus/MySpeed rydder gamle data.
+
+  nettkart-linjekvalitet            # siste 3 døgn regnes på nytt (cron, hver time)
+  nettkart-linjekvalitet --dager 30 # fyll historikk
+
+Kilde: GitHub homelab-komodo, scripts/ct120/nettkart-linjekvalitet.
+Installeres som /usr/local/sbin/nettkart-linjekvalitet (0755) + /etc/cron.d/nettkart-linjekvalitet.
+"""
+import datetime as dt
+import json
+import os
+import statistics
+import sys
+import tempfile
+import urllib.parse
+import urllib.request
+from zoneinfo import ZoneInfo
+
+PROM = os.environ.get("LK_PROM", "http://10.0.0.126:9090")
+MYSPEED = os.environ.get("LK_MYSPEED", "http://127.0.0.1:5216")
+OUT = os.environ.get("LK_OUT", "/srv/nettkart/www/linjekvalitet.json")
+TZ = ZoneInfo("Europe/Oslo")
+KEEP_DAYS = 120
+PING = 'probe_icmp_duration_seconds{job="blackbox-wan-icmp-pc9",phase="rtt",instance="1.1.1.1"}'
+OK = 'probe_success{job="blackbox-wan-icmp-pc9",instance="1.1.1.1"}'
+# Timetesten starter på hele timen og varer 11-30 s (snitt 15 s).
+LOAD = "({m} and (timestamp({m}) % 3600 >= 2) and (timestamp({m}) % 3600 < 20))".format(m=PING)
+IDLE = "({m} and (timestamp({m}) % 3600 >= 120))".format(m=PING)
+GRADES = [(5, "A+"), (30, "A"), (60, "B"), (200, "C"), (400, "D")]
+
+
+def get(url, timeout=60):
+    with urllib.request.urlopen(url, timeout=timeout) as r:
+        return json.load(r)
+
+
+def prom(expr, at):
+    q = urllib.parse.urlencode({"query": expr, "time": "%d" % at})
+    try:
+        res = get("%s/api/v1/query?%s" % (PROM, q))["data"]["result"]
+        v = float(res[0]["value"][1]) if res else None
+        return None if v is None or v != v else v
+    except Exception:
+        return None
+
+
+def grade(ms):
+    if ms is None:
+        return None
+    for lim, g in GRADES:
+        if ms < lim:
+            return g
+    return "F"
+
+
+def rnd(v, n=1):
+    return None if v is None else round(v, n)
+
+
+def day_row(day, now, tests):
+    start = dt.datetime.combine(day, dt.time(), TZ)
+    end = min(start + dt.timedelta(days=1), now)
+    secs = int((end - start).total_seconds())
+    if secs < 600:
+        return None
+    at = end.timestamp()
+    sub = "[%ds:5s]" % secs
+    rng = "[%ds]" % secs
+    idle = prom("quantile_over_time(0.5, %s%s) * 1000" % (IDLE, sub), at)
+    l50 = prom("quantile_over_time(0.5, %s%s) * 1000" % (LOAD, sub), at)
+    l95 = prom("quantile_over_time(0.95, %s%s) * 1000" % (LOAD, sub), at)
+    lmax = prom("max_over_time(%s%s) * 1000" % (LOAD, sub), at)
+    n = prom("count_over_time(%s%s)" % (LOAD, sub), at)
+    i95 = prom("quantile_over_time(0.95, %s%s) * 1000" % (IDLE, sub), at)
+    okavg = prom("avg_over_time(%s%s)" % (OK, rng), at)
+    flaps = prom("increase(opnsense_wan_flaps_total%s)" % rng, at)
+    down_s = prom("increase(opnsense_wan_flap_downtime_seconds_total%s)" % rng, at)
+    bloat = None if idle is None or l50 is None or (n or 0) < 12 else max(0.0, l50 - idle)
+    t = [x for x in tests if start <= x["t"] < end]
+    good = [x for x in t if x["down"] > 0]
+    goodup = [x for x in t if x["up"] > 0]
+    failed = [x for x in t if x["down"] <= 0 or x["up"] <= 0]
+    row = {
+        "dato": day.isoformat(),
+        "delvis": end < start + dt.timedelta(days=1),
+        "karakter": grade(bloat),
+        "bufferbloat_ms": rnd(bloat),
+        "ping_hvile_ms": rnd(idle),
+        "ping_hvile_p95_ms": rnd(i95),
+        "ping_last_ms": rnd(l50),
+        "ping_last_p95_ms": rnd(l95),
+        "ping_last_maks_ms": rnd(lmax),
+        "malinger_under_last": int(n or 0),
+        "pakketap_prosent": rnd(None if okavg is None else 100 * (1 - okavg), 3),
+        "wan_brudd": None if flaps is None else int(round(flaps)),
+        "wan_nedetid_s": None if down_s is None else int(round(down_s)),
+        "fartstester": len(t),
+        "fartstester_feilet": len(failed),
+        "ned_median": rnd(statistics.median(x["down"] for x in good)) if good else None,
+        "ned_min": rnd(min(x["down"] for x in good)) if good else None,
+        "opp_median": rnd(statistics.median(x["up"] for x in goodup)) if goodup else None,
+        "opp_min": rnd(min(x["up"] for x in goodup)) if goodup else None,
+    }
+    # En dag uten noen data i det hele tatt lagres ikke (kilden fantes ikke ennå).
+    if row["ping_hvile_ms"] is None and not t and row["wan_brudd"] is None:
+        return None
+    return row
+
+
+def main():
+    days = 3
+    if "--dager" in sys.argv:
+        days = int(sys.argv[sys.argv.index("--dager") + 1])
+    now = dt.datetime.now(TZ)
+    try:
+        raw = get("%s/api/speedtests?hours=%d&limit=5000" % (MYSPEED, days * 24 + 48))
+    except Exception:
+        raw = []
+    tests = []
+    for r in raw:
+        try:
+            tests.append({"t": dt.datetime.fromisoformat(r["created"].replace("Z", "+00:00")),
+                          "down": float(r.get("download") or -1), "up": float(r.get("upload") or -1)})
+        except Exception:
+            pass
+    try:
+        with open(OUT, encoding="utf-8") as fh:
+            old = {d["dato"]: d for d in json.load(fh).get("dager", [])}
+    except Exception:
+        old = {}
+    for i in range(days):
+        day = (now - dt.timedelta(days=i)).date()
+        row = day_row(day, now, tests)
+        if row:
+            # Behold en ferdig dag hvis kilden i mellomtiden er ryddet bort.
+            prev = old.get(row["dato"])
+            if prev and not prev.get("delvis") and row["ping_hvile_ms"] is None and prev.get("ping_hvile_ms") is not None:
+                continue
+            old[row["dato"]] = row
+    cutoff = (now - dt.timedelta(days=KEEP_DAYS)).date().isoformat()
+    rows = [old[k] for k in sorted(old) if k >= cutoff]
+    doc = {
+        "generert": now.isoformat(timespec="seconds"),
+        "generert_lokal": now.strftime("%d.%m.%Y %H:%M %Z"),
+        "metode": "Ping hvert 5. s fra pc9 (kabel) til 1.1.1.1. Under last = sekund 2-20 etter hver hele time, "
+                  "mens MySpeed laster linjen fullt. Bufferbloat = median under last minus median ellers. "
+                  "Skala som Waveform: A+ <5, A <30, B <60, C <200, D <400 ms, ellers F.",
+        "dager": rows,
+    }
+    d = os.path.dirname(OUT)
+    fd, tmp = tempfile.mkstemp(prefix=".linjekvalitet.", dir=d)
+    with os.fdopen(fd, "w", encoding="utf-8") as fh:
+        json.dump(doc, fh, ensure_ascii=False, indent=1)
+    os.chmod(tmp, 0o644)
+    os.replace(tmp, OUT)
+    last = rows[-1] if rows else {}
+    print("linjekvalitet: %d dager, siste %s karakter %s (bufferbloat %s ms)" % (
+        len(rows), last.get("dato"), last.get("karakter"), last.get("bufferbloat_ms")))
+
+
+if __name__ == "__main__":
+    main()

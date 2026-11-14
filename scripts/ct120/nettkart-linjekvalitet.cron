@@ -1,0 +1,2 @@
+# Linjekvalitet til nettverkskartet (kilde: GitHub homelab-komodo scripts/ct120/)
+10 * * * * root /usr/bin/python3 /usr/local/sbin/nettkart-linjekvalitet >/dev/null 2>&1

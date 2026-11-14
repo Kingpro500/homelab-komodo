@@ -81,7 +81,7 @@ if extra:
 # Webroten skal bare ha det nettkart-publish og kartets tjenester legger der.
 # Alt som ligger i kartmappen i Gitea hører hjemme i webroten; i tillegg kommer
 # filene tjenestene på CT120 genererer selv. Slik gir en ny kartside ikke falsk alarm.
-ALLOWED_WEB = {"daily-report.json", "nettkart-drift.json", "versions"}
+ALLOWED_WEB = {"daily-report.json", "nettkart-drift.json", "linjekvalitet.json", "versions"}
 ALLOWED_WEB |= {f.split("/")[-1] for f in git("ls-files", "docs/network-map").stdout.split()
                 if f.count("/") == 2}
 stray = sorted(f for f in os.listdir(LIVE_DIR) if f not in ALLOWED_WEB and not f.startswith("."))
