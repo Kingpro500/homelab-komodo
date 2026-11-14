@@ -57,3 +57,7 @@ SSH: `ssh -i ~/.ssh/id_ed25519_hermes -o IdentitiesOnly=yes -o BatchMode=yes roo
 ## Hermes-kø (lagt til 2026-11-14)
 - `~/.hermes/ko.env` (variabel `KO_TOKEN`, 0600): token for n8n-webhooken `hermes-ko`. Samme verdi ligger i n8n-credentialen `hermes-ko token`.
 - `hermes-ko.timer` kjører `~/.hermes/scripts/hermes_ko.py run` hvert 2. minutt som `hermes`, med `--yolo`. Se `pc7-ct130-hermes/hermes-ko/README.md`.
+
+## Hermes-kø (lagt til 2026-11-14)
+- `~/.hermes/ko.env` (variabel `KO_TOKEN`, 0600): token for n8n-webhooken `hermes-ko`. Samme verdi ligger i n8n-credentialen `hermes-ko token`.
+- `hermes-ko.timer` kjører `~/.hermes/scripts/hermes_ko.py run` hvert 2. minutt som `hermes`, med `--yolo`. Se `pc7-ct130-hermes/hermes-ko/README.md`.
