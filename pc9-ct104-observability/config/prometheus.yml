@@ -10,7 +10,19 @@ rule_files:
   - "/etc/prometheus/network-alerts.yml"
   - "/etc/prometheus/tunarr-session-alerts.yml"
   - "/etc/prometheus/media-services-alerts.yml"
+  - "/etc/prometheus/unraid-smart-alerts.yml"
 scrape_configs:
+  - job_name: unraid-smart
+    # smartctl_exporter v0.15.0 kjører i Unraid VM201 (ikke Komodo: Docker er av på Unraid).
+    # Startes fra /boot/config/go -> /boot/config/smartctl_exporter/start.sh.
+    # powermode-check=standby: sovende array-disker vekkes ikke.
+    scrape_interval: 120s
+    scrape_timeout: 60s
+    static_configs:
+      - targets: ['10.0.0.101:9633']
+        labels:
+          host: unraid
+
   - job_name: blackbox-http
     metrics_path: /probe
     params: {module: [http_2xx]}
