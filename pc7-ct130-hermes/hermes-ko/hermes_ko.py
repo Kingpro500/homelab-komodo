@@ -35,6 +35,9 @@ N8N = "http://10.0.0.119:5678"
 WORKER = ("gpt-5.6-luna", "openai-codex")     # billig: foreslår og utfører
 REVIEWER = (None, None)                        # kontrollør: Hermes sin standardmodell
 T_WORK, T_REVIEW, T_CHECK = 1500, 900, 180
+LOKAL_URL = "http://10.0.0.133:11434/api/generate"
+LOKAL_MODELL = "qwen3:8b"
+T_LOKAL = 60
 
 REGLER = """FASTE REGLER (gjelder alltid):
 - Les AGENTS.md øverst i ~/homelab-komodo før du gjør noe. Start med `git switch main && git pull --ff-only`.
@@ -90,6 +93,43 @@ def hermes(prompt, who, timeout):
 def dom(text):
     m = re.findall(r"DOM:\s*(GODKJENT|AVVIST)", text or "")
     return m[-1] if m else "AVVIST"
+
+
+def lokal_sjekk(t, forslag):
+    try:
+        oppgave = t.get("oppgave", "")
+        linjer = oppgave.splitlines()
+        if "Steg:" not in linjer:
+            return "HOPPET OVER", "ingen nummererte steg"
+        start = linjer.index("Steg:") + 1
+        steg = [linje.strip() for linje in linjer[start:]
+                if re.match(r"^\d+\.\s+", linje.strip())]
+        if not steg:
+            return "HOPPET OVER", "ingen nummererte steg"
+        prompt = (
+            "Oppgaven krever disse stegene i denne rekkefølgen:\n"
+            + "\n".join(steg)
+            + "\nForslaget sier:\n"
+            + forslag[:12000]
+            + "\nSvar med nøyaktig ett ord først, MANGLER eller KOMPLETT. "
+              "Ved MANGLER: skriv deretter numrene på stegene som mangler "
+              "helt i forslaget. Et steg som er gjengitt med andre ord teller "
+              "som med."
+        )
+        svar = http(LOKAL_URL, {
+            "model": LOKAL_MODELL,
+            "prompt": prompt,
+            "stream": False,
+            "options": {"temperature": 0},
+        }, timeout=T_LOKAL)
+        tekst = re.sub(r"<think>.*?</think>", "", svar.get("response", ""), flags=re.S).strip()
+        if tekst.startswith("MANGLER"):
+            return "MANGLER", tekst[:300]
+        if tekst.startswith("KOMPLETT"):
+            return "KOMPLETT", ""
+        return "HOPPET OVER", "uventet svar fra lokal modell"
+    except Exception as e:
+        return "HOPPET OVER", str(e)[:300]
 
 
 def kontroll(cmd):
@@ -236,6 +276,16 @@ def run():
         kritikk = t.get("tilbakemelding", "")
         for forsok in (1, 2):
             forslag = hermes(p_forslag(t, kritikk), WORKER, T_WORK)
+            if forsok == 1:
+                lokal_dom, lokal_tekst = lokal_sjekk(t, forslag)
+                ko("update", id=t["id"], logg="lokal sjekk: " + lokal_dom)
+                if lokal_dom == "MANGLER":
+                    t["forslag"] = forslag
+                    kritikk = (
+                        "Lokal forhåndssjekk (qwen3:8b) fant at forslaget "
+                        "mangler steg: " + lokal_tekst
+                    )
+                    continue
             vurdering = hermes(p_vurder(t, forslag), REVIEWER, T_REVIEW)
             t["forslag"] = forslag
             ko("update", id=t["id"], forslag=forslag, vurdering=vurdering, logg="forslag %d: %s" % (forsok, dom(vurdering)))

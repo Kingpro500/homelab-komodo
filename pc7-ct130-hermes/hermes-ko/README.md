@@ -42,6 +42,10 @@ Kontrollkommandoen kjøres fra CT130 som `hermes`.
 ct-ops-regelen instruerer om 200 sekunders tidsgrense, venting og inntil tre forsøk ved blokkering eller timeout.
 Claude-avgjørelser videresendes nå til forslag, kontrollør, utfører og sluttvurdering.
 
+Lokal AI-forhåndssjekk sammenligner forslag med nummererte steg før kontrolløren.
+Den gjelder bare forsøk 1 og oppgaver med en linje som er nøyaktig `Steg:`.
+Hvis Ollama ikke svarer, går køen videre uten forhåndssjekken.
+
 ## Statuser
 
 `ny` → `kjorer` → (`venter_godkjenning` → `godkjent` →) `ferdig` | `ferdig_med_merknad` (kontrollen gikk, kontrolløren
