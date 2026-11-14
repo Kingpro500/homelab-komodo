@@ -123,6 +123,15 @@ menu = ct121
 title = pc6-ct121-ct121 (10.0.0.226)
 host = 10.0.0.226
 
++ Gaming
+menu = Gaming
+title = Gaming clients (WiFi quality over time)
+
+++ PS5
+menu = PS5
+title = PlayStation 5 (WiFi 5 GHz via AC Pro, fixed IP)
+host = 10.0.0.110
+
 + Internet
 menu = Internet
 title = External connectivity
