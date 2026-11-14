@@ -21,8 +21,5 @@ Alerts `EmbyStandbyUnavailable` (5 min) and `EmbyStandbyProbeMissing` (10 min) a
 warnings: the primary Emby on CT200 is unaffected, but there is no failover target.
 Diagnose read-only first; never restart Emby while streams are active.
 
-## Unraid SMART (utenfor Komodo)
-`smartctl_exporter` v0.15.0 kjører i Unraid VM201 (10.0.0.101:9633). Docker er av på Unraid, derfor ikke Komodo.
-Binær + `start.sh` ligger i `/boot/config/smartctl_exporter/`, startes fra `/boot/config/go` (backup: `go.bak-smart`).
-`--smartctl.powermode-check=standby` vekker ikke sovende disker. Prometheus-jobb `unraid-smart`, alerts i `config/unraid-smart-alerts.yml`.
-Manuell start: `sh /boot/config/smartctl_exporter/start.sh`.
+## Unraid SMART
+SMART for Unraid-diskene følges i Scrutiny, som kjører som Docker-container på Unraid VM201: http://10.0.0.101:8088 (sda, sdb, sdc, sde og nvme0). Prometheus henter ikke SMART fra Unraid. Docker er på i Unraid. Agenter skal aldri skrive til Unraid-USB-en (/boot).
