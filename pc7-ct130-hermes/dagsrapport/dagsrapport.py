@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 import argparse, base64, datetime as dt, html, json, re, shlex, subprocess, sys, urllib.request
+from zoneinfo import ZoneInfo
 
 DATA_URL='http://10.0.0.124:3020/linjekvalitet.json'
 OLLAMA_URL='http://10.0.0.133:11434/api/generate'
@@ -15,7 +16,7 @@ def val(x, unit=''):
     if unit=='int': return str(int(x))
     return f'{x:.1f}'.replace('.',',')+unit
 def day_data(data):
-    end=dt.datetime.now(dt.timezone.utc).astimezone().date()-dt.timedelta(days=1)
+    end=dt.datetime.now(ZoneInfo('Europe/Oslo')).date()-dt.timedelta(days=1)
     rows={r.get('dato'):r for r in data.get('dager',[])}
     if end.isoformat() not in rows: raise RuntimeError('Gårsdagens rad mangler')
     return end,rows[end.isoformat()]
