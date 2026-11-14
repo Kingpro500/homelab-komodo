@@ -28,11 +28,14 @@ NAME="${NEW:-$OLD}"
 echo "== CT $ID: $C ($OLD) -> systemd-Periphery som $NAME, root $ROOTDIR"
 SID=$(kapi read '{"type":"ListServers","params":{}}' | jq -r --arg n "$OLD" '.[]|select(.name==$n)|.id')
 [ -n "$SID" ] || die "fant ikke server $OLD i Komodo"
+ADDR=$(kapi read '{"type":"ListServers","params":{}}' | jq -r --arg i "$SID" '.[]|select(.id==$i)|.info.address // ""')
+setaddr(){ kapi write "$(jq -nc --arg i "$SID" --arg a "$1" '{type:"UpdateServer",params:{id:$i,config:{address:$a}}}')" >/dev/null; }
 
 rollback(){
   echo "  ...   ruller tilbake"
   X "systemctl disable --now periphery 2>/dev/null; docker update --restart=unless-stopped $C >/dev/null; docker start $C >/dev/null" || true
   [ "$NAME" != "$OLD" ] && kapi write "$(jq -nc --arg i "$SID" --arg n "$OLD" '{type:"RenameServer",params:{id:$i,name:$n}}')" >/dev/null || true
+  [ -n "$ADDR" ] && setaddr "$ADDR" || true
   die "migrering feilet – gammel container er startet igjen"
 }
 
@@ -55,15 +58,18 @@ fi
 X "docker update --restart=no $C >/dev/null && docker stop $C >/dev/null" || rollback
 X "systemctl daemon-reload && systemctl enable --now periphery" || rollback
 ok "gammel container stoppet (beholdt, restart=no), systemd-Periphery startet"
+if [ -n "$ADDR" ]; then setaddr "" || rollback; ok "gammel inngående adresse $ADDR fjernet i Komodo (Periphery kobler ut til Core)"; fi
 # Periphery 2.3.x bruker ikke lenger den gamle «Logged in»-loggteksten.
 # Bekreft forbindelsen gjennom Komodo-registerets ferske serverstate.
-ST=""
-for i in $(seq 1 30); do
-  ST=$(kapi read '{"type":"ListServers","params":{}}' | jq -r --arg i "$SID" '.[]|select(.id==$i)|.info.state' 2>/dev/null || true)
-  [ "$ST" = Ok ] && break
-  sleep 2
+ST=""; N=0
+sleep 15
+for i in $(seq 1 40); do
+  ST=$(kapi read '{"type":"ListServers","params":{}}' | jq -r --arg i "$SID" '.[]|select(.id==$i)|if .info.state=="Ok" and .info.version!=null then "Ok" else (.info.state // "ukjent") end' 2>/dev/null || true)
+  if [ "$ST" = Ok ]; then N=$((N+1)); else N=0; fi
+  [ "$N" -ge 2 ] && break
+  sleep 3
 done
-[ "$ST" = Ok ] || { echo "        Komodo-state etter oppstart: ${ST:-ukjent}"; rollback; }
+[ "$N" -ge 2 ] || { echo "        Komodo-state etter oppstart: ${ST:-ukjent}"; rollback; }
 ok "$NAME er Ok i Komodo"
 X "docker ps --format '        {{.Names}}: {{.Status}}' | grep -v periphery" || true
 echo "== FERDIG: $NAME kjører nå systemd-Periphery. Gammel container '$C' er stoppet og kan fjernes senere."
