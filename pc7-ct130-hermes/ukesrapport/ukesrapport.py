@@ -101,17 +101,26 @@ def make_recommendations(rows):
     return out[:3] or ["Ingen tiltak anbefales denne uken."]
 
 
+def grade_median(rows):
+    order = ["A+", "A", "B", "C", "D", "F"]
+    chars = sorted((r.get("karakter") for r in rows if r.get("karakter")), key=order.index)
+    if not chars:
+        return "ingen data"
+    return chars[(len(chars) - 1) // 2]
+
+
 def build_ul(week, previous, drift, end):
     chars = [r.get("karakter") for r in week if r.get("karakter")]
     order = ["A+", "A", "B", "C", "D", "F"]
     worst = max(chars, key=lambda x: order.index(x)) if chars else "ingen data"
+    middle = grade_median(week)
     bb, down, up = median(week, "bufferbloat_ms"), median(week, "ned_median"), median(week, "opp_median")
     bbs = nonnull(week, "bufferbloat_ms")
     dn, un = nonnull(week, "ned_min"), nonnull(week, "opp_min")
     issues = drift.get("issues", [])
     drift_text = "ingen funn" if not issues else "; ".join(f"{i.get('title', '')}" for i in issues)
     li = [
-        f"Linjen: median bufferbloat {fmt(bb)} ms, dårligste karakter {worst}, høyeste bufferbloat {fmt(max(bbs) if bbs else None)} ms, median nedlasting {fmt(down)} Mbit/s og laveste nedlasting {fmt(min(dn) if dn else None)} Mbit/s, median opplasting {fmt(up)} Mbit/s og laveste opplasting {fmt(min(un) if un else None)} Mbit/s, {integer_total(week, 'wan_brudd')} WAN-brudd, {integer_total(week, 'wan_nedetid_s')} sekunder WAN-nedetid, {integer_total(week, 'fartstester_feilet')} feilede fartstester.",
+        f"Linjen: median karakter {middle}, dårligste karakter {worst}, median bufferbloat {fmt(bb)} ms, høyeste bufferbloat {fmt(max(bbs) if bbs else None)} ms, median nedlasting {fmt(down)} Mbit/s og laveste nedlasting {fmt(min(dn) if dn else None)} Mbit/s, median opplasting {fmt(up)} Mbit/s og laveste opplasting {fmt(min(un) if un else None)} Mbit/s, {integer_total(week, 'wan_brudd')} WAN-brudd, {integer_total(week, 'wan_nedetid_s')} sekunder WAN-nedetid, {integer_total(week, 'fartstester_feilet')} feilede fartstester.",
         "Endring mot forrige uke: " + ", ".join([change(week, previous, "bufferbloat_ms", "bufferbloat"), change(week, previous, "ned_median", "nedlasting"), change(week, previous, "opp_median", "opplasting"), f"WAN-brudd {integer_total(previous, 'wan_brudd')} → {integer_total(week, 'wan_brudd')} ({'+' if integer_total(week, 'wan_brudd')-integer_total(previous, 'wan_brudd') >= 0 else ''}{integer_total(week, 'wan_brudd')-integer_total(previous, 'wan_brudd')})", f"nedetid {integer_total(previous, 'wan_nedetid_s')} → {integer_total(week, 'wan_nedetid_s')} sekunder ({'+' if integer_total(week, 'wan_nedetid_s')-integer_total(previous, 'wan_nedetid_s') >= 0 else ''}{integer_total(week, 'wan_nedetid_s')-integer_total(previous, 'wan_nedetid_s')})"])+".",
         f"Drift: {drift.get('level', 'ukjent')}: {drift_text}.",
     ]
@@ -146,8 +155,12 @@ def update_html(source, ul):
     if len(matches) != 1:
         raise RuntimeError(f"fant {len(matches)} ul id=funn, forventet nøyaktig én")
     updated = source[:matches[0].start()] + ul + source[matches[0].end():]
-    today = dt.date.today().strftime("%d.%m.%Y")
-    updated, count = re.subn(r'(?m)^([^\n]*Sist gjennomgått[^\n]*)$', lambda m: re.sub(r'\d{2}\.\d{2}\.\d{4}', today, m.group(1)).replace("(Hermes, ukesrapport)", "").rstrip() + f" (Hermes, ukesrapport)", updated, count=1)
+    today = dt.date.today()
+    months = ["jan", "feb", "mar", "apr", "mai", "jun", "jul", "aug", "sep", "okt", "nov", "des"]
+    stamp = f"{today.day}. {months[today.month - 1]} {today.year}"
+    pattern = r'(?m)^\s*<p class="sub">[^\n]*Sist gjennomgått[^\n]*</p>[^\n]*$'
+    replacement = f'<p class="sub">Oppdateres av Hermes ved ukesrapport. Sist gjennomgått {stamp} (Hermes, ukesrapport).</p>'
+    updated, count = re.subn(pattern, replacement, updated, count=1)
     if count != 1:
         raise RuntimeError("fant ikke nøyaktig én Sist gjennomgått-linje")
     return updated
@@ -158,6 +171,11 @@ def selftest():
     assert not any("WAN-kabel" in x for x in make_recommendations(base))
     base[2]["wan_brudd"] = 1
     assert any("WAN-kabel" in x for x in make_recommendations(base))
+    assert grade_median([{"karakter": x} for x in ["A+", "A+", "A+", "A+", "A", "A+", "A+"]]) == "A+"
+    source = '<p class="sub">Oppdateres av agentene ved ukesrapport. Sist gjennomgått 14. nov 2026 (Claude).</p> (Hermes, ukesrapport)\n<ul id="funn" data-rapport="2026-W46"></ul>'
+    updated = update_html(source, '<ul id="funn" data-rapport="2026-W46"></ul>')
+    assert re.search(r'<p class="sub">Oppdateres av Hermes ved ukesrapport\. Sist gjennomgått \d{1,2}\. [a-z]{3} \d{4} \(Hermes, ukesrapport\)\.</p>$', updated.split("\n")[0])
+    assert "</p> (Hermes" not in updated
     print("selvtest ok")
 
 
