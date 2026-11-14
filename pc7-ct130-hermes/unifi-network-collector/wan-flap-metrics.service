@@ -1,0 +1,18 @@
+[Unit]
+Description=Prometheus metrics for durable OPNsense WAN flap history
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=hermes
+Group=hermes
+Environment=HOME=/home/hermes
+Environment=WAN_FLAP_DB=/home/hermes/.hermes/data/wan_flaps.db
+Environment=WAN_FLAP_METRICS_PORT=9130
+ExecStart=/usr/bin/python3 /home/hermes/.hermes/scripts/wan_flap_metrics.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

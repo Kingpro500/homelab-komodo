@@ -1,0 +1,13 @@
+[Unit]
+Description=Collect read-only UniFi device and port health
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=hermes
+Group=hermes
+Environment=HOME=/home/hermes
+Environment=UNIFI_ENVFILE=/home/hermes/.hermes/unifi.env
+Environment=WAN_FLAP_DB=/home/hermes/.hermes/data/wan_flaps.db
+ExecStart=/usr/bin/python3 /home/hermes/.hermes/scripts/unifi_network_collector.py
