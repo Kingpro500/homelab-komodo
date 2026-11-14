@@ -34,6 +34,17 @@ scrape_configs:
     static_configs:
       - targets: ['10.0.0.135:9120']
 
+  - job_name: 'unraid-smart'
+    # smartctl_exporter v0.15.0 kjører i Unraid VM201 (ikke Komodo: Docker er av på Unraid).
+    # Startes fra /boot/config/go -> /boot/config/smartctl_exporter/start.sh.
+    # powermode-check=standby: sovende array-disker vekkes ikke.
+    scrape_interval: 120s
+    scrape_timeout: 60s
+    static_configs:
+      - targets: ['10.0.0.101:9633']
+        labels:
+          host: unraid
+
   - job_name: 'pc1-gpu'
     # PC1 er gaming-node. Frakobling er forventet og skal ikke bli kritisk homelab-feil.
     scrape_interval: 15s

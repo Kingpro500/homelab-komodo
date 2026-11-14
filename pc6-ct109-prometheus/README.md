@@ -43,3 +43,8 @@ repo under `pc6-ct109-grafana/`).
 - Light footprint by design: 30s scrape interval, ~50 MB RAM idle.
 - CT109 is already loaded; the whole metrics stack can move to a less loaded guest
   if it ever matters.
+## Unraid SMART (utenfor Komodo)
+`smartctl_exporter` v0.15.0 kjører i Unraid VM201 (10.0.0.101:9633). Docker er av på Unraid, derfor ikke Komodo.
+Binær + `start.sh` ligger i `/boot/config/smartctl_exporter/`, startes fra `/boot/config/go` (backup: `go.bak-smart`).
+Starter med `--smartctl.powermode-check=standby` (vekker ikke sovende disker). Prometheus-jobb `unraid-smart`, alerts i gruppen `unraid-smart`.
+Manuell start: `sh /boot/config/smartctl_exporter/start.sh`.
