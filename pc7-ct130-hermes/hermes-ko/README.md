@@ -39,6 +39,9 @@ touch ~/.hermes/ko/STOPP                                # nødstopp; fjern filen
 Oppgave: `{"tittel": "...", "oppgave": "mål, fakta, nøyaktig endring, tilbakerulling", "kontroll": "<bash, exit 0 = ferdig>", "godkjenning": "ai" | "claude"}`.
 Kontrollkommandoen kjøres fra CT130 som `hermes`.
 
+ct-ops-regelen instruerer om 200 sekunders tidsgrense, venting og inntil tre forsøk ved blokkering eller timeout.
+Claude-avgjørelser videresendes nå til forslag, kontrollør, utfører og sluttvurdering.
+
 ## Statuser
 
 `ny` → `kjorer` → (`venter_godkjenning` → `godkjent` →) `ferdig` | `ferdig_med_merknad` (kontrollen gikk, kontrolløren

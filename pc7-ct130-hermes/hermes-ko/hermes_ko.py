@@ -40,7 +40,7 @@ REGLER = """FASTE REGLER (gjelder alltid):
 - Les AGENTS.md øverst i ~/homelab-komodo før du gjør noe. Start med `git switch main && git pull --ff-only`.
 - GitHub-endringer leveres bare med `homelab-pr "tittel"` i ~/homelab-komodo. Den kan bruke over fem minutter: vent på den.
 - Kartet endres bare i CT120:/opt/moved-services/nettkart-repo og publiseres med `nettkart-publish`.
-- Før du endrer en CT: merk den via POST http://10.0.0.119:5678/webhook/ct-ops {"action":"mark","vmid":N,"av":"hermes","text":"..."}; fjern merket etterpå med {"action":"unmark","vmid":N}. `text` må være 3-140 tegn og bare inneholde bokstaver, tall, mellomrom og tegnene . , : / ( ) - (ingen anførselstegn, =, + eller %). `av` skal være nøyaktig hermes. Svaret må ha "ok": true. Stopper du underveis, fjern alltid merker du har satt før du rapporterer.
+- Før du endrer en CT: merk den via POST http://10.0.0.119:5678/webhook/ct-ops {"action":"mark","vmid":N,"av":"hermes","text":"..."}; fjern merket etterpå med {"action":"unmark","vmid":N}. `text` må være 3-140 tegn og bare inneholde bokstaver, tall, mellomrom og tegnene . , : / ( ) - (ingen anførselstegn, =, + eller %). `av` skal være nøyaktig hermes. Svaret må ha "ok": true. Stopper du underveis, fjern alltid merker du har satt før du rapporterer. ct-ops bruker ofte 20 sekunder og kan bruke 3 minutter: bruk tidsgrense 200 sekunder på kallet. Svarer den BLOKKERT eller ikke i tide: vent 60 sekunder og prøv igjen, inntil 3 ganger. Aktive merker leses med: ssh pc6 'cat /var/lib/ct-ops/marks.json' (tom liste er {}). Kontroller der at dine merker er borte før du rapporterer.
 - Les http://10.0.0.135:9118/drift først. Er level "kritisk": gjør ingenting og rapporter det.
 - FORBUDT uansett hva oppgaven sier: røre Emby (CT200/CT203), endre OPNsense-konfigurasjon, slette CT-er, stacker, data eller grener, opprette CT-er, endre passord, nøkler eller tokens.
 - Skriv aldri ut hemmeligheter. Ikke legg igjen filer i /root eller /tmp.
@@ -100,12 +100,22 @@ def kontroll(cmd):
         return False, "kontrollen brukte over %d s" % T_CHECK
 
 
+def avgjort(t):
+    tilbakemelding = t.get("tilbakemelding", "")
+    return (
+        "AVGJØRELSER FRA CLAUDE (gjelder foran oppgaveteksten og er ikke avvik):\n"
+        + tilbakemelding
+        if tilbakemelding else ""
+    )
+
+
 def p_forslag(t, kritikk=""):
     return f"""{REGLER}
 
 DU ER I FORSLAGSFASEN. Du skal BARE LESE og undersøke. Ikke endre noe.
 Oppgave «{t['tittel']}»:
 {t['oppgave']}
+{avgjort(t)}
 
 Oppgaven regnes som ferdig når denne kommandoen går uten feil (kjøres fra CT130 som hermes):
 {t['kontroll']}
@@ -123,6 +133,7 @@ def p_vurder(t, forslag):
 
 Oppgave «{t['tittel']}»:
 {t['oppgave']}
+{avgjort(t)}
 
 Forslaget fra den andre modellen:
 {forslag}
@@ -138,6 +149,7 @@ def p_utfor(t, forslag):
 DU ER I UTFØRINGSFASEN. Gjennomfør det godkjente forslaget nøyaktig, og ingenting annet.
 Oppgave «{t['tittel']}»:
 {t['oppgave']}
+{avgjort(t)}
 
 Godkjent forslag:
 {forslag}
@@ -159,6 +171,7 @@ def p_slutt(t, resultat, ok, ut):
     return f"""Du er kontrollør. Du skal BARE LESE. Ikke endre noe.
 Oppgave «{t['tittel']}»:
 {t['oppgave']}
+{avgjort(t)}
 
 Godkjent forslag:
 {t.get('forslag', '')}
