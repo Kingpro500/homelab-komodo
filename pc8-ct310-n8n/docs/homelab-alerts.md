@@ -17,3 +17,4 @@
 - 2026-11-11: egen grense for nye enheter (tidligere stoppet den globale timegrensen 8 «New Device»-varsler samme dag). Backup før endring tatt. Hermes, godkjent av Roger.
 
 Ingen hemmeligheter i eksporten (kontrollert).
+- 2026-11-14: nye enheter logges og går i dagsrapporten, men gir ikke push. Stilleperiode og global timegrense for øvrige varsler er uendret. Hermes.
