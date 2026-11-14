@@ -55,16 +55,15 @@ fi
 X "docker update --restart=no $C >/dev/null && docker stop $C >/dev/null" || rollback
 X "systemctl daemon-reload && systemctl enable --now periphery" || rollback
 ok "gammel container stoppet (beholdt, restart=no), systemd-Periphery startet"
-# Komodo-status kan henge igjen fra den gamle containeren – krev en fersk innlogging i loggen.
-LOGIN=""
+# Periphery 2.3.x bruker ikke lenger den gamle «Logged in»-loggteksten.
+# Bekreft forbindelsen gjennom Komodo-registerets ferske serverstate.
+ST=""
 for i in $(seq 1 30); do
-  LOGIN=$(X "journalctl -u periphery --no-pager --since '-3 min' | grep -E 'Logged in to Komodo Core|Failed to login' | tail -1" || true)
-  case "$LOGIN" in *"Logged in"*) break;; *"Failed to login"*) break;; esac; sleep 2
+  ST=$(kapi read '{"type":"ListServers","params":{}}' | jq -r --arg i "$SID" '.[]|select(.id==$i)|.info.state' 2>/dev/null || true)
+  [ "$ST" = Ok ] && break
+  sleep 2
 done
-case "$LOGIN" in *"Logged in"*) ;; *) echo "        ${LOGIN:-ingen innlogging i loggen}" | cut -c1-200; rollback;; esac
-sleep 4
-ST=$(kapi read '{"type":"ListServers","params":{}}' | jq -r --arg i "$SID" '.[]|select(.id==$i)|.info.state' 2>/dev/null || true)
-[ "$ST" = Ok ] || rollback
+[ "$ST" = Ok ] || { echo "        Komodo-state etter oppstart: ${ST:-ukjent}"; rollback; }
 ok "$NAME er Ok i Komodo"
 X "docker ps --format '        {{.Names}}: {{.Status}}' | grep -v periphery" || true
 echo "== FERDIG: $NAME kjører nå systemd-Periphery. Gammel container '$C' er stoppet og kan fjernes senere."
