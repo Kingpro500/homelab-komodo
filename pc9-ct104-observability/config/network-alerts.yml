@@ -41,7 +41,7 @@ groups:
         expr: |
           probe_success{job="blackbox-wan-icmp-pc9",instance="10.0.0.1"} == 0
           and on() sum(probe_success{job="blackbox-wan-icmp-pc9",instance=~"1.1.1.1|9.9.9.9"} == 1) == 2
-        for: 30s
+        for: 15m
         labels:
           severity: critical
           scope: local-gateway
@@ -53,7 +53,7 @@ groups:
         expr: |
           probe_success{job="blackbox-wan-dns-pc9",instance="10.0.0.1:53"} == 0
           and on() sum(probe_success{job="blackbox-wan-dns-pc9",instance=~"1.1.1.1:53|9.9.9.9:53"} == 1) == 2
-        for: 30s
+        for: 15m
         labels:
           severity: warning
           scope: local-dns
@@ -63,7 +63,7 @@ groups:
 
       - alert: ExternalDnsDegraded
         expr: sum(probe_success{job="blackbox-wan-dns-pc9",instance=~"1.1.1.1:53|9.9.9.9:53"} == 0) >= 2
-        for: 30s
+        for: 15m
         labels:
           severity: warning
           scope: external-dns
@@ -73,7 +73,7 @@ groups:
 
       - alert: ExternalWanPathFailure
         expr: sum(probe_success{job="blackbox-wan-icmp-pc9",instance=~"1.1.1.1|9.9.9.9"} == 0) >= 2
-        for: 30s
+        for: 15m
         labels:
           severity: critical
           scope: wan-or-isp
