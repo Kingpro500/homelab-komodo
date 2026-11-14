@@ -104,3 +104,5 @@ sier det.
 seg på med `connect_as = "pc6-ct392-dashboards"` og bruker nøklene fra CT392,
 nettopp for at Komodo ikke skulle merke flyttingen. Navnebyttet er en egen jobb
 som må tas i Komodo, GitHub og kartet samtidig — ikke rydd i det halvveis.
+
+Dashbordet `unraid-smart.json` viser SMART-status, temperatur, driftstimer og dårlige sektorer fra jobben `unraid-smart` (smartctl_exporter i Unraid VM201).
