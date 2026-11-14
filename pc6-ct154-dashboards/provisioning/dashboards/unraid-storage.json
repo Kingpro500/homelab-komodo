@@ -101,11 +101,11 @@
     {
       "id": 6,
       "type": "bargauge",
-      "title": "Share – brukt pr. share (GiB)",
+      "title": "Disk – ledig per enhet (GiB)",
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "targets": [{ "refId": "A", "format": "table",
-        "expr": "unraid_share_used_bytes / 1073741824",
+        "expr": "unraid_device_free_bytes / 1073741824",
         "legendFormat": "{{name}}" }],
       "fieldConfig": {
         "defaults": { "unit": "decdbytes",
