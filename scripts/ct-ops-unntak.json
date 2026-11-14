@@ -12,6 +12,7 @@
       "type": "standard-periphery",
       "gjelder": "*",
       "grunn": "Komodo Core har Periphery i sin egen compose (dokumentert unntak i AGENTS.md)"
-    }
+    },
+    {"vmid": 340, "type": "stack-mappe", "gjelder": "pc6-ct340-additional-services-v2", "grunn": "Kjører fra delt repo-klone med manuell .env; Run Directory er dokumentert i docs/komodo-stack-deployment-runbook.md. Godkjent av Roger 14.11.2026"}
   ]
 }
