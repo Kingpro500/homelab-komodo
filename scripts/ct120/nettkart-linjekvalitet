@@ -45,6 +45,26 @@ GRADES = [(5, "A+"), (30, "A"), (60, "B"), (200, "C"), (400, "D")]
 PS5_SIGNAL = 'unifi_client_signal_dbm{ip="10.0.0.110"}'
 PS5_RETRY = 'unifi_client_retry_ratio{ip="10.0.0.110"}'
 PS5_SATISFACTION = 'unifi_client_satisfaction{ip="10.0.0.110"}'
+TARGETS = {
+    "gateway": "10.0.0.1",
+    "cloudflare": "1.1.1.1",
+    "quad9": "9.9.9.9",
+}
+SERVICE_NAMES = {
+    "10.0.0.128:6767": "Bazarr",
+    "10.0.0.128:8112": "Deluge",
+    "10.0.0.128:9696": "Prowlarr",
+    "10.0.0.128:7878": "Radarr",
+    "10.0.0.128:8787": "Readarr",
+    "10.0.0.128:5055": "Seerr",
+    "10.0.0.128:8989": "Sonarr",
+    "10.0.0.150": "Emby",
+    "10.0.0.203": "Emby standby",
+    "10.0.0.120:22": "pc6 SSH",
+    "10.0.0.120:8006": "pc6 Proxmox",
+    "10.0.0.122": "Tunarr",
+    "10.0.0.123": "Tunarr",
+}
 
 
 def get(url, timeout=60):
@@ -75,7 +95,7 @@ def uptime_for_day(start, end):
     if secs <= 0:
         return {"internett": None, "dns_ekstern": None, "dns_lokal": None,
                 "gateway": None, "tjenester": None,
-                "tjenester_laveste": {"navn": None, "prosent": None}, "dekning": None}
+                "tjenester_laveste": {"navn": None, "navn_lesbar": None, "prosent": None}, "dekning": None}
     at = end.timestamp()
     rng = "[%ds]" % secs
     step = max(1, int(secs / 5))
@@ -83,7 +103,7 @@ def uptime_for_day(start, end):
     coverage = prom("sum(count_over_time(probe_success{job=\"blackbox-wan-icmp-pc9\",instance=~\"1.1.1.1|9.9.9.9\"}%s)) / %d" % (rng, expected), at)
     out = {"internett": None, "dns_ekstern": None, "dns_lokal": None,
            "gateway": None, "tjenester": None,
-           "tjenester_laveste": {"navn": None, "prosent": None},
+           "tjenester_laveste": {"navn": None, "navn_lesbar": None, "prosent": None},
            "dekning": rnd(None if coverage is None else coverage * 100, 3)}
     if coverage is None or coverage < 0.9:
         return out
@@ -102,9 +122,38 @@ def uptime_for_day(start, end):
         metric = lowest[0].get("metric", {})
         try:
             value = float(lowest[0]["value"][1]) * 100
-            out["tjenester_laveste"] = {"navn": metric.get("instance"), "prosent": rnd(value, 3)}
+            address = metric.get("instance")
+            readable = next((name for key, name in SERVICE_NAMES.items() if address and (address == key or (key in ("10.0.0.122", "10.0.0.123") and key in address))), address)
+            out["tjenester_laveste"] = {"navn": address, "navn_lesbar": readable, "prosent": rnd(value, 3)}
         except (KeyError, TypeError, ValueError):
             pass
+    return out
+
+
+def latency_for_day(start, end, coverage):
+    empty = {"ping_median_ms": None, "ping_p95_ms": None, "ping_maks_ms": None,
+             "pakketap_prosent": None, "dns_median_ms": None, "dns_p95_ms": None}
+    out = {name: dict(empty) for name in TARGETS}
+    if coverage is None or coverage < 90:
+        return out
+    secs = int((end - start).total_seconds())
+    at = end.timestamp()
+    sub = "[%ds:5s]" % secs
+    rng = "[%ds]" % secs
+    for name, ip in TARGETS.items():
+        def q(expr):
+            return prom(expr, at)
+        icmp = 'probe_icmp_duration_seconds{job="blackbox-wan-icmp-pc9",phase="rtt",instance="%s"} > 0' % ip
+        dns = 'probe_duration_seconds{job="blackbox-wan-dns-pc9",instance="%s:53"} > 0' % ip
+        success = 'probe_success{job="blackbox-wan-icmp-pc9",instance="%s"}' % ip
+        out[name] = {
+            "ping_median_ms": rnd(q("quantile_over_time(0.5, (%s)%s) * 1000" % (icmp, sub))),
+            "ping_p95_ms": rnd(q("quantile_over_time(0.95, (%s)%s) * 1000" % (icmp, sub))),
+            "ping_maks_ms": rnd(q("max_over_time((%s)%s) * 1000" % (icmp, sub))),
+            "pakketap_prosent": rnd(None if q("avg_over_time(%s%s)" % (success, rng)) is None else (1 - q("avg_over_time(%s%s)" % (success, rng))) * 100, 3),
+            "dns_median_ms": rnd(q("quantile_over_time(0.5, (%s)%s) * 1000" % (dns, sub))),
+            "dns_p95_ms": rnd(q("quantile_over_time(0.95, (%s)%s) * 1000" % (dns, sub))),
+        }
     return out
 
 
@@ -198,6 +247,7 @@ def day_row(day, now, tests):
         "ps5": ps5_for_day(start, end),
         "oppetid": uptime_for_day(start, end),
     }
+    row["latens"] = latency_for_day(start, end, row["oppetid"].get("dekning"))
     # En dag uten noen data i det hele tatt lagres ikke (kilden fantes ikke ennå).
     if row["ping_hvile_ms"] is None and not t and row["wan_brudd"] is None:
         return None
