@@ -44,6 +44,7 @@ IDLE = "({m} and (timestamp({m}) % 3600 >= 120))".format(m=PING)
 GRADES = [(5, "A+"), (30, "A"), (60, "B"), (200, "C"), (400, "D")]
 PS5_SIGNAL = 'unifi_client_signal_dbm{ip="10.0.0.110"}'
 PS5_RETRY = 'unifi_client_retry_ratio{ip="10.0.0.110"}'
+PS5_SATISFACTION = 'unifi_client_satisfaction{ip="10.0.0.110"}'
 
 
 def get(url, timeout=60):
@@ -80,6 +81,7 @@ def ps5_for_day(start, end):
     sub = "[%ds:5m]" % secs
     signal = prom("quantile_over_time(0.5, %s%s)" % (PS5_SIGNAL, sub), at)
     retry = prom("quantile_over_time(0.5, %s%s) * 100" % (PS5_RETRY, sub), at)
+    satisfaction = prom("quantile_over_time(0.5, %s%s)" % (PS5_SATISFACTION, sub), at)
     connected = 0
     cursor = start
     while cursor < end:
@@ -90,11 +92,12 @@ def ps5_for_day(start, end):
             if count is not None and count > 0:
                 connected += 1
         cursor += dt.timedelta(hours=1)
-    if signal is None and retry is None and connected == 0:
+    if signal is None and retry is None and satisfaction is None and connected == 0:
         return None
     return {
         "signal_median_dbm": rnd(signal),
         "retry_median_prosent": rnd(retry),
+        "satisfaction_median": rnd(satisfaction),
         "timer_tilkoblet": connected,
     }
 
