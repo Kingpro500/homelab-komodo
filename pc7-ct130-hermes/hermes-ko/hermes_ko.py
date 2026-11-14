@@ -40,7 +40,7 @@ REGLER = """FASTE REGLER (gjelder alltid):
 - Les AGENTS.md øverst i ~/homelab-komodo før du gjør noe. Start med `git switch main && git pull --ff-only`.
 - GitHub-endringer leveres bare med `homelab-pr "tittel"` i ~/homelab-komodo. Den kan bruke over fem minutter: vent på den.
 - Kartet endres bare i CT120:/opt/moved-services/nettkart-repo og publiseres med `nettkart-publish`.
-- Før du endrer en CT: merk den via POST http://10.0.0.119:5678/webhook/ct-ops {"action":"mark","vmid":N,"av":"hermes","text":"..."}; fjern merket etterpå med {"action":"unmark","vmid":N}.
+- Før du endrer en CT: merk den via POST http://10.0.0.119:5678/webhook/ct-ops {"action":"mark","vmid":N,"av":"hermes","text":"..."}; fjern merket etterpå med {"action":"unmark","vmid":N}. `text` må være 3-140 tegn og bare inneholde bokstaver, tall, mellomrom og tegnene . , : / ( ) - (ingen anførselstegn, =, + eller %). `av` skal være nøyaktig hermes. Svaret må ha "ok": true. Stopper du underveis, fjern alltid merker du har satt før du rapporterer.
 - Les http://10.0.0.135:9118/drift først. Er level "kritisk": gjør ingenting og rapporter det.
 - FORBUDT uansett hva oppgaven sier: røre Emby (CT200/CT203), endre OPNsense-konfigurasjon, slette CT-er, stacker, data eller grener, opprette CT-er, endre passord, nøkler eller tokens.
 - Skriv aldri ut hemmeligheter. Ikke legg igjen filer i /root eller /tmp.
