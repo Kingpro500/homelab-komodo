@@ -5,7 +5,7 @@ Kilde: GitHub homelab-komodo, scripts/ct-ops-n8n. Installeres som /usr/local/sbi
 import json, os, re, subprocess, sys, time
 
 V = r"\d{3,6}"
-ALLOWED = [r"audit", r"nightly", r"verify " + V, r"map-check (?:all|%s(?: %s){0,99})" % (V, V), r"map-fix %s(?: %s){0,99}" % (V, V),
+ALLOWED = [r"audit", r"nightly", r"verify " + V, r"migrate %s pc\d+-ct%s-[a-z0-9-]{1,40}" % (V, V), r"map-check (?:all|%s(?: %s){0,99})" % (V, V), r"map-fix %s(?: %s){0,99}" % (V, V),
            r"mark %s [a-z0-9-]{2,20} [A-Za-z0-9æøåÆØÅ«» .,:/()→-]{3,140}" % V, r"unmark " + V,
            r"plan-rename %s [a-z0-9][a-z0-9-]{0,39}(?: --start-stop)?(?: --running-stacks)?" % V, r"apply p\d{3,6}-[0-9a-f]{10}"]
 raw = os.environ.get("SSH_ORIGINAL_COMMAND", "")
@@ -20,8 +20,13 @@ if not any(re.fullmatch(p, cmd) for p in ALLOWED):
     print(json.dumps({"ok": False, "status": "AVVIST", "error": "kommandoen er ikke tillatt via n8n"}, ensure_ascii=False))
     sys.exit(0)
 try:
-    r = subprocess.run(["/usr/local/sbin/ct-ops", *cmd.split()], capture_output=True, text=True, timeout=1500)
-    out = r.stdout.strip() or json.dumps({"ok": False, "status": "FEILET", "error": "ct-ops ga ingen utdata: " + r.stderr.strip()[-300:]}, ensure_ascii=False)
+    parts = cmd.split()
+    if parts[0] == "migrate":
+        r = subprocess.run(["/usr/local/sbin/ct-periphery-migrate", *parts[1:]], capture_output=True, text=True, timeout=1500)
+        out = json.dumps({"ok": r.returncode == 0, "status": "FERDIG" if r.returncode == 0 else "FEILET", "stdout": r.stdout[-6000:], "error": r.stderr[-1000:]}, ensure_ascii=False)
+    else:
+        r = subprocess.run(["/usr/local/sbin/ct-ops", *parts], capture_output=True, text=True, timeout=1500)
+        out = r.stdout.strip() or json.dumps({"ok": False, "status": "FEILET", "error": "ct-ops ga ingen utdata: " + r.stderr.strip()[-300:]}, ensure_ascii=False)
 except subprocess.TimeoutExpired:
     out = json.dumps({"ok": False, "status": "FEILET", "error": "ct-ops brukte mer enn 25 min"}, ensure_ascii=False)
 print(out)
