@@ -42,6 +42,8 @@ OK = 'probe_success{job="blackbox-wan-icmp-pc9",instance="1.1.1.1"}'
 LOAD = "({m} and (timestamp({m}) % 3600 >= 2) and (timestamp({m}) % 3600 < 20))".format(m=PING)
 IDLE = "({m} and (timestamp({m}) % 3600 >= 120))".format(m=PING)
 GRADES = [(5, "A+"), (30, "A"), (60, "B"), (200, "C"), (400, "D")]
+PS5_SIGNAL = 'unifi_client_signal_dbm{ip="10.0.0.110"}'
+PS5_RETRY = 'unifi_client_retry_ratio{ip="10.0.0.110"}'
 
 
 def get(url, timeout=60):
@@ -66,6 +68,35 @@ def grade(ms):
         if ms < lim:
             return g
     return "F"
+
+
+def ps5_for_day(start, end):
+    if end <= start:
+        return None
+    secs = int((end - start).total_seconds())
+    if secs < 300:
+        return None
+    at = end.timestamp()
+    sub = "[%ds:5m]" % secs
+    signal = prom("quantile_over_time(0.5, %s%s)" % (PS5_SIGNAL, sub), at)
+    retry = prom("quantile_over_time(0.5, %s%s) * 100" % (PS5_RETRY, sub), at)
+    connected = 0
+    cursor = start
+    while cursor < end:
+        hour_end = min(cursor + dt.timedelta(hours=1), end)
+        hour_secs = int((hour_end - cursor).total_seconds())
+        if hour_secs >= 300:
+            count = prom("count_over_time(%s[%ds:5m])" % (PS5_SIGNAL, hour_secs), hour_end.timestamp())
+            if count is not None and count > 0:
+                connected += 1
+        cursor += dt.timedelta(hours=1)
+    if signal is None and retry is None and connected == 0:
+        return None
+    return {
+        "signal_median_dbm": rnd(signal),
+        "retry_median_prosent": rnd(retry),
+        "timer_tilkoblet": connected,
+    }
 
 
 def rnd(v, n=1):
@@ -115,6 +146,7 @@ def day_row(day, now, tests):
         "ned_min": rnd(min(x["down"] for x in good)) if good else None,
         "opp_median": rnd(statistics.median(x["up"] for x in goodup)) if goodup else None,
         "opp_min": rnd(min(x["up"] for x in goodup)) if goodup else None,
+        "ps5": ps5_for_day(start, end),
     }
     # En dag uten noen data i det hele tatt lagres ikke (kilden fantes ikke ennå).
     if row["ping_hvile_ms"] is None and not t and row["wan_brudd"] is None:
