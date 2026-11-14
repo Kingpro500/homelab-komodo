@@ -471,7 +471,10 @@ def build_plan(inv, service, start_stop, running_stacks):
             if rel:
                 why = "compose bruker relative stier (%s) – navnebytte flytter mappen på verten og kan skille containerne fra data/konfig" % "; ".join(rel[:3])
         if not why and st["run_directory"] != w and st["run_directory"] != st["name"]:
-            why = "run_directory «%s» er ikke stackens egen mappe (deles kanskje) – avklares manuelt" % st["run_directory"]
+            delt = sorted(x["name"] for x in komodo("read", "ListFullStacks", {})
+                          if x["_id"]["$oid"] != st["id"] and (x["config"].get("run_directory") or "").strip("./") == st["run_directory"])
+            if delt:
+                why = "run_directory «%s» brukes også av %s – avklares manuelt" % (st["run_directory"], ", ".join(delt))
         if not why and st["run_directory"] != w and repo_dir_exists(w):
             why = "mappen «%s» finnes allerede i repoet" % w
         if why:
