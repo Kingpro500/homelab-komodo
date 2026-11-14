@@ -1,0 +1,10 @@
+[Unit]
+Description=Hermes-kø: hent neste oppgave fra n8n og la Hermes utføre den
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=hermes
+Environment=HOME=/home/hermes
+ExecStart=/usr/bin/python3 /home/hermes/.hermes/scripts/hermes_ko.py run
+TimeoutStartSec=3h
