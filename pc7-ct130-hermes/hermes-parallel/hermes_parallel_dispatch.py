@@ -28,7 +28,7 @@ def self_test():
  ts[0]['resources']=[]; ts[1]['resources']=[]; p=plan(ts); assert {x['id'] for x in p}=={'a1','a2'},'two CTs not parallel'
  assert not any(x['class'] in ('B','C') for x in p),'B or C selected'
  assert len({x['ct'] for x in p})==len(p),'CT lock failed'
- return 'SELF-TEST OK: two independent A tasks, B nonblocking, C never runs, CT and resource locks work'
+ return 'EXECUTION-TEST OK: two independent A tasks, B nonblocking, C never runs, CT and resource locks work'
 def main():
  ap=argparse.ArgumentParser(); ap.add_argument('--self-test','--self-test-execution',dest='self_test',action='store_true'); ap.add_argument('--list-b',action='store_true'); ap.add_argument('--plan',action='store_true'); a=ap.parse_args()
  if a.self_test: print(self_test()); return 0
