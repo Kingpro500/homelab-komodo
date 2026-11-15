@@ -27,17 +27,17 @@ groups:
         labels: {severity: critical, service: monitoring, node: pc9}
         annotations: {summary: "Blackbox exporter on CT104 is down", description: "All blackbox probes fail to scrape, so Emby/WAN/DNS/media availability alerts are blind. Check the blackbox container on pc9 CT104."}
       - alert: EmbyDown
-        expr: emby_up{instance="emby"} == 0
+        expr: emby_up{exported_instance="emby"} == 0
         for: 2m
         labels: {severity: critical, service: emby, node: pc6}
         annotations: {summary: "Emby health exporter reports unavailable"}
       - alert: EmbySessionsUnknown
-        expr: emby_sessions_known{instance="emby"} == 0
+        expr: emby_sessions_known{exported_instance="emby"} == 0
         for: 2m
         labels: {severity: critical, service: emby, node: pc6}
         annotations: {summary: "Emby sessions status is unknown; recovery must remain blocked"}
       - alert: EmbyProbeDegraded
-        expr: emby_probe_success{instance="emby"} < emby_probe_total{instance="emby"}
+        expr: emby_probe_success{exported_instance="emby"} < emby_probe_total{exported_instance="emby"}
         for: 5m
         labels: {severity: warning, service: emby, node: pc6}
         annotations: {summary: "Emby authenticated health probes are degraded"}
