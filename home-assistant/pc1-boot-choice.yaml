@@ -1,0 +1,39 @@
+# Home Assistant package for selecting the next pc1 boot target.
+# The scripts run on Home Assistant and use the pre-existing SSH trust to pc1.
+input_select:
+  pc1_boot_target:
+    name: pc1 oppstart
+    options:
+      - Windows 11
+      - Proxmox
+    initial: Proxmox
+    icon: mdi:restart
+
+script:
+  pc1_boot_windows_11:
+    alias: pc1 start Windows 11 neste gang
+    mode: single
+    sequence:
+      - service: shell_command.pc1_boot_windows_11
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.pc1_boot_target
+        data:
+          option: Windows 11
+
+  pc1_boot_proxmox:
+    alias: pc1 start Proxmox neste gang
+    mode: single
+    sequence:
+      - service: shell_command.pc1_boot_proxmox
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.pc1_boot_target
+        data:
+          option: Proxmox
+
+shell_command:
+  pc1_boot_windows_11: >-
+    /config/scripts/pc1-boot-windows-11.sh
+  pc1_boot_proxmox: >-
+    /config/scripts/pc1-boot-proxmox.sh
