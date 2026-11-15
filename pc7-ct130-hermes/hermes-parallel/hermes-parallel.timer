@@ -1,0 +1,7 @@
+[Unit]
+Description=Hermes parallel planner timer
+[Timer]
+OnBootSec=5min
+OnUnitInactiveSec=5min
+[Install]
+WantedBy=timers.target

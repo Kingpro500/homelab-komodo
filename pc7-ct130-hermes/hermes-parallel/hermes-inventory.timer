@@ -1,0 +1,7 @@
+[Unit]
+Description=Hermes CT inventory timer
+[Timer]
+OnBootSec=10min
+OnUnitInactiveSec=30min
+[Install]
+WantedBy=timers.target
