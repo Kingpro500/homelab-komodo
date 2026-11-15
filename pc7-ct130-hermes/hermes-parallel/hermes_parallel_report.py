@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate and display the conservative parallel-work B report."""
+"""Generate the daily autonomous CT-work report from local state."""
 import argparse
 import json
 import os
@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 
 BASE = os.path.expanduser("~/.hermes/parallel")
 STATE = os.path.join(BASE, "state.json")
+INVENTORY = os.path.join(BASE, "inventory.json")
 REPORT = os.path.join(BASE, "report.json")
 SEED = [
     {"id": "K44", "class": "A", "status": "B", "ct": 340,
@@ -18,36 +19,45 @@ SEED = [
 ]
 
 
-def load_tasks():
-    if os.path.exists(STATE):
-        with open(STATE, encoding="utf-8") as fh:
-            return json.load(fh).get("tasks", SEED)
-    return SEED
+def read_json(path, default):
+    try:
+        with open(path, encoding="utf-8") as fh:
+            return json.load(fh)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return default
 
 
 def generate():
     os.makedirs(BASE, exist_ok=True)
-    tasks = load_tasks()
+    state = read_json(STATE, {"tasks": SEED, "paused": False,
+                              "consecutive_a_failures": 0})
+    inventory = read_json(INVENTORY, {"nodes": [], "guests": [],
+                                      "error": "inventory not run yet"})
+    tasks = state.get("tasks", SEED)
+    b_tasks = [t for t in tasks if t.get("status") in ("B", "venter_pa_roger")
+               or t.get("class") == "B"]
     report = {
         "generated": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-        "b_tasks": [t for t in tasks if t.get("status") in ("B", "venter_pa_roger") or t.get("class") == "B"],
+        "inventory": inventory,
+        "a_tasks": [t for t in tasks if t.get("class") == "A"],
+        "a_failures": state.get("a_failures", []),
+        "consecutive_a_failures": state.get("consecutive_a_failures", 0),
+        "paused": bool(state.get("paused", False)),
+        "active_locks": state.get("active_locks", []),
+        "b_list": [{"number": i, **task} for i, task in enumerate(b_tasks, 1)],
     }
     tmp = REPORT + ".tmp"
     with open(tmp, "w", encoding="utf-8") as fh:
-        json.dump(report, fh, indent=2, sort_keys=True)
+        json.dump(report, fh, indent=2, sort_keys=True, ensure_ascii=False)
         fh.write("\n")
     os.replace(tmp, REPORT)
     return report
 
 
 def show_b():
-    if os.path.exists(REPORT):
-        with open(REPORT, encoding="utf-8") as fh:
-            report = json.load(fh)
-    else:
-        report = generate()
-    for task in report.get("b_tasks", []):
-        print(f"{task['id']}: {task.get('reason', '')}")
+    report = read_json(REPORT, generate())
+    for task in report.get("b_list", []):
+        print(f"{task['number']}. {task['id']}: {task.get('reason', '')}")
 
 
 def main():
