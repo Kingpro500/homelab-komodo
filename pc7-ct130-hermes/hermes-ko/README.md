@@ -39,6 +39,10 @@ touch ~/.hermes/ko/STOPP                                # nødstopp; fjern filen
 Oppgave: `{"tittel": "...", "oppgave": "mål, fakta, nøyaktig endring, tilbakerulling", "kontroll": "<bash, exit 0 = ferdig>", "godkjenning": "ai" | "claude"}`.
 Kontrollkommandoen kjøres fra CT130 som `hermes`.
 
+`PAUSE` inneholder tidspunktet pausen utløper og grunnen til at køen venter.
+`PAUSE` kan slettes for hånd for å starte køen igjen.
+Ved eneste kritiske funn `map:dirty` kontrolleres kartet selv med `ssh pc6 'pct exec 120 -- git -C /opt/moved-services/nettkart-repo status --short'`; tom utskrift er et utdatert funn.
+
 ct-ops-regelen instruerer om 200 sekunders tidsgrense, venting og inntil tre forsøk ved blokkering eller timeout.
 Claude-avgjørelser videresendes nå til forslag, kontrollør, utfører og sluttvurdering.
 
