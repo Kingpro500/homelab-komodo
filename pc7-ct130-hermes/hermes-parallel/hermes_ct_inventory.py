@@ -8,8 +8,13 @@ def one(node):
         if p.returncode: return {"node":node,"error":p.stderr.strip()}
         rows=[]
         for line in p.stdout.splitlines()[1:]:
-            x=line.split(None,5)
-            if len(x)>=4 and x[0].isdigit(): rows.append({"vmid":int(x[0]),"status":x[1],"lock":x[2],"name":x[3],"node":node})
+            x=line.split()
+            if len(x)>=3 and x[0].isdigit():
+                if len(x) >= 4:
+                    lock, name = x[2], x[3]
+                else:
+                    lock, name = "", x[2]
+                rows.append({"vmid":int(x[0]),"status":x[1],"lock":lock,"name":name,"node":node})
         return {"node":node,"guests":rows}
     except Exception as e: return {"node":node,"error":str(e)}
 def main():
