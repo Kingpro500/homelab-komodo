@@ -58,12 +58,15 @@ SERVICE_NAMES = {
     "10.0.0.128:8787": "Readarr",
     "10.0.0.128:5055": "Seerr",
     "10.0.0.128:8989": "Sonarr",
-    "10.0.0.150": "Emby",
-    "10.0.0.203": "Emby standby",
-    "10.0.0.120:22": "pc6 SSH",
-    "10.0.0.120:8006": "pc6 Proxmox",
     "10.0.0.122": "Tunarr",
     "10.0.0.123": "Tunarr",
+    "10.0.0.150": "Emby",
+    "10.0.0.203": "Emby standby",
+    "10.0.0.126:9090": "Prometheus",
+    "10.0.0.126:9093": "Alertmanager",
+    ":9115": "Blackbox",
+    "10.0.0.120:22": "pc6 SSH",
+    "10.0.0.120:8006": "pc6 Proxmox",
 }
 
 
@@ -123,7 +126,9 @@ def uptime_for_day(start, end):
         try:
             value = float(lowest[0]["value"][1]) * 100
             address = metric.get("instance")
-            readable = next((name for key, name in SERVICE_NAMES.items() if address and (address == key or (key in ("10.0.0.122", "10.0.0.123") and key in address))), address)
+            readable = next((name for key, name in SERVICE_NAMES.items() if address and key in address), None)
+            if readable is None:
+                readable = address.replace("http://", "", 1).split("/", 1)[0] if address else address
             out["tjenester_laveste"] = {"navn": address, "navn_lesbar": readable, "prosent": rnd(value, 3)}
         except (KeyError, TypeError, ValueError):
             pass

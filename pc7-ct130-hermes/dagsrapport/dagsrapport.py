@@ -19,7 +19,8 @@ def day_data(data):
     end=dt.datetime.now(ZoneInfo('Europe/Oslo')).date()-dt.timedelta(days=1)
     rows={r.get('dato'):r for r in data.get('dager',[])}
     if end.isoformat() not in rows: raise RuntimeError('Gårsdagens rad mangler')
-    return end,rows[end.isoformat()]
+    previous=end-dt.timedelta(days=1)
+    return end,rows[end.isoformat()],previous,rows.get(previous.isoformat())
 def points(end,r):
     up=r.get('oppetid') or {}; low=up.get('tjenester_laveste') or {}; cf=(r.get('latens') or {}).get('cloudflare') or {}
     internet=up.get('internett'); down=None if internet is None else (100-internet)/100*86400
@@ -36,12 +37,14 @@ def points(end,r):
     p4='Avvik: '+('Ingen avvik' if not issues else '; '.join(issues))+'.'
     return [p1,p2,p3,p4]
 def ai(text):
-    prompt='Punktene 1–4:\n'+text+'\nSkriv nøyaktig tre korte setninger på norsk bokmål som bare bruker tallene i teksten. Ingen andre tall.'
+    prompt='Punktene 1–4 for gårsdagen:\n'+text.split('\n--- DAGEN FØR ---\n')[0]+'\n\nPunktene 1–4 for dagen før:\n'+text.split('\n--- DAGEN FØR ---\n')[1]+'\nSkriv høyst to korte setninger på norsk bokmål. Si om gårsdagen var bedre, dårligere eller omtrent lik dagen før, og nevn det viktigste avviket hvis det finnes. Bruk bare tall som står i teksten. Sekunder nedetid er summer for hele døgnet, ikke per brudd.'
     req=json.dumps({'model':'qwen3:8b','prompt':prompt,'stream':False,'options':{'temperature':0.2}}).encode()
     with urllib.request.urlopen(urllib.request.Request(OLLAMA_URL,req,{'Content-Type':'application/json'}),timeout=90) as x: raw=json.load(x).get('response','')
     raw=re.sub(r'<think>.*?</think>','',raw,flags=re.S).strip()
     nums=re.findall(r'\d+(?:,\d+)?',raw); allowed=set(re.findall(r'\d+(?:,\d+)?',text.replace('.',',')))
-    if len(raw)>500 or len(re.findall(r'[.!?](?:\s|$)',raw))!=3 or any(n not in allowed for n in nums): return None
+    bad_words=re.search(r'\b(hvert|hver|per|each|uptime)\b',raw,re.I)
+    sentences=len(re.findall(r'[.!?](?:\s|$)',raw))
+    if len(raw)>300 or sentences<1 or sentences>2 or bad_words or any(n not in allowed for n in nums): return None
     return raw
 def read_remote():
     x=subprocess.run(['ssh','pc6','pct','exec','120','--','cat',REMOTE],capture_output=True,text=True,timeout=30)
@@ -54,7 +57,7 @@ def write_remote(s):
 def block(day,ps,summary):
     title=f'{day.day}. {MONTHS[day.month-1]}'
     out=f'<div id="dagsrapport" data-dag="{day.isoformat()}">\n<h2>I går, {title}</h2>\n<ul>\n'+''.join(f'<li>{html.escape(p,quote=False)}</li>\n' for p in ps)+'</ul>'
-    if summary: out+=f'<p class="sub">Oppsummert av lokal AI (qwen3:8b): {html.escape(summary,quote=False)}</p>'
+    if summary: out+=f'<p class="sub">Vurdering fra lokal AI (qwen3:8b, kan inneholde feil): {html.escape(summary,quote=False)}</p>'
     return out+'\n</div>'
 def update(src,new,day):
     ms=list(re.finditer(r'<div\b[^>]*\bid=["\']dagsrapport["\'][^>]*>.*?</div>',src,re.I|re.S))
@@ -67,13 +70,19 @@ def selftest():
     r={'karakter':'B','bufferbloat_ms':1.2,'ned_median':500.4,'opp_median':600,'wan_brudd':1,'wan_nedetid_s':4,'oppetid':{'internett':99.8,'dns_ekstern':99.9,'gateway':100,'tjenester':98,'tjenester_laveste':{'navn_lesbar':'x','prosent':98}},'latens':{'cloudflare':{'ping_median_ms':1,'ping_p95_ms':2,'ping_maks_ms':3,'pakketap_prosent':2}}}
     ps=points(dt.date(2026,1,1),r); assert 'Internett under' in ps[3] and 'Karakter dårligere' in ps[3]
     allowed=set(re.findall(r'\d+(?:,\d+)?', '\n'.join(ps).replace('.',','))); assert '999' not in allowed
+    bad='6 brudd med 58,0 sekunder hvert'; good='Dagen var omtrent lik dagen før, med 6 WAN-brudd.'
+    def valid(raw, text):
+        nums=re.findall(r'\d+(?:,\d+)?',raw); allowed=set(re.findall(r'\d+(?:,\d+)?',text.replace('.',',')))
+        return len(raw)<=300 and 1<=len(re.findall(r'[.!?](?:\s|$)',raw))<=2 and not re.search(r'\b(hvert|hver|per|each|uptime)\b',raw,re.I) and all(n in allowed for n in nums)
+    assert not valid(bad,'WAN-brudd 6, nedetid 58,0 sekunder')
+    assert valid(good,'WAN-brudd 6')
     print('selvtest ok')
 def main():
-    ap=argparse.ArgumentParser(); ap.add_argument('--selvtest',action='store_true'); ap.add_argument('--ikke-publiser',action='store_true'); a=ap.parse_args()
+    ap=argparse.ArgumentParser(); ap.add_argument('--selvtest',action='store_true'); ap.add_argument('--ikke-publiser',action='store_true'); ap.add_argument('--tving',action='store_true'); a=ap.parse_args()
     if a.selvtest: selftest(); return
-    day,r=day_data(fetch(DATA_URL)); ps=points(day,r); summary=None
+    day,r,previous,previous_r=day_data(fetch(DATA_URL)); ps=points(day,r); previous_ps=points(previous,previous_r) if previous_r else ['ikke tilgjengelig']*4; summary=None
     if not a.ikke_publiser:
-        try: summary=ai('\n'.join(ps))
+        try: summary=ai('\n'.join(ps)+'\n--- DAGEN FØR ---\n'+'\n'.join(previous_ps))
         except Exception: pass
     new=block(day,ps,summary)
     if a.ikke_publiser: print(new); return
@@ -81,7 +90,7 @@ def main():
     old_match=re.search(r'<div\b[^>]*\bid=["\']dagsrapport["\'][^>]*>.*?</div>',old,re.I|re.S)
     if old_match:
         old_ps=re.findall(r'<li>(.*?)</li>',old_match.group(0),re.S); old_day=re.search(r'data-dag="([^"]+)"',old_match.group(0))
-        if old_day and old_day.group(1)==day.isoformat() and old_ps==[html.escape(p,quote=False) for p in ps]: new=old_match.group(0)
+        if not a.tving and old_day and old_day.group(1)==day.isoformat() and old_ps==[html.escape(p,quote=False) for p in ps]: new=old_match.group(0)
     updated=update(old,new,day)
     if updated==old: print('uendret, publiserer ikke'); return
     write_remote(updated)
