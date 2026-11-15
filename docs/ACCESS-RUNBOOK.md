@@ -489,14 +489,16 @@ the credential), permitted action level, and a safe verification method.
 
 Oppgaver til Hermes legges i n8n-workflowen `hermes-ko` (`POST http://10.0.0.119:5678/webhook/hermes-ko`,
 Header Auth `X-Ko-Token`). Tokenet ligger i CT130 `/home/hermes/.hermes/ko.env` (0600) og i n8n-credentialen
-`hermes-ko token`; det skal aldri vises eller committes. Kjøreren på CT130 (`hermes-ko.timer`) henter oppgavene og
-kjører Hermes med `--yolo`. Bruk og nødstopp: [pc7-ct130-hermes/hermes-ko/README.md](../pc7-ct130-hermes/hermes-ko/README.md).
+`hermes-ko token`; det skal aldri vises eller committes. Kjørerne på CT130 (`hermes-ko-infra.timer` og
+`hermes-ko-general.timer`, samt de dokumenterte read-only-lane-timerne) henter oppgavene og kjører Hermes med `--yolo`.
+Bruk og nødstopp: [pc7-ct130-hermes/hermes-ko/README.md](../pc7-ct130-hermes/hermes-ko/README.md).
 Lagt til 14. november 2026.
 
 ## Hermes-kø (`hermes-ko`) — n8n til Hermes
 
 Oppgaver til Hermes legges i n8n-workflowen `hermes-ko` (`POST http://10.0.0.119:5678/webhook/hermes-ko`,
 Header Auth `X-Ko-Token`). Tokenet ligger i CT130 `/home/hermes/.hermes/ko.env` (0600) og i n8n-credentialen
-`hermes-ko token`; det skal aldri vises eller committes. Kjøreren på CT130 (`hermes-ko.timer`) henter oppgavene og
-kjører Hermes med `--yolo`. Bruk og nødstopp: [pc7-ct130-hermes/hermes-ko/README.md](../pc7-ct130-hermes/hermes-ko/README.md).
+`hermes-ko token`; det skal aldri vises eller committes. Kjørerne på CT130 (`hermes-ko-infra.timer` og
+`hermes-ko-general.timer`, samt de dokumenterte read-only-lane-timerne) henter oppgavene og kjører Hermes med `--yolo`.
+Bruk og nødstopp: [pc7-ct130-hermes/hermes-ko/README.md](../pc7-ct130-hermes/hermes-ko/README.md).
 Lagt til 14. november 2026.

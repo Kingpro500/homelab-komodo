@@ -297,7 +297,9 @@ def run(lane="general"):
         if tidspunkt > time.time():
             return
         os.unlink(pausefil)
-    lock = open(os.path.join(KO_DIR, "lock"), "w")
+    # Lokal lås er kun per lane. n8n sin atomiske lane- og ressurslås
+    # er autoritativ og skal ikke serialisere uavhengige lanes.
+    lock = open(os.path.join(KO_DIR, "lock-" + lane), "w")
     try:
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
     except OSError:
