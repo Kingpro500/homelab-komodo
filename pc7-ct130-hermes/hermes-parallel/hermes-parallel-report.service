@@ -5,5 +5,5 @@ After=network-online.target
 Type=oneshot
 User=hermes
 Environment=HOME=/home/hermes
-ExecStart=/usr/bin/python3 /home/hermes/.hermes/scripts/dagsrapport.py
+ExecStart=/usr/bin/python3 /home/hermes/.hermes/scripts/hermes_parallel_report.py --generate
 TimeoutStartSec=15min
