@@ -1,0 +1,9 @@
+[Unit]
+Description=Hermes parallel planner
+After=network-online.target
+[Service]
+Type=oneshot
+User=hermes
+Environment=HOME=/home/hermes
+ExecStart=/usr/bin/python3 /home/hermes/.hermes/scripts/hermes_parallel_dispatch.py --plan
+TimeoutStartSec=15min
