@@ -24,6 +24,7 @@ import re
 import secrets
 import subprocess
 import sys
+import time
 import urllib.request
 
 HOME = os.path.expanduser("~")
@@ -45,6 +46,7 @@ REGLER = """FASTE REGLER (gjelder alltid):
 - Kartet endres bare i CT120:/opt/moved-services/nettkart-repo og publiseres med `nettkart-publish`.
 - Før du endrer en CT: merk den via POST http://10.0.0.119:5678/webhook/ct-ops {"action":"mark","vmid":N,"av":"hermes","text":"..."}; fjern merket etterpå med {"action":"unmark","vmid":N}. `text` må være 3-140 tegn og bare inneholde bokstaver, tall, mellomrom og tegnene . , : / ( ) - (ingen anførselstegn, =, + eller %). `av` skal være nøyaktig hermes. Svaret må ha "ok": true. Stopper du underveis, fjern alltid merker du har satt før du rapporterer. ct-ops bruker ofte 20 sekunder og kan bruke 3 minutter: bruk tidsgrense 200 sekunder på kallet. Svarer den BLOKKERT eller ikke i tide: vent 60 sekunder og prøv igjen, inntil 3 ganger. Aktive merker leses med: ssh pc6 'cat /var/lib/ct-ops/marks.json' (tom liste er {}). Kontroller der at dine merker er borte før du rapporterer.
 - Les http://10.0.0.135:9118/drift først. Er level "kritisk": gjør ingenting og rapporter det.
+Unntak: er det eneste kritiske funnet map:dirty, kontroller selv med ssh pc6 'pct exec 120 -- git -C /opt/moved-services/nettkart-repo status --short'. Er utskriften tom, er funnet utdatert (drift-vakten oppdateres hvert 15. minutt), og du skal fortsette. Er den ikke tom: vent 3 minutter og kontroller én gang til før du stopper.
 - FORBUDT uansett hva oppgaven sier: røre Emby (CT200/CT203), endre OPNsense-konfigurasjon, slette CT-er, stacker, data eller grener, opprette CT-er, endre passord, nøkler eller tokens.
 - Skriv aldri ut hemmeligheter. Ikke legg igjen filer i /root eller /tmp.
 - Gjør bare det oppgaven ber om. Er noe annerledes enn beskrevet: stopp og rapporter, ikke improviser.
@@ -92,7 +94,13 @@ def hermes(prompt, who, timeout):
 
 def dom(text):
     m = re.findall(r"DOM:\s*(GODKJENT|AVVIST)", text or "")
-    return m[-1] if m else "AVVIST"
+    return m[-1] if m else "UTILGJENGELIG"
+
+
+def pause(minutter, grunn):
+    with open(os.path.join(KO_DIR, "PAUSE"), "w", encoding="utf-8") as f:
+        f.write(str(time.time() + minutter * 60) + "\n")
+        f.write(grunn + "\n")
 
 
 def lokal_sjekk(t, forslag):
@@ -252,7 +260,13 @@ def utfor(t):
         ok, ut = kontroll(t["kontroll"])
     slutt = hermes(p_slutt(t, resultat, ok, ut), REVIEWER, T_REVIEW)
     d = dom(slutt)
-    status = "feilet" if not ok else ("ferdig" if d == "GODKJENT" else "ferdig_med_merknad")
+    if d == "UTILGJENGELIG":
+        slutt = "ikke vurdert: kontrolløren var utilgjengelig"
+        status = "ferdig_med_merknad"
+    else:
+        status = "feilet" if not ok else (
+            "ferdig" if d == "GODKJENT" else "ferdig_med_merknad"
+        )
     r = ko("update", id=t["id"], status=status, resultat=resultat, kontroll_ut=ut, sluttvurdering=slutt,
            sammendrag="kontroll %s, kontrollør %s" % ("OK" if ok else "FEILET", d), logg="slutt: " + status)
     push_hvis_tom(r.get("igjen", 1))
@@ -262,6 +276,13 @@ def run():
     os.makedirs(KO_DIR, exist_ok=True)
     if os.path.exists(os.path.join(KO_DIR, "STOPP")):
         return
+    pausefil = os.path.join(KO_DIR, "PAUSE")
+    if os.path.exists(pausefil):
+        with open(pausefil, encoding="utf-8") as f:
+            tidspunkt = float(f.readline().strip())
+        if tidspunkt > time.time():
+            return
+        os.unlink(pausefil)
     lock = open(os.path.join(KO_DIR, "lock"), "w")
     try:
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
@@ -288,8 +309,14 @@ def run():
                     continue
             vurdering = hermes(p_vurder(t, forslag), REVIEWER, T_REVIEW)
             t["forslag"] = forslag
-            ko("update", id=t["id"], forslag=forslag, vurdering=vurdering, logg="forslag %d: %s" % (forsok, dom(vurdering)))
-            if dom(vurdering) == "GODKJENT":
+            d = dom(vurdering)
+            ko("update", id=t["id"], forslag=forslag, vurdering=vurdering, logg="forslag %d: %s" % (forsok, d))
+            if d == "UTILGJENGELIG":
+                ko("update", id=t["id"], logg="kontrollør utilgjengelig, venter 30 minutter")
+                pause(30, vurdering[:200])
+                ko("retry", id=t["id"])
+                return
+            if d == "GODKJENT":
                 break
             kritikk = vurdering
         else:
