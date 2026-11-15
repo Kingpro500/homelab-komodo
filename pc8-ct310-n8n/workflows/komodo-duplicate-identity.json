@@ -71,7 +71,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const a=$input.all().map(x=>x.json); const resources=a[0]?.data||a[0]?.resources||[]; const servers=a[1]?.data||a[1]||[]; const ids=new Set(resources.map(x=>Number(x.vmid)).filter(Number.isInteger)); const g={}; for(const s of servers){const t=[s.name,s.description,s.info?.connect_as,s.info?.address].filter(Boolean).join(' '); const m=t.match(/(?:ct|vm)[-_ ]?(\\d{2,6})/i); if(m&&ids.has(+m[1]))(g[m[1]]??=[]).push({id:s.id,name:s.name});} const d=Object.entries(g).filter(([,v])=>v.length>1).map(([vmid,servers])=>({vmid:+vmid,servers})); if(!d.length)return []; const text=d.map(x=>`CT${x.vmid}: `+x.servers.map(s=>`${s.name} [${s.id}]`).join(' vs ')).join('\\n'); return [{json:{severity:'critical',type:'komodo_duplicate_ct_identity',title:'RØD: flere Komodo-servere med samme CT-nummer',text,incident_id:'komodo-duplicate-ct-'+d.map(x=>x.vmid).join('-'),task:{tittel:'KRITISK: duplikat Komodo-identitet',oppgave:'Diagnostiser funnet. Ikke slett, rename, restart eller flytt noe. Klassifiser kanonisk eier og stopp ved uklart eierskap. Eventuell opprydding krever eksplisitt godkjenning. Funn: '+text,kontroll:'test -s /home/hermes/.hermes/ko/last-result.json',godkjenning:'claude'}}}];"
+        "jsCode": "const a=$input.all().map(x=>x.json); const resources=a[0]?.data||a[0]?.resources||[]; const servers=a[1]?.data||a[1]||[]; const pve=new Map(resources.map(x=>[Number(x.vmid),x]).filter(([id])=>Number.isInteger(id))); const identity=s=>{const t=[s.name,s.description,s.info?.connect_as,s.info?.address,s.tags].flat().filter(Boolean).join(' '); const m=t.match(/(?:^|[-_ ]?)(?:ct|vm)[-_ ]?(\\d{2,6})(?:$|[-_ ]?)/i); return m?Number(m[1]):null;}; const details=servers.map(s=>{const vmid=identity(s); return {server_id:s.id??null,server_name:s.name??null,status:s.status??s.info?.status??'unknown',stack_count:Number(s.stack_count??s.stacks_count??(Array.isArray(s.stacks)?s.stacks.length:0)),proxmox_node:pve.get(vmid)?.node??null,vmid,connect_as:s.info?.connect_as??s.connect_as??null};}).filter(x=>x.vmid!==null&&pve.has(x.vmid)); const groups={}; for(const x of details)(groups[x.vmid]??=[]).push(x); const critical_duplicates=Object.entries(groups).filter(([,v])=>v.length>=2).map(([vmid,items])=>({vmid:Number(vmid),servers:items})); if(!critical_duplicates.length)return []; const key=critical_duplicates.flatMap(x=>[x.vmid,...x.servers.map(s=>s.server_id)]).sort().join('-'); const incident_id='komodo-duplicate-ct-'+key; const text=critical_duplicates.map(x=>`CT${x.vmid}: `+x.servers.map(s=>`${s.server_name} [${s.server_id}] status ${s.status} stacks ${s.stack_count} node ${s.proxmox_node||'unknown'} vmid ${s.vmid} connect_as ${s.connect_as||'unknown'}`).join(' vs ')).join('\\n'); return [{json:{severity:'critical',type:'komodo_duplicate_ct_identity',incident_id,critical_duplicates,title:'RØD: flere Komodo-servere med samme CT-nummer',text,task:{tittel:'KRITISK: duplikat Komodo-identitet',oppgave:'Read-only klassifisering. Ikke slett, rename, restart, flytt eller overta noe. Uklar eier stopper videre behandling. Funn: '+text,kontroll:'test -s /home/hermes/.hermes/ko/last-result.json',godkjenning:'claude',ai_failover:'Hermes'}}}];"
       },
       "id": "Finn kritiske duplikater",
       "name": "Finn kritiske duplikater",
@@ -117,6 +117,20 @@
         250,
         160
       ]
+    },
+    {
+      "parameters": {
+        "mode": "append",
+        "numberInputs": 2
+      },
+      "id": "Samle inventar og servere",
+      "name": "Samle inventar og servere",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        -20,
+        80
+      ]
     }
   ],
   "connections": {
@@ -125,6 +139,11 @@
         [
           {
             "node": "Proxmox inventory",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Komodo ListServers",
             "type": "main",
             "index": 0
           }
@@ -138,6 +157,11 @@
             "node": "Proxmox inventory",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "Komodo ListServers",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
@@ -146,7 +170,7 @@
       "main": [
         [
           {
-            "node": "Komodo ListServers",
+            "node": "Samle inventar og servere",
             "type": "main",
             "index": 0
           }
@@ -157,9 +181,9 @@
       "main": [
         [
           {
-            "node": "Finn kritiske duplikater",
+            "node": "Samle inventar og servere",
             "type": "main",
-            "index": 0
+            "index": 1
           }
         ]
       ]
@@ -174,6 +198,17 @@
           },
           {
             "node": "Hermes read-only klassifisering",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Samle inventar og servere": {
+      "main": [
+        [
+          {
+            "node": "Finn kritiske duplikater",
             "type": "main",
             "index": 0
           }
