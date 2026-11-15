@@ -30,7 +30,7 @@ def self_test():
  assert len({x['ct'] for x in p})==len(p),'CT lock failed'
  return 'SELF-TEST OK: two independent A tasks, B nonblocking, C never runs, CT and resource locks work'
 def main():
- ap=argparse.ArgumentParser(); ap.add_argument('--self-test',action='store_true'); ap.add_argument('--list-b',action='store_true'); ap.add_argument('--plan',action='store_true'); a=ap.parse_args()
+ ap=argparse.ArgumentParser(); ap.add_argument('--self-test','--self-test-execution',dest='self_test',action='store_true'); ap.add_argument('--list-b',action='store_true'); ap.add_argument('--plan',action='store_true'); a=ap.parse_args()
  if a.self_test: print(self_test()); return 0
  s=load()
  if a.list_b:

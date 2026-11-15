@@ -1,0 +1,9 @@
+[Unit]
+Description=Hermes daily parallel report
+After=network-online.target
+[Service]
+Type=oneshot
+User=hermes
+Environment=HOME=/home/hermes
+ExecStart=/usr/bin/python3 /home/hermes/.hermes/scripts/dagsrapport.py
+TimeoutStartSec=15min
