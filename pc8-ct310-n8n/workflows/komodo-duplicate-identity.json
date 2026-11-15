@@ -1,0 +1,187 @@
+{
+  "name": "Komodo – duplikate CT-identiteter (rød vakt)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 10
+            }
+          ]
+        }
+      },
+      "id": "Hvert 10. minutt",
+      "name": "Hvert 10. minutt",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 2,
+      "position": [
+        -800,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "path": "komodo-duplicate-identity",
+        "httpMethod": "POST",
+        "responseMode": "onReceived"
+      },
+      "id": "Kjør nå",
+      "name": "Kjør nå",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -800,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://10.0.0.102:8006/api2/json/cluster/resources?type=vm",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth"
+      },
+      "id": "Proxmox inventory",
+      "name": "Proxmox inventory",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 2,
+      "position": [
+        -500,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://10.0.0.117:9120/read",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"type\":\"ListServers\",\"params\":{}}"
+      },
+      "id": "Komodo ListServers",
+      "name": "Komodo ListServers",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 2,
+      "position": [
+        -250,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const a=$input.all().map(x=>x.json); const resources=a[0]?.data||a[0]?.resources||[]; const servers=a[1]?.data||a[1]||[]; const ids=new Set(resources.map(x=>Number(x.vmid)).filter(Number.isInteger)); const g={}; for(const s of servers){const t=[s.name,s.description,s.info?.connect_as,s.info?.address].filter(Boolean).join(' '); const m=t.match(/(?:ct|vm)[-_ ]?(\\d{2,6})/i); if(m&&ids.has(+m[1]))(g[m[1]]??=[]).push({id:s.id,name:s.name});} const d=Object.entries(g).filter(([,v])=>v.length>1).map(([vmid,servers])=>({vmid:+vmid,servers})); if(!d.length)return []; const text=d.map(x=>`CT${x.vmid}: `+x.servers.map(s=>`${s.name} [${s.id}]`).join(' vs ')).join('\\n'); return [{json:{severity:'critical',type:'komodo_duplicate_ct_identity',title:'RØD: flere Komodo-servere med samme CT-nummer',text,incident_id:'komodo-duplicate-ct-'+d.map(x=>x.vmid).join('-'),task:{tittel:'KRITISK: duplikat Komodo-identitet',oppgave:'Diagnostiser funnet. Ikke slett, rename, restart eller flytt noe. Klassifiser kanonisk eier og stopp ved uklart eierskap. Eventuell opprydding krever eksplisitt godkjenning. Funn: '+text,kontroll:'test -s /home/hermes/.hermes/ko/last-result.json',godkjenning:'claude'}}}];"
+      },
+      "id": "Finn kritiske duplikater",
+      "name": "Finn kritiske duplikater",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://10.0.0.119:5678/webhook/homelab-alerts",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{$json}}"
+      },
+      "id": "Rød alert til Roger",
+      "name": "Rød alert til Roger",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 2,
+      "position": [
+        250,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://10.0.0.119:5678/webhook/hermes-ko",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{$json.task}}"
+      },
+      "id": "Hermes read-only klassifisering",
+      "name": "Hermes read-only klassifisering",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 2,
+      "position": [
+        250,
+        160
+      ]
+    }
+  ],
+  "connections": {
+    "Hvert 10. minutt": {
+      "main": [
+        [
+          {
+            "node": "Proxmox inventory",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Kjør nå": {
+      "main": [
+        [
+          {
+            "node": "Proxmox inventory",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Proxmox inventory": {
+      "main": [
+        [
+          {
+            "node": "Komodo ListServers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Komodo ListServers": {
+      "main": [
+        [
+          {
+            "node": "Finn kritiske duplikater",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Finn kritiske duplikater": {
+      "main": [
+        [
+          {
+            "node": "Rød alert til Roger",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Hermes read-only klassifisering",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
