@@ -63,6 +63,7 @@ running service.
 | PC1 full heng – varsel | hvert minutt; fem uavhengige feilrunder | [docs/pc1-full-heng-varsel.md](docs/pc1-full-heng-varsel.md) | [workflows/pc1-full-heng-varsel.json](workflows/pc1-full-heng-varsel.json) |
 | Komodo-versjonsvakt | daglig 05:15 + webhook | [docs/komodo-versjonsvakt.md](docs/komodo-versjonsvakt.md) | [workflows/komodo-versjonsvakt.json](workflows/komodo-versjonsvakt.json) |
 | Nettverkskart-vakt | daglig 08:30 | [docs/nettverkskart-vakt.md](docs/nettverkskart-vakt.md) | [workflows/nettverkskart-vakt.json](workflows/nettverkskart-vakt.json) |
+| Tjenestenavn og kartdrift – delegert diagnose | daglig 08:45 + webhook | [docs/tjenestenavn-kartdrift-delegert.md](docs/tjenestenavn-kartdrift-delegert.md) | [workflows/tjenestenavn-kartdrift-delegert.json](workflows/tjenestenavn-kartdrift-delegert.json) |
 | Podgrab minnevakt | hvert 10. minutt | [docs/podgrab-minnevakt.md](docs/podgrab-minnevakt.md) | [workflows/podgrab-minnevakt.json](workflows/podgrab-minnevakt.json) |
 
 Driftsprinsipper for hvordan n8n-automasjoner bygges, sikres og gjenopprettes
