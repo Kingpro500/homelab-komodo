@@ -1,0 +1,10 @@
+[Unit]
+Description=Hermes-kø inventory lane hvert 2. minutt
+
+[Timer]
+OnBootSec=3min
+OnUnitInactiveSec=2min
+Unit=hermes-ko-inventory.service
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,10 @@
+[Unit]
+Description=Hermes-kø diagnostics lane hvert 2. minutt
+
+[Timer]
+OnBootSec=3min
+OnUnitInactiveSec=2min
+Unit=hermes-ko-diagnostics.service
+
+[Install]
+WantedBy=timers.target

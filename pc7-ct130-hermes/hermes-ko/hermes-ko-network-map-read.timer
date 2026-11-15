@@ -1,0 +1,10 @@
+[Unit]
+Description=Hermes-kø network-map-read lane hvert 2. minutt
+
+[Timer]
+OnBootSec=3min
+OnUnitInactiveSec=2min
+Unit=hermes-ko-network-map-read.service
+
+[Install]
+WantedBy=timers.target

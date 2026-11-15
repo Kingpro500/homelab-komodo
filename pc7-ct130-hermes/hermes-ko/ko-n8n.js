@@ -8,7 +8,7 @@ for (const t of st.tasks) {
 const b = ($json && $json.body) || {};
 const now = new Date().toISOString();
 const APEN = ['ny', 'godkjent', 'kjorer'];
-const LANES = ['infra', 'general'];
+const LANES = ['infra', 'general', 'diagnostics', 'file-read', 'network-map-read', 'inventory'];
 const S = (v, n) => String(v === undefined || v === null ? '' : v).slice(0, n);
 const find = id => st.tasks.find(t => t.id === id);
 const laneOf = v => v === undefined || v === null || v === '' ? 'general' : String(v);

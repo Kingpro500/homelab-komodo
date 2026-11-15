@@ -1,0 +1,10 @@
+[Unit]
+Description=Hermes-kø file-read lane worker
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=hermes
+Environment=HOME=/home/hermes
+ExecStart=/usr/bin/python3 /home/hermes/.hermes/scripts/hermes_ko.py run --lane file-read
+TimeoutStartSec=3h
