@@ -69,7 +69,7 @@ groups:
   - name: emby
     rules:
       - alert: EmbyDown
-        expr: emby_up{instance="emby"} == 0
+        expr: emby_up{exported_instance="emby"} == 0
         for: 3m
         labels:
           severity: critical
@@ -79,7 +79,7 @@ groups:
           description: "Autentisert Emby-probe har feilet i minst 3 minutter. Recovery skal fortsatt være blokkert dersom sessions-status ikke kan verifiseres."
 
       - alert: EmbySessionsUnknown
-        expr: emby_up{instance="emby"} == 1 and emby_sessions_known{instance="emby"} == 0
+        expr: emby_up{exported_instance="emby"} == 1 and emby_sessions_known{exported_instance="emby"} == 0
         for: 5m
         labels:
           severity: warning
@@ -89,7 +89,7 @@ groups:
           description: "Emby svarer, men sessions-status er ukjent. Autorestart skal ikke tillates før sessions kan leses."
 
       - alert: EmbyProbeDegraded
-        expr: emby_up{instance="emby"} == 1 and emby_probe_success{instance="emby"} < emby_probe_total{instance="emby"}
+        expr: emby_up{exported_instance="emby"} == 1 and emby_probe_success{exported_instance="emby"} < emby_probe_total{exported_instance="emby"}
         for: 10m
         labels:
           severity: warning
