@@ -1,15 +1,23 @@
 # Additional Docker services on pc6 CT340 (10.0.0.142)
 services:
   qdirstat:
-    image: lscr.io/linuxserver/qdirstat:latest
+    # jlesage-bildet: vanlig HTTP + noVNC på port 5800. Byttet fra
+    # linuxserver/Selkies 15. nov 2026: Selkies krever HTTPS/WebCodecs og
+    # ga bare "Waiting for stream" i nettleseren.
+    image: jlesage/qdirstat:latest
     container_name: qdirstat
     restart: unless-stopped
     ports:
-      - "3000:3000"
-      - "3001:3001"
+      - "5800:5800"
+    environment:
+      TZ: Europe/Oslo
+      USER_ID: "911"
+      GROUP_ID: "911"
+      KEEP_APP_RUNNING: "1"
+      WEB_FILE_MANAGER: "0"
     volumes:
       - /backups:/backups
-      - /opt/qdirstat:/config
+      - /opt/qdirstat-jlesage:/config
       - /isos:/isos
       - /media:/media
       - /obsidian-vaults:/obsidian-vaults
