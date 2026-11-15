@@ -1,62 +1,63 @@
 # Hermes-kø (`hermes-ko`)
 
-Arbeidsdeling: Claude planlegger og legger oppgaver i en n8n-kø. Hermes utfører dem
-uten at noen må sitte og godkjenne, og en annen modell kontrollerer arbeidet.
+Hermes-kø har to eksplisitte lane-workers: `infra` for Proxmox, Komodo og GitHub og
+`general` for Home Assistant/AI og annet. Maksimalt én worker per lane og maksimalt
+én worker per delt ressurs. Lane-låsen er alltid aktiv; `ressurser` er en ekstra lås.
 
-| Steg | Hvem | Hva |
-| --- | --- | --- |
-| Forslag | `gpt-5.6-luna` via Codex-abonnementet | Leser tilstanden og foreslår nøyaktig endring og tilbakerulling |
-| Vurdering | Hermes sin standardmodell | Godkjenner eller avviser forslaget. To avvisninger parkerer oppgaven |
-| Godkjenning | Claude eller Roger | Bare for oppgaver lagt inn med `"godkjenning": "claude"` |
-| Utføring | `gpt-5.6-luna`, `--yolo` | Gjennomfører det godkjente forslaget |
-| Kontroll | Fast kommando | Avgjør om oppgaven er ferdig. Ett retteforsøk ved feil |
-| Sluttvurdering | Hermes sin standardmodell | Sjekker at det som ble gjort er det som ble godkjent |
+## Datamodell og låser
 
-Én oppgave om gangen. Når køen er tom, sendes ett varsel via `homelab-alerts`.
+Nye oppgaver har `kategori: infra|general` og `ressurser`, for eksempel
+`["ct:130", "repo:homelab-komodo", "ha:home-assistant"]`. Ressursnavn normaliseres
+til små, sanerte nøkler. Manglende kategori migreres deterministisk til `general` og
+logges på oppgaven. Ugyldig kategori avvises uten at oppgaven opprettes eller mistes.
+
+`next` mottar `lane` og `worker_id`, henter høyst én ledig oppgave og returnerer
+`worker_id` og `lock_id`. Den atomiske state-operasjonen reserverer både lane og alle
+ressurser. `update`, ferdig/feil-overgang, `reject` og eksplisitt `retry` krever samme
+worker- og lock-id. Feil id avvises. Stale `kjorer` blir `feilet` med tydelig årsak;
+lås- og workerhistorikk beholdes. Retry er eksplisitt og atomisk med samme lock-id.
+
+## Systemd som faktisk skal kjøre
+
+CT130 installerer disse fire filene i `/etc/systemd/system/`:
+
+- `hermes-ko-infra.service` → `hermes_ko.py run --lane infra`
+- `hermes-ko-general.service` → `hermes_ko.py run --lane general`
+- `hermes-ko-infra.timer` og `hermes-ko-general.timer` → hvert 2. minutt
+
+Begge er `Type=oneshot`, `User=hermes` og `TimeoutStartSec=3h`. Det finnes ingen
+`ConcurrencyLimit`; n8n-lane-låsen er autoritativ, og samme lane kan derfor ikke få
+to samtidige workers selv om timer-kall overlapper. Den gamle `hermes-ko.timer` skal
+være deaktivert før lane-timerne aktiveres.
 
 ## Deler
 
 | Fil | Installeres som |
 | --- | --- |
-| `hermes_ko.py` | CT130 `/home/hermes/.hermes/scripts/hermes_ko.py` (eier `hermes`, 0755) |
-| `ko-n8n.js` | Koden i Code-noden «Kø» i n8n-workflowen `hermes-ko`; kopi ved siden av skriptet |
-| `hermes-ko.service`, `hermes-ko.timer` | CT130 `/etc/systemd/system/`, `systemctl enable --now hermes-ko.timer` |
+| `hermes_ko.py` | CT130 `/home/hermes/.hermes/scripts/hermes_ko.py` |
+| `ko-n8n.js` | Code-noden «Kø» i aktiv workflow `hermes-ko` |
+| `hermes-ko-*.service` / `.timer` | CT130 `/etc/systemd/system/` |
 
-Første oppsett: `hermes_ko.py setup-n8n` lager tokenet `~/.hermes/ko.env` (0600), n8n-credentialen
-`hermes-ko token` (Header Auth, `X-Ko-Token`) og workflowen. Tokenet ligger aldri i Git.
+Aktiv workflow må sikkerhetskopieres før endring og kontrollhashes mot `ko-n8n.js`
+etter oppdatering. Backup skal ligge under `~/.hermes/ko/`, aldri i Git.
 
-## Bruk (som `hermes` på CT130)
+## Bruk
 
 ```sh
 python3 ~/.hermes/scripts/hermes_ko.py list
-python3 ~/.hermes/scripts/hermes_ko.py get k3          # forslag, vurdering, resultat
-python3 ~/.hermes/scripts/hermes_ko.py approve k3      # slipp et forslag videre til utføring
-python3 ~/.hermes/scripts/hermes_ko.py reject k3 "hva som må endres"   # nytt forslag
+python3 ~/.hermes/scripts/hermes_ko.py get k3
 python3 ~/.hermes/scripts/hermes_ko.py add < oppgave.json
-touch ~/.hermes/ko/STOPP                                # nødstopp; fjern filen for å starte igjen
+python3 ~/.hermes/scripts/hermes_ko.py retry k3
 ```
 
-Oppgave: `{"tittel": "...", "oppgave": "mål, fakta, nøyaktig endring, tilbakerulling", "kontroll": "<bash, exit 0 = ferdig>", "godkjenning": "ai" | "claude"}`.
-Kontrollkommandoen kjøres fra CT130 som `hermes`.
+CLI viser kategori/lane, worker og sanerte ressurser, men aldri tokens,
+kontrollkommandoer eller hemmeligheter. Eksisterende statusspor beholdes, inkludert
+`k65`, `k66` og `k70`.
 
-`PAUSE` inneholder tidspunktet pausen utløper og grunnen til at køen venter.
-`PAUSE` kan slettes for hånd for å starte køen igjen.
-Ved eneste kritiske funn `map:dirty` kontrolleres kartet selv med `ssh pc6 'pct exec 120 -- git -C /opt/moved-services/nettkart-repo status --short'`; tom utskrift er et utdatert funn.
+## Status og rollback
 
-ct-ops-regelen instruerer om 200 sekunders tidsgrense, venting og inntil tre forsøk ved blokkering eller timeout.
-Claude-avgjørelser videresendes nå til forslag, kontrollør, utfører og sluttvurdering.
-
-Lokal AI-forhåndssjekk sammenligner forslag med nummererte steg før kontrolløren.
-Den gjelder bare forsøk 1 og oppgaver med en linje som er nøyaktig `Steg:`.
-Hvis Ollama ikke svarer, går køen videre uten forhåndssjekken.
-
-## Statuser
-
-`ny` → `kjorer` → (`venter_godkjenning` → `godkjent` →) `ferdig` | `ferdig_med_merknad` (kontrollen gikk, kontrolløren
-hadde innvendinger) | `feilet` | `parkert` (forslaget avvist to ganger).
-
-## Grenser
-
-De faste reglene står i `REGLER` i skriptet: aldri Emby, aldri OPNsense-konfigurasjon, ingen sletting eller
-oppretting av CT-er, ingen endring av passord, nøkler eller tokens. Køen kjører Hermes med `--yolo`, så
-webhooken krever token, og bare oppgaver med en smal beskrivelse og en kontrollkommando skal legges inn.
+`ny` → `kjorer` → `venter_godkjenning`/`godkjent` → `ferdig`,
+`ferdig_med_merknad`, `feilet` eller `parkert`. Ved livefeil deaktiveres begge
+lane-timere, workflow-backup gjenopprettes via dokumentert n8n API-rute, og forrige
+GitHub-versjon installeres. Deretter aktiveres gammel timer bare etter at workflow,
+service-status og låser er kontrollert.
