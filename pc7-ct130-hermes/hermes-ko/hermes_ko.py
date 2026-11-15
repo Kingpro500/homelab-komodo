@@ -40,6 +40,8 @@ LOKAL_URL = "http://10.0.0.133:11434/api/generate"
 LOKAL_MODELL = "qwen3:8b"
 T_LOKAL = 60
 ACTIVE = {"worker_id": "", "lock_id": ""}
+LANES = ("infra", "general", "diagnostics", "file-read", "network-map-read", "inventory")
+READ_ONLY_LANES = ("diagnostics", "file-read", "network-map-read", "inventory")
 
 REGLER = """FASTE REGLER (gjelder alltid):
 - Les AGENTS.md øverst i ~/homelab-komodo før du gjør noe. Start med `git switch main && git pull --ff-only`.
@@ -165,6 +167,8 @@ def p_forslag(t, kritikk=""):
     return f"""{REGLER}
 
 DU ER I FORSLAGSFASEN. Du skal BARE LESE og undersøke. Ikke endre noe.
+Lane: {t.get('kategori', 'general')}. Ressurser: {', '.join(t.get('ressurser', [])) or 'ingen'}.
+Hvis lane er diagnostics, file-read, network-map-read eller inventory, er dette READ ONLY: ingen skrivekommandoer, deploy, restart, nettverkskartendring eller publisering. Foreslå kun lesing og kontrollkommandoer.
 Oppgave «{t['tittel']}»:
 {t['oppgave']}
 {avgjort(t)}
@@ -199,6 +203,8 @@ def p_utfor(t, forslag):
     return f"""{REGLER}
 
 DU ER I UTFØRINGSFASEN. Gjennomfør det godkjente forslaget nøyaktig, og ingenting annet.
+Lane: {t.get('kategori', 'general')}. Ressurser: {', '.join(t.get('ressurser', [])) or 'ingen'}.
+READ ONLY lanes diagnostics, file-read, network-map-read og inventory må aldri skrive, deploye, restarte eller endre/publisere nettverkskartet. Avvis eller stopp dersom godkjent forslag bryter dette.
 Oppgave «{t['tittel']}»:
 {t['oppgave']}
 {avgjort(t)}
@@ -277,8 +283,8 @@ def utfor(t):
 
 
 def run(lane="general"):
-    if lane not in ("infra", "general"):
-        raise ValueError("lane må være infra eller general")
+    if lane not in LANES:
+        raise ValueError("ugyldig lane: " + lane)
     ACTIVE["worker_id"] = "%s-%s-%s" % (lane, os.uname().nodename, os.getpid())
     ACTIVE["lock_id"] = ""
     os.makedirs(KO_DIR, exist_ok=True)

@@ -66,7 +66,12 @@ ssh pc6 'grep -Eiq "lane|kategori|ressurs|resource" /root/claude-work/homelab-ko
 ssh pc6 'test -f /root/claude-work/homelab-komodo/pc7-ct130-hermes/hermes-ko/README.md'
 ```
 
-## Status og rollback
+## Implementasjon av read-only lanes
+
+Køen støtter `infra`, `general`, `diagnostics`, `file-read`, `network-map-read` og `inventory`. De fire siste er read-only og skal bare undersøke levende tilstand; de skal aldri skrive, deploye, restarte eller endre/publisere kartet. Lane-låsen serialiserer samme lane, mens normaliserte ressurser sperrer delte ressurser mellom lanes. Ugyldig kategori avvises uten å miste oppgaven.
+
+Runtime-kilden er `pc7-ct130-hermes/hermes-ko/hermes_ko.py`, installert på CT130 som `/home/hermes/.hermes/scripts/hermes_ko.py`. Aktiv n8n-workflow `hermes-ko` bruker Code-noden fra `ko-n8n.js`. Før liveoppdatering tas backup under `~/.hermes/ko/`; rollback deaktiverer de nye timerne, gjenoppretter workflow-backup og forrige GitHub-versjon, og kontrollerer låser.
+
 
 `ny` → `kjorer` → `venter_godkjenning`/`godkjent` → `ferdig`,
 `ferdig_med_merknad`, `feilet` eller `parkert`. Ved livefeil deaktiveres begge
