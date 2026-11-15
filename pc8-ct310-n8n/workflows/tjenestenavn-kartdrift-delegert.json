@@ -1,0 +1,179 @@
+{
+  "name": "Tjenestenavn og kartdrift – delegert diagnose",
+  "nodes": [
+    {
+      "id": "tnkd-schedule",
+      "name": "Daglig diagnose",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "days",
+              "triggerAtHour": 8,
+              "triggerAtMinute": 45
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "tnkd-webhook",
+      "name": "Adresseendring webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        220
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "tjenestenavn-kartdrift",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "webhookId": "tjenestenavn-kartdrift"
+    },
+    {
+      "id": "tnkd-plan",
+      "name": "Lag begrenset diagnoseoppgave",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        300,
+        100
+      ],
+      "parameters": {
+        "jsCode": "const b = $json.body || $json || {};\nconst service = String(b.service || '').toLowerCase();\nconst vmid = String(b.vmid || '');\nif (service && !/^[a-z0-9][a-z0-9-]{1,62}$/.test(service)) throw new Error('Ugyldig tjenestenavn');\nif (vmid && !/^\\d{3,6}$/.test(vmid)) throw new Error('Ugyldig VMID');\nconst id = `name-map:${service || 'all'}:${vmid || 'inventory'}`;\nreturn [{json: {job_id: id, service: service || null, vmid: vmid || null, requested_name: b.requested_name || null, requested_url: b.requested_url || null, mode: 'diagnose-og-deleger', task: 'Read-only diagnose av tjenestenavn, DNS, VLAN-tilgjengelighet og kartlenker. Ikke gjør endringer direkte.', checks: ['finn aktuell runtime-IP og DHCP-status', 'test DNS-navn fra relevante VLAN', 'test tjenesten via navn', 'søk kart og brukerlenker etter IP-adresser', 'sammenlign kartstatus med autoritative kilder'], constraints: ['bruk tjenestenavn i brukerlenker', 'ikke endre direkte fra n8n', 'send funn til lokal AI og Hermes', 'stopp ved røde driftsfunn']}}];"
+      }
+    },
+    {
+      "id": "tnkd-ai",
+      "name": "Lokal AI klassifiserer planen",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        560,
+        100
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://10.0.0.133:11434/api/generate",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({model: 'qwen3:4b', stream: false, prompt: 'Klassifiser oppgaven som DNS_FEIL, DHCP_FEIL, RUTING_BRANNMUR_FEIL, TJENESTE_NED, GAMMEL_IP_I_LENKE, KART_STATUS_UTDATERT eller INGEN_FEIL. Lag kun en kort diagnostikkplan; ikke foreslå frie shell-kommandoer. Oppgave: ' + JSON.stringify($json)}) }}",
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "onError": "continueRegularOutput",
+      "alwaysOutputData": true
+    },
+    {
+      "id": "tnkd-hermes-payload",
+      "name": "Bygg Hermes-oppgave",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        820,
+        100
+      ],
+      "parameters": {
+        "jsCode": "const base = $('Lag begrenset diagnoseoppgave').first().json;\nconst ai = $json || {};\nconst aiText = String(ai.response || ai.error || 'Lokal AI svarte ikke; Hermes må klassifisere.').slice(0, 12000);\nreturn [{json: {action: 'add', tittel: 'Navn/DNS/kartdiagnose ' + base.job_id, oppgave: JSON.stringify({job_id: base.job_id, service: base.service, vmid: base.vmid, requested_name: base.requested_name, requested_url: base.requested_url, diagnose: base.task, kontroller: base.checks, begrensninger: base.constraints, lokal_ai: aiText}, null, 2), kontroll: 'Rapporter konkrete DNS-svar fra relevante VLAN, tjenestesvar via navn, alle gamle IP-lenker, kartversjon og anbefalt Hermes-handling. Ikke rapporter ferdig uten les-tilbake.', godkjenning: 'ai'}}];"
+      }
+    },
+    {
+      "id": "tnkd-hermes",
+      "name": "Send til hermes-ko",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1080,
+        100
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://10.0.0.119:5678/webhook/hermes-ko",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "timeout": 20000
+        }
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "P9uE226FEOUtgGUY",
+          "name": "hermes-ko token"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Daglig diagnose": {
+      "main": [
+        [
+          {
+            "node": "Lag begrenset diagnoseoppgave",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Adresseendring webhook": {
+      "main": [
+        [
+          {
+            "node": "Lag begrenset diagnoseoppgave",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lag begrenset diagnoseoppgave": {
+      "main": [
+        [
+          {
+            "node": "Lokal AI klassifiserer planen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lokal AI klassifiserer planen": {
+      "main": [
+        [
+          {
+            "node": "Bygg Hermes-oppgave",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bygg Hermes-oppgave": {
+      "main": [
+        [
+          {
+            "node": "Send til hermes-ko",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
