@@ -2,6 +2,14 @@
 
 ## ▶️ START HER — reglene som alltid gjelder
 
+## 🧭 Kanonisk regelkilde og bootstrap
+
+Den versjonsstyrte `AGENTS.md` på GitHub `Kingpro500/homelab-komodo` `main` er homelabets eneste autoritative kilde for husstandard, operative regler og bootstrap.
+
+Lokale arbeidsmapper, klientinstruksjoner og kopier kan gi avgrensede kjøretids- og tilgangsrammer, men kan ikke definere eller overstyre homelabets standard eller status.
+
+Før en agent konkluderer om eller endrer homelabets standard, skal den lese gjeldende versjon fra `main`. En gammel eller skitten lokal klone er ikke autoritet.
+
 Dette er den ene kilden. `CLAUDE.md`, `CONTRIBUTING.md` og `docs/agent-collaboration-workflow.md` peker hit. Står det noe annet et annet sted, gjelder dette.
 
 1. **To steder, aldri bland dem.** Nettverkskartet og advarselsiden → **Gitea** `Kingpro500/nettverkskart`. Alt annet (kode, stacker, drift-vakt, n8n, skript, dokumentasjon) → **GitHub** `Kingpro500/homelab-komodo`. Navnet `homelab-komodo` betyr alltid GitHub.
