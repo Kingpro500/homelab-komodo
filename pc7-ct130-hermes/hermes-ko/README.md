@@ -54,6 +54,18 @@ CLI viser kategori/lane, worker og sanerte ressurser, men aldri tokens,
 kontrollkommandoer eller hemmeligheter. Eksisterende statusspor beholdes, inkludert
 `k65`, `k66` og `k70`.
 
+## Kontroll
+
+Kontroller at lane- og ressursimplementasjonen finnes i alle tre leveransene:
+
+```sh
+set -eu
+ssh pc6 'test -f /root/claude-work/homelab-komodo/pc7-ct130-hermes/hermes-ko/hermes_ko.py'
+ssh pc6 'grep -Eiq "lane|kategori|ressurs|resource" /root/claude-work/homelab-komodo/pc7-ct130-hermes/hermes-ko/hermes_ko.py'
+ssh pc6 'grep -Eiq "lane|kategori|ressurs|resource" /root/claude-work/homelab-komodo/pc7-ct130-hermes/hermes-ko/ko-n8n.js'
+ssh pc6 'test -f /root/claude-work/homelab-komodo/pc7-ct130-hermes/hermes-ko/README.md'
+```
+
 ## Status og rollback
 
 `ny` → `kjorer` → `venter_godkjenning`/`godkjent` → `ferdig`,
