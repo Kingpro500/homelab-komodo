@@ -39,6 +39,7 @@ T_WORK, T_REVIEW, T_CHECK = 1500, 900, 180
 LOKAL_URL = "http://10.0.0.133:11434/api/generate"
 LOKAL_MODELL = "qwen3:8b"
 T_LOKAL = 60
+ACTIVE = {"worker_id": "", "lock_id": ""}
 
 REGLER = """FASTE REGLER (gjelder alltid):
 - Les AGENTS.md øverst i ~/homelab-komodo før du gjør noe. Start med `git switch main && git pull --ff-only`.
@@ -77,6 +78,9 @@ def http(url, body=None, headers=None, method=None, timeout=60):
 
 def ko(action, **kw):
     kw["action"] = action
+    if action in ("update", "retry") and ACTIVE["lock_id"]:
+        kw.setdefault("worker_id", ACTIVE["worker_id"])
+        kw.setdefault("lock_id", ACTIVE["lock_id"])
     return http(N8N + "/webhook/hermes-ko", kw, {"X-Ko-Token": env(KO_ENV).get("KO_TOKEN", "")})
 
 
@@ -272,7 +276,11 @@ def utfor(t):
     push_hvis_tom(r.get("igjen", 1))
 
 
-def run():
+def run(lane="general"):
+    if lane not in ("infra", "general"):
+        raise ValueError("lane må være infra eller general")
+    ACTIVE["worker_id"] = "%s-%s-%s" % (lane, os.uname().nodename, os.getpid())
+    ACTIVE["lock_id"] = ""
     os.makedirs(KO_DIR, exist_ok=True)
     if os.path.exists(os.path.join(KO_DIR, "STOPP")):
         return
@@ -288,9 +296,10 @@ def run():
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
     except OSError:
         return
-    t = ko("next").get("task")
+    t = ko("next", lane=lane, worker_id=ACTIVE["worker_id"]).get("task")
     if not t:
         return
+    ACTIVE["lock_id"] = t.get("lock_id")
     try:
         if t.get("fase") == "utfor":
             return utfor(t)
@@ -364,7 +373,12 @@ def setup_n8n():
 def main():
     a = sys.argv[1:] or ["run"]
     if a[0] == "run":
-        run()
+        lane = a[1] if len(a) > 1 and not a[1].startswith("--") else "general"
+        if lane.startswith("--lane="):
+            lane = lane.split("=", 1)[1]
+        elif lane == "--lane" and len(a) > 2:
+            lane = a[2]
+        run(lane)
     elif a[0] == "setup-n8n":
         setup_n8n()
     elif a[0] == "add":
