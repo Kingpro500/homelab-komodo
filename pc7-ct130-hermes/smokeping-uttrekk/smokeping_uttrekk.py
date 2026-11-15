@@ -58,8 +58,7 @@ def main():
     text=json.dumps(out,ensure_ascii=False,separators=(',',':'))
     if a.ikke_skriv: print(text); return
     payload=text.encode(); import base64
-    enc=base64.b64encode(payload).decode(); remote=f"import base64; p={OUT!r}; t=p+'.tmp'; open(t,'wb').write(base64.b64decode({enc!r})); __import__('os').replace(t,p)"
-    p=subprocess.run(['ssh','pc6','pct','exec','120','--','python3','-c',remote],capture_output=True,text=True,timeout=60)
+    enc=base64.b64encode(payload).decode();    p=subprocess.run(['ssh','pc6','pct','exec','120','--','python3','-c',"import sys,base64,os; p='"+OUT+"'; t=p+'.tmp'; open(t,'wb').write(base64.b64decode(sys.stdin.buffer.read())); os.replace(t,p)"],input=enc,text=True,capture_output=True,timeout=60)
     if p.returncode: raise RuntimeError(p.stderr.strip())
 
 if __name__=='__main__':
