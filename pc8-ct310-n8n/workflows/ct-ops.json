@@ -4,6 +4,7 @@
     {
       "id": "ctops-1",
       "name": "Forespørsel /ct-ops",
+      "webhookId": "ct-ops",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
       "position": [
@@ -15,8 +16,7 @@
         "path": "ct-ops",
         "responseMode": "responseNode",
         "options": {}
-      },
-      "webhookId": "ct-ops"
+      }
     },
     {
       "id": "ctops-2",
@@ -57,6 +57,8 @@
       "name": "Proxmox – n8n leser selv",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput",
       "position": [
         660,
         0
@@ -76,9 +78,7 @@
           "id": "rHPpMppTnNxVvCsk",
           "name": "Proxmox inventory read (n8n)"
         }
-      },
-      "onError": "continueRegularOutput",
-      "alwaysOutputData": true
+      }
     },
     {
       "id": "ctops-5",
@@ -193,6 +193,201 @@
       "parameters": {
         "jsCode": "// Varsler bare når bildet har endret seg siden forrige natt.\nlet res; try { res = JSON.parse($json.stdout); } catch (e) { res = { status: 'FEILET', error: String($json.stderr || $json.stdout || '').slice(0, 300) }; }\nconst st = $getWorkflowStaticData('global');\nconst sig = JSON.stringify([res.status, (res.deviations || []).map(d => [d.vmid, d.n]), (res.map || {}).status, res.map_missing_card, res.error || '']);\nconst mapChanged = ((res.map || {}).changed || []).length;\nif (sig === st.sig && !mapChanged) return [];\nconst first = st.sig === undefined; st.sig = sig;\nif (res.error) return [{ json: { attachments: [{ title: 'CT-ops nattlig revisjon FEILET', text: res.error }], job: 'ct-ops' } }];\nconst lines = (res.deviations || []).slice(0, 8).map(d => `CT${d.vmid}: ${d.first}`.slice(0, 110));\nreturn [{ json: { attachments: [{ title: `CT-ops: ${res.with_deviations} av ${res.cts} CT-er har avvik${first ? '' : ' (endret siden sist)'}`,\n  text: ((mapChanged ? `Kart v${res.map.published_version}: ${mapChanged} statuslinjer oppdatert. ` : '') + ((res.map || {}).status === 'BLOKKERT' ? 'Kart IKKE oppdatert: ' + res.map.error + ' ' : '') + lines.join(' | ')).slice(0, 900) }], job: 'ct-ops' } }];"
       }
+    },
+    {
+      "id": "ctops-dup-schedule",
+      "name": "Rød duplikatvakt hvert 10. minutt",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        620
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 10
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "ctops-dup-webhook",
+      "name": "Kjør rød duplikatvakt nå",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        760
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ct-ops-duplicate-check",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "webhookId": "ct-ops-duplicate-check"
+    },
+    {
+      "id": "ctops-dup-proxmox",
+      "name": "Duplikatvakt leser Proxmox",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        260,
+        680
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "https://10.0.0.102:8006/api2/json/cluster/resources?type=vm",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "options": {
+          "allowUnauthorizedCerts": true,
+          "timeout": 20000
+        }
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "rHPpMppTnNxVvCsk",
+          "name": "Proxmox inventory read (n8n)"
+        }
+      },
+      "onError": "continueRegularOutput",
+      "alwaysOutputData": true
+    },
+    {
+      "id": "ctops-dup-komodo",
+      "name": "Duplikatvakt leser Komodo",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        260,
+        840
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://10.0.0.117:9120/read",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"type\":\"ListServers\",\"params\":{}}",
+        "options": {
+          "timeout": 20000
+        }
+      },
+      "onError": "continueRegularOutput",
+      "alwaysOutputData": true
+    },
+    {
+      "id": "ctops-dup-merge",
+      "name": "Samle Proxmox og Komodo",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        500,
+        760
+      ],
+      "parameters": {
+        "mode": "append",
+        "numberInputs": 2
+      }
+    },
+    {
+      "id": "ctops-dup-detect",
+      "name": "Klassifiser numeriske CT duplikater",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        740,
+        760
+      ],
+      "parameters": {
+        "jsCode": "const a=$input.all().map(x=>x.json); const resources=a.find(x=>Array.isArray(x.data))?.data||a.find(x=>Array.isArray(x.resources))?.resources||[]; const servers=a.find(x=>Array.isArray(x.data)&&x.data.some(y=>y.id&&y.name))?.data||a.find(x=>Array.isArray(x)&&x.some(y=>y.id&&y.name))||[]; const pve=new Map(resources.map(x=>[Number(x.vmid),x]).filter(([id])=>Number.isInteger(id))); const identity=s=>{const t=[s.name,s.description,s.info?.connect_as,s.connect_as].flat().filter(Boolean).join(' '); const m=t.match(/(?:^|[-_ ]?)(?:ct|vm)[-_ ]?(\\d{2,6})(?:$|[-_ ]?)/i); return m?Number(m[1]):null;}; const details=servers.map(s=>{const vmid=identity(s); return {server_name:s.name??null,komodo_id:s.id??null,state:s.status??s.info?.status??'unknown',stack_count:Number(s.stack_count??s.stacks_count??(Array.isArray(s.stacks)?s.stacks.length:0)),vmid};}).filter(x=>x.vmid!==null&&pve.has(x.vmid)); const groups={}; for(const x of details)(groups[x.vmid]??=[]).push(x); const duplicates=Object.entries(groups).filter(([,v])=>v.length>=2).map(([vmid,servers])=>({vmid:Number(vmid),servers})); const critical=duplicates.length>0; const text=duplicates.map(x=>`CT${x.vmid}: `+x.servers.map(s=>`${s.server_name} [${s.komodo_id}] state ${s.state} stacks ${s.stack_count}`).join(' vs ')).join('\\n'); return [{json:{status:critical?'RØD':'OK',severity:critical?'critical':'normal',duplicates,duplicate_count:duplicates.length,policy:'Duplikat er read only. Ikke slett, flytt, deployer eller overta automatisk.',text:critical?text:'Ingen numeriske CT duplikater funnet.',map_report:critical?{dedupe_key:duplicates.map(x=>x.vmid+':'+x.servers.map(s=>s.komodo_id).sort().join(',')).sort().join('|'),status:'RØD',text}:null}}];"
+      }
+    },
+    {
+      "id": "ctops-dup-response",
+      "name": "Svar rød duplikatvakt",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1000,
+        680
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {}
+      }
+    },
+    {
+      "id": "ctops-dup-if",
+      "name": "Er status RØD?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1000,
+        840
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{$json.status}}",
+              "rightValue": "RØD",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "ctops-dup-alert",
+      "name": "Varsle RØD duplikat",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1240,
+        800
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://10.0.0.119:5678/webhook/homelab-alerts",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{JSON.stringify({attachments:[{title:\"RØD: Komodo duplikat CT-identitet\",text:$json.text}],job:\"ct-ops\"})}}",
+        "options": {}
+      }
+    },
+    {
+      "id": "ctops-dup-map",
+      "name": "Kartkanal deduplisert RØD avvik",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1240,
+        960
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://10.0.0.119:5678/webhook/hermes-ko",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{JSON.stringify({tittel:\"RØD duplikatvakt CT-identitet\",oppgave:\"Oppdater nettverkskartet via dokumentert kartkanal med én deduplisert RØD avvik per CT-ID. Ikke slett, flytt, deployer eller overta automatisk.\",rapport:$json.map_report,kontroll:\"read-only\"})}}",
+        "options": {}
+      }
     }
   ],
   "connections": {
@@ -299,13 +494,111 @@
           }
         ]
       ]
+    },
+    "Rød duplikatvakt hvert 10. minutt": {
+      "main": [
+        [
+          {
+            "node": "Duplikatvakt leser Proxmox",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Duplikatvakt leser Komodo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Kjør rød duplikatvakt nå": {
+      "main": [
+        [
+          {
+            "node": "Duplikatvakt leser Proxmox",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Duplikatvakt leser Komodo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Duplikatvakt leser Proxmox": {
+      "main": [
+        [
+          {
+            "node": "Samle Proxmox og Komodo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Duplikatvakt leser Komodo": {
+      "main": [
+        [
+          {
+            "node": "Samle Proxmox og Komodo",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Samle Proxmox og Komodo": {
+      "main": [
+        [
+          {
+            "node": "Klassifiser numeriske CT duplikater",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Klassifiser numeriske CT duplikater": {
+      "main": [
+        [
+          {
+            "node": "Svar rød duplikatvakt",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Er status RØD?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Er status RØD?": {
+      "main": [
+        [
+          {
+            "node": "Varsle RØD duplikat",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Kartkanal deduplisert RØD avvik",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
     }
   },
   "settings": {
-    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
     "executionTimeout": 1800,
     "timezone": "Europe/Oslo",
-    "saveDataErrorExecution": "all",
-    "saveDataSuccessExecution": "all"
+    "executionOrder": "v1"
   }
 }
