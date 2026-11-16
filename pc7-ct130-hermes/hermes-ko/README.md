@@ -19,16 +19,29 @@ lås- og workerhistorikk beholdes. Retry er eksplisitt og atomisk med samme lock
 
 ## Systemd som faktisk skal kjøre
 
-CT130 installerer disse fire filene i `/etc/systemd/system/`:
+CT130 installerer én `Type=oneshot`-service og én timer for hver av de seks støttede
+lanes i `/etc/systemd/system/`. Alle servicefilene kjører som `User=hermes` med
+`TimeoutStartSec=3h` og følgende eksakte `ExecStart`:
 
-- `hermes-ko-infra.service` → `hermes_ko.py run --lane infra`
-- `hermes-ko-general.service` → `hermes_ko.py run --lane general`
-- `hermes-ko-infra.timer` og `hermes-ko-general.timer` → hvert 2. minutt
+- `hermes-ko-infra.service` → `/usr/bin/python3 /home/hermes/.hermes/scripts/hermes_ko.py run --lane infra`
+- `hermes-ko-general.service` → `/usr/bin/python3 /home/hermes/.hermes/scripts/hermes_ko.py run --lane general`
+- `hermes-ko-diagnostics.service` → `/usr/bin/python3 /home/hermes/.hermes/scripts/hermes_ko.py run --lane diagnostics`
+- `hermes-ko-file-read.service` → `/usr/bin/python3 /home/hermes/.hermes/scripts/hermes_ko.py run --lane file-read`
+- `hermes-ko-network-map-read.service` → `/usr/bin/python3 /home/hermes/.hermes/scripts/hermes_ko.py run --lane network-map-read`
+- `hermes-ko-inventory.service` → `/usr/bin/python3 /home/hermes/.hermes/scripts/hermes_ko.py run --lane inventory`
 
-Begge er `Type=oneshot`, `User=hermes` og `TimeoutStartSec=3h`. Det finnes ingen
-`ConcurrencyLimit`; n8n-lane-låsen er autoritativ, og samme lane kan derfor ikke få
-to samtidige workers selv om timer-kall overlapper. Den gamle `hermes-ko.timer` skal
-være deaktivert før lane-timerne aktiveres.
+De tilhørende timerfilene er `hermes-ko-infra.timer`, `hermes-ko-general.timer`,
+`hermes-ko-diagnostics.timer`, `hermes-ko-file-read.timer`,
+`hermes-ko-network-map-read.timer` og `hermes-ko-inventory.timer`. De bruker
+`OnBootSec=3min`, `Unit=<lane-service>` og `OnUnitInactiveSec=2min`, med ett
+nåværende avvik: `hermes-ko-general.timer` bruker `OnUnitInactiveSec=1min`.
+Dermed er det én timerstyrt worker per lane; timerne skal ikke brukes til å starte
+flere samtidige workers i samme lane.
+
+Det finnes også deklarative filer for den gamle lane-løse `hermes-ko.service` og
+`hermes-ko.timer`, men de skal være deaktivert når lane-timerne er aktive. Det
+finnes ingen `ConcurrencyLimit`; n8n-lane-låsen er autoritativ, og samme lane kan
+derfor ikke få to samtidige workers selv om timer-kall overlapper.
 
 ## Deler
 
