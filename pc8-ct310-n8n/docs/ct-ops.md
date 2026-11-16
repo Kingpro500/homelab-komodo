@@ -62,6 +62,12 @@ Da teller det ikke, og CT-en kan bli grønn. Filen endres kun via `homelab-pr` e
 Kl. 04:40 kjøres full revisjon, og statuslinjer i kartet rettes der målt status har endret seg.
 Roger varsles bare når bildet er endret siden forrige natt.
 
+## Rød duplikatvakt
+
+Den aktive CT-ops-workflowen kjører også `Rød duplikatvakt hvert 10. minutt` og kan startes read-only via `POST /webhook/ct-ops-duplicate-check`. Den leser Proxmox-inventar og Komodo `ListServers`, trekker ut numerisk CT-ID og grupperer serverne. To eller flere servere for samme CT-ID gir alltid `status: RØD` og `severity: critical`, med komplett `server_name`, `komodo_id`, `state` og `stack_count` per treff. Null eller ett treff er ikke duplikat.
+
+Duplikatrapporten har deterministisk dedupliseringsnøkkel per CT-ID og server-ID. Rød status kan ikke bli gul/grønn og utløser ingen sletting, flytting, deploy eller automatisk overtakelse. Kartavvik sendes én gang per deduplisert funn gjennom den eksisterende dokumenterte Hermes/kartkanalen. Uklar eller manglende inventardata skal ikke klassifiseres som grønn/gul.
+
 ## Deler og gjenoppretting
 
 | Del | Sted |
