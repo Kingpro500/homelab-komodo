@@ -1,9 +1,9 @@
 [Unit]
-Description=Hermes-kø general lane hvert 2. minutt
+Description=Hermes-kø general lane hvert minutt
 
 [Timer]
 OnBootSec=3min
-OnUnitInactiveSec=2min
+OnUnitInactiveSec=1min
 Unit=hermes-ko-general.service
 
 [Install]
