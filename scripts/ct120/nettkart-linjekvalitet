@@ -45,6 +45,8 @@ GRADES = [(5, "A+"), (30, "A"), (60, "B"), (200, "C"), (400, "D")]
 PS5_SIGNAL = 'unifi_client_signal_dbm{ip="10.0.0.110"}'
 PS5_RETRY = 'unifi_client_retry_ratio{ip="10.0.0.110"}'
 PS5_SATISFACTION = 'unifi_client_satisfaction{ip="10.0.0.110"}'
+PS5_TX_RATE = 'unifi_client_tx_rate_mbps{ip="10.0.0.110"}'
+PS5_RADIO = 'unifi_client_signal_dbm{ip="10.0.0.110",radio=~".+"}'
 TARGETS = {
     "gateway": "10.0.0.1",
     "cloudflare": "1.1.1.1",
@@ -91,6 +93,14 @@ def prom_results(expr, at):
         return get("%s/api/v1/query?%s" % (PROM, q))["data"]["result"]
     except Exception:
         return []
+
+
+def prom_label(expr, at, label):
+    results = prom_results(expr, at)
+    if not results:
+        return None
+    metric = results[0].get("metric", {})
+    return metric.get(label)
 
 
 def uptime_for_day(start, end):
@@ -182,6 +192,8 @@ def ps5_for_day(start, end):
     signal = prom("quantile_over_time(0.5, %s%s)" % (PS5_SIGNAL, sub), at)
     retry = prom("quantile_over_time(0.5, %s%s) * 100" % (PS5_RETRY, sub), at)
     satisfaction = prom("quantile_over_time(0.5, %s%s)" % (PS5_SATISFACTION, sub), at)
+    tx_rate = prom("quantile_over_time(0.5, %s%s)" % (PS5_TX_RATE, sub), at)
+    radio = prom_label("topk(1, count_over_time(%s%s))" % (PS5_RADIO, sub), at, "radio")
     connected = 0
     cursor = start
     while cursor < end:
@@ -192,12 +204,14 @@ def ps5_for_day(start, end):
             if count is not None and count > 0:
                 connected += 1
         cursor += dt.timedelta(hours=1)
-    if signal is None and retry is None and satisfaction is None and connected == 0:
+    if signal is None and retry is None and satisfaction is None and tx_rate is None and radio is None and connected == 0:
         return None
     return {
         "signal_median_dbm": rnd(signal),
         "retry_median_prosent": rnd(retry),
         "satisfaction_median": rnd(satisfaction),
+        "link_rate_median_mbps": rnd(tx_rate),
+        "radio": radio,
         "timer_tilkoblet": connected,
     }
 
