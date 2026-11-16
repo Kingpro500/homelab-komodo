@@ -53,7 +53,7 @@ switch (b.action) {
   }
   case 'retry': { const t=find(b.id); if(!t||t.status!=='feilet'||b.lock_id!==t.lock_id||b.worker_id!==t.worker_id){out={ok:false,error:'retry krever gjeldende lock_id og worker_id på feilet oppgave'};break;} t.lock_history=t.lock_history||[];t.lock_history.push({lock_id:t.lock_id,worker_id:t.worker_id,action:'retry',at:now});release(t);t.status='ny';t.endret=now;t.sammendrag='eksplisitt retry godkjent';out={ok:true};break; }
   case 'approve': {const t=find(b.id);if(!t||t.status!=='venter_godkjenning'){out={ok:false,error:'oppgaven venter ikke på godkjenning'};break;}t.status='godkjent';t.godkjent_av=S(b.av||'ukjent',30);t.endret=now;out={ok:true};break;}
-  case 'reject': {const t=find(b.id);if(!t){out={ok:false,error:'ukjent id'};break;}if(t.status==='kjorer'&&!validLock(t)){out={ok:false,error:'lock_id eller worker_id avvist'};break;}t.tilbakemelding=S(b.tilbakemelding,4000);t.status=b.parker?'parkert':'ny';t.endret=now;if(t.status==='ny')release(t);out={ok:true};break;}
+  case 'reject': {const t=find(b.id);if(!t){out={ok:false,error:'ukjent id'};break;}if(t.status==='kjorer'&&!validLock(t)){out={ok:false,error:'lock_id eller worker_id avvist'};break;}t.tilbakemelding=S(b.tilbakemelding,4000);t.status=b.parker?'parkert':'ny';t.endret=now;if(t.status==='ny'||t.status==='parkert')release(t);out={ok:true};break;}
   case 'get': {const t=find(b.id);out=t?{ok:true,task:kort(t)}:{ok:false,error:'ukjent id'};break;}
   case 'list': {out={ok:true,tasks:st.tasks.map(kort)};break;}
   case 'purge': {const cut=Date.now()-14*86400000;st.tasks=st.tasks.filter(t=>APEN.includes(t.status)||t.status==='venter_godkjenning'||Date.parse(t.endret)>cut);out={ok:true,igjen:st.tasks.length};break;}
