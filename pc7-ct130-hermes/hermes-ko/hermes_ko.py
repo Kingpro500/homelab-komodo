@@ -381,11 +381,14 @@ def setup_n8n():
 def main():
     a = sys.argv[1:] or ["run"]
     if a[0] == "run":
-        lane = a[1] if len(a) > 1 and not a[1].startswith("--") else "general"
-        if lane.startswith("--lane="):
-            lane = lane.split("=", 1)[1]
-        elif lane == "--lane" and len(a) > 2:
-            lane = a[2]
+        lane = "general"
+        if len(a) > 1:
+            if a[1].startswith("--lane="):
+                lane = a[1].split("=", 1)[1]
+            elif a[1] == "--lane" and len(a) > 2:
+                lane = a[2]
+            elif not a[1].startswith("--"):
+                lane = a[1]
         run(lane)
     elif a[0] == "setup-n8n":
         setup_n8n()
