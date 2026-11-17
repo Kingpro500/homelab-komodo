@@ -1,0 +1,10 @@
+[Unit]
+Description=Hermes-kø infra plass 2 hvert 2. minutt
+
+[Timer]
+OnBootSec=3min
+OnUnitInactiveSec=2min
+Unit=hermes-ko-infra-2.service
+
+[Install]
+WantedBy=timers.target

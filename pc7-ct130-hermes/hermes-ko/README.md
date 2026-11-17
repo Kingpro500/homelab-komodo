@@ -1,8 +1,9 @@
 # Hermes-kø (`hermes-ko`)
 
-Hermes-kø har to eksplisitte lane-workers: `infra` for Proxmox, Komodo og GitHub og
-`general` for Home Assistant/AI og annet. Maksimalt én worker per lane og maksimalt
-én worker per delt ressurs. Lane-låsen er alltid aktiv; `ressurser` er en ekstra lås.
+Hermes-kø har seks lanes (se under). `infra` har **tre samtidige plasser** fra 17. nov 2026,
+de andre én. Maksimalt én worker per delt ressurs: to oppgaver med samme `ct:<id>` kjører
+aldri samtidig, mens oppgaver på ulike CT-er går parallelt. Køstatus ligger i SQLite på
+CT130 (`hermes-ko-store.service`), ikke i n8n.
 
 ## Datamodell og låser
 
@@ -48,7 +49,10 @@ derfor ikke få to samtidige workers selv om timer-kall overlapper.
 
 | Fil | Installeres som |
 | --- | --- |
-| `hermes_ko.py` | CT130 `/home/hermes/.hermes/scripts/hermes_ko.py` |
+| `hermes_ko.py` | CT130 `/home/hermes/.hermes/scripts/hermes_ko.py` (worker og CLI) |
+| `hermes_ko_store.py` | CT130 `/home/hermes/.hermes/scripts/hermes_ko_store.py` (kø-API `http://10.0.0.135:9121/queue`) |
+| `hermes-ko-store.service` | CT130 `/etc/systemd/system/`, alltid på |
+| `hermes-ko-infra-2/-3.service` / `.timer` | CT130 `/etc/systemd/system/`, plass 2 og 3 i infra |
 | `ko-n8n.js` | Code-noden «Kø» i aktiv workflow `hermes-ko` |
 | `hermes-ko-*.service` / `.timer` | CT130 `/etc/systemd/system/` |
 
@@ -152,10 +156,20 @@ Ikke lag egne overvåkingsløkker (`while sleep …; hermes_ko.py get kN`) eller
 per oppgave. De ble stående i dager (k87-løkken avsluttet aldri fordi den ikke kjente
 igjen `ferdig_med_merknad`) og ble fjernet 17. nov 2026.
 
-### Kjente avvik mellom GitHub og CT130
+### Køtjenesten (SQLite) og parallellitet
 
-CT130 kjører køen mot en lokal SQLite-tjeneste (`hermes-ko-store.service`,
-`hermes_ko_store.py`, `http://10.0.0.135:9121/queue`). Den ligger ikke i dette repoet
-ennå; `hermes_ko.py` her peker fortsatt på n8n-webhooken. SQLite-køen lagrer status,
-sammendrag og hendelseslogg, men ikke forslagsteksten. En oppgave med
-`godkjenning: claude` mister derfor forslaget mellom godkjenning og utføring.
+Filene i denne mappen er det som kjører på CT130 (kontrollert likt 17. nov 2026).
+Databasen er `~/.hermes/ko/hermes-ko.sqlite3` (0600, aldri i Git). Ta backup med
+SQLite sin backup-funksjon før endringer; kopier ikke filen mens tjenesten skriver.
+
+- **Plasser:** `SLOTS = {"infra": 3}` står både i `hermes_ko.py` og `hermes_ko_store.py`,
+  og det må finnes like mange timere (`hermes-ko-infra.timer`, `-2`, `-3`). Endres tallet,
+  endres alle tre steder i samme PR.
+- **Forslag og vurdering lagres** (`proposal`, `review`). En oppgave med
+  `godkjenning: claude` stopper i `venter_godkjenning`; `hermes_ko.py approve <id>` gjør
+  den `godkjent`, og neste worker utfører det lagrede forslaget med kontrollørens `VILKÅR:`.
+- **Død worker:** finnes ikke prosessen bak `worker_id` lenger, settes oppgaven til
+  `feilet` og lanen frigis ved neste kall til køen, ikke etter tre timer. Tre-timersregelen
+  gjelder fortsatt for worker-id-er som ikke er en prosess på CT130.
+- **Ingenting blokkerer:** `parkert`, `feilet`, `venter_godkjenning` og `ferdig` slipper
+  alle låser med en gang.
