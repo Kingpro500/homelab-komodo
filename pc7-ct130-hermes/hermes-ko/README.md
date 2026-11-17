@@ -34,7 +34,8 @@ De tilhørende timerfilene er `hermes-ko-infra.timer`, `hermes-ko-general.timer`
 `hermes-ko-diagnostics.timer`, `hermes-ko-file-read.timer`,
 `hermes-ko-network-map-read.timer` og `hermes-ko-inventory.timer`. De bruker
 `OnBootSec=3min`, `Unit=<lane-service>` og `OnUnitInactiveSec=2min`, med ett
-nåværende avvik: `hermes-ko-general.timer` bruker `OnUnitInactiveSec=1min`.
+avvik: `hermes-ko-general.timer` bruker `OnUnitActiveSec=1min` (satt av k90,
+17. nov 2026). Den teller fra at workeren startet; `Type=oneshot` hindrer dobbeltstart.
 Dermed er det én timerstyrt worker per lane; timerne skal ikke brukes til å starte
 flere samtidige workers i samme lane.
 
