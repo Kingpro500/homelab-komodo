@@ -46,6 +46,7 @@ KO_ENV = os.path.join(HOME, ".hermes", "ko.env")
 HERMES_ENV = os.path.join(HOME, ".hermes", ".env")
 HERMES = os.path.join(HOME, ".local", "bin", "hermes")
 N8N = "http://10.0.0.119:5678"
+QUEUE = "http://10.0.0.135:9121/queue"
 WORKER = ("gpt-5.6-luna", "openai-codex")     # billig: foreslår og utfører
 REVIEWER = (None, None)                        # kontrollør: Hermes sin standardmodell
 T_WORK, T_REVIEW, T_CHECK = 1500, 900, 180
@@ -55,6 +56,8 @@ T_LOKAL = 60
 ACTIVE = {"worker_id": "", "lock_id": ""}
 LANES = ("infra", "general", "diagnostics", "file-read", "network-map-read", "inventory")
 READ_ONLY_LANES = ("diagnostics", "file-read", "network-map-read", "inventory")
+# Samtidige workers per lane. Må stemme med SLOTS i hermes_ko_store.py og antall timere.
+SLOTS = {"infra": 3}
 
 REGLER = """FASTE REGLER (gjelder alltid):
 - Les AGENTS.md øverst i ~/homelab-komodo før du gjør noe. Start med `git switch main && git pull --ff-only`.
@@ -96,7 +99,7 @@ def ko(action, **kw):
     if action in ("update", "retry") and ACTIVE["lock_id"]:
         kw.setdefault("worker_id", ACTIVE["worker_id"])
         kw.setdefault("lock_id", ACTIVE["lock_id"])
-    return http(N8N + "/webhook/hermes-ko", kw, {"X-Ko-Token": env(KO_ENV).get("KO_TOKEN", "")})
+    return http(QUEUE, kw, {"X-Ko-Token": env(KO_ENV).get("KO_TOKEN", "")})
 
 
 def hermes(prompt, who, timeout):
@@ -391,10 +394,17 @@ def run(lane="general"):
         os.unlink(pausefil)
     # Lokal lås er kun per lane. n8n sin atomiske lane- og ressurslås
     # er autoritativ og skal ikke serialisere uavhengige lanes.
-    lock = open(os.path.join(KO_DIR, "lock-" + lane), "w")
-    try:
-        fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
-    except OSError:
+    # Én lokal lås per plass i lanen (lock-infra, lock-infra.2, lock-infra.3).
+    lock = None
+    for i in range(1, SLOTS.get(lane, 1) + 1):
+        f = open(os.path.join(KO_DIR, "lock-" + lane + ("" if i == 1 else ".%d" % i)), "w")
+        try:
+            fcntl.flock(f, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            lock = f
+            break
+        except OSError:
+            f.close()
+    if lock is None:
         return
     t = ko("next", lane=lane, worker_id=ACTIVE["worker_id"]).get("task")
     if not t:
@@ -402,6 +412,11 @@ def run(lane="general"):
     ACTIVE["lock_id"] = t.get("lock_id")
     try:
         if t.get("fase") == "utfor":
+            # Godkjent av Roger/Claude: forslag og vurdering (med VILKÅR) er lagret i køen.
+            if not t.get("forslag"):
+                ko("update", id=t["id"], status="feilet", sammendrag="godkjent, men forslaget mangler i køen")
+                return
+            t["vilkar"] = t.get("vurdering", "")
             return utfor(t)
         kritikk = t.get("tilbakemelding", "")
         forrige = ""
