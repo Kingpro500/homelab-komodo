@@ -91,3 +91,48 @@ Runtime-kilden er `pc7-ct130-hermes/hermes-ko/hermes_ko.py`, installert på CT13
 lane-timere, workflow-backup gjenopprettes via dokumentert n8n API-rute, og forrige
 GitHub-versjon installeres. Deretter aktiveres gammel timer bare etter at workflow,
 service-status og låser er kontrollert.
+
+## Kontrollørens dom (instruks til alle LLM-er som bruker køen)
+
+Gjelder fra 17. nov 2026. Instruksen til modellene står i promptene i `hermes_ko.py`
+(`REGLER`, `p_forslag`, `p_vurder`, `p_utfor`, `p_slutt`). Endres oppførselen, endres
+promptene der og dette avsnittet i samme PR.
+
+Kontrolløren gir én av tre dommer på et forslag:
+
+| Dom | Når | Hva skjer |
+| --- | --- | --- |
+| `DOM: GODKJENT` | Ingen av de fem avvisningsgrunnene gjelder | Utføres. Linjer som begynner med `VILKÅR:` følger med til utføreren og skal følges. |
+| `DOM: AVVIST` | Bare av de fem grunnene under | Ett nytt forslag. I runde to ser kontrolløren sin forrige vurdering og skal bare sjekke om den er løst. Avvist to ganger gir `parkert`. |
+| `DOM: BLOKKERT` | Feilen ligger i oppgaven, ikke i forslaget | `parkert` med én gang, sammendrag `trenger beslutning: …`. Roger må bestemme. |
+
+De fem avvisningsgrunnene: forslaget (1) bryter en fast regel, (2) gjør mer enn oppgaven
+ber om, (3) bygger på en faktafeil kontrolløren selv har kontrollert, (4) endrer noe uten
+å si hvordan det rulles tilbake, eller (5) vil ikke få kontrollkommandoen til å gå.
+Manglende detaljer og ønsker om ekstra tester, backup eller fremgangsmåter som ikke står
+i reglene eller oppgaven er ikke avvisningsgrunn; de skrives som `VILKÅR:`.
+
+Hvor begrunnelsen står: `hermes_ko.py get <id>` viser sammendraget
+(`forslaget ble avvist to ganger av kontrolløren: <grunn>` eller
+`trenger beslutning: <spørsmål>`). Hele vurderingen for hver runde ligger i
+oppgavens hendelseslogg (`events` i `~/.hermes/ko/hermes-ko.sqlite3`).
+
+### Til deg som skriver oppgaver (Claude, Codex, Hermes)
+
+- Kontrollkommandoen kjøres på CT130 som `hermes`. Filer på andre CT-er må leses med
+  `ssh pc6 'pct exec <ctid> -- …'`. En kommando som tester en sti som bare finnes på en
+  annen CT, feiler alltid, og oppgaven ender som `feilet` selv om arbeidet er gjort.
+- Oppgaveteksten må stemme med virkeligheten (riktig direktiv, filnavn, node). Stemmer
+  den ikke, gir kontrolløren `BLOKKERT` og oppgaven venter på Roger.
+- Én CT per oppgave, og før CT-en opp i `ressurser` (`ct:<id>`), så ulike CT-er kan gå
+  parallelt og samme CT aldri får to oppgaver samtidig.
+- Systemd må kalle workeren med `run --lane <navn>`. Til og med 16. nov 2026 ble dette
+  lest som `general` for alle lanes, så bare general-lanen hentet oppgaver (rettet i PR 285).
+
+### Kjente avvik mellom GitHub og CT130
+
+CT130 kjører køen mot en lokal SQLite-tjeneste (`hermes-ko-store.service`,
+`hermes_ko_store.py`, `http://10.0.0.135:9121/queue`). Den ligger ikke i dette repoet
+ennå; `hermes_ko.py` her peker fortsatt på n8n-webhooken. SQLite-køen lagrer status,
+sammendrag og hendelseslogg, men ikke forslagsteksten. En oppgave med
+`godkjenning: claude` mister derfor forslaget mellom godkjenning og utføring.

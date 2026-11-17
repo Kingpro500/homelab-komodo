@@ -8,6 +8,14 @@ resultatet etterpå. En fast kontrollkommando avgjør om oppgaven faktisk er fer
   forslag (billig)  ->  vurdering (kontrollør)  ->  utføring (billig, uten spørsmål)
                     ->  kontrollkommando        ->  sluttvurdering (kontrollør)
 
+Kontrollørens dom på et forslag (endret 17. nov 2026, se README «Kontrollørens dom»):
+  GODKJENT  utføres. Kontrollørens vilkår følger med til utføreren.
+  AVVIST    bare av fem navngitte grunner. Nytt forslag én gang; i runde to ser
+            kontrolløren sin forrige vurdering og skal bare sjekke om den er løst.
+  BLOKKERT  feilen ligger i oppgaven, ikke forslaget. Parkeres straks med
+            sammendrag «trenger beslutning: …». Roger må bestemme.
+Begrunnelsen lagres i oppgavens hendelseslogg og i sammendraget.
+
   hermes_ko.py run                 én runde: hent neste oppgave og kjør den (systemd-timer)
   hermes_ko.py add < oppgave.json  {"tittel","oppgave","kontroll","godkjenning":"ai"|"claude"}
   hermes_ko.py list | get <id> | approve <id> | reject <id> "tilbakemelding" | retry <id>
@@ -99,8 +107,23 @@ def hermes(prompt, who, timeout):
 
 
 def dom(text):
-    m = re.findall(r"DOM:\s*(GODKJENT|AVVIST)", text or "")
+    m = re.findall(r"DOM:\s*(GODKJENT|AVVIST|BLOKKERT)", text or "")
     return m[-1] if m else "UTILGJENGELIG"
+
+
+def kort(text, n=380):
+    """Kontrollørens begrunnelse på én linje, uten DOM-linjen, til sammendraget."""
+    linjer = [x.strip() for x in (text or "").splitlines()
+              if x.strip() and not x.strip().startswith("DOM:")]
+    return " ".join(linjer)[:n]
+
+
+def beslutning(text):
+    """Linjen kontrolløren skriver ved BLOKKERT: hva Roger må ta stilling til."""
+    for linje in (text or "").splitlines():
+        if linje.strip().startswith("BESLUTNING:"):
+            return linje.strip()[len("BESLUTNING:"):].strip()[:380]
+    return kort(text)
 
 
 def pause(minutter, grunn):
@@ -183,7 +206,14 @@ Undersøk dagens tilstand og svar med et kort forslag:
 4. Hva som kan gå galt."""
 
 
-def p_vurder(t, forslag):
+def p_vurder(t, forslag, forrige=""):
+    runde2 = f"""
+DETTE ER ANDRE RUNDE. Din vurdering av det første forslaget var:
+{forrige}
+
+Vurder nå bare to ting: er innvendingene over løst, og bryter det nye forslaget en fast regel?
+Kom ikke med nye innvendinger om forhold du kunne tatt opp sist. Motsi ikke din forrige vurdering.
+""" if forrige else ""
     return f"""Du er kontrollør for en billigere modell. Du skal BARE LESE. Ikke endre noe.
 {REGLER}
 
@@ -191,12 +221,30 @@ Oppgave «{t['tittel']}»:
 {t['oppgave']}
 {avgjort(t)}
 
+Kontrollkommandoen som avgjør om oppgaven er ferdig (kjøres fra CT130 som hermes):
+{t['kontroll']}
+
 Forslaget fra den andre modellen:
 {forslag}
+{runde2}
+Kontroller mot levende data der det trengs.
 
-Kontroller mot levende data der det trengs. Avvis hvis forslaget bryter en fast regel, gjør mer enn oppgaven,
-bygger på noe som ikke stemmer, mangler tilbakerulling, eller ikke vil få kontrollkommandoen til å gå.
-Svar med maks ti linjer begrunnelse. Siste linje skal være nøyaktig `DOM: GODKJENT` eller `DOM: AVVIST`."""
+AVVIS bare av en av disse fem grunnene, og si hvilken:
+1. Forslaget bryter en fast regel.
+2. Forslaget gjør mer enn oppgaven ber om.
+3. Forslaget bygger på en faktafeil som du selv har kontrollert.
+4. Forslaget endrer noe uten å si hvordan det rulles tilbake.
+5. Forslaget vil ikke få kontrollkommandoen til å gå.
+Alt annet er ikke avvisningsgrunn: manglende detaljer, ønsker om flere tester, backup, filer eller
+fremgangsmåter som verken står i de faste reglene eller i oppgaven. Slikt skriver du som linjer som begynner
+med `VILKÅR:`, og godkjenner. Utføreren får vilkårene og må følge dem.
+Kunne du ikke kontrollere noe selv, si det, men avvis ikke av den grunn alene.
+
+Bruk BLOKKERT når feilen ligger i oppgaven og ikke i forslaget: oppgaveteksten stemmer ikke med virkeligheten,
+kontrollkommandoen kan ikke gå uansett hva som gjøres, eller oppgaven krever noe de faste reglene forbyr.
+Da skal Roger bestemme. Skriv én linje som begynner med `BESLUTNING:` og sier hva han må ta stilling til.
+
+Svar med maks ti linjer begrunnelse. Siste linje skal være nøyaktig `DOM: GODKJENT`, `DOM: AVVIST` eller `DOM: BLOKKERT`."""
 
 
 def p_utfor(t, forslag):
@@ -211,6 +259,7 @@ Oppgave «{t['tittel']}»:
 
 Godkjent forslag:
 {forslag}
+{('Kontrollørens vurdering. Linjer som begynner med VILKÅR skal følges:' + chr(10) + t['vilkar']) if t.get('vilkar') else ''}
 
 Ferdig når denne kommandoen går uten feil: {t['kontroll']}
 Svar til slutt med: hva som er endret, hva du kontrollerte, og hva som ikke er gjort."""
@@ -312,6 +361,7 @@ def run(lane="general"):
         if t.get("fase") == "utfor":
             return utfor(t)
         kritikk = t.get("tilbakemelding", "")
+        forrige = ""
         for forsok in (1, 2):
             forslag = hermes(p_forslag(t, kritikk), WORKER, T_WORK)
             if forsok == 1:
@@ -324,20 +374,28 @@ def run(lane="general"):
                         "mangler steg: " + lokal_tekst
                     )
                     continue
-            vurdering = hermes(p_vurder(t, forslag), REVIEWER, T_REVIEW)
+            vurdering = hermes(p_vurder(t, forslag, forrige), REVIEWER, T_REVIEW)
             t["forslag"] = forslag
             d = dom(vurdering)
-            ko("update", id=t["id"], forslag=forslag, vurdering=vurdering, logg="forslag %d: %s" % (forsok, d))
+            ko("update", id=t["id"], forslag=forslag, vurdering=vurdering,
+               logg="forslag %d: %s\n%s" % (forsok, d, vurdering[-3500:]))
             if d == "UTILGJENGELIG":
                 ko("update", id=t["id"], logg="kontrollør utilgjengelig, venter 30 minutter")
                 pause(30, vurdering[:200])
                 ko("retry", id=t["id"])
                 return
+            if d == "BLOKKERT":
+                r = ko("update", id=t["id"], status="parkert",
+                       sammendrag="trenger beslutning: " + beslutning(vurdering))
+                return push_hvis_tom(r.get("igjen", 1))
             if d == "GODKJENT":
+                t["vilkar"] = vurdering
                 break
             kritikk = vurdering
+            forrige = vurdering
         else:
-            r = ko("update", id=t["id"], status="parkert", sammendrag="forslaget ble avvist to ganger av kontrolløren")
+            r = ko("update", id=t["id"], status="parkert",
+                   sammendrag="forslaget ble avvist to ganger av kontrolløren: " + kort(vurdering))
             return push_hvis_tom(r.get("igjen", 1))
         if t.get("godkjenning") == "claude":
             r = ko("update", id=t["id"], status="venter_godkjenning", sammendrag="forslag klart, venter på Claude eller Roger")
