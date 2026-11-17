@@ -130,6 +130,28 @@ oppgavens hendelseslogg (`events` i `~/.hermes/ko/hermes-ko.sqlite3`).
 - Systemd må kalle workeren med `run --lane <navn>`. Til og med 16. nov 2026 ble dette
   lest som `general` for alle lanes, så bare general-lanen hentet oppgaver (rettet i PR 285).
 
+### Varsling og dagsrapport (fra 17. nov 2026)
+
+Køen sender **ingen melding per oppgave**. Telefonvarsel går bare når Roger må bestemme
+noe: en oppgave får `DOM: BLOKKERT` (parkert med `trenger beslutning: …`) eller settes til
+`venter_godkjenning`. Alt annet samles i én dagsrapport kl. 06:00 norsk tid:
+
+- `hermes-ko-rapport.timer` (`OnCalendar=*-*-* 06:00:00 Europe/Oslo`, `Persistent=true`)
+  starter `hermes-ko-rapport.service`, som kjører `hermes_ko.py rapport`.
+- Rapporten gir siste døgn (ferdig, med merknad, feilet, parkert), hva som står i kø nå,
+  alt som venter på Roger, og feilet/parkert med grunn. Maks 700 tegn til telefonen; hele
+  teksten står i journalen (`journalctl -u hermes-ko-rapport`).
+- `hermes_ko.py rapport --vis` skriver rapporten uten å sende den.
+
+Begge går via n8n `homelab-alerts` (vedleggsformatet `attachments: [{title, text}]`).
+n8n slipper ikke telefonvarsler gjennom 23–06 og maks ett i timen. Et beslutningsvarsel
+som faller bort der, kommer med i neste dagsrapport. Unngå ordene «new device» og
+«ny enhet» i titler; n8n stopper slike meldinger.
+
+Ikke lag egne overvåkingsløkker (`while sleep …; hermes_ko.py get kN`) eller cron-jobber
+per oppgave. De ble stående i dager (k87-løkken avsluttet aldri fordi den ikke kjente
+igjen `ferdig_med_merknad`) og ble fjernet 17. nov 2026.
+
 ### Kjente avvik mellom GitHub og CT130
 
 CT130 kjører køen mot en lokal SQLite-tjeneste (`hermes-ko-store.service`,

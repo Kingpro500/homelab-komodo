@@ -16,9 +16,14 @@ Kontrollørens dom på et forslag (endret 17. nov 2026, se README «Kontrolløre
             sammendrag «trenger beslutning: …». Roger må bestemme.
 Begrunnelsen lagres i oppgavens hendelseslogg og i sammendraget.
 
+Varsling (endret 17. nov 2026): telefonvarsel bare når Roger må bestemme noe
+(BLOKKERT eller venter_godkjenning). Alt annet kommer i én dagsrapport kl. 06:00
+(hermes-ko-rapport.timer -> `hermes_ko.py rapport`). Ingen melding per oppgave.
+
   hermes_ko.py run                 én runde: hent neste oppgave og kjør den (systemd-timer)
   hermes_ko.py add < oppgave.json  {"tittel","oppgave","kontroll","godkjenning":"ai"|"claude"}
   hermes_ko.py list | get <id> | approve <id> | reject <id> "tilbakemelding" | retry <id>
+  hermes_ko.py rapport [--vis]     dagsrapport til telefonen (--vis: bare skriv den ut)
   hermes_ko.py setup-n8n           opprett credential + workflow i n8n (én gang)
   Nødstopp: touch ~/.hermes/ko/STOPP   (fjern filen for å starte igjen)
 
@@ -294,20 +299,59 @@ midlertidige filer, ucommittede endringer, åpne grener)? Svar med maks åtte li
 Siste linje skal være nøyaktig `DOM: GODKJENT` eller `DOM: AVVIST`."""
 
 
-def push_hvis_tom(igjen):
-    if igjen:
-        return
+def varsle(tittel, tekst):
+    """Telefonvarsel via n8n homelab-alerts (vedleggsformatet gir tittel og tekst, maks 700 tegn).
+    n8n holder stilletid 23-06 og maks ett telefonvarsel i timen; det som faller bort der,
+    står likevel i dagsrapporten."""
     try:
-        tasks = ko("list").get("tasks", [])
-        siste = [x for x in tasks if x["status"] in ("ferdig", "ferdig_med_merknad", "feilet", "parkert")][-8:]
-        linjer = ["%s: %s" % (x["status"], x["tittel"]) for x in siste]
-        venter = [x["tittel"] for x in tasks if x["status"] == "venter_godkjenning"]
-        if venter:
-            linjer.append("Venter på godkjenning: " + ", ".join(venter))
         http(N8N + "/webhook/homelab-alerts", {"source": "hermes-ko", "severity": "info",
-             "title": "Hermes-køen er tom", "message": "\n".join(linjer)})
+             "attachments": [{"title": tittel[:120], "text": tekst[:700]}]})
     except Exception:
         pass
+
+
+def varsle_beslutning(t, grunn):
+    varsle("Hermes trenger beslutning: %s" % t["id"],
+           "%s\n%s\nSe: hermes_ko.py get %s" % (t["tittel"], grunn, t["id"]))
+
+
+def trenger_deg(x):
+    return x["status"] == "venter_godkjenning" or (
+        x["status"] == "parkert" and (x.get("sammendrag") or "").startswith("trenger beslutning"))
+
+
+def rapport(send=True):
+    """Én samlet melding om siste døgn. Kjøres av hermes-ko-rapport.timer kl. 06:00."""
+    grense = time.time() - 86400
+    tasks = ko("list").get("tasks", [])
+
+    def endret(x):
+        try:
+            return float(x.get("endret") or 0)
+        except (TypeError, ValueError):
+            return 0.0
+
+    siste = [x for x in tasks if endret(x) >= grense]
+    n = lambda liste, s: sum(1 for x in liste if x["status"] == s)
+    kort_tittel = lambda x: x["tittel"][:45]
+    linjer = ["Siste døgn: %d ferdig, %d med merknad, %d feilet, %d parkert. Nå: %d ny, %d kjører." % (
+        n(siste, "ferdig"), n(siste, "ferdig_med_merknad"), n(siste, "feilet"), n(siste, "parkert"),
+        n(tasks, "ny") + n(tasks, "godkjent"), n(tasks, "kjorer"))]
+    deg = [x for x in tasks if trenger_deg(x)]
+    if deg:
+        linjer.append("Trenger deg (%d): " % len(deg) + "; ".join(
+            "%s %s" % (x["id"], kort_tittel(x)) for x in deg))
+    galt = [x for x in siste if x["status"] in ("feilet", "parkert") and not trenger_deg(x)]
+    if galt:
+        linjer.append("Feilet/parkert: " + "; ".join(
+            "%s %s%s" % (x["id"], kort_tittel(x), (": " + x["sammendrag"][:70]) if x.get("sammendrag") else "")
+            for x in galt))
+    tekst = "\n".join(linjer)
+    print(tekst)
+    if send:
+        if len(tekst) > 700:
+            tekst = tekst[:640] + "\n… resten: hermes_ko.py list"
+        varsle("Hermes-køen: dagsrapport", tekst)
 
 
 def utfor(t):
@@ -328,7 +372,6 @@ def utfor(t):
         )
     r = ko("update", id=t["id"], status=status, resultat=resultat, kontroll_ut=ut, sluttvurdering=slutt,
            sammendrag="kontroll %s, kontrollør %s" % ("OK" if ok else "FEILET", d), logg="slutt: " + status)
-    push_hvis_tom(r.get("igjen", 1))
 
 
 def run(lane="general"):
@@ -387,7 +430,7 @@ def run(lane="general"):
             if d == "BLOKKERT":
                 r = ko("update", id=t["id"], status="parkert",
                        sammendrag="trenger beslutning: " + beslutning(vurdering))
-                return push_hvis_tom(r.get("igjen", 1))
+                return varsle_beslutning(t, beslutning(vurdering))
             if d == "GODKJENT":
                 t["vilkar"] = vurdering
                 break
@@ -396,10 +439,10 @@ def run(lane="general"):
         else:
             r = ko("update", id=t["id"], status="parkert",
                    sammendrag="forslaget ble avvist to ganger av kontrolløren: " + kort(vurdering))
-            return push_hvis_tom(r.get("igjen", 1))
+            return
         if t.get("godkjenning") == "claude":
-            r = ko("update", id=t["id"], status="venter_godkjenning", sammendrag="forslag klart, venter på Claude eller Roger")
-            return push_hvis_tom(r.get("igjen", 1))
+            ko("update", id=t["id"], status="venter_godkjenning", sammendrag="forslag klart, venter på Claude eller Roger")
+            return varsle_beslutning(t, "Forslaget er godkjent av kontrolløren og venter på din godkjenning.")
         utfor(t)
     except Exception as e:  # kjøreren skal aldri la en oppgave henge som «kjører»
         ko("update", id=t["id"], status="feilet", sammendrag="kjøreren feilet: %s" % str(e)[:300])
@@ -448,6 +491,8 @@ def main():
             elif not a[1].startswith("--"):
                 lane = a[1]
         run(lane)
+    elif a[0] == "rapport":
+        rapport(send="--vis" not in a)
     elif a[0] == "setup-n8n":
         setup_n8n()
     elif a[0] == "add":
