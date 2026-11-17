@@ -1,0 +1,10 @@
+[Unit]
+Description=Hermes-kø dagsrapport kl. 06:00
+
+[Timer]
+OnCalendar=*-*-* 06:00:00 Europe/Oslo
+Persistent=true
+Unit=hermes-ko-rapport.service
+
+[Install]
+WantedBy=timers.target
