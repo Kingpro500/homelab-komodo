@@ -38,3 +38,21 @@ pace requests to lower the 429 rate. Check with:
 ```bash
 pct exec 172 -- docker logs --since 1h pinchflat 2>&1 | grep -c "HTTP Error 429"
 ```
+
+## YouTube cookies (bot check "Sign in to confirm you're not a bot")
+
+- File: CT172 `/opt/pinchflat/extras/cookies.txt` (mode 600, never committed or displayed).
+  Copied on 18 Nov 2026 from the MeTube export on CT120 `/opt/metube/Cookies/cookies.txt`
+  (exported 8 Aug 2026). Renew both from the same browser export when they stop working.
+- All sources use cookie behaviour `when_needed` (set 18 Nov 2026; previously `disabled`).
+  Pinchflat 2025.9.26 then uses cookies for indexing and for error recovery: a download that
+  fails with "Sign in to confirm" is retried with cookies. Ordinary downloads run without the
+  account, which limits the risk of YouTube flagging it. New sources must also be set to
+  "When needed" in the UI.
+- Check that the login is still valid without listing account data:
+
+```bash
+pct exec 172 -- docker exec pinchflat yt-dlp --cookies /config/extras/cookies.txt --flat-playlist -I 1:3 --print id ":ytsubs" | wc -l
+```
+
+  Note: yt-dlp may rewrite the cookie file it is given; test against a copy if in doubt.
