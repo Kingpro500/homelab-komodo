@@ -1,0 +1,7 @@
+# Managed per homelab-komodo pc6-ct172-pinchflat/README.md (2026-11-18)
+# YouTube returns HTTP 429 on subtitle requests; without -i yt-dlp fails the whole video.
+# -i turns subtitle failures into warnings; real download failures still exit non-zero.
+--ignore-errors
+--sleep-subtitles 5
+--sleep-requests 1
+--retry-sleep http:exp=2:60
