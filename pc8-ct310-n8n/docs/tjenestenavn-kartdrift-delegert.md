@@ -26,6 +26,10 @@ Workflowen gjør ikke direkte endringer i nettverk, DNS eller kart.
 - Røde driftsfunn skal stoppe flyten.
 - Workflowen skal være inaktiv til lokal test og en faktisk n8n-execution er verifisert.
 
+## Kontrollkommando i hermes-ko
+
+Feltet `kontroll` kjøres med bash av hermes-ko og må være en ekte kommando (rapportkravet ligger i `oppgave`). Den spør 10.0.0.1, 10.0.0.115 og 10.0.0.118 om `nettkart.lan.local` og feiler hvis én ikke svarer eller svarene er ulike. En feilet kontroll betyr altså en reell DNS-splitt, ikke en feil i oppgaven.
+
 ## Gjenoppretting
 
 Importer `workflows/tjenestenavn-kartdrift-delegert.json`, kontroller credentialen `hermes-ko token`, kjør lokal Code-test og én kontrollert execution før aktivering.
