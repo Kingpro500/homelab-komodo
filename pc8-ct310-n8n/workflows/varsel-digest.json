@@ -1,0 +1,288 @@
+{
+  "id": "BABunjhEF6aiM3Gu",
+  "name": "Varsel-digest (hver 6. time)",
+  "description": null,
+  "active": true,
+  "activeVersionId": "e560c0b6-7024-434e-a1c9-7361fcc26f3d",
+  "createdAt": "2026-11-19T18:01:24.836Z",
+  "updatedAt": "2026-11-19T18:03:38.662Z",
+  "isArchived": false,
+  "versionId": "e560c0b6-7024-434e-a1c9-7361fcc26f3d",
+  "versionCounter": 3,
+  "sourceWorkflowId": null,
+  "triggerCount": 3,
+  "nodes": [
+    {
+      "id": "d584b66c-2f5e-4aba-b5be-af2da6964549",
+      "name": "Motta varsel",
+      "webhookId": "b7f0c2a1-6d3e-4f7a-9a51-varselko0001",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "varsel-ko",
+        "responseMode": "onReceived",
+        "options": {}
+      }
+    },
+    {
+      "id": "efe24074-0229-484e-9002-b64e9d8347a4",
+      "name": "Normaliser",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        0
+      ],
+      "parameters": {
+        "jsCode": "const out = [];\nfor (const it of $input.all()) {\n  const b = it.json.body || {};\n  const q = it.json.query || {};\n  out.push({ json: {\n    title: String(b.title || 'Varsel').slice(0, 200),\n    message: String(b.message || '').slice(0, 2000),\n    kilde: String(q.kilde || b.kilde || '').slice(0, 120),\n  }});\n}\nreturn out;"
+      }
+    },
+    {
+      "id": "658b32ce-b1ec-4fae-b73e-68b8a91948fa",
+      "name": "Legg i kø",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        440,
+        0
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "insert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "n1V4Pl8EKmfMY9L6"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": null
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "0500e8f5-6027-4012-8440-c08778a7bce0",
+      "name": "Kl. 00, 06, 12, 18",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        300
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 0 0,6,12,18 * * *"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "9c81e9c7-c310-485a-aa30-64405c7bdc44",
+      "name": "Hent kø",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "alwaysOutputData": true,
+      "position": [
+        220,
+        300
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "n1V4Pl8EKmfMY9L6"
+        },
+        "matchType": "anyCondition",
+        "filters": {},
+        "returnAll": true
+      }
+    },
+    {
+      "id": "644950e2-f870-498b-a26f-0fc44f52ae72",
+      "name": "Lag sammendrag",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        300
+      ],
+      "parameters": {
+        "jsCode": "// Samler alle koede varsler til én melding (lagt til 2026-11-19).\nconst rows = $input.all().map(i => i.json).filter(r => r && r.id != null);\nif (!rows.length) return [];\nrows.sort((a, b) => a.id - b.id);\nconst fmt = d => new Intl.DateTimeFormat('nb-NO', {timeZone: 'Europe/Oslo', hour: '2-digit', minute: '2-digit'}).format(new Date(d));\nconst groups = new Map();\nfor (const r of rows) {\n  const k = r.title;\n  const g = groups.get(k) || { title: r.title, kilde: r.kilde, n: 0, first: r.createdAt, last: r.createdAt, msg: '' };\n  g.n++; g.last = r.createdAt; g.msg = r.message; groups.set(k, g);\n}\nconst list = [...groups.values()];\nconst crit = g => /kritisk|nede|down|feil|heng|failover/i.test(g.title + ' ' + g.msg) ? 0 : 1;\nlist.sort((a, b) => crit(a) - crit(b) || b.n - a.n);\nlet text = '';\nfor (const g of list) {\n  const when = g.n > 1 ? `${g.n}×, ${fmt(g.first)}–${fmt(g.last)}` : fmt(g.last);\n  const block = `• ${g.title} (${when})` + (g.msg ? `\\n  ${g.msg.replace(/\\s+/g, ' ').slice(0, 220)}` : '') + '\\n';\n  if (text.length + block.length > 3500) { text += `… og ${list.length - list.indexOf(g)} til`; break; }\n  text += block;\n}\nreturn [{ json: {\n  title: `Homelab: ${rows.length} varsel${rows.length === 1 ? '' : 'er'} (${list.length} ulike) siste 6 t`,\n  message: text.trim(),\n  maxId: rows[rows.length - 1].id,\n}}];"
+      }
+    },
+    {
+      "id": "ae4a4a15-0adc-4a03-bedd-715aa2df94d7",
+      "name": "Send til iPhone",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "alwaysOutputData": true,
+      "position": [
+        660,
+        300
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://10.0.0.7:8123/api/services/notify/mobile_app_1_iphone_r",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ title: $json.title, message: $json.message }) }}",
+        "options": {}
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "6zH1NVLTEbnYKEAF",
+          "name": "Home Assistant Bearer (n8n)"
+        }
+      }
+    },
+    {
+      "id": "e1d21c5a-bcab-47a6-b437-ac49f396c386",
+      "name": "Tøm sendte",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "executeOnce": true,
+      "position": [
+        880,
+        300
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "deleteRows",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "n1V4Pl8EKmfMY9L6"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "lte",
+              "keyValue": "={{ $('Lag sammendrag').first().json.maxId }}"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "b3ea129f-987b-445b-9bec-20f9c305458c",
+      "name": "Kjør digest nå",
+      "webhookId": "c1d2e3f4-0000-4aaa-8bbb-varseldigest1",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        500
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "varsel-digest-kjor",
+        "responseMode": "onReceived",
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Motta varsel": {
+      "main": [
+        [
+          {
+            "node": "Normaliser",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normaliser": {
+      "main": [
+        [
+          {
+            "node": "Legg i kø",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Kl. 00, 06, 12, 18": {
+      "main": [
+        [
+          {
+            "node": "Hent kø",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hent kø": {
+      "main": [
+        [
+          {
+            "node": "Lag sammendrag",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lag sammendrag": {
+      "main": [
+        [
+          {
+            "node": "Send til iPhone",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send til iPhone": {
+      "main": [
+        [
+          {
+            "node": "Tøm sendte",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Kjør digest nå": {
+      "main": [
+        [
+          {
+            "node": "Hent kø",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "nodeGroups": [],
+  "settings": {
+    "timezone": "Europe/Oslo",
+    "executionOrder": "v1"
+  },
+  "pinData": null,
+  "meta": null,
+  "tags": []
+}

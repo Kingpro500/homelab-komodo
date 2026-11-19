@@ -3,12 +3,12 @@
   "name": "Nettverksovervaakning",
   "description": "Nettverksovervaakning - timerapport og dagsrapport.",
   "active": true,
-  "activeVersionId": "4884d732-8d3f-4588-aeab-e75855c63447",
+  "activeVersionId": "6ab68ce1-961d-473f-8523-76d2fa71c106",
   "createdAt": "2026-10-05T08:31:46.440Z",
-  "updatedAt": "2026-10-25T06:20:19.668Z",
+  "updatedAt": "2026-11-19T18:04:02.204Z",
   "isArchived": false,
-  "versionId": "4884d732-8d3f-4588-aeab-e75855c63447",
-  "versionCounter": 5,
+  "versionId": "6ab68ce1-961d-473f-8523-76d2fa71c106",
+  "versionCounter": 8,
   "sourceWorkflowId": null,
   "triggerCount": 2,
   "nodes": [
@@ -107,21 +107,14 @@
       ],
       "parameters": {
         "method": "POST",
-        "url": "http://10.0.0.7:8123/api/services/notify/mobile_app_1_iphone_r",
-        "authentication": "predefinedCredentialType",
+        "url": "http://127.0.0.1:5678/webhook/varsel-ko?kilde=Nettverksovervaakning%20/%20Push%20nytt%20nettverksproblem",
+        "authentication": "none",
         "sendHeaders": true,
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ title: 'Nettverk: ' + $json.new_problems.filter(p => p.sev === 'KRITISK' || p.sev === 'ADVARSEL').length + ' nye problemer', message: $json.new_problems.filter(p => p.sev === 'KRITISK' || p.sev === 'ADVARSEL').map(p => '[' + p.sev + '] ' + p.text).join('\\n\\n') }) }}",
         "options": {
           "timeout": 30000
-        },
-        "nodeCredentialType": "homeAssistantApi"
-      },
-      "credentials": {
-        "homeAssistantApi": {
-          "id": "V3OoXYi3tIJVwD3D",
-          "name": "Home Assistant API"
         }
       }
     },
@@ -200,22 +193,41 @@
       ],
       "parameters": {
         "method": "POST",
-        "url": "http://10.0.0.7:8123/api/services/notify/mobile_app_1_iphone_r",
-        "authentication": "predefinedCredentialType",
+        "url": "http://127.0.0.1:5678/webhook/varsel-ko?kilde=Nettverksovervaakning%20/%20Push%20dagsrapport%20nettverk",
+        "authentication": "none",
         "sendHeaders": true,
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ title: $json.tittel, message: $json.rapport }) }}",
         "options": {
           "timeout": 30000
-        },
-        "nodeCredentialType": "homeAssistantApi"
-      },
-      "credentials": {
-        "homeAssistantApi": {
-          "id": "V3OoXYi3tIJVwD3D",
-          "name": "Home Assistant API"
         }
+      }
+    },
+    {
+      "id": "db5a02f0-f909-4972-9ef3-b92e3cab1828",
+      "name": "Stilleperiode 23-06 (Push nytt nettverksproblem)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        -140
+      ],
+      "parameters": {
+        "jsCode": "// Stilleperiode 23:00-05:59 Europe/Oslo (lagt til 2026-11-08). Ingen koeing.\nconst hour = Number(new Intl.DateTimeFormat('en-GB', {timeZone: 'Europe/Oslo', hour: '2-digit', hourCycle: 'h23'}).format(new Date()));\nif (hour >= 23 || hour < 6) return [];\nreturn $input.all();"
+      }
+    },
+    {
+      "id": "2aa06a32-298c-4261-8064-b6dd484cf29a",
+      "name": "Stilleperiode 23-06 (Push dagsrapport nettverk)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        20,
+        280
+      ],
+      "parameters": {
+        "jsCode": "// Stilleperiode 23:00-05:59 Europe/Oslo (lagt til 2026-11-08). Ingen koeing.\nconst hour = Number(new Intl.DateTimeFormat('en-GB', {timeZone: 'Europe/Oslo', hour: '2-digit', hourCycle: 'h23'}).format(new Date()));\nif (hour >= 23 || hour < 6) return [];\nreturn $input.all();"
       }
     }
   ],
@@ -246,7 +258,7 @@
       "main": [
         [
           {
-            "node": "Push nytt nettverksproblem",
+            "node": "Stilleperiode 23-06 (Push nytt nettverksproblem)",
             "type": "main",
             "index": 0
           }
@@ -279,6 +291,28 @@
       "main": [
         [
           {
+            "node": "Stilleperiode 23-06 (Push dagsrapport nettverk)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Stilleperiode 23-06 (Push nytt nettverksproblem)": {
+      "main": [
+        [
+          {
+            "node": "Push nytt nettverksproblem",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Stilleperiode 23-06 (Push dagsrapport nettverk)": {
+      "main": [
+        [
+          {
             "node": "Push dagsrapport nettverk",
             "type": "main",
             "index": 0
@@ -291,342 +325,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "staticData": {
-    "node:Hver time": {
-      "recurrenceRules": [
-        null
-      ],
-      "recurrenceRuleSignatures": [
-        null
-      ]
-    },
-    "node:Hver dag 08:00": {
-      "recurrenceRules": [
-        null
-      ],
-      "recurrenceRuleSignatures": [
-        null
-      ]
-    }
-  },
   "pinData": null,
   "meta": null,
-  "tags": [],
-  "shared": [
-    {
-      "role": "workflow:owner",
-      "workflowId": "zu6Tg91HWtUaHI2M",
-      "projectId": "KXT1M3IDP7uzR2Xe",
-      "project": {
-        "id": "KXT1M3IDP7uzR2Xe",
-        "name": "Roger Lillefosse <rogerlillefosse@gmail.com>",
-        "type": "personal",
-        "icon": null,
-        "description": null,
-        "customTelemetryTags": [],
-        "creatorId": "79a33b7a-6319-42bf-827e-3928073bdeb7",
-        "createdAt": "2026-10-01T05:21:05.719Z",
-        "updatedAt": "2026-10-01T08:58:31.958Z"
-      },
-      "createdAt": "2026-10-05T08:31:46.440Z",
-      "updatedAt": "2026-10-05T08:31:46.440Z"
-    }
-  ],
-  "activeVersion": {
-    "versionId": "4884d732-8d3f-4588-aeab-e75855c63447",
-    "workflowId": "zu6Tg91HWtUaHI2M",
-    "nodes": [
-      {
-        "id": "34eaba4d-a539-490f-b250-b1106d19a9c3",
-        "name": "Hver time",
-        "type": "n8n-nodes-base.scheduleTrigger",
-        "typeVersion": 1.2,
-        "position": [
-          -240,
-          -200
-        ],
-        "parameters": {
-          "rule": {
-            "interval": [
-              {
-                "field": "hours",
-                "triggerAtMinute": 5
-              }
-            ]
-          }
-        }
-      },
-      {
-        "id": "bcbdb39c-7598-401f-b97e-d3185d6e8495",
-        "name": "Hent nettverksstatus",
-        "type": "n8n-nodes-base.httpRequest",
-        "typeVersion": 4.2,
-        "position": [
-          0,
-          0
-        ],
-        "parameters": {
-          "url": "http://10.0.0.135:9118/network/status",
-          "authentication": "predefinedCredentialType",
-          "options": {
-            "timeout": 90000,
-            "response": {
-              "response": {
-                "responseFormat": "json"
-              }
-            }
-          },
-          "sendHeaders": true,
-          "nodeCredentialType": "httpHeaderAuth"
-        },
-        "credentials": {
-          "httpHeaderAuth": {
-            "id": "TcgXN7shgc4X7U8w",
-            "name": "Homelab Audit Header"
-          }
-        }
-      },
-      {
-        "id": "f69184e5-6548-4b30-89a8-fe3153a4d094",
-        "name": "Er det nye problemer?",
-        "type": "n8n-nodes-base.if",
-        "typeVersion": 2.2,
-        "position": [
-          -20,
-          -200
-        ],
-        "parameters": {
-          "conditions": {
-            "options": {
-              "caseSensitive": true,
-              "leftValue": "",
-              "typeValidation": "loose",
-              "version": 2
-            },
-            "conditions": [
-              {
-                "id": "c-sev",
-                "leftValue": "={{ $json.new_problems.some(p => p.sev === 'KRITISK' || p.sev === 'ADVARSEL') }}",
-                "rightValue": "",
-                "operator": {
-                  "type": "boolean",
-                  "operation": "true",
-                  "singleValue": true
-                }
-              }
-            ],
-            "combinator": "and"
-          },
-          "options": {}
-        }
-      },
-      {
-        "id": "f4053967-d426-4972-93aa-7e36cfc59b59",
-        "name": "Push nytt nettverksproblem",
-        "type": "n8n-nodes-base.httpRequest",
-        "typeVersion": 4.2,
-        "position": [
-          200,
-          -260
-        ],
-        "parameters": {
-          "method": "POST",
-          "url": "http://10.0.0.7:8123/api/services/notify/mobile_app_1_iphone_r",
-          "authentication": "predefinedCredentialType",
-          "sendHeaders": true,
-          "sendBody": true,
-          "specifyBody": "json",
-          "jsonBody": "={{ JSON.stringify({ title: 'Nettverk: ' + $json.new_problems.filter(p => p.sev === 'KRITISK' || p.sev === 'ADVARSEL').length + ' nye problemer', message: $json.new_problems.filter(p => p.sev === 'KRITISK' || p.sev === 'ADVARSEL').map(p => '[' + p.sev + '] ' + p.text).join('\\n\\n') }) }}",
-          "options": {
-            "timeout": 30000
-          },
-          "nodeCredentialType": "homeAssistantApi"
-        },
-        "credentials": {
-          "homeAssistantApi": {
-            "id": "V3OoXYi3tIJVwD3D",
-            "name": "Home Assistant API"
-          }
-        }
-      },
-      {
-        "id": "183f33e6-912e-4e91-8610-1d369906e5e0",
-        "name": "Hver dag 08:00",
-        "type": "n8n-nodes-base.scheduleTrigger",
-        "typeVersion": 1.2,
-        "position": [
-          -240,
-          160
-        ],
-        "parameters": {
-          "rule": {
-            "interval": [
-              {
-                "field": "days",
-                "triggerAtHour": 8,
-                "triggerAtMinute": 0
-              }
-            ]
-          }
-        }
-      },
-      {
-        "id": "0ba6601f-1752-49bc-a4b6-55499b38c266",
-        "name": "Hent full nettverksrapport",
-        "type": "n8n-nodes-base.httpRequest",
-        "typeVersion": 4.2,
-        "position": [
-          0,
-          0
-        ],
-        "parameters": {
-          "url": "http://10.0.0.135:9118/network",
-          "authentication": "predefinedCredentialType",
-          "options": {
-            "timeout": 90000,
-            "response": {
-              "response": {
-                "responseFormat": "json"
-              }
-            }
-          },
-          "sendHeaders": true,
-          "nodeCredentialType": "httpHeaderAuth"
-        },
-        "credentials": {
-          "httpHeaderAuth": {
-            "id": "TcgXN7shgc4X7U8w",
-            "name": "Homelab Audit Header"
-          }
-        }
-      },
-      {
-        "id": "9f04554a-d5cf-4e8d-ad72-14be642be1dd",
-        "name": "Formater rapport",
-        "type": "n8n-nodes-base.code",
-        "typeVersion": 2,
-        "position": [
-          -20,
-          160
-        ],
-        "parameters": {
-          "jsCode": "const d = $json;\nconst lan = d.lan || {};\nconst wan = d.wan || {};\nconst flaps = lan.flaps_24h || {};\nlet m = 'Tjenester: ' + d.services_up + '/' + d.services_total + '\\n';\nm += 'WAN: ' + (wan.wan_outages_1h || 0) + ' hopp siste time, '\n     + Math.round(wan.wan_downtime_s_1h || 0) + ' sek nede\\n';\nm += 'LAN: ' + (lan.hosts || 0) + ' enheter';\nif (lan.conflicts && Object.keys(lan.conflicts).length) {\n  m += ', ' + Object.keys(lan.conflicts).length + ' ARP-konflikt'; }\nm += '\\nFysiske hopp siste døgn: '\n     + (Object.keys(flaps).length ? Object.entries(flaps).map(([k,v]) => k + '=' + v).join(', ') : 'ingen') + '\\n';\nm += 'WAN-flaps siste doegn (klokketime): '\n     + (lan.flaps_hour_24h && lan.flaps_hour_24h.length ? lan.flaps_hour_24h.join('  ') : 'ingen') + '\\n';\nm += 'Port-counters (CRC/drops): ikke tilgjengelig via OPNsense-API\\n';\nif (d.services_down && d.services_down.length) {\n  m += '\\nNede: ' + d.services_down.join(', ') + '\\n'; }\nif (d.problems && d.problems.length) {\n  m += '\\nAktive problemer:\\n' + d.problems.map(p => '- [' + p.sev + '] ' + p.text).join('\\n') + '\\n'; }\nelse { m += '\\nIngen aktive problemer.\\n'; }\nreturn [{ json: { tittel: d.all_clear ? 'Nettverk: alt OK' : 'Nettverk: ' + d.problems.length + ' problemer', rapport: m } }];"
-        }
-      },
-      {
-        "id": "75595220-9ea1-40d4-8fe1-9f84f75f97ec",
-        "name": "Push dagsrapport nettverk",
-        "type": "n8n-nodes-base.httpRequest",
-        "typeVersion": 4.2,
-        "position": [
-          220,
-          160
-        ],
-        "parameters": {
-          "method": "POST",
-          "url": "http://10.0.0.7:8123/api/services/notify/mobile_app_1_iphone_r",
-          "authentication": "predefinedCredentialType",
-          "sendHeaders": true,
-          "sendBody": true,
-          "specifyBody": "json",
-          "jsonBody": "={{ JSON.stringify({ title: $json.tittel, message: $json.rapport }) }}",
-          "options": {
-            "timeout": 30000
-          },
-          "nodeCredentialType": "homeAssistantApi"
-        },
-        "credentials": {
-          "homeAssistantApi": {
-            "id": "V3OoXYi3tIJVwD3D",
-            "name": "Home Assistant API"
-          }
-        }
-      }
-    ],
-    "connections": {
-      "Hver time": {
-        "main": [
-          [
-            {
-              "node": "Hent nettverksstatus",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Hent nettverksstatus": {
-        "main": [
-          [
-            {
-              "node": "Er det nye problemer?",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Er det nye problemer?": {
-        "main": [
-          [
-            {
-              "node": "Push nytt nettverksproblem",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Hver dag 08:00": {
-        "main": [
-          [
-            {
-              "node": "Hent full nettverksrapport",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Hent full nettverksrapport": {
-        "main": [
-          [
-            {
-              "node": "Formater rapport",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Formater rapport": {
-        "main": [
-          [
-            {
-              "node": "Push dagsrapport nettverk",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      }
-    },
-    "nodeGroups": [],
-    "authors": "Roger Lillefosse",
-    "name": null,
-    "description": null,
-    "autosaved": false,
-    "createdAt": "2026-10-25T06:20:19.670Z",
-    "updatedAt": "2026-10-25T06:20:19.670Z",
-    "workflowPublishHistory": [
-      {
-        "id": 127,
-        "workflowId": "zu6Tg91HWtUaHI2M",
-        "versionId": "4884d732-8d3f-4588-aeab-e75855c63447",
-        "event": "activated",
-        "userId": "79a33b7a-6319-42bf-827e-3928073bdeb7",
-        "createdAt": "2026-10-25T06:20:19.706Z"
-      }
-    ]
-  }
+  "tags": []
 }

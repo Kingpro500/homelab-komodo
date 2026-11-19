@@ -13,7 +13,9 @@ pc6, pc7, pc8, pc9 og 1.1.1.1, pluss pakkerate, kringkasting/multicast (talt dir
 USB-driveren teller ikke multicast), feil, drops og link. De siste 30 s holdes i minnet.
 
 **Blaff** = minst 2 mål borte i 2 s, OPNsense/internett borte i 2 s, linkendring, eller
-kringkasting > 8× normalt (min. 3000 pps) / pakkerate > 10× normalt (min. 50 000 pps).
+kringkasting > 8× normalt (min. 3000 pps), eller pakkerate > 10× normalt (min. 50 000 pps) sammenhengende i
+`RATE_SUSTAIN` s (standard 60). Kortere pakkeskurer uten tap er normal trafikk, f.eks. MySpeed-testen i CT120 hver time
+(~15–25 s per retning); de ga falsk «Nettverksblaff» hver time fram til 19. nov 2026.
 Da startes et 20 s opptak av kringkasting/multicast/ARP, og når blaffet er over (10 s uten utløser)
 + 30 s etter, skrives rapporten.
 

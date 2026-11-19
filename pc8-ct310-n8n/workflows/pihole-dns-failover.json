@@ -1,9 +1,19 @@
 {
-  "name": "Pi-hole DNS failover",
   "id": "d8c564c5-3e89-4fba-9e3c-4ba2e51a3f37",
-  "description": "EKSPORTERT UTEN HEMMELIGHETER. Bytt REDACTED_AUDIT_TOKEN og REDACTED_HASS_TOKEN ved import. Hermes gjør DNS-testene og den begrensede Kea-endringen.",
+  "name": "Pi-hole DNS failover",
+  "description": "EKSPORTERT UTEN HEMMELIGHETER. Bytt e92b188aafdb10c77ef1f09337551d2b7b3bda115e085365 og eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI2ZWU2MzlmMWUxM2I0NGJiOTNiNTcyYjBhZWJiYTJiNyIsImlhdCI6MTc5MTA2MDM3OSwiZXhwIjoyMTA2NDIwMzc5fQ.HMnoqjP9Lrfd1JewhlrtcjwECsdVUnaCckr_fUqITFA ved import. Hermes gjør DNS-testene og den begrensede Kea-endringen.",
+  "active": true,
+  "activeVersionId": "3b2e3e24-3d7b-4f25-9aeb-3d1eebce98cf",
+  "createdAt": "2026-10-05T21:53:08.529Z",
+  "updatedAt": "2026-11-19T18:04:01.361Z",
+  "isArchived": false,
+  "versionId": "3b2e3e24-3d7b-4f25-9aeb-3d1eebce98cf",
+  "versionCounter": 5,
+  "sourceWorkflowId": null,
+  "triggerCount": 1,
   "nodes": [
     {
+      "id": "3563134c-2ff4-48f9-80fb-e3f540baf6f9",
       "name": "Hvert minutt",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
@@ -23,6 +33,7 @@
       }
     },
     {
+      "id": "612e0ded-04a6-4bcf-b948-9873c37f263a",
       "name": "Sjekk og avstem DNS",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -33,16 +44,8 @@
       "parameters": {
         "method": "POST",
         "url": "http://10.0.0.135:9118/dns/reconcile",
-        "authentication": "none",
+        "authentication": "predefinedCredentialType",
         "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "X-Audit-Token",
-              "value": "REDACTED_LEGACY_CREDENTIAL"
-            }
-          ]
-        },
         "options": {
           "timeout": 30000,
           "response": {
@@ -50,10 +53,18 @@
               "responseFormat": "json"
             }
           }
+        },
+        "nodeCredentialType": "httpHeaderAuth"
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "TcgXN7shgc4X7U8w",
+          "name": "Homelab Audit Header"
         }
       }
     },
     {
+      "id": "800d41cd-b3de-4cd0-a16a-f046585440e0",
       "name": "Er det en overgang eller feil?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
@@ -87,6 +98,7 @@
       }
     },
     {
+      "id": "1151aa81-9132-403b-8572-bc8e7b4fd72e",
       "name": "Formater DNS-varsel",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -99,6 +111,7 @@
       }
     },
     {
+      "id": "9cae7b2f-424b-4364-ac40-4bd501341a66",
       "name": "Push DNS-varsel",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
@@ -108,27 +121,28 @@
       ],
       "parameters": {
         "method": "POST",
-        "url": "http://10.0.0.7:8123/api/services/notify/mobile_app_1_iphone_r",
+        "url": "http://127.0.0.1:5678/webhook/varsel-ko?kilde=Pi-hole%20DNS%20failover%20/%20Push%20DNS-varsel",
         "authentication": "none",
         "sendHeaders": true,
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ title: $json.title, message: $json.message }) }}",
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Authorization",
-              "value": "REDACTED_LEGACY_CREDENTIAL"
-            },
-            {
-              "name": "Content-Type",
-              "value": "application/json"
-            }
-          ]
-        },
         "options": {
           "timeout": 30000
         }
+      }
+    },
+    {
+      "id": "ca28263a-336f-402a-97d2-01ac6b39844e",
+      "name": "Stilleperiode 23-06 (Push DNS-varsel)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        320,
+        20
+      ],
+      "parameters": {
+        "jsCode": "// Stilleperiode 23:00-05:59 Europe/Oslo (lagt til 2026-11-08). Ingen koeing.\nconst hour = Number(new Intl.DateTimeFormat('en-GB', {timeZone: 'Europe/Oslo', hour: '2-digit', hourCycle: 'h23'}).format(new Date()));\nif (hour >= 23 || hour < 6) return [];\nreturn $input.all();"
       }
     }
   ],
@@ -171,6 +185,17 @@
       "main": [
         [
           {
+            "node": "Stilleperiode 23-06 (Push DNS-varsel)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Stilleperiode 23-06 (Push DNS-varsel)": {
+      "main": [
+        [
+          {
             "node": "Push DNS-varsel",
             "type": "main",
             "index": 0
@@ -179,8 +204,11 @@
       ]
     }
   },
-  "active": false,
+  "nodeGroups": [],
   "settings": {
     "executionOrder": "v1"
-  }
+  },
+  "pinData": null,
+  "meta": null,
+  "tags": []
 }

@@ -1,5 +1,16 @@
 {
+  "id": "x7ZcV5d4KUuL5z3V",
   "name": "Emby backup-mount vakt",
+  "description": null,
+  "active": true,
+  "activeVersionId": "75fba9b2-c15d-4009-9b1b-6ba88799c35e",
+  "createdAt": "2026-11-13T06:02:49.296Z",
+  "updatedAt": "2026-11-19T18:04:02.039Z",
+  "isArchived": false,
+  "versionId": "75fba9b2-c15d-4009-9b1b-6ba88799c35e",
+  "versionCounter": 3,
+  "sourceWorkflowId": null,
+  "triggerCount": 1,
   "nodes": [
     {
       "id": "7c2b83b8-33d2-4dc8-9ba5-5d6fd26e173a",
@@ -26,14 +37,14 @@
       "name": "Sjekk Tower NFS og Emby-avhengighet",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [
-        240,
-        300
-      ],
       "retryOnFail": true,
       "maxTries": 2,
       "waitBetweenTries": 5000,
       "onError": "continueRegularOutput",
+      "position": [
+        240,
+        300
+      ],
       "parameters": {
         "url": "http://10.0.0.135:9118/media/check",
         "method": "POST",
@@ -71,29 +82,22 @@
       "name": "Varsle",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
       "position": [
         800,
         300
       ],
-      "retryOnFail": true,
-      "maxTries": 3,
-      "waitBetweenTries": 5000,
       "parameters": {
-        "url": "http://10.0.0.135:9118/notify",
+        "url": "http://127.0.0.1:5678/webhook/varsel-ko?kilde=Emby%20backup-mount%20vakt%20/%20Varsle",
         "method": "POST",
-        "authentication": "predefinedCredentialType",
+        "authentication": "none",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({title:$json.title,message:$json.message}) }}",
         "options": {
           "timeout": 30000
-        },
-        "nodeCredentialType": "httpHeaderAuth"
-      },
-      "credentials": {
-        "httpHeaderAuth": {
-          "id": "TcgXN7shgc4X7U8w",
-          "name": "Homelab Audit Header"
         }
       }
     }
@@ -133,10 +137,14 @@
       ]
     }
   },
+  "nodeGroups": [],
   "settings": {
-    "executionOrder": "v1",
     "saveDataErrorExecution": "all",
     "saveDataSuccessExecution": "all",
-    "executionTimeout": 600
-  }
+    "executionTimeout": 600,
+    "executionOrder": "v1"
+  },
+  "pinData": null,
+  "meta": null,
+  "tags": []
 }
