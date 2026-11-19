@@ -1,6 +1,16 @@
 {
+  "id": "O3FZ7CxnsEWGRfcZ",
   "name": "Lagring - full-fremskrivning",
   "description": null,
+  "active": true,
+  "activeVersionId": "b3aa4df4-77df-4287-9c39-b311df8fc9dc",
+  "createdAt": "2026-10-06T04:52:18.310Z",
+  "updatedAt": "2026-11-19T18:04:00.785Z",
+  "isArchived": false,
+  "versionId": "b3aa4df4-77df-4287-9c39-b311df8fc9dc",
+  "versionCounter": 4,
+  "sourceWorkflowId": null,
+  "triggerCount": 1,
   "nodes": [
     {
       "id": "7e65c83b-a968-4804-8bd3-7ece009b1093",
@@ -35,7 +45,7 @@
       "parameters": {
         "method": "GET",
         "url": "http://10.0.0.135:9118/storage",
-        "authentication": "none",
+        "authentication": "predefinedCredentialType",
         "options": {
           "timeout": 60000,
           "response": {
@@ -45,13 +55,12 @@
           }
         },
         "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "X-Audit-Token",
-              "value": "REDACTED_LEGACY_CREDENTIAL"
-            }
-          ]
+        "nodeCredentialType": "httpHeaderAuth"
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "TcgXN7shgc4X7U8w",
+          "name": "Homelab Audit Header"
         }
       }
     },
@@ -112,7 +121,7 @@
       ],
       "parameters": {
         "method": "POST",
-        "url": "http://10.0.0.7:8123/api/services/notify/mobile_app_1_iphone_r",
+        "url": "http://127.0.0.1:5678/webhook/varsel-ko?kilde=Lagring%20-%20full-fremskrivning%20/%20Varsle%20iPhone",
         "authentication": "none",
         "sendHeaders": true,
         "sendBody": true,
@@ -120,18 +129,6 @@
         "jsonBody": "={{ JSON.stringify({ title: 'Lagring: ' + $json.alerts.length + ' volum paa vei til aa fylles', message: $json.alerts.map(a => a.name + ': ' + a.used_pct + '% brukt, full om ~' + a.days_to_full + ' d (' + a.rate_per_day + ' %/dag)').join('\\n') }) }}",
         "options": {
           "timeout": 30000
-        },
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Authorization",
-              "value": "REDACTED_LEGACY_CREDENTIAL"
-            },
-            {
-              "name": "Content-Type",
-              "value": "application/json"
-            }
-          ]
         }
       }
     }
@@ -182,11 +179,14 @@
       ]
     }
   },
+  "nodeGroups": [],
   "settings": {
     "saveExecutionProgress": true,
     "saveManualExecutions": true,
     "executionOrder": "v1",
     "availableInMCP": false
   },
-  "parentFolder": null
+  "pinData": null,
+  "meta": null,
+  "tags": []
 }

@@ -28,6 +28,7 @@ PRE, POST, END_CLEAR, MAX_EVENT = (int(os.environ.get(k, d)) for k, d in
 N8N_EVENTS = os.environ.get("N8N_EVENTS", "http://10.0.0.119:5678/webhook/events")
 N8N_ALERT = os.environ.get("N8N_ALERT", "http://10.0.0.119:5678/webhook/homelab-alerts")
 ALERT = os.environ.get("ALERT", "0") == "1"
+RATE_SUSTAIN = int(os.environ.get("RATE_SUSTAIN", "60"))  # sekunder med høy pakkerate før det regnes som blaff
 LOGDIR, SPOOL = "/var/log/blaff", "/var/lib/blaff/spool"
 KEEP_DAYS = 30
 os.makedirs(LOGDIR, exist_ok=True); os.makedirs(SPOOL, exist_ok=True)
@@ -151,7 +152,7 @@ def main():
     stat_mc = lambda: MC[0]  # noqa: E731
     prev = {k: stat(k) for k in ("rx_packets", "tx_packets", "rx_errors", "rx_dropped")}; prev["multicast"] = stat_mc()
     prev_t, prev_car = time.time(), carrier()
-    event = None; post_left = 0; clear_for = 0; last_spool = 0; last_clean = 0
+    event = None; post_left = 0; clear_for = 0; last_spool = 0; last_clean = 0; high_rx_for = 0
     while True:
         t0 = time.time()
         rtt = ping_all()
@@ -169,13 +170,20 @@ def main():
              "rtt_ms": {k: v for k, v in rtt.items() if v is not None}}
         mc_med = statistics.median(base_mc) if base_mc else 0
         rx_med = statistics.median(base_rx) if base_rx else 0
-        storm = len(base_mc) > 60 and (s["mc_pps"] > max(3000, 8 * mc_med) or s["rx_pps"] > max(50000, 10 * rx_med))
+        ready = len(base_mc) > 60
+        storm = ready and s["mc_pps"] > max(3000, 8 * mc_med)
+        # Høy pakkerate alene er ofte en planlagt hastighetstest (MySpeed i CT120 hver time, ~15-25 s per
+        # retning, uten tap). En sløyfe/flom varer til noen griper inn, så pakkerate teller først etter
+        # RATE_SUSTAIN sekunder sammenhengende (rettet 2026-11-19: ga falsk «Nettverksblaff» hver time).
+        high_rx_for = high_rx_for + 1 if ready and s["rx_pps"] > max(50000, 10 * rx_med) else 0
+        flood = high_rx_for >= RATE_SUSTAIN
         lost2 = [n for n in TARGETS if fail[n] >= 2]
         trigger = []
         if len(lost2) >= 2: trigger.append("%d mål borte" % len(lost2))
         if CORE & set(lost2): trigger.append("OPNsense/internett borte")
         if car != prev_car: trigger.append("link %s" % ("opp" if car else "NED"))
         if storm: trigger.append("kringkastingsstorm %d pps" % s["mc_pps"])
+        if flood: trigger.append("pakkerate %d pps i %d s" % (s["rx_pps"], high_rx_for))
         prev_car = car
 
         if event is None:

@@ -65,6 +65,8 @@ running service.
 | Nettverkskart-vakt | daglig 08:30 | [docs/nettverkskart-vakt.md](docs/nettverkskart-vakt.md) | [workflows/nettverkskart-vakt.json](workflows/nettverkskart-vakt.json) |
 | Tjenestenavn og kartdrift – delegert diagnose | daglig 08:45 + webhook | [docs/tjenestenavn-kartdrift-delegert.md](docs/tjenestenavn-kartdrift-delegert.md) | [workflows/tjenestenavn-kartdrift-delegert.json](workflows/tjenestenavn-kartdrift-delegert.json) |
 | Podgrab minnevakt | hvert 10. minutt | [docs/podgrab-minnevakt.md](docs/podgrab-minnevakt.md) | [workflows/podgrab-minnevakt.json](workflows/podgrab-minnevakt.json) |
+| **Varsel-digest (hver 6. time)** – alle push-varsler samles her | kl. 00/06/12/18 + webhook `varsel-ko` | [docs/varsel-digest.md](docs/varsel-digest.md) | [workflows/varsel-digest.json](workflows/varsel-digest.json) |
+| Pinchflat – tilgjengelighetsvakt | hvert 5. minutt | [docs/pinchflat-tilgjengelighetsvakt.md](docs/pinchflat-tilgjengelighetsvakt.md) | [workflows/pinchflat-tilgjengelighetsvakt.json](workflows/pinchflat-tilgjengelighetsvakt.json) |
 
 Driftsprinsipper for hvordan n8n-automasjoner bygges, sikres og gjenopprettes
 er samlet i [docs/operations/n8n-workflows.md](../docs/operations/n8n-workflows.md).

@@ -1,5 +1,16 @@
 {
+  "id": "tower-media-nfs-health-repair",
   "name": "Media health - deep probes and guarded recovery",
+  "description": "Sjekker og reparerer Tower-media NFS hvert 5. min; varsler iPhone ved reparasjon.",
+  "active": true,
+  "activeVersionId": "9d4f6b92-f0b0-42b2-a909-37f7956565ce",
+  "createdAt": "2026-10-05T18:11:17.291Z",
+  "updatedAt": "2026-11-19T18:04:01.869Z",
+  "isArchived": false,
+  "versionId": "9d4f6b92-f0b0-42b2-a909-37f7956565ce",
+  "versionCounter": 12,
+  "sourceWorkflowId": null,
+  "triggerCount": 1,
   "nodes": [
     {
       "id": "d9dcd2e1-55bd-40a4-9f0b-04b858d7c6cd",
@@ -37,25 +48,20 @@
       "parameters": {
         "url": "http://10.0.0.135:9118/media/check",
         "method": "POST",
-        "authentication": "none",
+        "authentication": "predefinedCredentialType",
         "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "X-Audit-Token",
-              "value": "REDACTED_LEGACY_CREDENTIAL"
-            },
-            {
-              "name": "Content-Type",
-              "value": "application/json"
-            }
-          ]
-        },
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={}",
         "options": {
           "timeout": 590000
+        },
+        "nodeCredentialType": "httpHeaderAuth"
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "TcgXN7shgc4X7U8w",
+          "name": "Homelab Audit Header"
         }
       }
     },
@@ -86,22 +92,10 @@
         300
       ],
       "parameters": {
-        "url": "http://10.0.0.135:9118/notify",
+        "url": "http://127.0.0.1:5678/webhook/varsel-ko?kilde=Media%20health%20-%20deep%20probes%20and%20guarded%20recovery%20/%20Notify%20through%20global%20hourly%20throttle",
         "method": "POST",
         "authentication": "none",
         "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "X-Audit-Token",
-              "value": "REDACTED_LEGACY_CREDENTIAL"
-            },
-            {
-              "name": "Content-Type",
-              "value": "application/json"
-            }
-          ]
-        },
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({title:$json.title,message:$json.message}) }}",
@@ -146,10 +140,14 @@
       ]
     }
   },
+  "nodeGroups": [],
   "settings": {
     "executionOrder": "v1",
     "saveDataErrorExecution": "all",
     "saveDataSuccessExecution": "all",
     "executionTimeout": 600
-  }
+  },
+  "pinData": null,
+  "meta": null,
+  "tags": []
 }

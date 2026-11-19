@@ -1,0 +1,103 @@
+{
+  "id": "pinchflat-health-watch",
+  "name": "Pinchflat – tilgjengelighetsvakt",
+  "description": null,
+  "active": true,
+  "activeVersionId": "2a4d0b06-b739-4935-b2b7-3e0993c5e31d",
+  "createdAt": "2026-11-15T09:44:17.075Z",
+  "updatedAt": "2026-11-19T18:05:25.461Z",
+  "isArchived": false,
+  "versionId": "2a4d0b06-b739-4935-b2b7-3e0993c5e31d",
+  "versionCounter": 2,
+  "sourceWorkflowId": null,
+  "triggerCount": 1,
+  "nodes": [
+    {
+      "id": "8c280f19-5f1f-4ee8-b5cd-5db1a503d9af",
+      "name": "Hvert femte minutt",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 5
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "c51490e7-0bb8-4b18-8c2c-37b721ab9005",
+      "name": "Sjekk Pinchflat og dedupliser",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        0
+      ],
+      "parameters": {
+        "jsCode": "const url = 'http://10.0.0.164:8945/';\nconst timeoutMs = 20000;\nconst state = $getWorkflowStaticData('global');\nlet healthy = false;\nlet detail = '';\n\ntry {\n  // fetch() finnes ikke i n8n-sandkassen (ga falske nede-varsler fra 2026-11-18); bruker n8n sin HTTP-hjelper.\n  const response = await this.helpers.httpRequest({ url, method: 'GET', timeout: timeoutMs, returnFullResponse: true, ignoreHttpStatusErrors: true });\n  healthy = response.statusCode >= 200 && response.statusCode < 400;\n  detail = `HTTP ${response.statusCode}`;\n} catch (error) {\n  detail = error instanceof Error ? error.message : String(error);\n}\n\nconst previous = state.status || 'unknown';\nstate.status = healthy ? 'up' : 'down';\nstate.last_checked_at = new Date().toISOString();\n\n// Notify only on transitions. This prevents a persistent outage from creating\n// a new event every five minutes; the shared alert workflow handles delivery.\nif (healthy && previous !== 'down') return [];\nif (!healthy && previous === 'down') return [];\n\nconst recovered = healthy;\nreturn [{\n  json: {\n    title: recovered ? 'Pinchflat er tilbake' : 'Pinchflat er utilgjengelig',\n    message: recovered\n      ? `Pinchflat svarte igjen (${detail}) – ${url}`\n      : `Pinchflat svarte ikke normalt (${detail}) – ${url}`,\n    severity: recovered ? 'info' : 'warning',\n    service: 'pinchflat',\n    status: recovered ? 'recovered' : 'down',\n    url,\n    observed_at: state.last_checked_at\n  }\n}];"
+      }
+    },
+    {
+      "id": "675d8aa2-878e-4fc6-9b71-805251d98a1e",
+      "name": "Send til felles varslingskanal",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        520,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://127.0.0.1:5678/webhook/homelab-alerts",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "timeout": 10000
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Hvert femte minutt": {
+      "main": [
+        [
+          {
+            "node": "Sjekk Pinchflat og dedupliser",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sjekk Pinchflat og dedupliser": {
+      "main": [
+        [
+          {
+            "node": "Send til felles varslingskanal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "nodeGroups": [],
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Europe/Oslo"
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "tags": []
+}

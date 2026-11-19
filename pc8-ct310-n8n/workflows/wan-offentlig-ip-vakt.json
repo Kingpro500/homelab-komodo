@@ -3,12 +3,12 @@
   "name": "WAN offentlig IP-vakt",
   "description": null,
   "active": true,
-  "activeVersionId": "14b06ad9-0b3c-46b8-bb45-32cdeb34d7d1",
+  "activeVersionId": "06782991-6917-4501-9466-dd3586ff2212",
   "createdAt": "2026-10-05T21:59:49.126Z",
-  "updatedAt": "2026-10-25T06:20:18.814Z",
+  "updatedAt": "2026-11-19T18:04:00.933Z",
   "isArchived": false,
-  "versionId": "14b06ad9-0b3c-46b8-bb45-32cdeb34d7d1",
-  "versionCounter": 2,
+  "versionId": "06782991-6917-4501-9466-dd3586ff2212",
+  "versionCounter": 5,
   "sourceWorkflowId": null,
   "triggerCount": 1,
   "nodes": [
@@ -112,22 +112,28 @@
       ],
       "parameters": {
         "method": "POST",
-        "url": "http://10.0.0.7:8123/api/services/notify/mobile_app_1_iphone_r",
-        "authentication": "predefinedCredentialType",
+        "url": "http://127.0.0.1:5678/webhook/varsel-ko?kilde=WAN%20offentlig%20IP-vakt%20/%20Varsle%20iPhone",
+        "authentication": "none",
         "sendHeaders": true,
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ title: 'WAN IP endret', message: 'Ny offentlig IP: ' + $json.ip + ' (var ' + $json.prevIp + ')' }) }}",
         "options": {
           "timeout": 30000
-        },
-        "nodeCredentialType": "homeAssistantApi"
-      },
-      "credentials": {
-        "homeAssistantApi": {
-          "id": "V3OoXYi3tIJVwD3D",
-          "name": "Home Assistant API"
         }
+      }
+    },
+    {
+      "id": "0655ff89-7c99-4cc6-afb4-5e258c8439d6",
+      "name": "Stilleperiode 23-06 (Varsle iPhone)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        520,
+        420
+      ],
+      "parameters": {
+        "jsCode": "// Stilleperiode 23:00-05:59 Europe/Oslo (lagt til 2026-11-08). Ingen koeing.\nconst hour = Number(new Intl.DateTimeFormat('en-GB', {timeZone: 'Europe/Oslo', hour: '2-digit', hourCycle: 'h23'}).format(new Date()));\nif (hour >= 23 || hour < 6) return [];\nreturn $input.all();"
       }
     }
   ],
@@ -169,6 +175,17 @@
       "main": [
         [
           {
+            "node": "Stilleperiode 23-06 (Varsle iPhone)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Stilleperiode 23-06 (Varsle iPhone)": {
+      "main": [
+        [
+          {
             "node": "Varsle iPhone",
             "type": "main",
             "index": 0
@@ -184,227 +201,7 @@
     "executionOrder": "v1",
     "availableInMCP": false
   },
-  "staticData": {
-    "node:Hver 6. time": {
-      "recurrenceRules": [
-        6
-      ],
-      "recurrenceRuleSignatures": [
-        "hours:6"
-      ]
-    },
-    "global": {
-      "lastIp": "89.10.228.222"
-    }
-  },
   "pinData": null,
   "meta": null,
-  "tags": [],
-  "shared": [
-    {
-      "role": "workflow:owner",
-      "workflowId": "TgkM1U6Fj2MW8X5G",
-      "projectId": "KXT1M3IDP7uzR2Xe",
-      "project": {
-        "id": "KXT1M3IDP7uzR2Xe",
-        "name": "Roger Lillefosse <rogerlillefosse@gmail.com>",
-        "type": "personal",
-        "icon": null,
-        "description": null,
-        "customTelemetryTags": [],
-        "creatorId": "79a33b7a-6319-42bf-827e-3928073bdeb7",
-        "createdAt": "2026-10-01T05:21:05.719Z",
-        "updatedAt": "2026-10-01T08:58:31.958Z"
-      },
-      "createdAt": "2026-10-05T21:59:49.126Z",
-      "updatedAt": "2026-10-05T21:59:49.126Z"
-    }
-  ],
-  "activeVersion": {
-    "versionId": "14b06ad9-0b3c-46b8-bb45-32cdeb34d7d1",
-    "workflowId": "TgkM1U6Fj2MW8X5G",
-    "nodes": [
-      {
-        "id": "1932db65-448a-43ba-a38b-a8b68953c29d",
-        "name": "Hver 6. time",
-        "type": "n8n-nodes-base.scheduleTrigger",
-        "typeVersion": 1.2,
-        "position": [
-          -260,
-          300
-        ],
-        "parameters": {
-          "rule": {
-            "interval": [
-              {
-                "field": "hours",
-                "hoursInterval": 6
-              }
-            ]
-          }
-        }
-      },
-      {
-        "id": "ddfcb601-deaf-4a90-8ec4-d594163dd801",
-        "name": "Hent offentlig IP",
-        "type": "n8n-nodes-base.httpRequest",
-        "typeVersion": 4.2,
-        "position": [
-          0,
-          300
-        ],
-        "parameters": {
-          "method": "GET",
-          "url": "https://api.ipify.org?format=json",
-          "authentication": "none",
-          "options": {
-            "timeout": 30000,
-            "response": {
-              "response": {
-                "responseFormat": "json"
-              }
-            }
-          }
-        }
-      },
-      {
-        "id": "4514b349-23fc-4885-9b19-080e153d2bb8",
-        "name": "Har IP-en endret seg?",
-        "type": "n8n-nodes-base.code",
-        "typeVersion": 2,
-        "position": [
-          240,
-          300
-        ],
-        "parameters": {
-          "jsCode": "const sd = $getWorkflowStaticData('global');\nconst current = String($json.ip ?? '').trim();\nconst prev = sd.lastIp;\n// changed = 1 naar IP-en faktisk har endret seg fra en kjent forrige verdi.\n// Forste kjoring (prev == undefined) gir 0: vi etablerer bare utgangspunktet.\nconst changed = (current !== '' && prev !== undefined && current !== prev) ? 1 : 0;\nsd.lastIp = current;\nreturn [{ json: { ip: current, prevIp: prev ?? null, changed } }];"
-        }
-      },
-      {
-        "id": "0de16625-281f-4f9f-ba73-0349064ab9f4",
-        "name": "Endret?",
-        "type": "n8n-nodes-base.if",
-        "typeVersion": 2.2,
-        "position": [
-          480,
-          300
-        ],
-        "parameters": {
-          "conditions": {
-            "options": {
-              "caseSensitive": true,
-              "leftValue": "",
-              "typeValidation": "loose",
-              "version": 2
-            },
-            "conditions": [
-              {
-                "id": "cond-changed",
-                "leftValue": "={{ $json.changed }}",
-                "rightValue": 0,
-                "operator": {
-                  "type": "number",
-                  "operation": "gt"
-                }
-              }
-            ],
-            "combinator": "and"
-          },
-          "options": {}
-        }
-      },
-      {
-        "id": "b84d268e-d7c4-4027-8544-748eb5acb894",
-        "name": "Varsle iPhone",
-        "type": "n8n-nodes-base.httpRequest",
-        "typeVersion": 4.2,
-        "position": [
-          720,
-          300
-        ],
-        "parameters": {
-          "method": "POST",
-          "url": "http://10.0.0.7:8123/api/services/notify/mobile_app_1_iphone_r",
-          "authentication": "predefinedCredentialType",
-          "sendHeaders": true,
-          "sendBody": true,
-          "specifyBody": "json",
-          "jsonBody": "={{ JSON.stringify({ title: 'WAN IP endret', message: 'Ny offentlig IP: ' + $json.ip + ' (var ' + $json.prevIp + ')' }) }}",
-          "options": {
-            "timeout": 30000
-          },
-          "nodeCredentialType": "homeAssistantApi"
-        },
-        "credentials": {
-          "homeAssistantApi": {
-            "id": "V3OoXYi3tIJVwD3D",
-            "name": "Home Assistant API"
-          }
-        }
-      }
-    ],
-    "connections": {
-      "Hver 6. time": {
-        "main": [
-          [
-            {
-              "node": "Hent offentlig IP",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Hent offentlig IP": {
-        "main": [
-          [
-            {
-              "node": "Har IP-en endret seg?",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Har IP-en endret seg?": {
-        "main": [
-          [
-            {
-              "node": "Endret?",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "Endret?": {
-        "main": [
-          [
-            {
-              "node": "Varsle iPhone",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      }
-    },
-    "nodeGroups": [],
-    "authors": "Roger Lillefosse",
-    "name": null,
-    "description": null,
-    "autosaved": false,
-    "createdAt": "2026-10-25T06:20:18.817Z",
-    "updatedAt": "2026-10-25T06:20:18.817Z",
-    "workflowPublishHistory": [
-      {
-        "id": 117,
-        "workflowId": "TgkM1U6Fj2MW8X5G",
-        "versionId": "14b06ad9-0b3c-46b8-bb45-32cdeb34d7d1",
-        "event": "activated",
-        "userId": "79a33b7a-6319-42bf-827e-3928073bdeb7",
-        "createdAt": "2026-10-25T06:20:18.857Z"
-      }
-    ]
-  }
+  "tags": []
 }
