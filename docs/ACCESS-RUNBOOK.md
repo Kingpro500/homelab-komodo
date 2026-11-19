@@ -122,6 +122,7 @@ vice versa.
 | CT130 Hermes | via PC6 `pct exec 130` (funn 2026-11-10: nå på pc7 — `ssh root@10.0.0.107` fra pc6, så `pct exec 130`) | Guest diagnostics; preferred path for OPNsense and UniFi monitoring | Live-verified 6 November 2026 |
 | PC9 / CT106 / CT108 | direct `codex-fleet-readonly` path where installed | Forced-command, read-only diagnostics only; no shell, Docker socket, file reads, restarts, or package management | Historically verified; re-check before claiming a current direct session |
 | PVE / CT115 | direct `codex-fleet-readonly` path where installed | Forced-command, read-only diagnostics only | Historically verified; re-check before claiming a current direct session |
+| VM100 Home Assistant OS (pc9) | via PC6 `ssh root@10.0.0.103`, then `qm guest exec 100 -- docker exec <container> …` (QEMU guest agent) | Container-level work in HA apps (Tessera/ESPHome builds, OTA, logs); prefer the HA REST API for entity changes. See [`tessera-screens-runbook.md`](tessera-screens-runbook.md) | Live-verified 19–20 November 2026 |
 | PC1 | Proxmox visibility through MCP when online | No current SSH claim; node was previously unavailable | Do not infer direct SSH access |
 | OPNsense | no SSH route documented for Codex | Use Hermes authenticated API path | API route live-verified 4 November 2026 |
 | Tower/Unraid and Windows | no active Codex SSH route documented | Planned only | Do not claim access |
@@ -478,6 +479,13 @@ Use this runbook for agent behaviour and access paths. Use the network map and
 NetBox for topology, addresses, ownership, dependencies and service state.
 Neither is a secret store. Add a link/reference here when a new management API
 or diagnostic route is introduced.
+
+## Tessera ESP32 screens (Home Assistant)
+
+Install, layout, settings, OTA flashing and troubleshooting of the Tessera touch screens
+(Stue `10.0.0.3`, Sov 2 `10.0.0.23`) are documented in
+[`tessera-screens-runbook.md`](tessera-screens-runbook.md). Tiles are changed through Home Assistant
+events (`esp_screens_*`), not through the Tessera HTTP API, which only accepts HA ingress.
 
 ## Updating this runbook
 

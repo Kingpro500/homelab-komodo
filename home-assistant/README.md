@@ -1,3 +1,5 @@
+> Tessera ESP32-skjermer (Stue, Sov 2): se [`docs/tessera-screens-runbook.md`](../docs/tessera-screens-runbook.md).
+
 # pc1 boot choice for Home Assistant
 
 Copy `pc1-boot-choice.yaml` into the Home Assistant packages/configuration setup and copy the three shell scripts into `/config/scripts/` with executable permissions. The package exposes two scripts: Windows 11 and Proxmox. Each selection sets the next UEFI boot entry on pc1 with `efibootmgr`, then reboots pc1.

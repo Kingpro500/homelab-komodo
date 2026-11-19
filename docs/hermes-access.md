@@ -37,6 +37,9 @@ Test kjørt av Hermes (bruker `hermes` på hermes-verten, uid 1000). Kun variabe
 | Browserbase | BROWSERBASE_* (kun innstillinger) | Ingen API-nøkkel i .env. Ikke brukbar |
 | OPENCODE_GO_API_KEY | | Ikke testet |
 
+## Tessera-skjermer (lagt til 2026-11-20)
+Hermes styrer flisene og innstillingene på Tessera-skjermene med `HASS_URL`/`HASS_TOKEN` (HA-hendelsene `esp_screens_*` og vanlige HA-entiteter). Bygging og OTA går gjennom VM100-ruten via pc9 (`qm guest exec 100`). Alt står i [`tessera-screens-runbook.md`](tessera-screens-runbook.md). Ikke verifisert fra Hermes selv ennå; HA-tokenet svarer 200.
+
 ## Mangler / begrensninger
 - Ingen sudo lokalt. Root er kun via SSH til Proxmox-nodene.
 - API-token kan ikke opptre som root@pam.
