@@ -150,8 +150,8 @@ noe: en oppgave får `DOM: BLOKKERT` (parkert med `trenger beslutning: …`) ell
 - `hermes_ko.py rapport --vis` skriver rapporten uten å sende den.
 
 Begge går via n8n `homelab-alerts` (vedleggsformatet `attachments: [{title, text}]`).
-n8n slipper ikke telefonvarsler gjennom 23–06 og maks ett i timen. Et beslutningsvarsel
-som faller bort der, kommer med i neste dagsrapport. Unngå ordene «new device» og
+n8n sender telefonvarsler bare i varsel-digesten kl. 06/12/18 (aldri 23–06; se `pc8-ct310-n8n/docs/varsel-digest.md`). Beslutningsvarsler
+kommer også med i neste dagsrapport. Unngå ordene «new device» og
 «ny enhet» i titler; n8n stopper slike meldinger.
 
 Ikke lag egne overvåkingsløkker (`while sleep …; hermes_ko.py get kN`) eller cron-jobber

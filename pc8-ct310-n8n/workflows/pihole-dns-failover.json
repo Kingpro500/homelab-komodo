@@ -3,12 +3,12 @@
   "name": "Pi-hole DNS failover",
   "description": "EKSPORTERT UTEN HEMMELIGHETER. Bytt e92b188aafdb10c77ef1f09337551d2b7b3bda115e085365 og eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI2ZWU2MzlmMWUxM2I0NGJiOTNiNTcyYjBhZWJiYTJiNyIsImlhdCI6MTc5MTA2MDM3OSwiZXhwIjoyMTA2NDIwMzc5fQ.HMnoqjP9Lrfd1JewhlrtcjwECsdVUnaCckr_fUqITFA ved import. Hermes gjør DNS-testene og den begrensede Kea-endringen.",
   "active": true,
-  "activeVersionId": "3b2e3e24-3d7b-4f25-9aeb-3d1eebce98cf",
+  "activeVersionId": "46b5d3fc-733c-44ef-8c89-42867d80949c",
   "createdAt": "2026-10-05T21:53:08.529Z",
-  "updatedAt": "2026-11-19T18:04:01.361Z",
+  "updatedAt": "2026-11-19T19:09:31.729Z",
   "isArchived": false,
-  "versionId": "3b2e3e24-3d7b-4f25-9aeb-3d1eebce98cf",
-  "versionCounter": 5,
+  "versionId": "46b5d3fc-733c-44ef-8c89-42867d80949c",
+  "versionCounter": 6,
   "sourceWorkflowId": null,
   "triggerCount": 1,
   "nodes": [
@@ -142,7 +142,7 @@
         20
       ],
       "parameters": {
-        "jsCode": "// Stilleperiode 23:00-05:59 Europe/Oslo (lagt til 2026-11-08). Ingen koeing.\nconst hour = Number(new Intl.DateTimeFormat('en-GB', {timeZone: 'Europe/Oslo', hour: '2-digit', hourCycle: 'h23'}).format(new Date()));\nif (hour >= 23 || hour < 6) return [];\nreturn $input.all();"
+        "jsCode": "// Stilleperiode og takt styres nå av «Varsel-digest (hver 6. time)» (kl. 06/12/18, aldri 23-06).\n// Porten slipper alt videre til køen, så nattlige hendelser kommer i 06-meldingen i stedet for å kastes (2026-11-19).\nreturn $input.all();"
       }
     }
   ],

@@ -3,12 +3,12 @@
   "name": "Nettverksovervaakning",
   "description": "Nettverksovervaakning - timerapport og dagsrapport.",
   "active": true,
-  "activeVersionId": "6ab68ce1-961d-473f-8523-76d2fa71c106",
+  "activeVersionId": "24436741-f139-40ba-bad3-09e32a82a929",
   "createdAt": "2026-10-05T08:31:46.440Z",
-  "updatedAt": "2026-11-19T18:04:02.204Z",
+  "updatedAt": "2026-11-19T19:09:31.411Z",
   "isArchived": false,
-  "versionId": "6ab68ce1-961d-473f-8523-76d2fa71c106",
-  "versionCounter": 8,
+  "versionId": "24436741-f139-40ba-bad3-09e32a82a929",
+  "versionCounter": 9,
   "sourceWorkflowId": null,
   "triggerCount": 2,
   "nodes": [
@@ -214,7 +214,7 @@
         -140
       ],
       "parameters": {
-        "jsCode": "// Stilleperiode 23:00-05:59 Europe/Oslo (lagt til 2026-11-08). Ingen koeing.\nconst hour = Number(new Intl.DateTimeFormat('en-GB', {timeZone: 'Europe/Oslo', hour: '2-digit', hourCycle: 'h23'}).format(new Date()));\nif (hour >= 23 || hour < 6) return [];\nreturn $input.all();"
+        "jsCode": "// Stilleperiode og takt styres nå av «Varsel-digest (hver 6. time)» (kl. 06/12/18, aldri 23-06).\n// Porten slipper alt videre til køen, så nattlige hendelser kommer i 06-meldingen i stedet for å kastes (2026-11-19).\nreturn $input.all();"
       }
     },
     {
@@ -227,7 +227,7 @@
         280
       ],
       "parameters": {
-        "jsCode": "// Stilleperiode 23:00-05:59 Europe/Oslo (lagt til 2026-11-08). Ingen koeing.\nconst hour = Number(new Intl.DateTimeFormat('en-GB', {timeZone: 'Europe/Oslo', hour: '2-digit', hourCycle: 'h23'}).format(new Date()));\nif (hour >= 23 || hour < 6) return [];\nreturn $input.all();"
+        "jsCode": "// Stilleperiode og takt styres nå av «Varsel-digest (hver 6. time)» (kl. 06/12/18, aldri 23-06).\n// Porten slipper alt videre til køen, så nattlige hendelser kommer i 06-meldingen i stedet for å kastes (2026-11-19).\nreturn $input.all();"
       }
     }
   ],
