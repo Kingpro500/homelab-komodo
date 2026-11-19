@@ -56,3 +56,20 @@ pct exec 172 -- docker exec pinchflat yt-dlp --cookies /config/extras/cookies.tx
 ```
 
   Note: yt-dlp may rewrite the cookie file it is given; test against a copy if in doubt.
+
+## Recovery: downloads stalled in retry backoff
+
+Oban retries failed downloads with exponential backoff (up to 20 attempts). After a
+burst of failures (e.g. the 429 period), every pending job can end up waiting hours or
+days, so nothing downloads even though the cause is fixed. Seen 19 Nov 2026: all 196
+pending download jobs were `retryable` on attempt 18–19 and only 1 was `available`.
+
+Check (read-only):
+
+```bash
+pct exec 172 -- python3 -c "import sqlite3;c=sqlite3.connect('file:/opt/pinchflat/db/pinchflat.db?mode=ro',uri=True);print(c.execute(\"select state,count(*),min(scheduled_at) from oban_jobs where worker='Pinchflat.Downloading.MediaDownloadWorker' and state in ('available','retryable','executing') group by 1\").fetchall())"
+```
+
+Fix (same effect as `Oban.retry_job/1`; save the rows first): set those jobs to
+`state='available'`, `scheduled_at=now`, `max_attempts=max(max_attempts, attempt+5)`.
+The 19 Nov backup of the rows is `/opt/pinchflat/db/oban-retryable-backup-20261119.json`.
