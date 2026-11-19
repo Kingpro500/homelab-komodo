@@ -88,6 +88,8 @@ ssh pc6 'test -f /root/claude-work/homelab-komodo/pc7-ct130-hermes/hermes-ko/REA
 
 Køen støtter `infra`, `general`, `diagnostics`, `file-read`, `network-map-read` og `inventory`. De fire siste er read-only og skal bare undersøke levende tilstand; de skal aldri skrive, deploye, restarte eller endre/publisere kartet. Lane-låsen serialiserer samme lane, mens normaliserte ressurser sperrer delte ressurser mellom lanes. Ugyldig kategori avvises uten å miste oppgaven.
 
+Feiler kontrollkommandoen i en read-only lane, gjør workeren **ikke** noe retteforsøk; oppgaven ender som `feilet` med kontrollutskriften som funn. (Før 19. nov 2026 fikk retteforsøket ingen lane-sperre, og k162 i `inventory` endret Pi-hole-DNS på CT101/CT103.)
+
 Runtime-kilden er `pc7-ct130-hermes/hermes-ko/hermes_ko.py`, installert på CT130 som `/home/hermes/.hermes/scripts/hermes_ko.py`. Aktiv n8n-workflow `hermes-ko` bruker Code-noden fra `ko-n8n.js`. Før liveoppdatering tas backup under `~/.hermes/ko/`; rollback deaktiverer de nye timerne, gjenoppretter workflow-backup og forrige GitHub-versjon, og kontrollerer låser.
 
 

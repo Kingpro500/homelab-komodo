@@ -276,7 +276,8 @@ Svar til slutt med: hva som er endret, hva du kontrollerte, og hva som ikke er g
 def p_rett(t, ut):
     return f"""{REGLER}
 
-Oppgaven «{t['tittel']}» er utført, men kontrollkommandoen feiler. Rett det innenfor oppgaven, eller rull tilbake.
+Oppgaven «{t['tittel']}» (lane {t.get('kategori')}) er utført, men kontrollkommandoen feiler. Rett det innenfor oppgaven, eller rull tilbake.
+Er lane diagnostics, file-read, network-map-read eller inventory, skal du ikke endre noe: rapporter bare.
 Kontrollkommando: {t['kontroll']}
 Utskrift:
 {ut}"""
@@ -360,7 +361,10 @@ def rapport(send=True):
 def utfor(t):
     resultat = hermes(p_utfor(t, t["forslag"]), WORKER, T_WORK)
     ok, ut = kontroll(t["kontroll"])
-    if not ok:
+    if not ok and t.get("kategori") in READ_ONLY_LANES:
+        # Read-only lane: en feilet kontroll er et funn, ikke noe workeren skal rette.
+        ko("update", id=t["id"], logg="kontrollen feilet; read-only lane, ingen retteforsøk")
+    elif not ok:
         ko("update", id=t["id"], logg="kontrollen feilet, ett retteforsøk")
         resultat += "\n\n--- retteforsøk ---\n" + hermes(p_rett(t, ut), WORKER, T_WORK)
         ok, ut = kontroll(t["kontroll"])

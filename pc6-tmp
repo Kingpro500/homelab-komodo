@@ -1,0 +1,35 @@
+import json,os,sys,urllib.request,re,time
+env={}
+for l in open(os.path.expanduser('~/.hermes/.env')):
+    if '=' in l and not l.lstrip().startswith('#'):
+        k,v=l.rstrip('\n').split('=',1); env[k.strip()]=v.strip().strip('"\'')
+U=env.get('N8N_URL','http://10.0.0.119:5678').rstrip('/'); H={'X-N8N-API-KEY':env['N8N_API_KEY'],'Content-Type':'application/json'}
+def http(p,d=None,m=None):
+    r=urllib.request.Request(U+p,data=None if d is None else json.dumps(d).encode(),headers=H,method=m or ('POST' if d is not None else 'GET'))
+    return json.load(urllib.request.urlopen(r,timeout=30))
+NAME='Tjenestenavn og kartdrift – delegert diagnose'
+ws=[w for w in http('/api/v1/workflows?limit=250')['data'] if w['name']==NAME]
+print('antall',len(ws))
+w=http('/api/v1/workflows/'+ws[0]['id'])
+print('id',w['id'],'aktiv',w['active'],'oppdatert',w.get('updatedAt'))
+repo=json.load(open(sys.argv[2]))
+rn={n['name']:n for n in repo['nodes']}
+for n in w['nodes']:
+    r=rn.get(n['name'])
+    same = r is not None and json.dumps(r.get('parameters'),sort_keys=True)==json.dumps(n.get('parameters'),sort_keys=True)
+    print(' node',n['name'],'lik repo' if same else 'ULIK')
+print('repo-noder uten live:',[k for k in rn if k not in {n['name'] for n in w['nodes']}])
+js=[n for n in w['nodes'] if n['name']=='Bygg Hermes-oppgave'][0]['parameters']['jsCode']
+print('live kontroll:',re.search(r"kontroll: ('[^']*'|\"[^\"]{0,60})",js).group(1)[:80])
+if sys.argv[1]=='put':
+    os.makedirs(os.path.expanduser('~/.hermes/ko'),exist_ok=True)
+    b=os.path.expanduser('~/.hermes/ko/n8n-backup-tjenestenavn-%s.json'%time.strftime('%Y%m%dT%H%M%SZ',time.gmtime()))
+    json.dump(w,open(b,'w'),ensure_ascii=False); print('backup',b)
+    for n in w['nodes']:
+        if n['name']=='Bygg Hermes-oppgave': n['parameters']['jsCode']=rn['Bygg Hermes-oppgave']['parameters']['jsCode']
+    body={k:w[k] for k in ('name','nodes','connections','settings') if k in w}
+    body['settings']={k:v for k,v in (body.get('settings') or {}).items() if k in ('executionOrder','timezone','saveDataErrorExecution','saveDataSuccessExecution','saveManualExecutions','saveExecutionProgress','executionTimeout','errorWorkflow','callerPolicy')}
+    r=http('/api/v1/workflows/'+w['id'],body,'PUT'); print('PUT ok, aktiv',r.get('active'),'oppdatert',r.get('updatedAt'))
+    w2=http('/api/v1/workflows/'+w['id'])
+    js2=[n for n in w2['nodes'] if n['name']=='Bygg Hermes-oppgave'][0]['parameters']['jsCode']
+    print('les-tilbake lik repo:',js2==rn['Bygg Hermes-oppgave']['parameters']['jsCode'],'aktiv',w2['active'])
