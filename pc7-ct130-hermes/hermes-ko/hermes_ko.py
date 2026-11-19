@@ -378,7 +378,8 @@ def utfor(t):
             "ferdig" if d == "GODKJENT" else "ferdig_med_merknad"
         )
     r = ko("update", id=t["id"], status=status, resultat=resultat, kontroll_ut=ut, sluttvurdering=slutt,
-           sammendrag="kontroll %s, kontrollør %s" % ("OK" if ok else "FEILET", d), logg="slutt: " + status)
+           sammendrag=("kontroll %s, kontrollør %s: %s" % ("OK" if ok else "FEILET", d, kort(slutt, 420)))[:500],
+           logg="slutt: %s\n%s" % (status, slutt[:1500]))
 
 
 def run(lane="general"):
