@@ -50,6 +50,7 @@ derfor ikke få to samtidige workers selv om timer-kall overlapper.
 | Fil | Installeres som |
 | --- | --- |
 | `hermes_ko.py` | CT130 `/home/hermes/.hermes/scripts/hermes_ko.py` (worker og CLI) |
+| `husstandard_kontroll.py` | CT130 `/home/hermes/.hermes/scripts/husstandard_kontroll.py` (kontroll for husstandard-oppgaver) |
 | `hermes_ko_store.py` | CT130 `/home/hermes/.hermes/scripts/hermes_ko_store.py` (kø-API `http://10.0.0.135:9121/queue`) |
 | `hermes-ko-store.service` | CT130 `/etc/systemd/system/`, alltid på |
 | `hermes-ko-infra-2/-3.service` / `.timer` | CT130 `/etc/systemd/system/`, plass 2 og 3 i infra |
@@ -135,6 +136,8 @@ oppgavens hendelseslogg (`events` i `~/.hermes/ko/hermes-ko.sqlite3`).
   parallelt og samme CT aldri får to oppgaver samtidig.
 - Systemd må kalle workeren med `run --lane <navn>`. Til og med 16. nov 2026 ble dette
   lest som `general` for alle lanes, så bare general-lanen hentet oppgaver (rettet i PR 285).
+
+**Husstandard-oppgaver** bruker `husstandard_kontroll.py <vmid> [--ma-kjore] [--godta-navn]` som kontroll, ikke rå `ct-ops verify`. `verify` på en stoppet CT måler ikke avvikene og gir `ok: true` – 19. nov 2026 ble CT111 (k125) stående stoppet etter en tilbakerulling, og kontrollen meldte OK. `--ma-kjore` settes når CT-en kjørte da oppgaven ble laget: den må fortsatt kjøre, og Komodo-serveren må være `Ok`. `--godta-navn` brukes når navneavvik er holdt utenfor oppgaven til Roger har bestemt; navnene skrives da ut, men stopper ikke oppgaven.
 
 ### Varsling og dagsrapport (fra 17. nov 2026)
 
