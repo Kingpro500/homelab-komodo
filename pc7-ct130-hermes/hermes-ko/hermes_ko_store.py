@@ -45,7 +45,8 @@ def connect():
     """)
     # Forslag og kontrollørens vurdering må overleve mellom forslag og utføring (godkjenning: claude).
     have = {r[1] for r in db.execute("PRAGMA table_info(tasks)")}
-    for col in ("proposal", "review"):
+    # Sluttresultatet (utførers rapport, kontrollutskrift og sluttkontrollørens begrunnelse) lagres også.
+    for col in ("proposal", "review", "result", "check_output", "final_review"):
         if col not in have:
             try:
                 db.execute("ALTER TABLE tasks ADD COLUMN %s TEXT" % col)
@@ -60,6 +61,8 @@ def row(t):
     d["godkjenning"] = d.pop("approval"); d["kategori"] = d.pop("lane"); d["ressurser"] = json.loads(d.pop("resources"))
     d["fase"] = d.pop("phase"); d["sammendrag"] = d.pop("summary"); d["tilbakemelding"] = d.pop("feedback")
     d["forslag"] = d.pop("proposal", None) or ""; d["vurdering"] = d.pop("review", None) or ""
+    d["resultat"] = d.pop("result", None) or ""; d["kontroll_ut"] = d.pop("check_output", None) or ""
+    d["sluttvurdering"] = d.pop("final_review", None) or ""
     for old, new in (("created_at","opprettet"),("updated_at","endret"),("started_at","startet")):
         d[new] = d.pop(old)
     return d
@@ -153,6 +156,8 @@ def handle(p):
         db.execute("UPDATE tasks SET status=?,summary=?,updated_at=? WHERE id=?",(status,str(summary or "")[:500],now,t["id"]))
         if p.get("forslag"): db.execute("UPDATE tasks SET proposal=? WHERE id=?",(str(p["forslag"])[:20000],t["id"]))
         if p.get("vurdering"): db.execute("UPDATE tasks SET review=? WHERE id=?",(str(p["vurdering"])[:8000],t["id"]))
+        for key, col, cap in (("resultat", "result", 20000), ("kontroll_ut", "check_output", 4000), ("sluttvurdering", "final_review", 8000)):
+            if p.get(key): db.execute("UPDATE tasks SET %s=? WHERE id=?" % col, (str(p[key])[-cap:] if key == "kontroll_ut" else str(p[key])[:cap], t["id"]))
         if status in {"ferdig","ferdig_med_merknad","feilet","parkert","venter_godkjenning"}: release(db,t["id"])
         if p.get("logg"): event(db,t["id"],p["logg"])
         return {"ok":True,"igjen":db.execute("SELECT count(*) FROM tasks WHERE status IN ('ny','godkjent','kjorer')").fetchone()[0]}

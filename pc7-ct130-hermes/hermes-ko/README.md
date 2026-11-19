@@ -175,3 +175,5 @@ SQLite sin backup-funksjon før endringer; kopier ikke filen mens tjenesten skri
   gjelder fortsatt for worker-id-er som ikke er en prosess på CT130.
 - **Ingenting blokkerer:** `parkert`, `feilet`, `venter_godkjenning` og `ferdig` slipper
   alle låser med en gang.
+
+Fra 19. nov 2026 lagrer køen også sluttresultatet: `resultat` (utførers rapport), `kontroll_ut` (siste del av kontrollutskriften) og `sluttvurdering` (sluttkontrollørens begrunnelse). `hermes_ko.py get <id>` viser dem. `sammendrag` har nå med kontrollørens begrunnelse på én linje, og hendelsen `slutt:` har med begrunnelsen.
