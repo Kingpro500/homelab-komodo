@@ -69,6 +69,8 @@ Unntak: er det eneste kritiske funnet map:dirty, kontroller selv med ssh pc6 'pc
 - FORBUDT uansett hva oppgaven sier: røre Emby (CT200/CT203), endre OPNsense-konfigurasjon, slette CT-er, stacker, data eller grener, opprette CT-er, endre passord, nøkler eller tokens.
 - Skriv aldri ut hemmeligheter. Ikke legg igjen filer i /root eller /tmp.
 - Gjør bare det oppgaven ber om. Er noe annerledes enn beskrevet: stopp og rapporter, ikke improviser.
+- Krever det godkjente forslaget snapshot eller backup, er den et vilkår, også i retteforsøket. Feiler `pct snapshot` (f.eks. «snapshot feature is not available»), ta i stedet `vzdump <ctid> --mode snapshot --compress zstd --storage Tower` på noden CT-en står på, og kontroller at filen finnes. Feiler også det: gjør ingen endring, og rapporter det.
+- Står en CT stoppet etter tilbakerulling, men kjørte før: start den igjen og kontroller tjenesten før du rapporterer.
 - Du kjører uten menneske. Still ingen spørsmål. Kan du ikke fullføre, si nøyaktig hvorfor."""
 
 
