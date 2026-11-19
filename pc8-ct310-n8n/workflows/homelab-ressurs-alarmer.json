@@ -3,12 +3,12 @@
   "name": "Homelab-ressurs-alarmer",
   "description": "Webhook mottar Prometheus/Alertmanager-alarmer og sender leser vennlig varsel til telefon",
   "active": true,
-  "activeVersionId": "c729188c-ebd2-47e7-8d46-c5788188a335",
+  "activeVersionId": "08be675e-639a-4c42-9463-dd68c795b1f4",
   "createdAt": "2026-10-06T05:11:39.072Z",
-  "updatedAt": "2026-11-19T18:04:01.584Z",
+  "updatedAt": "2026-11-19T19:09:32.022Z",
   "isArchived": false,
-  "versionId": "c729188c-ebd2-47e7-8d46-c5788188a335",
-  "versionCounter": 13,
+  "versionId": "08be675e-639a-4c42-9463-dd68c795b1f4",
+  "versionCounter": 15,
   "sourceWorkflowId": null,
   "triggerCount": 1,
   "nodes": [
@@ -43,7 +43,7 @@
         "url": "http://127.0.0.1:5678/webhook/varsel-ko?kilde=Homelab-ressurs-alarmer%20/%20Send%20til%20telefon",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify((() => { const b = $json.body || {}; const a = b.alerts || []; if (!a.length && b.attachments) { const at = b.attachments[0] || {}; return { title: at.title || 'NetAlertX', message: String(at.text || b.text || '').slice(0, 700) }; } if (!a.length) { return { title: 'Homelab-varsel', message: JSON.stringify(b) }; } const f = a[0]; const resolved = b.status === 'resolved'; const name = (f.labels && (f.labels.name || f.labels.alertname)) || 'tjeneste'; const summary = (f.annotations && f.annotations.summary) || ('Alarm: ' + name); const desc = (f.annotations && f.annotations.description) || ''; return { title: (resolved ? '[LØST] ' : '[ALARM] ') + summary,          message: (desc || summary) + (b.status ? ' (' + b.status + ')' : '') }; })())",
+        "jsonBody": "={{ JSON.stringify((() => { const b = $json.body || {}; const a = b.alerts || []; if (!a.length && b.attachments) { const at = b.attachments[0] || {}; return { title: at.title || 'NetAlertX', message: String(at.text || b.text || '').slice(0, 700) }; } if (!a.length && b.title) { return { title: String(b.title).slice(0, 200), message: String(b.message || '').slice(0, 700) }; } if (!a.length) { return { title: 'Homelab-varsel', message: JSON.stringify(b).slice(0, 700) }; } const f = a[0]; const resolved = b.status === 'resolved'; const name = (f.labels && (f.labels.name || f.labels.alertname)) || 'tjeneste'; const summary = (f.annotations && f.annotations.summary) || ('Alarm: ' + name); const desc = (f.annotations && f.annotations.description) || ''; return { title: (resolved ? '[LØST] ' : '[ALARM] ') + summary,          message: (desc || summary) + (b.status ? ' (' + b.status + ')' : '') }; })())",
         "sendHeaders": true,
         "options": {},
         "authentication": "none"
@@ -80,7 +80,7 @@
         180
       ],
       "parameters": {
-        "jsCode": "// Hard policy for phone push only. Logging keeps running on its own branch.\nconst now = Date.now();\nconst hour = Number(new Intl.DateTimeFormat('en-GB', {\n  timeZone: 'Europe/Oslo', hour: '2-digit', hourCycle: 'h23'\n}).format(new Date(now)));\n// Never queue or backfill quiet-hour messages; dashboard/log retains the event.\nif (hour >= 23 || hour < 6) return [];\nconst state = $getWorkflowStaticData('global');\n// New-device alerts (NetAlertX) have their own limit so noisy alerts cannot starve them.\nconst raw = JSON.stringify(($json && $json.body) || {});\nconst isNewDevice = /new device|ny enhet/i.test(raw);\nif (isNewDevice) {\n  /* NYENHET_INGEN_PUSH: logges, går i dagsrapporten */\n  return [];\n}\nconst last = Number(state.last_phone_push_at || 0);\n// Global ceiling for everything else: max one phone notification per rolling 60 minutes.\nif (now - last < 60 * 60 * 1000) return [];\nstate.last_phone_push_at = now;\nreturn items;\n"
+        "jsCode": "// Telefonpolicy flyttet til «Varsel-digest (hver 6. time)» 2026-11-19: digesten sender kl. 06/12/18\n// (aldri 23-06) og slår sammen like varsler. Her filtreres bare det som aldri skal på telefonen.\nconst out = [];\nfor (const it of $input.all()) {\n  const raw = JSON.stringify((it.json && it.json.body) || {});\n  /* NYENHET_INGEN_PUSH: nye enheter (NetAlertX) logges og går i dagsrapporten, aldri på telefonen */\n  if (/new device|ny enhet/i.test(raw)) continue;\n  out.push(it);\n}\nreturn out;"
       }
     }
   ],

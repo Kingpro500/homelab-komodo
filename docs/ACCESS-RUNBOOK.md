@@ -196,7 +196,7 @@ not used as a trust anchor for this diagnostic probe).
 
 n8n-arbeidsflyten **Komodo-versjonsvakt** sjekker hver dag kl. 09:20 siste release på
 GitHub (`moghtech/komodo`) mot versjonen Core kjører (`http://10.0.0.117:9120/version`) og
-sender ett push per ny versjon via `homelab-alerts` (stilletid 23–06, maks ett push i timen).
+sender ett varsel per ny versjon via `homelab-alerts`; det kommer på telefonen i neste varsel-digest (kl. 06/12/18, se `pc8-ct310-n8n/docs/varsel-digest.md`).
 
 Rekkefølge ved ny versjon (Periphery skal aldri være eldre enn Core):
 

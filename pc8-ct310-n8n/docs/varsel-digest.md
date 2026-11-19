@@ -7,7 +7,7 @@ Innført 19. nov 2026 etter ønske fra Roger: varsler skal bare komme hver 6. ti
 | Workflow | «Varsel-digest (hver 6. time)», id `BABunjhEF6aiM3Gu` |
 | Kø | n8n Data Table `varsel_ko` (id `n1V4Pl8EKmfMY9L6`, kolonner `title`, `message`, `kilde`) |
 | Inn | `POST http://127.0.0.1:5678/webhook/varsel-ko?kilde=<workflow / node>` med JSON `{title, message}` |
-| Ut | kl. 00, 06, 12 og 18 (Europe/Oslo): én melding til Home Assistant `notify.mobile_app_1_iphone_r` |
+| Ut | kl. 06, 12 og 18 (Europe/Oslo): én melding til Home Assistant `notify.mobile_app_1_iphone_r`. Aldri 23–06; det som skjer om natta kommer kl. 06 |
 | Kjør nå | `POST http://10.0.0.119:5678/webhook/varsel-digest-kjor` (sender bare hvis køen ikke er tom) |
 | Eksport | [workflows/varsel-digest.json](../workflows/varsel-digest.json) |
 
@@ -24,7 +24,15 @@ Innført 19. nov 2026 etter ønske fra Roger: varsler skal bare komme hver 6. ti
    ble sendt. Feiler sendingen, blir radene liggende til neste runde.
 4. Tom kø = ingen melding.
 
-Eksisterende stilleperiode (23–06) og timegrense i de enkelte vaktene ligger fortsatt foran køen.
+## Telefonpolicy ligger i digesten
+
+Digesten er eneste vei til telefonen, så stilletid og takt styres her. De gamle portene som *kastet*
+varsler (stilleperiode 23–06 i Nettverksovervåkning, Pi-hole DNS failover og WAN-IP, og «maks ett push
+i timen» i Homelab-ressurs-alarmer) slipper nå alt videre til køen, så ingenting går tapt. Unntak som
+beholdes: nye enheter fra NetAlertX går aldri på telefonen (logges og vises i dagsrapporten).
+
+Homelab-ressurs-alarmer bruker `title`/`message` direkte når et varsel har dem (før ble slike vist som
+«Homelab-varsel» med rå JSON).
 
 ## Nye varsler
 

@@ -16,7 +16,7 @@ Podgrab brukte ca. 3 GB RSS i CT210 (kjent lekkasje) og sendte CT210 til 96 pros
    - **restart:** forrige måling minst 70 prosent, nå under 30 prosent (OOM-kill / selvrestart).
    - **mangler:** metrikken finnes ikke i 3 kjøringer på rad (30 min).
    - **løst:** tilbake til ok etter warn/crit sender ett «tilbake til normalt».
-3. **Send via homelab-alerts** (`POST /webhook/homelab-alerts`; telefon-push følger homelab-alerts sin stilleperiode 23–06 og timegrense).
+3. **Send via homelab-alerts** (`POST /webhook/homelab-alerts`; kommer på telefonen i neste [varsel-digest](varsel-digest.md), kl. 06/12/18).
 
 ## Dedupe
 Per type (`warn`, `crit`, `restart`, `missing`) maks ett varsel per 6 timer (workflow static data). Historikk: siste 3 timer.

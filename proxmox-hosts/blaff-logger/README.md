@@ -22,7 +22,7 @@ Da startes et 20 s opptak av kringkasting/multicast/ARP, og når blaffet er over
 **Rapport:** `/var/log/blaff/<host>-<tid>.json` (varighet, utløser, mål borte i sekunder, linkbrudd,
 topprater, de 5 MAC-adressene som sendte mest kringkasting, alle målinger 30 s før/under/etter) +
 `.pcap`. Beholdes i 30 dager. Sammendrag til n8n `/webhook/events` (FerretDB-hendelseslogg,
-`type: nettverksblaff`); pc6 sender også push via `/webhook/homelab-alerts`, aldri 23–06.
+`type: nettverksblaff`); pc6 sender også varsel via `/webhook/homelab-alerts`; det havner i varsel-digesten (kl. 06/12/18, `pc8-ct310-n8n/docs/varsel-digest.md`).
 Er n8n nede (den står i boden), køes rapporten i `/var/lib/blaff/spool` og sendes senere.
 
 **Lese en rapport:** `python3 -m json.tool /var/log/blaff/<fil>.json | less`. Ved en sløyfe/storm er

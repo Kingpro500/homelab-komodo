@@ -3,12 +3,12 @@
   "name": "WAN offentlig IP-vakt",
   "description": null,
   "active": true,
-  "activeVersionId": "06782991-6917-4501-9466-dd3586ff2212",
+  "activeVersionId": "5ee30877-6027-4c9f-9615-66b0eef5b892",
   "createdAt": "2026-10-05T21:59:49.126Z",
-  "updatedAt": "2026-11-19T18:04:00.933Z",
+  "updatedAt": "2026-11-19T19:09:31.862Z",
   "isArchived": false,
-  "versionId": "06782991-6917-4501-9466-dd3586ff2212",
-  "versionCounter": 5,
+  "versionId": "5ee30877-6027-4c9f-9615-66b0eef5b892",
+  "versionCounter": 6,
   "sourceWorkflowId": null,
   "triggerCount": 1,
   "nodes": [
@@ -133,7 +133,7 @@
         420
       ],
       "parameters": {
-        "jsCode": "// Stilleperiode 23:00-05:59 Europe/Oslo (lagt til 2026-11-08). Ingen koeing.\nconst hour = Number(new Intl.DateTimeFormat('en-GB', {timeZone: 'Europe/Oslo', hour: '2-digit', hourCycle: 'h23'}).format(new Date()));\nif (hour >= 23 || hour < 6) return [];\nreturn $input.all();"
+        "jsCode": "// Stilleperiode og takt styres nå av «Varsel-digest (hver 6. time)» (kl. 06/12/18, aldri 23-06).\n// Porten slipper alt videre til køen, så nattlige hendelser kommer i 06-meldingen i stedet for å kastes (2026-11-19).\nreturn $input.all();"
       }
     }
   ],
