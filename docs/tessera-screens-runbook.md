@@ -136,6 +136,9 @@ Fremgangsmåten som ble brukt 2026-11-19 på begge Guition-skjermene:
 
 - `media_player.101_stue_spotify_rogerlillefosse` har bare `SELECT_SOURCE` når avspilling skjer på Sonos
   eller via AirPlay: Spotify Web API regner Sonos som «restricted device». Bruk Sonos-entiteten til neste/volum.
+- `script.neste_sang`: «Neste sang»-flisene (Stue side 1, 2, 5, 6) kjører dette scriptet. Har Spotify-entiteten
+  `NEXT_TRACK` (bit 32) og spiller, hoppes det via Spotify (f.eks. Spotify-appen på PC1 under gaming); ellers
+  sendes neste til `media_player.stue_arc_sonos`.
 - Spotify DJ (start eller bytt sjanger) kan ikke styres via Web API, HA, iOS-snarveier eller Sonos.
   Daily Mix og andre Spotify-eide spillelister må lagres som Sonos-favoritter for å kunne spilles fra HA.
 
