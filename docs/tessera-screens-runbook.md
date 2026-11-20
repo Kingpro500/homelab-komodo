@@ -132,6 +132,13 @@ Fremgangsmåten som ble brukt 2026-11-19 på begge Guition-skjermene:
   `https://open.spotify.com/playlist/<id>`). Brukes som «run»-fliser på Stue side 6 (musikkside).
   Favoritt-ID-ene finnes med `media_player/browse_media` på `media_player.stue_arc_sonos` (type `favorites`).
 
+- `script.spotify_volum_ned` / `script.spotify_volum_opp` (±5 %) og `sensor.spotify_volum` (template-hjelper, 0–100):
+  Stue side 2 rad 5. Virker når Spotify spiller på en styrbar enhet (PC1 = «P1W»).
+- Svart skjerm i standby: sjekk `number.<skjerm>_standby_brightness` (0 = svart) og at skjermspareren har
+  `show: true` i `/data/screensavers.json`. Fila leses bare ved oppstart: endre den og restart appen
+  (`POST http://supervisor/addons/self/restart` fra containeren). Stue: `more` = Spotify-entiteten, så cover vises
+  også når Spotify spiller fra PC1 og Arc står på TV-kilden.
+
 ### Spotify-begrensninger (verifisert 2026-11-20)
 
 - `media_player.101_stue_spotify_rogerlillefosse` har bare `SELECT_SOURCE` når avspilling skjer på Sonos
