@@ -20,9 +20,10 @@ billige ESP32-berøringsskjermer og styrer flisene på dem. Repo:
 | --- | --- | --- | --- | --- | --- |
 | Stue | Guition 4″ ESP32-S3-4848S040 | `10.0.0.3` / `1c:db:d4:76:da:34` | `stue` | 101 Stue | `101_stue_stue_` |
 | Sov 2 | Guition 4″ ESP32-S3-4848S040 | `10.0.0.23` / `28:84:85:85:fd:30` | `sov2` | 106 Sov 2 Stort | `101_stue_sov_2_` (laget før flytting av område; ID-ene er ikke endret) |
+| Stue 10 | Guition 10.1″ JC8012P4A1 (første utgave, pre-v3 P4 + C6) | `10.0.0.26` / Wi-Fi-MAC `10:20:ba:f3:c7:48` (HA-enhet `80:f1:b2:d3:95:ce`) | `stue10` | 101 Stue | `101_stue_stue_10_` |
 
 Begge er DHCP-adresser. Kartet (Gitea, `nettkart-publish`) er fasit for IP-er.
-Rutenettet er **3×5 per side og gjelder hele skjermen**. Sider kan ikke ha egne rutenett.
+Rutenettet er **3×5 per side på 4″ og 5×5 på 10.1″, og gjelder hele skjermen**. Sider kan ikke ha egne rutenett.
 Fyll en side «luftig» med `3x1`-fliser i stedet.
 
 ## Tilgangsruter
@@ -121,6 +122,22 @@ Fremgangsmåten som ble brukt 2026-11-19 på begge Guition-skjermene:
 7. Legg inn fliser med hendelsene over. Sett rotasjon, mørk modus, standby og nattlysstyrke.
    Flytt enheten til riktig HA-område (`config/device_registry/update` over WebSocket).
 8. Oppdater kartet med `nettkart-publish` (IP, MAC, navn).
+
+### Fra ESPMedia (jtenniswood/esphome-media-player) til Tessera, 10.1″ JC8012P4A1 (2026-11-21)
+
+- Finn brettet: `curl http://<ip>/text_sensor/device_profile` på ESPMedia-skjermen.
+- Velg Tessera-variant: ESPMedia bruker ESPHomes vanlige `mipi_dsi` + første LCD-tabell, som ikke starter på rev3-silisium,
+  så brettet er **første utgave** (`packages/jc8012p4a1.yaml`). Gir bildet utvasket farge med en farget strek: bytt til
+  `jc8012p4a1v2.yaml` via OTA. V3 trenger USB.
+- ESPMedia har ikke OTA-passord og bruker HAs standard partisjonstabell, så `esphome upload <navn>.yaml --device <ip>` virker.
+- HA beholder ESPMedia-oppføringen (samme MAC) og ber om reauth: fullfør flyten med `noise_psk` = ny API-nøkkel fra profilen
+  (via REST `config/config_entries/flow/<id>`, uten å skrive ut nøkkelen). Enheten heter da «Stue 10».
+- Tessera-sensoren `sensor.esp_screens_<navn>` dukker opp når første flis legges til.
+- Skjermspareren lagres per HA-device-id i `/data/screensavers.json`; kopier Stue sin oppføring og restart appen.
+- Kopi av Stue-oppsettet: les `sensor.esp_screens_stue`-flisene og send `esp_screens_add_tile` med samme
+  `page/row/column/size`. En `action` kommer ut som `{"action": "..."}` i sensoren og må sendes som streng.
+- Lysstyrke: standby og natt 40 % (lavere ser svart ut). Rotasjon kan bare være 0° eller 180°.
+- Backup av ESPMedia-tilstanden: Mac `~/Downloads/espmedia-d395ce-backup-2026-11-21.txt`, pc6 `/root/espc-backup/`.
 
 ## Hjelpere laget for skjermene
 
