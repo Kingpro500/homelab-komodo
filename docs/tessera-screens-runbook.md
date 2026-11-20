@@ -126,6 +126,18 @@ Fremgangsmåten som ble brukt 2026-11-19 på begge Guition-skjermene:
 
 - `sensor.arc_volum`: template-hjelper (UI) som viser volumet til `media_player.stue_arc_sonos` som 0–100,
   uten enhet. Brukes som `display: watch`-flis på Stue side 1.
+- `script.arc_*` (9 stk, laget via `POST /api/config/script/config/<id>`): setter Stue Arc til volum 10 %
+  og spiller en Sonos-favoritt (`media_content_type: favorite_item_id`, f.eks. `FV:2/61` = Daily Mix 1)
+  eller en Spotify-spilleliste som delingslenke (`media_content_type: playlist`,
+  `https://open.spotify.com/playlist/<id>`). Brukes som «run»-fliser på Stue side 6 (musikkside).
+  Favoritt-ID-ene finnes med `media_player/browse_media` på `media_player.stue_arc_sonos` (type `favorites`).
+
+### Spotify-begrensninger (verifisert 2026-11-20)
+
+- `media_player.101_stue_spotify_rogerlillefosse` har bare `SELECT_SOURCE` når avspilling skjer på Sonos
+  eller via AirPlay: Spotify Web API regner Sonos som «restricted device». Bruk Sonos-entiteten til neste/volum.
+- Spotify DJ (start eller bytt sjanger) kan ikke styres via Web API, HA, iOS-snarveier eller Sonos.
+  Daily Mix og andre Spotify-eide spillelister må lagres som Sonos-favoritter for å kunne spilles fra HA.
 
 ## Feilsøking
 
