@@ -59,7 +59,7 @@ scrape_configs:
       - targets: ["10.0.0.150:9121"]
     metric_relabel_configs:
       - source_labels: [__name__]
-        regex: emby_transcode_.*
+        regex: emby_(transcode|backup)_.*
         action: keep
   - job_name: tunarr-nfs-health
     scrape_interval: 30s

@@ -40,8 +40,43 @@ def sample():
         if speed is not None: result['emby_transcode_job_speed_ratio'+labels]=speed
     return result
 
+# --- Emby config backup health (added 2026-11-22) -------------------------
+# Read-only. Stale NFS handles can block, so every filesystem probe runs in a
+# subprocess with a hard timeout. The watcher on pc6 (media_recovery.py)
+# writes watch.json here after each 15-min run; Prometheus alerts on it.
+BACKUP_MNT='/var/lib/emby-backups'
+BACKUP_STATE='/var/lib/emby-backup-state'
+def backup_sample():
+    import json
+    r={}
+    try:
+        ok=subprocess.run(['timeout','5','sh','-c','mountpoint -q "$1" && ls "$1/ct200-config-snapshots" >/dev/null','x',BACKUP_MNT],
+                          capture_output=True,timeout=8).returncode==0
+    except Exception:
+        ok=False
+    r['emby_backup_mount_ok']=1 if ok else 0
+    try:
+        r['emby_backup_last_success_timestamp_seconds']=float(open(BACKUP_STATE+'/last_success').read().strip())
+    except Exception:
+        r['emby_backup_last_success_timestamp_seconds']=0
+    try:
+        failed=subprocess.run(['systemctl','is-failed','--quiet','emby-config-backup.service'],timeout=5).returncode==0
+    except Exception:
+        failed=True
+    r['emby_backup_service_failed']=1 if failed else 0
+    try:
+        w=json.load(open(BACKUP_STATE+'/watch.json'))
+        r['emby_backup_watch_last_run_timestamp_seconds']=float(w.get('at',0))
+        r['emby_backup_watch_ok']=1 if w.get('ok') else 0
+        r['emby_backup_watch_repairs_24h']=int(w.get('repairs_24h',0))
+    except Exception:
+        r['emby_backup_watch_last_run_timestamp_seconds']=0
+        r['emby_backup_watch_ok']=0
+        r['emby_backup_watch_repairs_24h']=0
+    return r
+
 def render():
-    s=sample(); out=[]
+    s=sample(); s.update(backup_sample()); out=[]
     for k,v in s.items():
         if k.startswith('#'): continue
         name=k.split('{',1)[0]

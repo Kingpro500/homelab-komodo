@@ -3,12 +3,12 @@
   "name": "Emby backup-mount vakt",
   "description": null,
   "active": true,
-  "activeVersionId": "75fba9b2-c15d-4009-9b1b-6ba88799c35e",
+  "activeVersionId": "5200dfae-855c-4e30-9600-0b04dfa52631",
   "createdAt": "2026-11-13T06:02:49.296Z",
-  "updatedAt": "2026-11-19T18:04:02.039Z",
+  "updatedAt": "2026-11-22T08:57:51.625Z",
   "isArchived": false,
-  "versionId": "75fba9b2-c15d-4009-9b1b-6ba88799c35e",
-  "versionCounter": 3,
+  "versionId": "5200dfae-855c-4e30-9600-0b04dfa52631",
+  "versionCounter": 4,
   "sourceWorkflowId": null,
   "triggerCount": 1,
   "nodes": [
@@ -74,7 +74,7 @@
         300
       ],
       "parameters": {
-        "jsCode": "const sd=$getWorkflowStaticData('global'); const x=$json; const text=JSON.stringify(x).toLowerCase(); const bad=!!x.error || x.ok===false || x.notify===true || /stale file handle|read-only file system|emby.*backup|backup.*emby|nfs/.test(text); if(!bad) return []; const fp=JSON.stringify({ok:x.ok,error:x.error,reason:x.reason,notify:x.notify,matched:text.includes('stale file handle')?'stale_file_handle':text.includes('read-only file system')?'read_only':'other'}); const now=Date.now(); if(sd.lastFingerprint===fp && now-(sd.lastAlertAt||0)<6*60*60*1000) return []; sd.lastFingerprint=fp; sd.lastAlertAt=now; return [{json:{title:'Emby-backup: NFS/mount-feil',message:'Backup-mounten eller Tower-media trenger oppfølging. Det kan være Stale file handle/read-only NFS. Emby restartes ikke automatisk. Rapport: '+JSON.stringify(x).slice(0,3000)}}];"
+        "jsCode": "// Emby CT200 config-backup vakt (omskrevet 2026-11-22).\n// pc6 media_recovery.py sjekker og reparerer backup-mounten selv (re-bind uten Emby-restart)\n// og kjører en tapt backup. Reparasjonsvarsel kommer fra \"Media health\"-flyten (hvert 5. min).\n// Denne flyten varsler kun når Emby-backupen FORTSATT er syk, eller når sjekken selv feiler.\nconst sd=$getWorkflowStaticData('global'); const x=$json||{};\nif (x.skipped) return [];\nconst b=(x.services||{})['emby-backup'];\nlet fp=null, title='', msg='';\nif (x.error || !b) { fp='check-error'; title='Emby-backup vakt: sjekken feiler'; msg='media/check svarte ikke med emby-backup-status: '+String(x.error||'mangler').slice(0,300); }\nelse if (!b.ok) { const d=b.detail||{}; fp='unhealthy:'+b.decision; title='Emby-backup: fortsatt feil ('+b.decision+')';\n  msg='Mount OK: '+d.mount_ok+', siste vellykkede backup: '+(d.last_success_age_h==null?'ukjent':d.last_success_age_h+' t siden')+', tjeneste feilet: '+d.service_failed+', reparasjoner siste døgn: '+d.repairs_24h+'. Emby restartes ikke automatisk. Se /var/lib/media-recovery/latest.json på pc6.'; }\nif (!fp) { if (sd.lastFingerprint) { const was=sd.lastFingerprint; sd.lastFingerprint=null; sd.lastAlertAt=0; return [{json:{title:'Emby-backup: frisk igjen',message:'Tidligere tilstand: '+was}}]; } return []; }\nconst now=Date.now(); if (sd.lastFingerprint===fp && now-(sd.lastAlertAt||0)<6*60*60*1000) return [];\nsd.lastFingerprint=fp; sd.lastAlertAt=now;\nreturn [{json:{title,message:msg}}];"
       }
     },
     {

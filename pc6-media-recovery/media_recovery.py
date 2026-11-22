@@ -137,6 +137,63 @@ def guest_probe(name,sample):
   if not info.get('Version'):raise RuntimeError('invalid Emby API response')
   return {'api':True,'media_read':True}
  return hls(base)
+
+# --- Emby CT200 config-backup mount watch (added 2026-11-22) --------------
+# The backup target is PVE bind mount mp1 (/mnt/pve/Tower-media/Emby Backup ->
+# /var/lib/emby-backups). If Unraid replaces that folder the bind goes stale
+# ("Stale file handle") and every nightly backup fails silently. Repair never
+# restarts Emby: it re-binds the folder inside CT200's mount namespace from its
+# existing /media (mp0) view of the same NFS export and re-runs a missed backup.
+BK_CT=200; BK_NAME='pc6-ct200-emby'; BK_MNT='/var/lib/emby-backups'; BK_SRC='/media/Emby Backup'
+BK_STATE='/var/lib/emby-backup-state'; BK_MAX_AGE=26*3600; BK_RERUN_AGE=20*3600
+def _ct(args,timeout=20,stdin=None):
+ return subprocess.run(['pct','exec',str(BK_CT),'--']+args,input=stdin,capture_output=True,text=True,timeout=timeout)
+def backup_status():
+ mount_ok=_ct(['timeout','8','sh','-c','mountpoint -q "$1" && ls "$1/ct200-config-snapshots" >/dev/null','x',BK_MNT],15).returncode==0
+ r=_ct(['cat',BK_STATE+'/last_success'])
+ try:last=float(r.stdout.strip())
+ except ValueError:last=0.0
+ failed=_ct(['systemctl','is-failed','--quiet','emby-config-backup.service']).returncode==0
+ return {'mount_ok':mount_ok,'last_success':last,'service_failed':failed}
+def backup_rebind():
+ pid=subprocess.run(['lxc-info','-n',str(BK_CT),'-p','-H'],capture_output=True,text=True,timeout=10).stdout.strip()
+ if not pid.isdigit():raise RuntimeError('CT200 init pid unavailable')
+ script='umount -l "$1" 2>/dev/null; mount --bind "$2" "$1" && mount -o remount,bind,rw "$1"'
+ r=subprocess.run(['nsenter','-t',pid,'-m','--','sh','-c',script,'x',BK_MNT,BK_SRC],capture_output=True,text=True,timeout=30)
+ if r.returncode:raise RuntimeError('rebind failed: '+r.stderr[-180:])
+ return 'rebound'
+def backup_run():
+ r=_ct(['systemctl','start','emby-config-backup.service'],600)
+ if r.returncode:raise RuntimeError('backup run failed: '+r.stderr[-180:])
+ return 'backup-ran'
+def emby_backup_watch(state,host_ok,identity_ok,now):
+ s=state.setdefault('emby-backup',{})
+ attempts=[t for t in s.get('attempts',[]) if now-t<86400]
+ st=backup_status(); acts=[]
+ age=now-st['last_success'] if st['last_success'] else None
+ healthy=st['mount_ok'] and age is not None and age<BK_MAX_AGE and not st['service_failed']
+ decision='healthy'
+ if not healthy:
+  if not (host_ok and identity_ok):decision='blocked'
+  elif len(attempts)>=3:decision='max-attempts'
+  elif attempts and now-attempts[-1]<1800:decision='cooldown'
+  else:
+   s['attempts']=attempts+[now];attempts=s['attempts'];save(STATE/'state.json',state)
+   if not st['mount_ok']:acts.append(probe(backup_rebind))
+   st=backup_status()
+   age=now-st['last_success'] if st['last_success'] else None
+   if st['mount_ok'] and (age is None or age>BK_RERUN_AGE or st['service_failed']):
+    acts.append(probe(backup_run));st=backup_status()
+    age=time.time()-st['last_success'] if st['last_success'] else None
+   healthy=st['mount_ok'] and age is not None and age<BK_MAX_AGE and not st['service_failed']
+   decision='recovered' if healthy else 'repair-failed'
+ s['failures']=0 if healthy else s.get('failures',0)+1
+ detail={'mount_ok':st['mount_ok'],'last_success_age_h':round(age/3600,1) if age is not None else None,
+         'service_failed':st['service_failed'],'repairs_24h':len(attempts)}
+ watch=json.dumps({'at':now,'ok':healthy,'decision':decision,**detail})
+ try:_ct(['sh','-c','cat > "$1.tmp" && mv "$1.tmp" "$1"','x',BK_STATE+'/watch.json'],15,watch)
+ except Exception:pass
+ return {'ok':healthy,'detail':detail,'decision':decision,'failures':s['failures']},acts
 def run():
  STATE.mkdir(mode=0o700,parents=True,exist_ok=True)
  with open(STATE/'lock','w') as lock:
@@ -187,6 +244,13 @@ def run():
         if result['ok']:break
       decision='recovered' if result['ok'] else 'repair-failed'
    results[name]={**result,'decision':decision,'failures':s['failures']}
+  ct200=next((v for v in inventory if v.get('vmid')==BK_CT and v.get('node')=='pc6' and v.get('name')==BK_NAME),None)
+  try:
+   bres,bacts=emby_backup_watch(state,hosts['pc6']['ok'],bool(ct200 and ct200.get('status')=='running'),now)
+  except Exception as e:
+   bres,bacts={'ok':False,'detail':str(e)[:220],'decision':'check-error','failures':0},[]
+  results['emby-backup']=bres
+  if bacts:actions.append({'service':'emby-backup','steps':bacts})
   ok=all(x['ok'] for x in results.values())
   images=installed_images()
   versions=version_audit(state,images,now)

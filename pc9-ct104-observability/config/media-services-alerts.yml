@@ -22,3 +22,36 @@ groups:
         annotations:
           summary: "Ingen status for CT210 fra homelab-exporter"
           description: "Overvåkingen av CT210 virker ikke; sjekk homelab-exporter på 10.0.0.135:9120."
+  - name: emby-config-backup
+    # Emby CT200 nightly config backup to Unraid (/var/lib/emby-backups, PVE mp1).
+    # Metrics: emby_transcode_exporter.py on CT200:9121. Watch/repair: pc6
+    # /usr/local/sbin/media_recovery.py via n8n "Emby backup-mount vakt" (every 15 min).
+    rules:
+      - alert: EmbyBackupStale
+        expr: time() - emby_backup_last_success_timestamp_seconds > 26 * 3600
+        for: 15m
+        labels: {severity: warning, service: emby, node: pc6}
+        annotations:
+          summary: "Emby config-backup er over 26 t gammel"
+          description: "Siste vellykkede backup av Emby CT200 er {{ $value | humanizeDuration }} gammel. Sjekk journalctl -u emby-config-backup i CT200 og /var/lib/emby-backups."
+      - alert: EmbyBackupWatchNotFixing
+        expr: emby_backup_watch_ok == 0 and emby_backup_watch_last_run_timestamp_seconds > 0
+        for: 35m
+        labels: {severity: warning, service: emby, node: pc6}
+        annotations:
+          summary: "Emby backup-vakt kjører, men får ikke rettet feilen"
+          description: "Vakten har kjørt flere ganger uten å få backup-mounten/backupen frisk (maks 3 reparasjoner per døgn). Se /var/lib/media-recovery/latest.json på pc6."
+      - alert: EmbyBackupWatchSilent
+        expr: time() - emby_backup_watch_last_run_timestamp_seconds > 3600
+        for: 10m
+        labels: {severity: warning, service: emby, node: pc6}
+        annotations:
+          summary: "Emby backup-vakt har ikke kjørt på over 1 time"
+          description: "n8n «Emby backup-mount vakt» -> hermes /media/check -> pc6 media_recovery.py har stoppet. Vakten gjør ingenting."
+      - alert: EmbyBackupMetricsMissing
+        expr: absent(emby_backup_mount_ok)
+        for: 15m
+        labels: {severity: warning, service: emby, node: pc6}
+        annotations:
+          summary: "Ingen backup-metrikker fra Emby CT200"
+          description: "emby-transcode-exporter på 10.0.0.150:9121 leverer ikke emby_backup_*."
