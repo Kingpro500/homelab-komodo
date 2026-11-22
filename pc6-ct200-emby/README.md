@@ -21,7 +21,17 @@ Failover is controlled, not seamless: active viewers must reconnect to CT203. Ex
 
 CT200 runs `/usr/local/sbin/emby-config-backup` daily at 04:15 (with 15 minutes randomized delay), managed by `emby-config-backup.timer`. It writes a compact, consistent backup to:
 
-`/media/Emby Backup/ct200-config-snapshots/`
+`/var/lib/emby-backups/ct200-config-snapshots/` (Proxmox bind mount `mp1` = `/mnt/pve/Tower-media/Emby Backup`, read-write; `/media` itself is read-only)
+
+On success the script writes a local marker `/var/lib/emby-backup-state/last_success` (epoch seconds), readable even when the NFS mount is broken.
+
+### Stale mount watch and repair (2026-11-22)
+
+If Unraid replaces the `Emby Backup` folder, the `mp1` bind goes stale (`Stale file handle`) and every nightly backup fails silently; this happened 2026-11-13 → 2026-11-22. Now:
+
+- `pc6-media-recovery/media_recovery.py` (every 5 min via n8n *Media health* and every 15 min via *Emby backup-mount vakt*) checks the mount, the marker and the service. A stale mount is re-bound **inside CT200's mount namespace** (`nsenter` from pc6: bind `/media/Emby Backup` → `/var/lib/emby-backups`, remount rw). Emby is **not** restarted; the Emby container only mounts `/config`, `/media` and `/transcode` (rprivate), so streams are unaffected. A missed backup (>20 h) is re-run. Max 3 repairs/24 h, 30 min cooldown.
+- The watcher writes `/var/lib/emby-backup-state/watch.json` in CT200; `emby_transcode_exporter.py` (:9121) exposes `emby_backup_*`.
+- Prometheus group `emby-config-backup` (`pc9-ct104-observability/config/media-services-alerts.yml`) puts `EmbyBackupStale`, `EmbyBackupWatchNotFixing`, `EmbyBackupWatchSilent` and `EmbyBackupMetricsMissing` on the network-map warning page.
 
 The backup contains SQLite `.backup` exports, configuration, plugins, a manifest and hashes. It deliberately excludes metadata, BIF previews, cache, logs and transcodes. The requested `/mnt/user/appdata/backup` is not exported by Unraid; the established writable Emby Backup location is used instead.
 

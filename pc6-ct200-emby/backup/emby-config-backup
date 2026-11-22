@@ -2,7 +2,7 @@
 set -euo pipefail
 
 source=/opt/emby/EmbyServer
-target='/media/Emby Backup/ct200-config-snapshots'
+target='/var/lib/emby-backups/ct200-config-snapshots'
 stamp=$(date -u +%Y%m%dT%H%M%SZ)
 install -d -m 0750 "$target"
 stage=$(mktemp -d "$target/.incomplete-$stamp.XXXXXX")
@@ -22,12 +22,15 @@ for database in "$source"/data/*.db; do
 done
 
 tar -C "$source" -czf "$stage/config-and-plugins.tar.gz" config plugins
+
 {
   printf 'created_utc=%s\n' "$stamp"
   printf 'purpose=Emby CT200 critical config and consistent SQLite backup; excludes metadata, cache, logs and transcode.\n'
-  (cd "$stage" && sha256sum *)
+  (cd "$stage" && sha256sum * )
 } > "$stage/MANIFEST.txt"
 
 mv -- "$stage" "$final"
 stage=''
 printf 'Created %s\n' "$final"
+# Local success marker (readable even if the NFS backup mount is broken); read by emby_transcode_exporter.py.
+date -u +%s > /var/lib/emby-backup-state/last_success.tmp && mv /var/lib/emby-backup-state/last_success.tmp /var/lib/emby-backup-state/last_success
