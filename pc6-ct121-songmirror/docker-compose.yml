@@ -25,3 +25,31 @@ services:
       timeout: 5s
       retries: 3
       start_period: 20s
+
+  # Daily world-chart playlists + "last 200 liked" in Spotify.
+  # Reads charts from Apple Music and writes to Spotify through the web sessions
+  # stored by SongMirror (mounted read-only). Only touches playlists it created.
+  toplister:
+    image: ghcr.io/ahnafnafee/songmirror:latest
+    container_name: songmirror-toplister
+    restart: unless-stopped
+    user: "1000:1000"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    entrypoint: ["/app/.venv/bin/python", "/opt/toplister/toplister.py"]
+    environment:
+      TZ: Europe/Oslo
+      PYTHONPATH: /app
+      SONGMIRROR_DATA: /sm
+      STATE_DIR: /state
+      RUN_AT: "06:30"
+      RUN_ON_START: "1"
+    volumes:
+      - /opt/songmirror/data:/sm:ro
+      - /opt/songmirror/toplister/state:/state
+      - ./toplister:/opt/toplister:ro
+    healthcheck:
+      disable: true
