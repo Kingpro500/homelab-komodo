@@ -1,0 +1,27 @@
+services:
+  songmirror:
+    image: ghcr.io/ahnafnafee/songmirror:latest
+    container_name: songmirror
+    restart: unless-stopped
+    ports:
+      - "8888:8080"
+    user: "1000:1000"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    tmpfs:
+      - /tmp:size=256m,mode=1777
+    environment:
+      SONGMIRROR_DATA_DIR: /data
+      SONGMIRROR_ENV_FILE: /data/app.env
+      SONGMIRROR_DOWNLOAD_DIR: /music
+      SPOTIFY_OAUTH_OPEN_BROWSER: "0"
+    volumes:
+      - /opt/songmirror/data:/data
+      - /opt/songmirror/music:/music
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/health', timeout=3)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
