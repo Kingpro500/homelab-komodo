@@ -63,6 +63,12 @@ REGIONS = {
 LOCAL_LIST_FOR_REGION = {"Latin-Amerika": "latin", "Afrika": "afrika",
                          "Midtøsten": "midtosten", "Øst-Asia": "ostasia", "Sør-Asia": "sorasia"}
 SMALL_PER_COUNTRY = 4
+# "Små land" should be local hits, not Russian-language pop that charts across the
+# Baltics/Cyprus. A track is skipped for that list if it also charts in one of these
+# reference storefronts, has a Russian/Belarusian/Kazakh ISRC, or uses Cyrillic text.
+RU_REFERENCE_SF = ["ru", "kz", "by"]
+RU_ISRC_PREFIXES = ("RU", "BY", "KZ")
+CYRILLIC = re.compile(r"[\u0400-\u04FF]")
 
 GENRE_KEYS = {
     "latin": ["latin", "latino", "urbano", "reggaeton", "en español", "mexican", "mexicana",
@@ -193,6 +199,23 @@ def build_world(headers):
                 t["hits"][sf] = rank
                 t["regions"][region] += (101 - rank) / len(countries)
             log(f"  {region:<15} {sf}: {len(chart)}")
+    ru_ref = set()
+    for sf in RU_REFERENCE_SF:
+        try:
+            for s in apple_chart(sf, headers):
+                ru_ref.add(s["isrc"] or f"{norm(s['artist'])}|{norm(s['name'])}")
+                ru_ref.add(f"{norm(s['artist'])}|{norm(s['name'])}")
+            log(f"  {'(ref)':<15} {sf}: ok")
+        except Exception as e:  # noqa: BLE001
+            log(f"  ! ref {sf}: {e!r}"[:200])
+
+    def russian_language(t):
+        if CYRILLIC.search(f"{t['name']} {t['artist']}"):
+            return True
+        if (t["isrc"] or "").upper().startswith(RU_ISRC_PREFIXES):
+            return True
+        return (t["isrc"] in ru_ref) or f"{norm(t['artist'])}|{norm(t['name'])}" in ru_ref
+
     small_set = {sf for _, (_, cs) in REGIONS.items() for sf, sm in cs if sm}
     western_regions = {r for r, (w, _) in REGIONS.items() if w}
 
@@ -209,7 +232,7 @@ def build_world(headers):
         if cls == "global":
             score = sum(v for r, v in t["regions"].items() if r in western_regions)
             buckets["pop"].append((score, t))
-            if all(sf in small_set for sf in t["hits"]):
+            if all(sf in small_set for sf in t["hits"]) and not russian_language(t):
                 buckets["smaa"].append((sum(101 - r for r in t["hits"].values()), t))
         else:
             buckets[cls].append((sum(t["regions"].values()), t))
