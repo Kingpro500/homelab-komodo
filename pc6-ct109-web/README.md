@@ -39,7 +39,7 @@ sletting av en kjørende stack kjører `compose down` på CT-en.
 
 ## Nyheter — `http://10.0.0.124:3020/nyheter/` (lagt til 28. nov 2026)
 
-Egen nyhetsside for Roger: toppsakene per land, med overskrifter på andre språk
+Egen nyhetsside for Roger: toppsakene per land og per tema (KI, teknologi, vitenskap, utenriks/tenketanker, forsvar, økonomi, energi, Reddit/forum, Substack, faktasjekk, homelab, bil, kultur, satire), med overskrifter på andre språk
 enn norsk, svensk, dansk og engelsk maskinoversatt til norsk.
 
 | Del | Hvor |
@@ -50,7 +50,10 @@ enn norsk, svensk, dansk og engelsk maskinoversatt til norsk.
 | Data | Docker-volumet `nyheter-data` (`data.json`, oversettelsescache, funne RSS-adresser) — monteres read-only i nginx som `/nyheter/data.json` |
 
 - **Toppsaker:** Google News sin forside per land (rangert etter hvor store sakene er i lokale medier). Danmark har ingen egen Google-utgave og bruker et søk i de største danske mediene.
-- **Dine aviser:** nyhetsmappene i Rogers Chrome-bokmerker (`N/…`). Tjenesten finner RSS-feeden fra forsiden; aviser uten åpen RSS (eller som blokkerer) hentes via Google News-søk på eget domene og merkes «via søk».
-- **Ståsted:** hver avis har `lean` i `feeds.json` (omtrentlig, etter AllSides/Ad Fontes/MBFC der det finnes, ellers allmenn oppfatning).
+- **Aviser:** nyhetsmappene i Rogers Chrome-bokmerker (`N/…`), supplert (`"added": true`) slik at hvert land har minst én avis i hver fløy: ytre venstre, venstre, sentrum, høyre, ytre høyre (+ allmenn, statlig, opposisjon). Tjenesten finner RSS-feeden fra forsiden; aviser uten åpen RSS (eller som blokkerer) hentes via Google News-søk på eget domene og merkes «via søk». Kjente hull: Iran mangler ytre venstre (finnes ikke lovlig), Midtøsten er en region uten felles skala.
+- **Ståsted:** `lean` i `feeds.json` — omtrentlig, etter Wikipedia-beskrivelser og AllSides/Ad Fontes/MBFC der de finnes. I Iran, Russland og Tyrkia følger skalaen landets egne fløyer (reformister = venstre, hardlinere = ytre høyre). Siden lar Roger skjule fløyer og velge 2 eller 3 saker per avis.
 - **Oversettelse:** `clients5.google.com` (gratis, uten nøkkel), med MyMemory som reserve. `translate.googleapis.com` er blokkert fra hjemmenettet («Sorry»-side). Kall til `news.google.com` strupes til minst 2 s mellomrom.
 - Første henting etter en tom cache tar ca. 6–7 minutter; siden viser «Fant ingen data ennå» så lenge.
+- **Tema:** `topics` i `feeds.json` (samme format som land). Siden har fanene Alle / Land / Tema.
+- **Reservesøk:** kilder uten RSS søkes først i Bing News (`format=rss`, nyeste først), deretter Google News. Reddit blokkerer RSS fra hjemmenettet og hentes via Google News-søk på `reddit.com/r/<navn>`. Struping: Google News 3 s, Bing 2 s, Reddit 7 s mellom kall; søk caches i 90 min.
+- Én runde med ca. 310 kilder tar ca. 8 min med tom cache, betydelig kortere etterpå. Henteren kjører 8 kilder i parallell.
