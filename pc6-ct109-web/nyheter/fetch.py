@@ -30,6 +30,7 @@ CACHE_FILE = os.path.join(DATA, "translations.json")
 # Google News-søk for aviser uten RSS hentes sjeldnere enn resten (skåner Google for 429)
 SEARCH_TTL = int(os.environ.get("SEARCH_TTL", "5400"))
 search_cache = {}
+SEARCH_FILE = os.path.join(DATA, "search.json")  # overlever omstart, så en restart ikke gir full runde mot Google
 cache = {}
 
 
@@ -214,7 +215,12 @@ def translate(s, lang):
 
 
 def load_cache():
-    global cache, discovered
+    global cache, discovered, search_cache
+    try:
+        with open(SEARCH_FILE) as f:
+            search_cache = json.load(f)
+    except Exception:
+        search_cache = {}
     try:
         with open(CACHE_FILE) as f:
             cache = json.load(f)
@@ -322,6 +328,9 @@ def run_once():
         del cache[k]
     save_json(CACHE_FILE, cache)
     save_json(DISC_FILE, discovered)
+    for k in [k for k, v in search_cache.items() if time.time() - v["t"] > SEARCH_TTL]:
+        del search_cache[k]
+    save_json(SEARCH_FILE, search_cache)
     save_json(os.path.join(DATA, "data.json"), {"updated": datetime.now(timezone.utc).isoformat(), "interval": INTERVAL, "countries": out})
     log("ferdig på", int(time.time() - t0), "s:", sum(len(c["items"]) for c in out), "toppsaker,",
         sum(len(p["items"]) for c in out for p in c["papers"]), "kildesaker fra", len(out), "seksjoner")
