@@ -1,0 +1,50 @@
+# Koito (scrobble-historikk, ListenBrainz-kompatibel) + multi-scrobbler (henter avspillinger
+# fra kilder og sender dem til Koito). Kjører i CT114 ved siden av Navidrome.
+# Hemmeligheter står i Komodo-stackens Environment, aldri i git:
+#   KOITO_DEFAULT_PASSWORD  passord for første Koito-bruker (brukes bare ved første oppstart)
+#   KOITO_TOKEN             Koito API-nøkkel som multi-scrobbler sender med
+services:
+  koito:
+    image: gabehf/koito:latest
+    container_name: koito
+    restart: unless-stopped
+    ports:
+      - "4110:4110"
+    environment:
+      TZ: Europe/Oslo
+      KOITO_DEFAULT_USERNAME: roger
+      KOITO_DEFAULT_PASSWORD: ${KOITO_DEFAULT_PASSWORD:?settes i Komodo-stackens Environment}
+    volumes:
+      - /opt/scrobbling/koito:/etc/koito
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  multi-scrobbler:
+    image: foxxmd/multi-scrobbler:latest
+    container_name: multi-scrobbler
+    restart: unless-stopped
+    user: "1000:1000"
+    depends_on:
+      - koito
+    ports:
+      - "9078:9078"
+    environment:
+      TZ: Europe/Oslo
+      BASE_URL: http://10.0.0.172:9078
+      # Klient: Koito (multi-scrobbler legger selv til /apis/listenbrainz)
+      KOITO_ID: koito
+      KOITO_URL: http://koito:4110
+      KOITO_USER: roger
+      KOITO_TOKEN: ${KOITO_TOKEN:-}
+      # Kilde: Web Scrobbler-utvidelsen (Qobuz m.m.) -> http://10.0.0.172:9078/api/webscrobbler
+      WS_ID: webscrobbler
+    volumes:
+      - /opt/scrobbling/multi-scrobbler/config:/config
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
