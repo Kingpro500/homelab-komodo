@@ -24,6 +24,19 @@ PER_COUNTRY = int(os.environ.get("PER_COUNTRY", "10"))
 PER_PAPER = int(os.environ.get("PER_PAPER", "3"))
 MAX_NEW_TR = int(os.environ.get("MAX_NEW_TRANSLATIONS", "700"))  # nye oversettelser per runde; resten vises på originalspråket til neste runde
 new_tr = 0
+MAX_NEW_DESC = int(os.environ.get("MAX_NEW_INGRESS", "300"))  # nye ingress-oversettelser per runde
+new_desc = 0
+TAG_RE = re.compile(r"<[^>]+>")
+
+
+def ingress(raw, title):
+    """Kort ingress fra RSS/Atom-beskrivelsen: uten HTML, høyst ca. 240 tegn."""
+    t = " ".join(TAG_RE.sub(" ", html.unescape(html.unescape(raw or ""))).split())
+    if len(t) < 25 or t.lower().startswith(title.lower()[:40]) and len(t) < len(title) + 15:
+        return ""
+    if len(t) > 240:
+        t = t[:240].rsplit(" ", 1)[0].rstrip(",.;:–-") + " …"
+    return t
 TARGET = "no"
 NO_TRANSLATE = {"no", "nb", "nn", "sv", "da", "en"}
 UA = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131 Safari/537.36"
@@ -104,7 +117,12 @@ def parse_feed(raw, kind):
         if "bing.com/news/apiclick" in link:
             link = urllib.parse.parse_qs(urllib.parse.urlparse(link).query).get("url", [link])[0]
         if len(title.strip(" -–")) >= 8 and title.strip() != source and link:
-            items.append({"original": title, "link": link, "source": source, "published": ts})
+            it_ = {"original": title, "link": link, "source": source, "published": ts}
+            if kind != "gnews":  # Google News-beskrivelsen er bare en lenkeliste
+                d = ingress(text(it, "description"), title)
+                if d:
+                    it_["desc"] = d
+            items.append(it_)
     # Atom
     ns = "{http://www.w3.org/2005/Atom}"
     for it in root.iter(ns + "entry"):
@@ -113,7 +131,15 @@ def parse_feed(raw, kind):
         link = l.get("href") if l is not None else ""
         ts = text(it, ns + "updated") or text(it, ns + "published")
         if title and link:
-            items.append({"original": title, "link": link, "source": "", "published": ts or None})
+            it_ = {"original": title, "link": link, "source": "", "published": ts or None}
+            raw = text(it, ns + "summary") or text(it, ns + "content")
+            if not raw:
+                md = it.find(".//{http://search.yahoo.com/mrss/}description")
+                raw = md.text if md is not None and md.text else ""
+            d = ingress(raw, title)
+            if d:
+                it_["desc"] = d
+            items.append(it_)
     return items
 
 
@@ -189,15 +215,20 @@ def site_search_url(url, country, lang=None):
     return "https://news.google.com/rss/search?q=" + urllib.parse.quote(q + " when:2d") + "&" + edition
 
 
-def translate(s, lang):
+def translate(s, lang, desc=False):
     key = f"{lang}|{s}"
     if key in cache:
         cache[key]["seen"] = time.time()
         return cache[key]["t"]
-    global new_tr
-    if new_tr >= MAX_NEW_TR:
-        return None
-    new_tr += 1
+    global new_tr, new_desc
+    if desc:
+        if new_desc >= MAX_NEW_DESC:
+            return None
+        new_desc += 1
+    else:
+        if new_tr >= MAX_NEW_TR:
+            return None
+        new_tr += 1
     t = None
     try:
         q = urllib.parse.quote(s)
@@ -241,10 +272,15 @@ def load_cache():
 
 def tr_items(items, lang):
     for it in items:
+        d = it.pop("desc", None)
         if lang not in NO_TRANSLATE:
             it["title"] = translate(it["original"], lang) or it["original"]
+            if d:
+                it["ingress"] = translate(d, lang, desc=True) or d
         else:
             it["title"] = it.pop("original")
+            if d:
+                it["ingress"] = d
     return items
 
 
@@ -315,8 +351,8 @@ def run_once():
     order = conf.get("order", [])
     sections.sort(key=lambda s: order.index(s["code"]) if s["code"] in order else len(order))
     t0 = time.time()
-    global new_tr
-    new_tr = 0
+    global new_tr, new_desc
+    new_tr = new_desc = 0
     # seksjoner med "refresh" (de mindre landene) hentes sjeldnere: gjenbruk forrige resultat til det er gammelt nok
     prev = {}
     try:
@@ -354,7 +390,7 @@ def run_once():
         del search_cache[k]
     save_json(SEARCH_FILE, search_cache)
     save_json(os.path.join(DATA, "data.json"), {"updated": datetime.now(timezone.utc).isoformat(), "interval": INTERVAL, "countries": out})
-    log("ferdig på", int(time.time() - t0), "s:", len(reuse), "seksjoner gjenbrukt,", new_tr, "nye oversettelser,", sum(len(c["items"]) for c in out), "toppsaker,",
+    log("ferdig på", int(time.time() - t0), "s:", len(reuse), "seksjoner gjenbrukt,", new_tr, "nye oversettelser,", new_desc, "nye ingresser oversatt,", sum(len(c["items"]) for c in out), "toppsaker,",
         sum(len(p["items"]) for c in out for p in c["papers"]), "kildesaker fra", len(out), "seksjoner")
 
 
