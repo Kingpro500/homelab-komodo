@@ -19,8 +19,12 @@ Står i Komodo-stackens **Environment**, aldri i git:
 
 - **Sonos** (kilde `sonos`): lokal Sonos-API via Arc på 10.0.0.15 (`SONOS_HOST`). Dekker alt som spilles på Sonos (alle soner).
 - **Web Scrobbler** (nettleserutvidelse, dekker Qobuz/YouTube Music i nettleser): Accounts → Webhook → API URL `http://10.0.0.172:9078/api/webscrobbler`.
-- **Navidrome**: kan sende direkte til Koito via ListenBrainz (`ND_LISTENBRAINZ_BASEURL=http://10.0.0.172:4110/apis/listenbrainz/1/`), eller via multi-scrobbler (`SUBSONIC_*`).
+- **Navidrome**: scrobbler direkte til Koito via ListenBrainz-API (`ND_LISTENBRAINZ_BASEURL` i `pc9-ct114-navidrome`). Kobles per bruker i Navidrome: Personal → ListenBrainz → lim inn `KOITO_TOKEN`.
 - **Spotify** (kilde `spotify`): godkjennes i dashbordet; nettleseren havner på `127.0.0.1:9078/callback?code=…` – bytt `127.0.0.1` med `10.0.0.172` og trykk Enter.
 - Last.fm brukes ikke som kilde (API-nøkler krever Pro fra 1. des 2026, og Sonos + Spotify dekker det samme). Gammel historikk importeres i Koito fra eksport.
 
 Data: `/opt/scrobbling/koito` (Koito) og `/opt/scrobbling/multi-scrobbler/config` (eies av 1000:1000).
+
+## Kjent felle
+
+`/music` i CT114 er en NFS-mount fra Unraid (mp0). Får Navidrome «mkdir /music: file exists» ved deploy, er handlet stale (`ls /music` → «Stale file handle»). Hot-replug av mp0 hjelper ikke; `pct reboot 114` gjør. Flytt eventuelle Koito-importfiler ut av `import/` først, ellers starter importen på nytt.
