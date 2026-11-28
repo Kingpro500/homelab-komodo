@@ -35,6 +35,7 @@ services:
     environment:
       TZ: Europe/Oslo
       INTERVAL: "1800"
+      PER_PAPER: "10"   # siden viser 2/3/5/10 per avis (valg øverst)
     mem_limit: 256m
     volumes:
       - ./nyheter:/app:ro

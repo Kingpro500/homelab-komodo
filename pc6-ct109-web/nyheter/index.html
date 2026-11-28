@@ -59,8 +59,8 @@ button.more{background:none;border:0;color:var(--accent);cursor:pointer;padding:
 .paper ul{padding-left:16px}
 .paper li{margin:1px 0 2px}
 .paper li a{font-weight:450}
-.paper li.p3{display:none}
-body.three .paper li.p3{display:list-item}
+body.pp2 .paper li:nth-child(n+3),body.pp3 .paper li:nth-child(n+4),body.pp5 .paper li:nth-child(n+6){display:none}
+.ctl select{background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:4px;font-size:12px}
 .via{color:var(--dim);font-size:10px;font-weight:400}
 .lean{display:inline-block;font-size:10px;font-weight:500;border-radius:999px;padding:0 6px;border:1px solid currentColor;line-height:1.5}
 .l-ytre-venstre{color:#ff5c7a}.l-venstre{color:#ff9e9e}.l-sentrum{color:#c0caf5}.l-høyre{color:#7aa2f7}.l-ytre-høyre{color:#2f7bff}
@@ -82,7 +82,7 @@ body.three .paper li.p3{display:list-item}
     <span style="margin-left:10px">Ståsted (klikk for å skjule):</span> <span id="chips"></span>
     <label><input type="checkbox" id="optWrap"> hele titler</label>
     <label><input type="checkbox" id="optOrig"> vis originaltekst</label>
-    <label><input type="checkbox" id="optThree"> 3 saker per avis</label>
+    <label>saker per avis <select id="optPP"><option>2</option><option>3</option><option>5</option><option>10</option></select></label>
     <label><input type="checkbox" id="optShut"> lukk alle land</label>
   </div>
 </header>
@@ -107,10 +107,10 @@ const open = new Set(store("open") || []);
 const shut = new Set(store("shut") || []);
 const hidden = new Set(store("hidden") || []);
 function applyPrefs(){
-  document.body.className = ["v-" + (store("view") || "alle"), store("orig") ? "showorig" : "", store("wrap") ? "wrap" : "", store("three") ? "three" : "", ...[...hidden].map(l => "hide-" + cls(l))].join(" ");
+  document.body.className = ["v-" + (store("view") || "alle"), store("orig") ? "showorig" : "", store("wrap") ? "wrap" : "", "pp" + (store("pp") || (store("three") ? 3 : 2)), ...[...hidden].map(l => "hide-" + cls(l))].join(" ");
   document.getElementById("optOrig").checked = !!store("orig");
   document.getElementById("optWrap").checked = !!store("wrap");
-  document.getElementById("optThree").checked = !!store("three");
+  document.getElementById("optPP").value = String(store("pp") || (store("three") ? 3 : 2));
   document.querySelectorAll(".chip").forEach(c => c.classList.toggle("off", hidden.has(c.dataset.l)));
   document.querySelectorAll(".tabs b").forEach(b => b.classList.toggle("on", b.dataset.v === (store("view") || "alle")));
 }
@@ -122,7 +122,7 @@ document.getElementById("chips").onclick = e => {
 document.getElementById("tabs").onclick = e => { const v = e.target.dataset?.v; if (!v) return; store("view", v); applyPrefs(); relayout(); };
 document.getElementById("optWrap").onchange = e => { store("wrap", e.target.checked); applyPrefs(); relayout(); };
 document.getElementById("optOrig").onchange = e => { store("orig", e.target.checked); applyPrefs(); relayout(); };
-document.getElementById("optThree").onchange = e => { store("three", e.target.checked); applyPrefs(); relayout(); };
+document.getElementById("optPP").onchange = e => { store("pp", +e.target.value); applyPrefs(); relayout(); };
 document.getElementById("optShut").onchange = e => {
   document.querySelectorAll("section").forEach(s => { s.classList.toggle("shut", e.target.checked); e.target.checked ? shut.add(s.id) : shut.delete(s.id); });
   store("shut", [...shut]); relayout();
@@ -164,7 +164,7 @@ async function load(){
       <div class="paper l-${cls(p.lean)}"><h3><a href="${esc(p.home)}" target="_blank" rel="noopener noreferrer">${esc(p.name)}</a>
         <span class="lean l-${cls(p.lean)}">${esc(p.lean || "ukjent")}</span>
         ${p.via && p.via !== "rss" ? `<span class="via" title="Ingen åpen RSS; saker funnet via nyhetssøk (${p.via === "bing" ? "Bing" : "Google News"}) på kildens domene">via søk</span>` : ""}</h3>
-        ${p.items.length ? `<ul>${p.items.map((it, i) => li(it, i >= 2 ? "p3" : "", false)).join("")}</ul>` : ""}
+        ${p.items.length ? `<ul>${p.items.map((it, i) => li(it, "", false)).join("")}</ul>` : ""}
         ${p.error ? `<p class="err">⚠ ${esc(p.error)}</p>` : ""}</div>`).join("");
     const from = TRANSLATED_FROM[c.lang];
     return `<section data-i="${d.countries.indexOf(c)}" id="${esc(c.code)}" class="k-${c.kind === "tema" ? "tema" : "land"} ${open.has(c.code) ? "open" : ""} ${shut.has(c.code) ? "shut" : ""}">
@@ -199,7 +199,7 @@ const relayout = () => layout(true);
 document.getElementById("rnd").onclick = () => {
   const vis = el => !el || getComputedStyle(el).display !== "none";
   const links = [...document.querySelectorAll("#main li a")]
-    .filter(a => vis(a.closest("section")) && !a.closest("section.shut") && vis(a.closest(".paper")));
+    .filter(a => vis(a.closest("section")) && !a.closest("section.shut") && vis(a.closest(".paper")) && vis(a.closest("li")));
   const pick = [];
   const pool = links.slice();
   while (pick.length < 5 && pool.length) pick.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]);
