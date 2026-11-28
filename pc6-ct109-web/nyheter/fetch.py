@@ -8,7 +8,9 @@ import html
 import json
 import os
 import re
+import threading
 import time
+from concurrent.futures import ThreadPoolExecutor
 import urllib.parse
 import urllib.error
 import urllib.request
@@ -25,6 +27,9 @@ NO_TRANSLATE = {"no", "nb", "nn", "sv", "da", "en"}
 UA = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131 Safari/537.36"
 
 CACHE_FILE = os.path.join(DATA, "translations.json")
+# Google News-søk for aviser uten RSS hentes sjeldnere enn resten (skåner Google for 429)
+SEARCH_TTL = int(os.environ.get("SEARCH_TTL", "5400"))
+search_cache = {}
 cache = {}
 
 
@@ -33,18 +38,31 @@ def log(*a):
 
 
 _last_google = 0.0
+_google_lock = threading.Lock()
+# Andre nettsteder som sperrer ved mange kall: minste antall sekunder mellom kall
+THROTTLE = {"www.bing.com": 2.0, "www.reddit.com": 7.0}
+_host_locks = {h: threading.Lock() for h in THROTTLE}
+_host_last = {}
 
 
 def get(url, timeout=20):
-    """HTTP GET. Kall til Google News strupes (min. 2 s mellomrom) og prøves igjen én gang ved 429."""
+    """HTTP GET. Kall til Google News går i kø (min. 3 s mellomrom) og prøves igjen én gang ved 429."""
     global _last_google
-    google = urllib.parse.urlparse(url).netloc == "news.google.com"
-    for attempt in (1, 2):
-        if google:
-            wait = _last_google + 2.0 - time.time()
+    host = urllib.parse.urlparse(url).netloc
+    google = host == "news.google.com"
+    if host in THROTTLE:
+        with _host_locks[host]:
+            wait = _host_last.get(host, 0) + THROTTLE[host] - time.time()
             if wait > 0:
                 time.sleep(wait)
-            _last_google = time.time()
+            _host_last[host] = time.time()
+    for attempt in (1, 2):
+        if google:
+            with _google_lock:
+                wait = _last_google + 3.0 - time.time()
+                if wait > 0:
+                    time.sleep(wait)
+                _last_google = time.time()
         req = urllib.request.Request(url, headers={"User-Agent": UA, "Accept-Language": "en"})
         try:
             with urllib.request.urlopen(req, timeout=timeout) as r:
@@ -52,7 +70,8 @@ def get(url, timeout=20):
         except urllib.error.HTTPError as e:
             if e.code == 429 and google and attempt == 1:
                 log("429 fra Google, venter 60 s")
-                time.sleep(60)
+                with _google_lock:
+                    time.sleep(60)
                 continue
             raise
 
@@ -79,6 +98,8 @@ def parse_feed(raw, kind):
                 ts = email.utils.parsedate_to_datetime(pub).astimezone(timezone.utc).isoformat()
             except Exception:
                 pass
+        if "bing.com/news/apiclick" in link:
+            link = urllib.parse.parse_qs(urllib.parse.urlparse(link).query).get("url", [link])[0]
         if len(title.strip(" -–")) >= 8 and title.strip() != source and link:
             items.append({"original": title, "link": link, "source": source, "published": ts})
     # Atom
@@ -141,12 +162,23 @@ def _discover(url):
     return feed
 
 
+EDITIONS = {"en": "hl=en-US&gl=US&ceid=US:en", "no": "hl=no&gl=NO&ceid=NO:no", "sv": "hl=sv&gl=SE&ceid=SE:sv",
+            "da": "hl=da&gl=DK&ceid=DK:da", "fr": "hl=fr&gl=FR&ceid=FR:fr", "de": "hl=de&gl=DE&ceid=DE:de"}
+
+
+def bing_search_url(url):
+    host = urllib.parse.urlparse(url).netloc.removeprefix("www.")
+    path = urllib.parse.urlparse(url).path.strip("/")
+    q = f"site:{host}/{path}" if path and path.count("/") <= 1 and len(path) > 2 else f"site:{host}"
+    return "https://www.bing.com/news/search?format=rss&qft=" + urllib.parse.quote('sortbydate="1"') + "&q=" + urllib.parse.quote(q)
+
+
 def site_search_url(url, country, lang=None):
     host = urllib.parse.urlparse(url).netloc.removeprefix("www.")
     path = urllib.parse.urlparse(url).path.strip("/")
     # Undermapper som /en eller /chicago tas med så søket treffer riktig utgave
-    q = f"site:{host}/{path}" if path and "/" not in path and len(path) > 2 else f"site:{host}"
-    edition = "hl=en-US&gl=US&ceid=US:en"
+    q = f"site:{host}/{path}" if path and path.count("/") <= 1 and len(path) > 2 else f"site:{host}"
+    edition = EDITIONS.get(lang, EDITIONS["en"])
     if lang in (None, country.get("lang")):
         for s in country.get("sources", []):
             if s.get("type") == "gnews":
@@ -211,52 +243,79 @@ def save_json(path, obj):
     os.replace(tmp, path)
 
 
+def fetch_paper(pp, c):
+    """Hent én avis/kilde. Returnerer (oppføring, uoversatte saker)."""
+    plang = pp.get("lang", c.get("lang", "en"))
+    entry = {"name": pp["name"], "home": pp["url"], "lang": plang, "lean": pp.get("lean"), "items": [], "error": None, "via": "rss"}
+    try:
+        got = parse_feed(get(find_feed(pp["url"])), "rss")
+        if not got:
+            raise ValueError("tom feed")
+    except Exception as e:
+        # reserve: nyhetssøk på kildens eget domene — Bing først, Google News til slutt
+        log(c["name"], pp["name"], "ingen RSS, bruker søk:", f"{type(e).__name__}: {e}"[:100])
+        got, errs = [], []
+        for engine, su in (("bing", bing_search_url(pp["url"])), ("gnews", site_search_url(pp["url"], c, plang))):
+            try:
+                hit = search_cache.get(su)
+                if hit and time.time() - hit["t"] < SEARCH_TTL:
+                    got = [dict(x) for x in hit["items"]]
+                else:
+                    got = parse_feed(get(su), engine if engine == "gnews" else "rss")
+                    got.sort(key=lambda x: x["published"] or "", reverse=True)
+                    got = got[:PER_PAPER]
+                    search_cache[su] = {"t": time.time(), "items": [dict(x) for x in got]}
+                if got:
+                    entry["via"] = engine
+                    break
+            except Exception as e2:
+                errs.append(f"{engine}: {type(e2).__name__}: {e2}"[:120])
+        if not got:
+            entry["error"] = "; ".join(errs) or "ingen saker funnet"
+            log(c["name"], pp["name"], "feilet:", entry["error"])
+    return entry, got[:PER_PAPER]
+
+
+def fetch_top(c):
+    lists, errors = [], []
+    for src in c.get("sources", []):
+        try:
+            lists.append(parse_feed(get(src["url"]), src.get("type", "rss")))
+        except Exception as e:
+            errors.append(f"{src['url']}: {type(e).__name__}: {e}")
+            log(c["name"], "feilet:", errors[-1])
+    # flett kildene: 1. fra hver, 2. fra hver, ...
+    items, seen = [], set()
+    for i in range(max((len(l) for l in lists), default=0)):
+        for l in lists:
+            if i < len(l) and l[i]["link"] not in seen and l[i]["original"].lower() not in seen:
+                seen.add(l[i]["link"])
+                seen.add(l[i]["original"].lower())
+                items.append(l[i])
+    return items[:PER_COUNTRY], errors
+
+
 def run_once():
     with open(os.path.join(APP, "feeds.json")) as f:
         conf = json.load(f)
+    sections = [dict(c, kind="land") for c in conf.get("countries", [])] + [dict(t, kind="tema") for t in conf.get("topics", [])]
+    order = conf.get("order", [])
+    sections.sort(key=lambda s: order.index(s["code"]) if s["code"] in order else len(order))
+    t0 = time.time()
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        tops = list(pool.map(fetch_top, sections))
+        jobs = [(si, pool.submit(fetch_paper, pp, c)) for si, c in enumerate(sections) for pp in c.get("papers", [])]
+        results = [(si, f.result()) for si, f in jobs]
     out = []
-    for c in conf["countries"]:
+    for si, c in enumerate(sections):
         lang = c.get("lang", "en")
-        lists, errors = [], []
-        for src in c["sources"]:
-            try:
-                lists.append(parse_feed(get(src["url"]), src.get("type", "rss")))
-            except Exception as e:
-                errors.append(f"{src['url']}: {type(e).__name__}: {e}")
-                log(c["name"], "feilet:", errors[-1])
-        # flett kildene: 1. fra hver, 2. fra hver, ...
-        items, seen = [], set()
-        for i in range(max((len(l) for l in lists), default=0)):
-            for l in lists:
-                if i < len(l) and l[i]["link"] not in seen and l[i]["original"].lower() not in seen:
-                    seen.add(l[i]["link"])
-                    seen.add(l[i]["original"].lower())
-                    items.append(l[i])
-        items = tr_items(items[:PER_COUNTRY], lang)
+        items, errors = tops[si]
         papers = []
-        for pp in c.get("papers", []):
-            plang = pp.get("lang", lang)
-            entry = {"name": pp["name"], "home": pp["url"], "lang": plang, "lean": pp.get("lean"), "items": [], "error": None, "via": "rss"}
-            try:
-                got = parse_feed(get(find_feed(pp["url"])), "rss")
-                if not got:
-                    raise ValueError("tom feed")
-            except Exception as e:
-                # reserve: Google News-søk på avisens eget domene (siste 2 døgn, nyeste først)
-                log(c["name"], pp["name"], "RSS feilet, bruker Google News-søk:", f"{type(e).__name__}: {e}"[:120])
-                try:
-                    got = parse_feed(get(site_search_url(pp["url"], c, plang)), "gnews")
-                    got.sort(key=lambda x: x["published"] or "", reverse=True)
-                    entry["via"] = "gnews"
-                    if not got:
-                        entry["error"] = "ingen saker funnet"
-                except Exception as e2:
-                    got = []
-                    entry["error"] = f"{type(e2).__name__}: {e2}"[:200]
-                    log(c["name"], pp["name"], "feilet:", entry["error"])
-            entry["items"] = tr_items(got[:PER_PAPER], plang)
-            papers.append(entry)
-        out.append({k: c.get(k) for k in ("code", "name", "flag")} | {"lang": lang, "items": items, "papers": papers, "error": "; ".join(errors) or None})
+        for sj, (entry, got) in results:
+            if sj == si:
+                entry["items"] = tr_items(got, entry["lang"])
+                papers.append(entry)
+        out.append({k: c.get(k) for k in ("code", "name", "flag", "kind")} | {"lang": lang, "items": tr_items(items, lang), "papers": papers, "error": "; ".join(errors) or None})
     # rydd cache: glem oversettelser som ikke er brukt på 7 dager
     cutoff = time.time() - 7 * 86400
     for k in [k for k, v in cache.items() if v.get("seen", 0) < cutoff]:
@@ -264,7 +323,8 @@ def run_once():
     save_json(CACHE_FILE, cache)
     save_json(DISC_FILE, discovered)
     save_json(os.path.join(DATA, "data.json"), {"updated": datetime.now(timezone.utc).isoformat(), "interval": INTERVAL, "countries": out})
-    log("ferdig:", sum(len(c["items"]) for c in out), "saker fra", len(out), "land")
+    log("ferdig på", int(time.time() - t0), "s:", sum(len(c["items"]) for c in out), "toppsaker,",
+        sum(len(p["items"]) for c in out for p in c["papers"]), "kildesaker fra", len(out), "seksjoner")
 
 
 def main():

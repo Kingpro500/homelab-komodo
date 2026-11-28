@@ -3,82 +3,140 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Nyheter – toppsaker per land</title>
+<title>Nyheter – land og tema</title>
 <style>
-:root{--bg:#0f1115;--card:#171a21;--line:#262b36;--text:#e8eaf0;--dim:#8b93a7;--accent:#7dcfff;--warn:#e0af68}
+:root{--bg:#0f1115;--card:#161920;--line:#252a35;--text:#e6e8ef;--dim:#878fa3;--accent:#7dcfff}
 *{box-sizing:border-box}
-html,body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
-header{position:sticky;top:0;z-index:2;background:rgba(15,17,21,.94);backdrop-filter:blur(6px);border-bottom:1px solid var(--line);padding:10px 18px}
-.top{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
-h1{font-size:20px;margin:0}
-.meta{color:var(--dim);font-size:13px}
-.meta a{color:var(--accent);text-decoration:none}
-nav{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
-nav a{font-size:13px;color:var(--text);text-decoration:none;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:2px 10px}
+html,body{margin:0;background:var(--bg);color:var(--text);font:13.5px/1.35 system-ui,-apple-system,"Segoe UI",sans-serif}
+a{color:inherit;text-decoration:none}
+header{position:sticky;top:0;z-index:2;background:rgba(15,17,21,.95);backdrop-filter:blur(6px);border-bottom:1px solid var(--line);padding:6px 12px}
+.row{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+h1{font-size:16px;margin:0 8px 0 0;white-space:nowrap}
+.meta{color:var(--dim);font-size:12px}
+.meta a,a.meta{color:var(--accent)}
+nav a{font-size:12px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:1px 8px}
 nav a:hover{border-color:var(--accent)}
-main{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:14px;padding:16px 18px 40px;max-width:1700px;margin:auto}
-section{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px;scroll-margin-top:110px}
-h2{font-size:16px;margin:0 0 8px;display:flex;justify-content:space-between;align-items:baseline}
-h2 small{color:var(--dim);font-weight:400;font-size:12px}
-ol{margin:0;padding-left:20px}
-li{margin:0 0 9px}
+nav a.tema{border-style:dashed}
+.tabs{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-right:6px}
+.tabs b{cursor:pointer;font-weight:500;font-size:12px;padding:2px 10px;color:var(--dim)}
+.tabs b.on{background:#24324a;color:var(--text)}
+body.v-land section.k-tema,body.v-tema section.k-land,body.v-land nav a.tema,body.v-tema nav a.land{display:none}
+.ctl{margin-top:4px;font-size:12px;color:var(--dim)}
+.chip{cursor:pointer;user-select:none;display:inline-block;font-size:11px;border-radius:999px;padding:0 7px;border:1px solid currentColor;margin-right:3px}
+.chip.off{opacity:.3;text-decoration:line-through}
+.ctl label{cursor:pointer;margin-left:10px}
+main{display:flex;gap:10px;align-items:flex-start;padding:10px 12px 30px}
+.col{flex:1 1 0;min-width:0}
+section{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:7px 10px 8px;margin:0 0 10px;scroll-margin-top:90px}
+h2{font-size:14px;margin:0 0 4px;display:flex;justify-content:space-between;align-items:baseline;cursor:pointer}
+h2 small{color:var(--dim);font-weight:400;font-size:11px}
+section.shut > :not(h2){display:none}
+section.shut h2{margin:0}
+ol,ul{margin:0;padding-left:18px}
+li{margin:0 0 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body.wrap li{white-space:normal}
+.t{display:inline-block;min-width:26px;color:var(--dim);font-size:11px;margin-right:4px;text-align:right}
+ol,ul{list-style:none;padding-left:0!important}
 li.extra{display:none}
 section.open li.extra{display:list-item}
-li a{color:var(--text);text-decoration:none;font-weight:550}
-li a:visited{color:#a9a3c4}
+li a{font-weight:550}
+li a:visited{color:#a8a2c2}
 li a:hover{color:var(--accent);text-decoration:underline}
-.orig{display:block;color:var(--dim);font-size:12px;font-style:italic}
-.src{display:block;color:var(--dim);font-size:12px}
-button.more{background:none;border:0;color:var(--accent);cursor:pointer;padding:0;font-size:13px}
-.err{color:var(--warn);font-size:12px}
-.empty{color:var(--dim)}
-.papers{margin-top:12px;border-top:1px solid var(--line);padding-top:8px}
-.ph{color:var(--dim);font-size:12px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
-.paper h3{font-size:13px;margin:8px 0 4px}
-.paper h3 a{color:var(--accent);text-decoration:none}
-.paper ul{margin:0;padding-left:18px}
-.paper li{margin-bottom:6px}
-.paper li a{font-weight:500}
-.lean{display:inline-block;font-size:11px;font-weight:500;border-radius:999px;padding:0 7px;margin-left:6px;vertical-align:1px;border:1px solid currentColor}
-.l-venstre{color:#f7768e}.l-sentrum-venstre{color:#ff9e9e}.l-sentrum{color:#c0caf5}.l-sentrum-høyre{color:#7aa2f7}.l-høyre{color:#3d8bff}
-.l-allmenn{color:#9ece6a}.l-statlig,.l-regjeringsvennlig{color:#e0af68}.l-opposisjon{color:#bb9af7}.l-ukjent{color:#6b7280}
-.legend{color:var(--dim);font-size:12px;margin-top:6px}
-.legend .lean{margin:0 4px 0 0}
-.via{color:var(--dim);font-size:11px;font-weight:400;margin-left:6px}
+.m{color:var(--dim);font-size:11px;font-weight:400;white-space:nowrap}
+.orig{display:none;color:var(--dim);font-size:11px;font-style:italic}
+body.showorig .orig{display:block}
+button.more{background:none;border:0;color:var(--accent);cursor:pointer;padding:0;font-size:12px}
+.err{color:#e0af68;font-size:11px;margin:2px 0}
+.papers{margin-top:6px;border-top:1px solid var(--line);padding-top:4px}
+.paper{margin-top:4px}
+.paper h3{font-size:12px;margin:0;font-weight:600;display:flex;gap:5px;align-items:center;flex-wrap:wrap}
+.paper h3 a{color:var(--accent)}
+.paper ul{padding-left:16px}
+.paper li{margin:1px 0 2px}
+.paper li a{font-weight:450}
+.paper li.p3{display:none}
+body.three .paper li.p3{display:list-item}
+.via{color:var(--dim);font-size:10px;font-weight:400}
+.lean{display:inline-block;font-size:10px;font-weight:500;border-radius:999px;padding:0 6px;border:1px solid currentColor;line-height:1.5}
+.l-ytre-venstre{color:#ff5c7a}.l-venstre{color:#ff9e9e}.l-sentrum{color:#c0caf5}.l-høyre{color:#7aa2f7}.l-ytre-høyre{color:#2f7bff}
+.l-allmenn{color:#9ece6a}.l-statlig{color:#e0af68}.l-opposisjon{color:#bb9af7}.l-ukjent{color:#6b7280}
+.hide-ytre-venstre .paper.l-ytre-venstre,.hide-venstre .paper.l-venstre,.hide-sentrum .paper.l-sentrum,.hide-høyre .paper.l-høyre,
+.hide-ytre-høyre .paper.l-ytre-høyre,.hide-allmenn .paper.l-allmenn,.hide-statlig .paper.l-statlig,.hide-opposisjon .paper.l-opposisjon{display:none}
 </style>
 </head>
 <body>
 <header>
-  <div class="top">
-    <h1>📰 Toppsaker per land</h1>
-    <span class="meta" id="meta">Laster …</span>
-    <span class="meta"><a href="/">← Nettverkskartet</a></span>
+  <div class="row">
+    <h1>📰 Nyheter</h1>
+    <span class="tabs" id="tabs"><b data-v="alle">Alle</b><b data-v="land">Land</b><b data-v="tema">Tema</b></span>
+    <nav class="row" id="nav"></nav>
   </div>
-  <nav id="nav"></nav>
-  <div class="legend">Ståsted for dine aviser (omtrentlig, etter AllSides/Ad Fontes/MBFC der det finnes, ellers allmenn oppfatning):
-    <span class="lean l-venstre">venstre</span><span class="lean l-sentrum-venstre">sentrum-venstre</span><span class="lean l-sentrum">sentrum</span><span class="lean l-sentrum-høyre">sentrum-høyre</span><span class="lean l-høyre">høyre</span><span class="lean l-allmenn">allmenn</span><span class="lean l-statlig">statlig / regjeringsvennlig</span><span class="lean l-opposisjon">opposisjon</span></div>
+  <div class="ctl">
+    <span id="meta">Laster …</span> · <a class="meta" href="/">← Nettverkskartet</a>
+    <span style="margin-left:10px">Ståsted (klikk for å skjule):</span> <span id="chips"></span>
+    <label><input type="checkbox" id="optWrap"> hele titler</label>
+    <label><input type="checkbox" id="optOrig"> vis originaltekst</label>
+    <label><input type="checkbox" id="optThree"> 3 saker per avis</label>
+    <label><input type="checkbox" id="optShut"> lukk alle land</label>
+  </div>
 </header>
 <main id="main"></main>
 <script>
 const SHOW = 5;
+const LEANS = ["ytre venstre","venstre","sentrum","høyre","ytre høyre","allmenn","statlig","opposisjon"];
+const TRANSLATED_FROM = {fi:"finsk",de:"tysk",fr:"fransk",it:"italiensk",es:"spansk",el:"gresk",hu:"ungarsk",he:"hebraisk",fa:"persisk",tr:"tyrkisk",ru:"russisk"};
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const cls = s => String(s || "ukjent").replace(/ /g, "-");
+const store = (k, v) => v === undefined ? JSON.parse(localStorage.getItem("nyh-" + k) || "null") : localStorage.setItem("nyh-" + k, JSON.stringify(v));
 function ago(iso){
   if(!iso) return "";
   const m = Math.round((Date.now() - new Date(iso)) / 60000);
   if (isNaN(m)) return "";
-  if (m < 1) return "nå";
-  if (m < 60) return m + " min siden";
-  if (m < 48*60) return Math.round(m/60) + " t siden";
-  return Math.round(m/1440) + " d siden";
+  if (m < 60) return Math.max(m,1) + " m";
+  if (m < 48*60) return Math.round(m/60) + " t";
+  return Math.round(m/1440) + " d";
 }
-const open = new Set(JSON.parse(localStorage.getItem("nyheter-open") || "[]"));
-function toggle(code, btn){
+const open = new Set(store("open") || []);
+const shut = new Set(store("shut") || []);
+const hidden = new Set(store("hidden") || []);
+function applyPrefs(){
+  document.body.className = ["v-" + (store("view") || "alle"), store("orig") ? "showorig" : "", store("wrap") ? "wrap" : "", store("three") ? "three" : "", ...[...hidden].map(l => "hide-" + cls(l))].join(" ");
+  document.getElementById("optOrig").checked = !!store("orig");
+  document.getElementById("optWrap").checked = !!store("wrap");
+  document.getElementById("optThree").checked = !!store("three");
+  document.querySelectorAll(".chip").forEach(c => c.classList.toggle("off", hidden.has(c.dataset.l)));
+  document.querySelectorAll(".tabs b").forEach(b => b.classList.toggle("on", b.dataset.v === (store("view") || "alle")));
+}
+document.getElementById("chips").innerHTML = LEANS.map(l => `<span class="chip l-${cls(l)}" data-l="${l}">${l}</span>`).join("");
+document.getElementById("chips").onclick = e => {
+  const l = e.target.dataset?.l; if (!l) return;
+  hidden.has(l) ? hidden.delete(l) : hidden.add(l); store("hidden", [...hidden]); applyPrefs(); relayout();
+};
+document.getElementById("tabs").onclick = e => { const v = e.target.dataset?.v; if (!v) return; store("view", v); applyPrefs(); relayout(); };
+document.getElementById("optWrap").onchange = e => { store("wrap", e.target.checked); applyPrefs(); relayout(); };
+document.getElementById("optOrig").onchange = e => { store("orig", e.target.checked); applyPrefs(); relayout(); };
+document.getElementById("optThree").onchange = e => { store("three", e.target.checked); applyPrefs(); relayout(); };
+document.getElementById("optShut").onchange = e => {
+  document.querySelectorAll("section").forEach(s => { s.classList.toggle("shut", e.target.checked); e.target.checked ? shut.add(s.id) : shut.delete(s.id); });
+  store("shut", [...shut]); relayout();
+};
+function toggleMore(code, btn){
   const s = document.getElementById(code);
   s.classList.toggle("open");
   s.classList.contains("open") ? open.add(code) : open.delete(code);
-  localStorage.setItem("nyheter-open", JSON.stringify([...open]));
-  btn.textContent = s.classList.contains("open") ? "Vis færre" : "Vis flere";
+  store("open", [...open]);
+  btn.textContent = s.classList.contains("open") ? "færre" : "flere toppsaker";
+  relayout();
 }
+function toggleShut(code){
+  const s = document.getElementById(code);
+  s.classList.toggle("shut");
+  s.classList.contains("shut") ? shut.add(code) : shut.delete(code);
+  store("shut", [...shut]);
+  relayout();
+}
+const li = (it, extraCls, showSource) => `
+  <li class="${extraCls}"><span class="t">${esc(ago(it.published))}</span><a href="${esc(it.link)}" target="_blank" rel="noopener noreferrer" title="${esc(it.title)}${it.original ? "\n\n" + esc(it.original) : ""}${showSource && it.source ? "\n— " + esc(it.source) : ""}">${esc(it.title)}</a>${showSource && it.source ? `<span class="m"> · ${esc(it.source)}</span>` : ""}${it.original ? `<span class="orig">${esc(it.original)}</span>` : ""}</li>`;
 async function load(){
   let d;
   try {
@@ -86,39 +144,51 @@ async function load(){
     if (!r.ok) throw new Error(r.status);
     d = await r.json();
   } catch(e) {
-    document.getElementById("meta").textContent = "Fant ingen data ennå (første henting tar et par minutter).";
+    document.getElementById("meta").textContent = "Fant ingen data ennå (første henting tar noen minutter).";
     return;
   }
-  const upd = new Date(d.updated);
-  document.getElementById("meta").textContent =
-    "Oppdatert " + upd.toLocaleString("no-NO",{dateStyle:"short",timeStyle:"short"}) +
-    " · hentes hvert " + Math.round(d.interval/60) + ". min · utenlandske overskrifter er maskinoversatt";
-  document.getElementById("nav").innerHTML = d.countries.map(c =>
-    `<a href="#${esc(c.code)}">${esc(c.flag)} ${esc(c.name)}</a>`).join("");
-  const li = (it, extra) => `
-      <li class="${extra ? "extra" : ""}">
-        <a href="${esc(it.link)}" target="_blank" rel="noopener noreferrer">${esc(it.title)}</a>
-        ${it.original ? `<span class="orig">${esc(it.original)}</span>` : ""}
-        <span class="src">${esc(it.source)}${it.source && it.published ? " · " : ""}${esc(ago(it.published))}</span>
-      </li>`;
+  document.getElementById("meta").textContent = "Oppdatert " +
+    new Date(d.updated).toLocaleString("no-NO",{dateStyle:"short",timeStyle:"short"}) + " · hvert " + Math.round(d.interval/60) + ". min · utenlandske overskrifter maskinoversatt (hold musen over for original)";
+  document.getElementById("nav").innerHTML = d.countries.map(c => `<a class="${c.kind === "tema" ? "tema" : "land"}" href="#${esc(c.code)}">${esc(c.flag)} ${esc(c.name)}</a>`).join("");
+  lastCols = 0;
   document.getElementById("main").innerHTML = d.countries.map(c => {
-    const items = c.items.map((it, i) => li(it, i >= SHOW)).join("");
-    const papers = (c.papers || []).map(p => `
-      <div class="paper"><h3><a href="${esc(p.home)}" target="_blank" rel="noopener noreferrer">${esc(p.name)}</a>${p.lean ? `<span class="lean l-${esc(p.lean)}">${esc(p.lean)}</span>` : ""}${p.via === "gnews" ? `<span class="via" title="Avisen har ingen åpen RSS; sakene er funnet via Google News-søk på avisens domene">via søk</span>` : ""}</h3>
-      ${p.items.length ? `<ul>${p.items.map(it => li(it, false)).join("")}</ul>` : ""}
-      ${p.error ? `<p class="err">⚠ ${esc(p.error)}</p>` : ""}</div>`).join("");
-    const more = c.items.length > SHOW
-      ? `<button class="more" onclick="toggle('${esc(c.code)}', this)">${open.has(c.code) ? "Vis færre" : "Vis flere"}</button>` : "";
-    return `<section id="${esc(c.code)}" class="${open.has(c.code) ? "open" : ""}">
-      <h2><span>${esc(c.flag)} ${esc(c.name)}</span><small>${c.lang === "no" || c.lang === "sv" || c.lang === "da" || c.lang === "en" ? "" : "oversatt fra " + esc(c.lang)}</small></h2>
-      ${c.items.length ? `<ol>${items}</ol>` : ((c.papers || []).length ? "" : `<p class="empty">Ingen saker.</p>`)}
+    const items = c.items.map((it, i) => li(it, i >= SHOW ? "extra" : "", true)).join("");
+    const papers = (c.papers || []).slice().sort((a, b) => LEANS.indexOf(a.lean) - LEANS.indexOf(b.lean)).map(p => `
+      <div class="paper l-${cls(p.lean)}"><h3><a href="${esc(p.home)}" target="_blank" rel="noopener noreferrer">${esc(p.name)}</a>
+        <span class="lean l-${cls(p.lean)}">${esc(p.lean || "ukjent")}</span>
+        ${p.via && p.via !== "rss" ? `<span class="via" title="Ingen åpen RSS; saker funnet via nyhetssøk (${p.via === "bing" ? "Bing" : "Google News"}) på kildens domene">via søk</span>` : ""}</h3>
+        ${p.items.length ? `<ul>${p.items.map((it, i) => li(it, i >= 2 ? "p3" : "", false)).join("")}</ul>` : ""}
+        ${p.error ? `<p class="err">⚠ ${esc(p.error)}</p>` : ""}</div>`).join("");
+    const from = TRANSLATED_FROM[c.lang];
+    return `<section data-i="${d.countries.indexOf(c)}" id="${esc(c.code)}" class="k-${c.kind === "tema" ? "tema" : "land"} ${open.has(c.code) ? "open" : ""} ${shut.has(c.code) ? "shut" : ""}">
+      <h2 onclick="toggleShut('${esc(c.code)}')"><span>${esc(c.flag)} ${esc(c.name)}</span><small>${from ? "oversatt fra " + from + " · " : ""}${(c.papers||[]).length} ${c.kind === "tema" ? "kilder" : "aviser"}</small></h2>
+      ${c.items.length ? `<ol>${items}</ol>` : ""}
       ${c.error ? `<p class="err">⚠ ${esc(c.error)}</p>` : ""}
-      ${more}
-      ${papers ? `<div class="papers"><div class="ph">Fra dine aviser</div>${papers}</div>` : ""}
+      ${c.items.length > SHOW ? `<button class="more" onclick="toggleMore('${esc(c.code)}', this)">${open.has(c.code) ? "færre" : "flere toppsaker"}</button>` : ""}
+      ${papers ? `<div class="papers">${papers}</div>` : ""}
     </section>`;
   }).join("");
+  applyPrefs();
+  layout();
   if (location.hash) document.querySelector(location.hash)?.scrollIntoView();
 }
+// Murstein: legg landene i rekkefølge, hver i den korteste kolonnen (radvis lesing).
+let lastCols = 0;
+function layout(force){
+  const main = document.getElementById("main");
+  const secs = [...main.querySelectorAll("section")].sort((a, b) => +a.dataset.i - +b.dataset.i);
+  const all = secs.slice();
+  const n = Math.max(1, Math.floor((main.clientWidth + 10) / 340));
+  if (!secs.length || (n === lastCols && !force)) return;
+  lastCols = n;
+  const cols = Array.from({length: n}, () => { const c = document.createElement("div"); c.className = "col"; return c; });
+  main.replaceChildren(...cols);
+  const h = new Array(n).fill(0);
+  for (const s of all) { const i = h.indexOf(Math.min(...h)); cols[i].appendChild(s); h[i] += s.offsetHeight ? s.offsetHeight + 10 : 0; }
+}
+window.addEventListener("resize", () => layout());
+const relayout = () => layout(true);
+applyPrefs();
 load();
 setInterval(load, 10 * 60 * 1000);
 </script>
