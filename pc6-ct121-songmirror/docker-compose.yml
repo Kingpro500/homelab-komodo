@@ -53,3 +53,34 @@ services:
       - ./toplister:/opt/toplister:ro
     healthcheck:
       disable: true
+
+  # Follows renames/deletions of the "Finpuss" playlists in Spotify (by playlist id)
+  # and keeps the SongMirror sync job and the Apple copies in step. See
+  # toplister/finpuss_vakt.py.
+  finpuss-vakt:
+    image: ghcr.io/ahnafnafee/songmirror:latest
+    container_name: songmirror-finpuss-vakt
+    restart: unless-stopped
+    user: "1000:1000"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    entrypoint: ["/app/.venv/bin/python", "/opt/toplister/finpuss_vakt.py"]
+    environment:
+      TZ: Europe/Oslo
+      PYTHONPATH: /app
+      SONGMIRROR_DATA: /sm
+      STATE_DIR: /state
+      SONGMIRROR_URL: http://songmirror:8080
+      JOB_ID: 9a81dcc0
+      INTERVAL_S: "300"
+    volumes:
+      - /opt/songmirror/data:/sm:ro
+      - /opt/songmirror/toplister/state:/state
+      - ./toplister:/opt/toplister:ro
+    depends_on:
+      - songmirror
+    healthcheck:
+      disable: true
