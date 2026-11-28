@@ -3,6 +3,7 @@
 # Hemmeligheter står i Komodo-stackens Environment, aldri i git:
 #   KOITO_DEFAULT_PASSWORD  passord for første Koito-bruker (brukes bare ved første oppstart)
 #   KOITO_TOKEN             Koito API-nøkkel som multi-scrobbler sender med
+#   LASTFM_API_KEY/SECRET   Last.fm API-konto (samme som SongMirror bruker)
 services:
   koito:
     image: gabehf/koito:latest
@@ -41,6 +42,11 @@ services:
       KOITO_TOKEN: ${KOITO_TOKEN:-}
       # Kilde: Web Scrobbler-utvidelsen (Qobuz m.m.) -> http://10.0.0.172:9078/api/webscrobbler
       WS_ID: webscrobbler
+      # Kilde: Last.fm (henter det som allerede scrobbles dit). Godkjennes én gang i dashbordet.
+      SOURCE_LASTFM_ID: lastfm
+      SOURCE_LASTFM_API_KEY: ${LASTFM_API_KEY:?settes i Komodo-stackens Environment}
+      SOURCE_LASTFM_SECRET: ${LASTFM_API_SECRET:?settes i Komodo-stackens Environment}
+      SOURCE_LASTFM_REDIRECT_URI: http://10.0.0.172:9078/lastfm/callback
     volumes:
       - /opt/scrobbling/multi-scrobbler/config:/config
     logging:
