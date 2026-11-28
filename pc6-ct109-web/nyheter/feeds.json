@@ -1167,6 +1167,3915 @@
      "added": true
     }
    ]
+  },
+  {
+   "code": "nl",
+   "name": "Nederland",
+   "flag": "🇳🇱",
+   "lang": "nl",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=nl&gl=NL&ceid=NL:nl"
+    }
+   ],
+   "papers": [
+    {
+     "name": "NOS",
+     "url": "https://nos.nl/",
+     "lean": "allmenn"
+    },
+    {
+     "name": "de Volkskrant",
+     "url": "https://www.volkskrant.nl/",
+     "lean": "venstre"
+    },
+    {
+     "name": "NRC",
+     "url": "https://www.nrc.nl/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "De Telegraaf",
+     "url": "https://www.telegraaf.nl/",
+     "lean": "høyre"
+    },
+    {
+     "name": "GeenStijl",
+     "url": "https://www.geenstijl.nl/",
+     "lean": "ytre høyre"
+    },
+    {
+     "name": "De Groene Amsterdammer",
+     "url": "https://www.groene.nl/",
+     "lean": "venstre"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "ch",
+   "name": "Sveits",
+   "flag": "🇨🇭",
+   "lang": "de",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=de&gl=CH&ceid=CH:de"
+    }
+   ],
+   "papers": [
+    {
+     "name": "SRF",
+     "url": "https://www.srf.ch/news",
+     "lean": "allmenn"
+    },
+    {
+     "name": "NZZ",
+     "url": "https://www.nzz.ch/",
+     "lean": "høyre"
+    },
+    {
+     "name": "Tages-Anzeiger",
+     "url": "https://www.tagesanzeiger.ch/",
+     "lean": "venstre"
+    },
+    {
+     "name": "Weltwoche",
+     "url": "https://weltwoche.ch/",
+     "lean": "ytre høyre"
+    },
+    {
+     "name": "WOZ",
+     "url": "https://www.woz.ch/",
+     "lean": "ytre venstre"
+    },
+    {
+     "name": "Le Temps",
+     "url": "https://www.letemps.ch/",
+     "lean": "sentrum",
+     "lang": "fr"
+    },
+    {
+     "name": "swissinfo",
+     "url": "https://www.swissinfo.ch/eng/",
+     "lean": "allmenn",
+     "lang": "en"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "pl",
+   "name": "Polen",
+   "flag": "🇵🇱",
+   "lang": "pl",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=pl&gl=PL&ceid=PL:pl"
+    }
+   ],
+   "papers": [
+    {
+     "name": "Gazeta Wyborcza",
+     "url": "https://wyborcza.pl/",
+     "lean": "venstre"
+    },
+    {
+     "name": "Rzeczpospolita",
+     "url": "https://www.rp.pl/",
+     "lean": "høyre"
+    },
+    {
+     "name": "TVN24",
+     "url": "https://tvn24.pl/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "wPolityce",
+     "url": "https://wpolityce.pl/",
+     "lean": "ytre høyre"
+    },
+    {
+     "name": "Krytyka Polityczna",
+     "url": "https://krytykapolityczna.pl/",
+     "lean": "ytre venstre"
+    },
+    {
+     "name": "Notes from Poland",
+     "url": "https://notesfrompoland.com/",
+     "lean": "sentrum",
+     "lang": "en"
+    },
+    {
+     "name": "Polskie Radio English",
+     "url": "https://www.polskieradio.pl/395",
+     "lean": "statlig",
+     "lang": "en"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "be",
+   "name": "Belgia",
+   "flag": "🇧🇪",
+   "lang": "fr",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=fr&gl=BE&ceid=BE:fr"
+    }
+   ],
+   "papers": [
+    {
+     "name": "Le Soir",
+     "url": "https://www.lesoir.be/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "De Standaard",
+     "url": "https://www.standaard.be/",
+     "lean": "sentrum",
+     "lang": "nl"
+    },
+    {
+     "name": "VRT NWS",
+     "url": "https://www.vrt.be/vrtnws/nl/",
+     "lean": "allmenn",
+     "lang": "nl"
+    },
+    {
+     "name": "Het Nieuwsblad",
+     "url": "https://www.nieuwsblad.be/",
+     "lean": "sentrum",
+     "lang": "nl"
+    },
+    {
+     "name": "Brussels Times",
+     "url": "https://www.brusselstimes.com/",
+     "lean": "sentrum",
+     "lang": "en"
+    },
+    {
+     "name": "Doorbraak",
+     "url": "https://doorbraak.be/",
+     "lean": "ytre høyre",
+     "lang": "nl"
+    },
+    {
+     "name": "Solidaire",
+     "url": "https://www.solidaire.org/",
+     "lean": "ytre venstre"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "ro",
+   "name": "Romania",
+   "flag": "🇷🇴",
+   "lang": "ro",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=ro&gl=RO&ceid=RO:ro"
+    }
+   ],
+   "papers": [
+    {
+     "name": "Digi24",
+     "url": "https://www.digi24.ro/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "HotNews",
+     "url": "https://hotnews.ro/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Adevărul",
+     "url": "https://adevarul.ro/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Romania Insider",
+     "url": "https://www.romania-insider.com/",
+     "lean": "sentrum",
+     "lang": "en"
+    },
+    {
+     "name": "Realitatea",
+     "url": "https://www.realitatea.net/",
+     "lean": "høyre"
+    },
+    {
+     "name": "Libertatea",
+     "url": "https://www.libertatea.ro/",
+     "lean": "sentrum"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "cz",
+   "name": "Tsjekkia",
+   "flag": "🇨🇿",
+   "lang": "cs",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=cs&gl=CZ&ceid=CZ:cs"
+    }
+   ],
+   "papers": [
+    {
+     "name": "iROZHLAS",
+     "url": "https://www.irozhlas.cz/",
+     "lean": "allmenn"
+    },
+    {
+     "name": "Deník N",
+     "url": "https://denikn.cz/",
+     "lean": "venstre"
+    },
+    {
+     "name": "Novinky",
+     "url": "https://www.novinky.cz/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Lidovky",
+     "url": "https://www.lidovky.cz/",
+     "lean": "høyre"
+    },
+    {
+     "name": "Parlamentní listy",
+     "url": "https://www.parlamentnilisty.cz/",
+     "lean": "ytre høyre"
+    },
+    {
+     "name": "Expats.cz",
+     "url": "https://www.expats.cz/",
+     "lean": "sentrum",
+     "lang": "en"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "pt",
+   "name": "Portugal",
+   "flag": "🇵🇹",
+   "lang": "pt",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=pt-PT&gl=PT&ceid=PT:pt-150"
+    }
+   ],
+   "papers": [
+    {
+     "name": "Público",
+     "url": "https://www.publico.pt/",
+     "lean": "venstre"
+    },
+    {
+     "name": "Expresso",
+     "url": "https://expresso.pt/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Observador",
+     "url": "https://observador.pt/",
+     "lean": "høyre"
+    },
+    {
+     "name": "RTP",
+     "url": "https://www.rtp.pt/noticias/",
+     "lean": "allmenn"
+    },
+    {
+     "name": "Correio da Manhã",
+     "url": "https://www.cmjornal.pt/",
+     "lean": "høyre"
+    },
+    {
+     "name": "Esquerda.net",
+     "url": "https://www.esquerda.net/",
+     "lean": "ytre venstre"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "ua",
+   "name": "Ukraina",
+   "flag": "🇺🇦",
+   "lang": "uk",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=uk&gl=UA&ceid=UA:uk"
+    }
+   ],
+   "papers": [
+    {
+     "name": "Ukrainska Pravda",
+     "url": "https://www.pravda.com.ua/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Kyiv Independent",
+     "url": "https://kyivindependent.com/",
+     "lean": "sentrum",
+     "lang": "en"
+    },
+    {
+     "name": "Kyiv Post",
+     "url": "https://www.kyivpost.com/",
+     "lean": "sentrum",
+     "lang": "en"
+    },
+    {
+     "name": "Suspilne",
+     "url": "https://suspilne.media/",
+     "lean": "allmenn"
+    },
+    {
+     "name": "Ukrinform",
+     "url": "https://www.ukrinform.net/",
+     "lean": "statlig",
+     "lang": "en"
+    },
+    {
+     "name": "Strana",
+     "url": "https://strana.news/",
+     "lean": "opposisjon",
+     "lang": "ru"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "sk",
+   "name": "Slovakia",
+   "flag": "🇸🇰",
+   "lang": "sk",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=sk&gl=SK&ceid=SK:sk"
+    }
+   ],
+   "papers": [
+    {
+     "name": "SME",
+     "url": "https://www.sme.sk/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Denník N",
+     "url": "https://dennikn.sk/",
+     "lean": "venstre"
+    },
+    {
+     "name": "Pravda",
+     "url": "https://www.pravda.sk/",
+     "lean": "venstre"
+    },
+    {
+     "name": "Aktuality",
+     "url": "https://www.aktuality.sk/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Štandard",
+     "url": "https://standard.sk/",
+     "lean": "høyre"
+    },
+    {
+     "name": "Hlavné správy",
+     "url": "https://www.hlavnespravy.sk/",
+     "lean": "ytre høyre"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "bg",
+   "name": "Bulgaria",
+   "flag": "🇧🇬",
+   "lang": "bg",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=bg&gl=BG&ceid=BG:bg"
+    }
+   ],
+   "papers": [
+    {
+     "name": "Dnevnik",
+     "url": "https://www.dnevnik.bg/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Mediapool",
+     "url": "https://www.mediapool.bg/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "BNR",
+     "url": "https://bnr.bg/",
+     "lean": "allmenn"
+    },
+    {
+     "name": "Novinite",
+     "url": "https://www.novinite.com/",
+     "lean": "sentrum",
+     "lang": "en"
+    },
+    {
+     "name": "Duma",
+     "url": "https://duma.bg/",
+     "lean": "ytre venstre"
+    },
+    {
+     "name": "Trud",
+     "url": "https://trud.bg/",
+     "lean": "høyre"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "hr",
+   "name": "Kroatia",
+   "flag": "🇭🇷",
+   "lang": "hr",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss/search?q=%22Croatia%22+when:1d&hl=en-US&gl=US&ceid=US:en",
+     "note": "ingen Google News-utgave for landet: engelskspråklige saker om landet"
+    }
+   ],
+   "papers": [
+    {
+     "name": "Index.hr",
+     "url": "https://www.index.hr/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Jutarnji list",
+     "url": "https://www.jutarnji.hr/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Večernji list",
+     "url": "https://www.vecernji.hr/",
+     "lean": "høyre"
+    },
+    {
+     "name": "HRT",
+     "url": "https://vijesti.hrt.hr/",
+     "lean": "allmenn"
+    },
+    {
+     "name": "Novosti",
+     "url": "https://www.portalnovosti.com/",
+     "lean": "venstre"
+    },
+    {
+     "name": "Narod.hr",
+     "url": "https://narod.hr/",
+     "lean": "ytre høyre"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200,
+   "top_lang": "en"
+  },
+  {
+   "code": "rs",
+   "name": "Serbia",
+   "flag": "🇷🇸",
+   "lang": "sr",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=sr&gl=RS&ceid=RS:sr"
+    }
+   ],
+   "papers": [
+    {
+     "name": "N1 Srbija",
+     "url": "https://n1info.rs/",
+     "lean": "opposisjon"
+    },
+    {
+     "name": "RTS",
+     "url": "https://www.rts.rs/",
+     "lean": "statlig"
+    },
+    {
+     "name": "Blic",
+     "url": "https://www.blic.rs/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Informer",
+     "url": "https://informer.rs/",
+     "lean": "høyre"
+    },
+    {
+     "name": "Danas",
+     "url": "https://www.danas.rs/",
+     "lean": "venstre"
+    },
+    {
+     "name": "Politika",
+     "url": "https://www.politika.rs/",
+     "lean": "statlig"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "lu",
+   "name": "Luxembourg",
+   "flag": "🇱🇺",
+   "lang": "de",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss/search?q=%22Luxembourg%22+when:1d&hl=en-US&gl=US&ceid=US:en",
+     "note": "ingen Google News-utgave for landet: engelskspråklige saker om landet"
+    }
+   ],
+   "papers": [
+    {
+     "name": "Luxemburger Wort",
+     "url": "https://www.wort.lu/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "RTL Today",
+     "url": "https://today.rtl.lu/",
+     "lean": "allmenn",
+     "lang": "en"
+    },
+    {
+     "name": "L'essentiel",
+     "url": "https://www.lessentiel.lu/",
+     "lean": "sentrum",
+     "lang": "fr"
+    },
+    {
+     "name": "Tageblatt",
+     "url": "https://www.tageblatt.lu/",
+     "lean": "venstre"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200,
+   "top_lang": "en"
+  },
+  {
+   "code": "by",
+   "name": "Belarus",
+   "flag": "🇧🇾",
+   "lang": "ru",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss/search?q=%22Belarus%22+when:1d&hl=en-US&gl=US&ceid=US:en",
+     "note": "ingen Google News-utgave for landet: engelskspråklige saker om landet"
+    }
+   ],
+   "papers": [
+    {
+     "name": "BelTA",
+     "url": "https://eng.belta.by/",
+     "lean": "statlig",
+     "lang": "en"
+    },
+    {
+     "name": "Nasha Niva",
+     "url": "https://nashaniva.com/",
+     "lean": "opposisjon",
+     "lang": "be"
+    },
+    {
+     "name": "Zerkalo",
+     "url": "https://news.zerkalo.io/",
+     "lean": "opposisjon"
+    },
+    {
+     "name": "Charter97",
+     "url": "https://charter97.org/",
+     "lean": "opposisjon"
+    },
+    {
+     "name": "Belsat",
+     "url": "https://belsat.eu/",
+     "lean": "opposisjon"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200,
+   "top_lang": "en"
+  },
+  {
+   "code": "lt",
+   "name": "Litauen",
+   "flag": "🇱🇹",
+   "lang": "lt",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=lt&gl=LT&ceid=LT:lt"
+    }
+   ],
+   "papers": [
+    {
+     "name": "LRT",
+     "url": "https://www.lrt.lt/",
+     "lean": "allmenn"
+    },
+    {
+     "name": "Delfi",
+     "url": "https://www.delfi.lt/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "15min",
+     "url": "https://www.15min.lt/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "LRT English",
+     "url": "https://www.lrt.lt/en",
+     "lean": "allmenn",
+     "lang": "en"
+    },
+    {
+     "name": "Lietuvos rytas",
+     "url": "https://www.lrytas.lt/",
+     "lean": "høyre"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "si",
+   "name": "Slovenia",
+   "flag": "🇸🇮",
+   "lang": "sl",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=sl&gl=SI&ceid=SI:sl"
+    }
+   ],
+   "papers": [
+    {
+     "name": "RTV SLO",
+     "url": "https://www.rtvslo.si/",
+     "lean": "allmenn"
+    },
+    {
+     "name": "Delo",
+     "url": "https://www.delo.si/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Dnevnik",
+     "url": "https://www.dnevnik.si/",
+     "lean": "venstre"
+    },
+    {
+     "name": "Nova24TV",
+     "url": "https://nova24tv.si/",
+     "lean": "ytre høyre"
+    },
+    {
+     "name": "Mladina",
+     "url": "https://www.mladina.si/",
+     "lean": "ytre venstre"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "lv",
+   "name": "Latvia",
+   "flag": "🇱🇻",
+   "lang": "lv",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=lv&gl=LV&ceid=LV:lv"
+    }
+   ],
+   "papers": [
+    {
+     "name": "LSM",
+     "url": "https://www.lsm.lv/",
+     "lean": "allmenn"
+    },
+    {
+     "name": "Delfi",
+     "url": "https://www.delfi.lv/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Diena",
+     "url": "https://www.diena.lv/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "LSM English",
+     "url": "https://eng.lsm.lv/",
+     "lean": "allmenn",
+     "lang": "en"
+    },
+    {
+     "name": "Neatkarīgā",
+     "url": "https://nra.lv/",
+     "lean": "høyre"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "ee",
+   "name": "Estland",
+   "flag": "🇪🇪",
+   "lang": "et",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss/search?q=%22Estonia%22+when:1d&hl=en-US&gl=US&ceid=US:en",
+     "note": "ingen Google News-utgave for landet: engelskspråklige saker om landet"
+    }
+   ],
+   "papers": [
+    {
+     "name": "ERR",
+     "url": "https://www.err.ee/",
+     "lean": "allmenn"
+    },
+    {
+     "name": "ERR News",
+     "url": "https://news.err.ee/",
+     "lean": "allmenn",
+     "lang": "en"
+    },
+    {
+     "name": "Postimees",
+     "url": "https://www.postimees.ee/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Delfi",
+     "url": "https://www.delfi.ee/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Eesti Ekspress",
+     "url": "https://ekspress.delfi.ee/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Uued Uudised",
+     "url": "https://uueduudised.ee/",
+     "lean": "ytre høyre"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200,
+   "top_lang": "en"
+  },
+  {
+   "code": "is",
+   "name": "Island",
+   "flag": "🇮🇸",
+   "lang": "is",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss/search?q=%22Iceland%22+when:1d&hl=en-US&gl=US&ceid=US:en",
+     "note": "ingen Google News-utgave for landet: engelskspråklige saker om landet"
+    }
+   ],
+   "papers": [
+    {
+     "name": "RÚV",
+     "url": "https://www.ruv.is/",
+     "lean": "allmenn"
+    },
+    {
+     "name": "Morgunblaðið",
+     "url": "https://www.mbl.is/",
+     "lean": "høyre"
+    },
+    {
+     "name": "Vísir",
+     "url": "https://www.visir.is/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Iceland Review",
+     "url": "https://www.icelandreview.com/",
+     "lean": "sentrum",
+     "lang": "en"
+    },
+    {
+     "name": "Heimildin",
+     "url": "https://heimildin.is/",
+     "lean": "venstre"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200,
+   "top_lang": "en"
+  },
+  {
+   "code": "ba",
+   "name": "Bosnia-Hercegovina",
+   "flag": "🇧🇦",
+   "lang": "bs",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss/search?q=%22Bosnia%22+when:1d&hl=en-US&gl=US&ceid=US:en",
+     "note": "ingen Google News-utgave for landet: engelskspråklige saker om landet"
+    }
+   ],
+   "papers": [
+    {
+     "name": "Klix",
+     "url": "https://www.klix.ba/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Avaz",
+     "url": "https://avaz.ba/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "N1 BiH",
+     "url": "https://n1info.ba/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Balkan Insight",
+     "url": "https://balkaninsight.com/",
+     "lean": "sentrum",
+     "lang": "en"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200,
+   "top_lang": "en"
+  },
+  {
+   "code": "al",
+   "name": "Albania",
+   "flag": "🇦🇱",
+   "lang": "sq",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss/search?q=%22Albania%22+when:1d&hl=en-US&gl=US&ceid=US:en",
+     "note": "ingen Google News-utgave for landet: engelskspråklige saker om landet"
+    }
+   ],
+   "papers": [
+    {
+     "name": "Top Channel",
+     "url": "https://top-channel.tv/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Balkanweb",
+     "url": "https://www.balkanweb.com/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Euronews Albania",
+     "url": "https://euronews.al/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Exit News",
+     "url": "https://exit.al/en/",
+     "lean": "sentrum",
+     "lang": "en"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200,
+   "top_lang": "en"
+  },
+  {
+   "code": "mt",
+   "name": "Malta",
+   "flag": "🇲🇹",
+   "lang": "en",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss/search?q=%22Malta%22+when:1d&hl=en-US&gl=US&ceid=US:en",
+     "note": "ingen Google News-utgave for landet: engelskspråklige saker om landet"
+    }
+   ],
+   "papers": [
+    {
+     "name": "Times of Malta",
+     "url": "https://timesofmalta.com/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "MaltaToday",
+     "url": "https://www.maltatoday.com.mt/",
+     "lean": "venstre"
+    },
+    {
+     "name": "The Shift",
+     "url": "https://theshiftnews.com/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Malta Independent",
+     "url": "https://www.independent.com.mt/",
+     "lean": "sentrum"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "md",
+   "name": "Moldova",
+   "flag": "🇲🇩",
+   "lang": "ro",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss/search?q=%22Moldova%22+when:1d&hl=en-US&gl=US&ceid=US:en",
+     "note": "ingen Google News-utgave for landet: engelskspråklige saker om landet"
+    }
+   ],
+   "papers": [
+    {
+     "name": "Ziarul de Gardă",
+     "url": "https://www.zdg.md/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "NewsMaker",
+     "url": "https://newsmaker.md/",
+     "lean": "sentrum",
+     "lang": "ru"
+    },
+    {
+     "name": "Moldpres",
+     "url": "https://www.moldpres.md/",
+     "lean": "statlig"
+    },
+    {
+     "name": "IPN",
+     "url": "https://www.ipn.md/en/",
+     "lean": "sentrum",
+     "lang": "en"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200,
+   "top_lang": "en"
+  },
+  {
+   "code": "mk",
+   "name": "Nord-Makedonia",
+   "flag": "🇲🇰",
+   "lang": "mk",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss/search?q=%22North%20Macedonia%22+when:1d&hl=en-US&gl=US&ceid=US:en",
+     "note": "ingen Google News-utgave for landet: engelskspråklige saker om landet"
+    }
+   ],
+   "papers": [
+    {
+     "name": "MIA",
+     "url": "https://mia.mk/",
+     "lean": "statlig"
+    },
+    {
+     "name": "Sloboden Pečat",
+     "url": "https://www.slobodenpecat.mk/",
+     "lean": "venstre"
+    },
+    {
+     "name": "Nova Makedonija",
+     "url": "https://www.novamakedonija.com.mk/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Republika",
+     "url": "https://republika.mk/",
+     "lean": "høyre"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200,
+   "top_lang": "en"
+  },
+  {
+   "code": "cn",
+   "name": "Kina",
+   "flag": "🇨🇳",
+   "lang": "zh",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=zh-CN&gl=CN&ceid=CN:zh-Hans"
+    }
+   ],
+   "papers": [
+    {
+     "name": "Xinhua",
+     "url": "https://english.news.cn/",
+     "lean": "statlig",
+     "lang": "en"
+    },
+    {
+     "name": "People's Daily",
+     "url": "http://en.people.cn/",
+     "lean": "statlig",
+     "lang": "en"
+    },
+    {
+     "name": "Global Times",
+     "url": "https://www.globaltimes.cn/",
+     "lean": "statlig",
+     "lang": "en"
+    },
+    {
+     "name": "South China Morning Post",
+     "url": "https://www.scmp.com/",
+     "lean": "sentrum",
+     "lang": "en"
+    },
+    {
+     "name": "Caixin Global",
+     "url": "https://www.caixinglobal.com/",
+     "lean": "sentrum",
+     "lang": "en"
+    },
+    {
+     "name": "Radio Free Asia",
+     "url": "https://www.rfa.org/english/",
+     "lean": "opposisjon",
+     "lang": "en"
+    },
+    {
+     "name": "China Digital Times",
+     "url": "https://chinadigitaltimes.net/",
+     "lean": "opposisjon",
+     "lang": "en"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "jp",
+   "name": "Japan",
+   "flag": "🇯🇵",
+   "lang": "ja",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=ja&gl=JP&ceid=JP:ja"
+    }
+   ],
+   "papers": [
+    {
+     "name": "NHK World",
+     "url": "https://www3.nhk.or.jp/nhkworld/",
+     "lean": "allmenn",
+     "lang": "en"
+    },
+    {
+     "name": "Asahi",
+     "url": "https://www.asahi.com/",
+     "lean": "venstre"
+    },
+    {
+     "name": "Mainichi",
+     "url": "https://mainichi.jp/english/",
+     "lean": "venstre",
+     "lang": "en"
+    },
+    {
+     "name": "Nikkei Asia",
+     "url": "https://asia.nikkei.com/",
+     "lean": "sentrum",
+     "lang": "en"
+    },
+    {
+     "name": "Yomiuri",
+     "url": "https://japannews.yomiuri.co.jp/",
+     "lean": "høyre",
+     "lang": "en"
+    },
+    {
+     "name": "Sankei",
+     "url": "https://www.sankei.com/",
+     "lean": "ytre høyre"
+    },
+    {
+     "name": "Japan Times",
+     "url": "https://www.japantimes.co.jp/",
+     "lean": "sentrum",
+     "lang": "en"
+    },
+    {
+     "name": "Akahata",
+     "url": "https://www.jcp.or.jp/akahata/",
+     "lean": "ytre venstre"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "in",
+   "name": "India",
+   "flag": "🇮🇳",
+   "lang": "en",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=en-IN&gl=IN&ceid=IN:en"
+    }
+   ],
+   "papers": [
+    {
+     "name": "The Hindu",
+     "url": "https://www.thehindu.com/",
+     "lean": "venstre"
+    },
+    {
+     "name": "Indian Express",
+     "url": "https://indianexpress.com/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Times of India",
+     "url": "https://timesofindia.indiatimes.com/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Hindustan Times",
+     "url": "https://www.hindustantimes.com/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "The Wire",
+     "url": "https://thewire.in/",
+     "lean": "ytre venstre"
+    },
+    {
+     "name": "Republic World",
+     "url": "https://www.republicworld.com/",
+     "lean": "ytre høyre"
+    },
+    {
+     "name": "OpIndia",
+     "url": "https://www.opindia.com/",
+     "lean": "ytre høyre"
+    },
+    {
+     "name": "NDTV",
+     "url": "https://www.ndtv.com/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Scroll",
+     "url": "https://scroll.in/",
+     "lean": "venstre"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "br",
+   "name": "Brasil",
+   "flag": "🇧🇷",
+   "lang": "pt",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=pt-BR&gl=BR&ceid=BR:pt-419"
+    }
+   ],
+   "papers": [
+    {
+     "name": "Folha de S.Paulo",
+     "url": "https://www.folha.uol.com.br/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "O Globo",
+     "url": "https://oglobo.globo.com/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Estadão",
+     "url": "https://www.estadao.com.br/",
+     "lean": "høyre"
+    },
+    {
+     "name": "CartaCapital",
+     "url": "https://www.cartacapital.com.br/",
+     "lean": "venstre"
+    },
+    {
+     "name": "Brasil de Fato",
+     "url": "https://www.brasildefato.com.br/",
+     "lean": "ytre venstre"
+    },
+    {
+     "name": "Revista Oeste",
+     "url": "https://revistaoeste.com/",
+     "lean": "ytre høyre"
+    },
+    {
+     "name": "Agência Brasil",
+     "url": "https://agenciabrasil.ebc.com.br/",
+     "lean": "statlig"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "ca",
+   "name": "Canada",
+   "flag": "🇨🇦",
+   "lang": "en",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=en-CA&gl=CA&ceid=CA:en"
+    }
+   ],
+   "papers": [
+    {
+     "name": "CBC",
+     "url": "https://www.cbc.ca/news",
+     "lean": "allmenn"
+    },
+    {
+     "name": "Globe and Mail",
+     "url": "https://www.theglobeandmail.com/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Toronto Star",
+     "url": "https://www.thestar.com/",
+     "lean": "venstre"
+    },
+    {
+     "name": "National Post",
+     "url": "https://nationalpost.com/",
+     "lean": "høyre"
+    },
+    {
+     "name": "Rebel News",
+     "url": "https://www.rebelnews.com/",
+     "lean": "ytre høyre"
+    },
+    {
+     "name": "The Tyee",
+     "url": "https://thetyee.ca/",
+     "lean": "venstre"
+    },
+    {
+     "name": "rabble.ca",
+     "url": "https://rabble.ca/",
+     "lean": "ytre venstre"
+    },
+    {
+     "name": "La Presse",
+     "url": "https://www.lapresse.ca/",
+     "lean": "sentrum",
+     "lang": "fr"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "kr",
+   "name": "Sør-Korea",
+   "flag": "🇰🇷",
+   "lang": "ko",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=ko&gl=KR&ceid=KR:ko"
+    }
+   ],
+   "papers": [
+    {
+     "name": "Yonhap",
+     "url": "https://en.yna.co.kr/",
+     "lean": "statlig",
+     "lang": "en"
+    },
+    {
+     "name": "Korea Herald",
+     "url": "https://www.koreaherald.com/",
+     "lean": "sentrum",
+     "lang": "en"
+    },
+    {
+     "name": "Hankyoreh",
+     "url": "https://english.hani.co.kr/",
+     "lean": "venstre",
+     "lang": "en"
+    },
+    {
+     "name": "Chosun Ilbo",
+     "url": "https://www.chosun.com/english/",
+     "lean": "høyre",
+     "lang": "en"
+    },
+    {
+     "name": "JoongAng Daily",
+     "url": "https://koreajoongangdaily.joins.com/",
+     "lean": "sentrum",
+     "lang": "en"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "mx",
+   "name": "Mexico",
+   "flag": "🇲🇽",
+   "lang": "es",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=es-419&gl=MX&ceid=MX:es-419"
+    }
+   ],
+   "papers": [
+    {
+     "name": "El Universal",
+     "url": "https://www.eluniversal.com.mx/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Reforma",
+     "url": "https://www.reforma.com/",
+     "lean": "høyre"
+    },
+    {
+     "name": "La Jornada",
+     "url": "https://www.jornada.com.mx/",
+     "lean": "ytre venstre"
+    },
+    {
+     "name": "Milenio",
+     "url": "https://www.milenio.com/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Proceso",
+     "url": "https://www.proceso.com.mx/",
+     "lean": "venstre"
+    },
+    {
+     "name": "Mexico News Daily",
+     "url": "https://mexiconewsdaily.com/",
+     "lean": "sentrum",
+     "lang": "en"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "au",
+   "name": "Australia",
+   "flag": "🇦🇺",
+   "lang": "en",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=en-AU&gl=AU&ceid=AU:en"
+    }
+   ],
+   "papers": [
+    {
+     "name": "ABC News",
+     "url": "https://www.abc.net.au/news",
+     "lean": "allmenn"
+    },
+    {
+     "name": "Sydney Morning Herald",
+     "url": "https://www.smh.com.au/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "The Australian",
+     "url": "https://www.theaustralian.com.au/",
+     "lean": "høyre"
+    },
+    {
+     "name": "Guardian Australia",
+     "url": "https://www.theguardian.com/australia-news",
+     "lean": "venstre"
+    },
+    {
+     "name": "Sky News Australia",
+     "url": "https://www.skynews.com.au/",
+     "lean": "høyre"
+    },
+    {
+     "name": "Green Left",
+     "url": "https://www.greenleft.org.au/",
+     "lean": "ytre venstre"
+    },
+    {
+     "name": "Spectator Australia",
+     "url": "https://www.spectator.com.au/",
+     "lean": "ytre høyre"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "id",
+   "name": "Indonesia",
+   "flag": "🇮🇩",
+   "lang": "id",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=id&gl=ID&ceid=ID:id"
+    }
+   ],
+   "papers": [
+    {
+     "name": "Kompas",
+     "url": "https://www.kompas.com/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Tempo",
+     "url": "https://www.tempo.co/",
+     "lean": "venstre"
+    },
+    {
+     "name": "Detik",
+     "url": "https://www.detik.com/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Republika",
+     "url": "https://www.republika.co.id/",
+     "lean": "høyre"
+    },
+    {
+     "name": "Jakarta Post",
+     "url": "https://www.thejakartapost.com/",
+     "lean": "sentrum",
+     "lang": "en"
+    },
+    {
+     "name": "Antara",
+     "url": "https://en.antaranews.com/",
+     "lean": "statlig",
+     "lang": "en"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "sa",
+   "name": "Saudi-Arabia",
+   "flag": "🇸🇦",
+   "lang": "ar",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=ar&gl=SA&ceid=SA:ar"
+    }
+   ],
+   "papers": [
+    {
+     "name": "Arab News",
+     "url": "https://www.arabnews.com/",
+     "lean": "statlig",
+     "lang": "en"
+    },
+    {
+     "name": "Saudi Gazette",
+     "url": "https://saudigazette.com.sa/",
+     "lean": "statlig",
+     "lang": "en"
+    },
+    {
+     "name": "Al Arabiya",
+     "url": "https://english.alarabiya.net/",
+     "lean": "statlig",
+     "lang": "en"
+    },
+    {
+     "name": "SPA",
+     "url": "https://www.spa.gov.sa/en",
+     "lean": "statlig",
+     "lang": "en"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "ar",
+   "name": "Argentina",
+   "flag": "🇦🇷",
+   "lang": "es",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=es-419&gl=AR&ceid=AR:es-419"
+    }
+   ],
+   "papers": [
+    {
+     "name": "Clarín",
+     "url": "https://www.clarin.com/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "La Nación",
+     "url": "https://www.lanacion.com.ar/",
+     "lean": "høyre"
+    },
+    {
+     "name": "Página/12",
+     "url": "https://www.pagina12.com.ar/",
+     "lean": "ytre venstre"
+    },
+    {
+     "name": "Infobae",
+     "url": "https://www.infobae.com/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Buenos Aires Times",
+     "url": "https://www.batimes.com.ar/",
+     "lean": "sentrum",
+     "lang": "en"
+    },
+    {
+     "name": "La Derecha Diario",
+     "url": "https://derechadiario.com.ar/",
+     "lean": "ytre høyre"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "sg",
+   "name": "Singapore",
+   "flag": "🇸🇬",
+   "lang": "en",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=en-SG&gl=SG&ceid=SG:en"
+    }
+   ],
+   "papers": [
+    {
+     "name": "Straits Times",
+     "url": "https://www.straitstimes.com/",
+     "lean": "statlig"
+    },
+    {
+     "name": "CNA",
+     "url": "https://www.channelnewsasia.com/",
+     "lean": "statlig"
+    },
+    {
+     "name": "Mothership",
+     "url": "https://mothership.sg/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "The Online Citizen",
+     "url": "https://www.theonlinecitizen.com/",
+     "lean": "opposisjon"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "ae",
+   "name": "De forente arabiske emirater",
+   "flag": "🇦🇪",
+   "lang": "ar",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=ar&gl=AE&ceid=AE:ar"
+    }
+   ],
+   "papers": [
+    {
+     "name": "The National",
+     "url": "https://www.thenationalnews.com/",
+     "lean": "statlig",
+     "lang": "en"
+    },
+    {
+     "name": "Gulf News",
+     "url": "https://gulfnews.com/",
+     "lean": "statlig",
+     "lang": "en"
+    },
+    {
+     "name": "Khaleej Times",
+     "url": "https://www.khaleejtimes.com/",
+     "lean": "statlig",
+     "lang": "en"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "th",
+   "name": "Thailand",
+   "flag": "🇹🇭",
+   "lang": "th",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=th&gl=TH&ceid=TH:th"
+    }
+   ],
+   "papers": [
+    {
+     "name": "Bangkok Post",
+     "url": "https://www.bangkokpost.com/",
+     "lean": "sentrum",
+     "lang": "en"
+    },
+    {
+     "name": "Khaosod English",
+     "url": "https://www.khaosodenglish.com/",
+     "lean": "venstre",
+     "lang": "en"
+    },
+    {
+     "name": "Thai PBS World",
+     "url": "https://world.thaipbs.or.th/",
+     "lean": "allmenn",
+     "lang": "en"
+    },
+    {
+     "name": "Thairath",
+     "url": "https://www.thairath.co.th/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Prachatai",
+     "url": "https://prachataienglish.com/",
+     "lean": "venstre",
+     "lang": "en"
+    },
+    {
+     "name": "The Nation",
+     "url": "https://www.nationthailand.com/",
+     "lean": "høyre",
+     "lang": "en"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "co",
+   "name": "Colombia",
+   "flag": "🇨🇴",
+   "lang": "es",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=es-419&gl=CO&ceid=CO:es-419"
+    }
+   ],
+   "papers": [
+    {
+     "name": "El Tiempo",
+     "url": "https://www.eltiempo.com/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "El Espectador",
+     "url": "https://www.elespectador.com/",
+     "lean": "venstre"
+    },
+    {
+     "name": "Semana",
+     "url": "https://www.semana.com/",
+     "lean": "høyre"
+    },
+    {
+     "name": "La Silla Vacía",
+     "url": "https://www.lasillavacia.com/",
+     "lean": "sentrum"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "my",
+   "name": "Malaysia",
+   "flag": "🇲🇾",
+   "lang": "en",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=en-MY&gl=MY&ceid=MY:en"
+    }
+   ],
+   "papers": [
+    {
+     "name": "The Star",
+     "url": "https://www.thestar.com.my/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Malaysiakini",
+     "url": "https://www.malaysiakini.com/",
+     "lean": "opposisjon"
+    },
+    {
+     "name": "New Straits Times",
+     "url": "https://www.nst.com.my/",
+     "lean": "statlig"
+    },
+    {
+     "name": "Free Malaysia Today",
+     "url": "https://www.freemalaysiatoday.com/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Malay Mail",
+     "url": "https://www.malaymail.com/",
+     "lean": "sentrum"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "vn",
+   "name": "Vietnam",
+   "flag": "🇻🇳",
+   "lang": "vi",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=vi&gl=VN&ceid=VN:vi"
+    }
+   ],
+   "papers": [
+    {
+     "name": "VnExpress International",
+     "url": "https://e.vnexpress.net/",
+     "lean": "sentrum",
+     "lang": "en"
+    },
+    {
+     "name": "Tuoi Tre News",
+     "url": "https://tuoitrenews.vn/",
+     "lean": "statlig",
+     "lang": "en"
+    },
+    {
+     "name": "VietnamPlus",
+     "url": "https://en.vietnamplus.vn/",
+     "lean": "statlig",
+     "lang": "en"
+    },
+    {
+     "name": "The Vietnamese",
+     "url": "https://www.thevietnamese.org/",
+     "lean": "opposisjon",
+     "lang": "en"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "bd",
+   "name": "Bangladesh",
+   "flag": "🇧🇩",
+   "lang": "bn",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=bn&gl=BD&ceid=BD:bn"
+    }
+   ],
+   "papers": [
+    {
+     "name": "The Daily Star",
+     "url": "https://www.thedailystar.net/",
+     "lean": "sentrum",
+     "lang": "en"
+    },
+    {
+     "name": "Dhaka Tribune",
+     "url": "https://www.dhakatribune.com/",
+     "lean": "sentrum",
+     "lang": "en"
+    },
+    {
+     "name": "Prothom Alo",
+     "url": "https://en.prothomalo.com/",
+     "lean": "sentrum",
+     "lang": "en"
+    },
+    {
+     "name": "New Age",
+     "url": "https://www.newagebd.net/",
+     "lean": "venstre",
+     "lang": "en"
+    },
+    {
+     "name": "bdnews24",
+     "url": "https://bdnews24.com/",
+     "lean": "sentrum",
+     "lang": "en"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "ph",
+   "name": "Filippinene",
+   "flag": "🇵🇭",
+   "lang": "en",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=en-PH&gl=PH&ceid=PH:en"
+    }
+   ],
+   "papers": [
+    {
+     "name": "Inquirer",
+     "url": "https://www.inquirer.net/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Rappler",
+     "url": "https://www.rappler.com/",
+     "lean": "venstre"
+    },
+    {
+     "name": "Philstar",
+     "url": "https://www.philstar.com/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Manila Times",
+     "url": "https://www.manilatimes.net/",
+     "lean": "høyre"
+    },
+    {
+     "name": "GMA News",
+     "url": "https://www.gmanetwork.com/news/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Bulatlat",
+     "url": "https://www.bulatlat.com/",
+     "lean": "ytre venstre"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "za",
+   "name": "Sør-Afrika",
+   "flag": "🇿🇦",
+   "lang": "en",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=en-ZA&gl=ZA&ceid=ZA:en"
+    }
+   ],
+   "papers": [
+    {
+     "name": "News24",
+     "url": "https://www.news24.com/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Daily Maverick",
+     "url": "https://www.dailymaverick.co.za/",
+     "lean": "venstre"
+    },
+    {
+     "name": "Mail & Guardian",
+     "url": "https://mg.co.za/",
+     "lean": "venstre"
+    },
+    {
+     "name": "SABC News",
+     "url": "https://www.sabcnews.com/",
+     "lean": "allmenn"
+    },
+    {
+     "name": "BizNews",
+     "url": "https://www.biznews.com/",
+     "lean": "høyre"
+    },
+    {
+     "name": "IOL",
+     "url": "https://www.iol.co.za/",
+     "lean": "sentrum"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "pk",
+   "name": "Pakistan",
+   "flag": "🇵🇰",
+   "lang": "en",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=en-PK&gl=PK&ceid=PK:en"
+    }
+   ],
+   "papers": [
+    {
+     "name": "Dawn",
+     "url": "https://www.dawn.com/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Express Tribune",
+     "url": "https://tribune.com.pk/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "The News",
+     "url": "https://www.thenews.com.pk/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Geo News",
+     "url": "https://www.geo.tv/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Business Recorder",
+     "url": "https://www.brecorder.com/",
+     "lean": "sentrum"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "eg",
+   "name": "Egypt",
+   "flag": "🇪🇬",
+   "lang": "ar",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=ar&gl=EG&ceid=EG:ar"
+    }
+   ],
+   "papers": [
+    {
+     "name": "Ahram Online",
+     "url": "https://english.ahram.org.eg/",
+     "lean": "statlig",
+     "lang": "en"
+    },
+    {
+     "name": "Egypt Independent",
+     "url": "https://egyptindependent.com/",
+     "lean": "sentrum",
+     "lang": "en"
+    },
+    {
+     "name": "Mada Masr",
+     "url": "https://www.madamasr.com/en/",
+     "lean": "opposisjon",
+     "lang": "en"
+    },
+    {
+     "name": "Egypt Today",
+     "url": "https://www.egypttoday.com/",
+     "lean": "statlig",
+     "lang": "en"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "cl",
+   "name": "Chile",
+   "flag": "🇨🇱",
+   "lang": "es",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=es-419&gl=CL&ceid=CL:es-419"
+    }
+   ],
+   "papers": [
+    {
+     "name": "La Tercera",
+     "url": "https://www.latercera.com/",
+     "lean": "høyre"
+    },
+    {
+     "name": "Emol",
+     "url": "https://www.emol.com/",
+     "lean": "høyre"
+    },
+    {
+     "name": "BioBioChile",
+     "url": "https://www.biobiochile.cl/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "El Mostrador",
+     "url": "https://www.elmostrador.cl/",
+     "lean": "venstre"
+    },
+    {
+     "name": "CIPER",
+     "url": "https://www.ciperchile.cl/",
+     "lean": "venstre"
+    },
+    {
+     "name": "El Siglo",
+     "url": "https://elsiglo.cl/",
+     "lean": "ytre venstre"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "pe",
+   "name": "Peru",
+   "flag": "🇵🇪",
+   "lang": "es",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=es-419&gl=PE&ceid=PE:es-419"
+    }
+   ],
+   "papers": [
+    {
+     "name": "El Comercio",
+     "url": "https://elcomercio.pe/",
+     "lean": "høyre"
+    },
+    {
+     "name": "La República",
+     "url": "https://larepublica.pe/",
+     "lean": "venstre"
+    },
+    {
+     "name": "RPP",
+     "url": "https://rpp.pe/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Expreso",
+     "url": "https://www.expreso.com.pe/",
+     "lean": "ytre høyre"
+    },
+    {
+     "name": "IDL-Reporteros",
+     "url": "https://www.idl-reporteros.pe/",
+     "lean": "venstre"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "kz",
+   "name": "Kasakhstan",
+   "flag": "🇰🇿",
+   "lang": "ru",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss/search?q=%22Kazakhstan%22+when:1d&hl=en-US&gl=US&ceid=US:en",
+     "note": "ingen Google News-utgave for landet: engelskspråklige saker om landet"
+    }
+   ],
+   "papers": [
+    {
+     "name": "Tengrinews",
+     "url": "https://tengrinews.kz/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Kazinform",
+     "url": "https://en.inform.kz/",
+     "lean": "statlig",
+     "lang": "en"
+    },
+    {
+     "name": "Astana Times",
+     "url": "https://astanatimes.com/",
+     "lean": "statlig",
+     "lang": "en"
+    },
+    {
+     "name": "Vlast",
+     "url": "https://vlast.kz/",
+     "lean": "opposisjon"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200,
+   "top_lang": "en"
+  },
+  {
+   "code": "ng",
+   "name": "Nigeria",
+   "flag": "🇳🇬",
+   "lang": "en",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=en-NG&gl=NG&ceid=NG:en"
+    }
+   ],
+   "papers": [
+    {
+     "name": "Punch",
+     "url": "https://punchng.com/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Premium Times",
+     "url": "https://www.premiumtimesng.com/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Vanguard",
+     "url": "https://www.vanguardngr.com/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "The Guardian Nigeria",
+     "url": "https://guardian.ng/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Sahara Reporters",
+     "url": "https://saharareporters.com/",
+     "lean": "opposisjon"
+    },
+    {
+     "name": "Daily Trust",
+     "url": "https://dailytrust.com/",
+     "lean": "sentrum"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "dz",
+   "name": "Algerie",
+   "flag": "🇩🇿",
+   "lang": "fr",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss/search?q=%22Algeria%22+when:1d&hl=en-US&gl=US&ceid=US:en",
+     "note": "ingen Google News-utgave for landet: engelskspråklige saker om landet"
+    }
+   ],
+   "papers": [
+    {
+     "name": "APS",
+     "url": "https://www.aps.dz/",
+     "lean": "statlig"
+    },
+    {
+     "name": "TSA",
+     "url": "https://www.tsa-algerie.com/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "El Watan",
+     "url": "https://elwatan-dz.com/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Algérie Part",
+     "url": "https://www.algeriepart.com/",
+     "lean": "opposisjon"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200,
+   "top_lang": "en"
+  },
+  {
+   "code": "nz",
+   "name": "New Zealand",
+   "flag": "🇳🇿",
+   "lang": "en",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=en-NZ&gl=NZ&ceid=NZ:en"
+    }
+   ],
+   "papers": [
+    {
+     "name": "RNZ",
+     "url": "https://www.rnz.co.nz/",
+     "lean": "allmenn"
+    },
+    {
+     "name": "NZ Herald",
+     "url": "https://www.nzherald.co.nz/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Stuff",
+     "url": "https://www.stuff.co.nz/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "The Spinoff",
+     "url": "https://thespinoff.co.nz/",
+     "lean": "venstre"
+    },
+    {
+     "name": "Newsroom",
+     "url": "https://newsroom.co.nz/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "The Platform",
+     "url": "https://www.theplatform.kiwi/",
+     "lean": "høyre"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "iq",
+   "name": "Irak",
+   "flag": "🇮🇶",
+   "lang": "en",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss/search?q=%22Iraq%22+when:1d&hl=en-US&gl=US&ceid=US:en",
+     "note": "ingen Google News-utgave for landet: engelskspråklige saker om landet"
+    }
+   ],
+   "papers": [
+    {
+     "name": "Rudaw",
+     "url": "https://www.rudaw.net/english",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Shafaq News",
+     "url": "https://shafaq.com/en",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Kurdistan24",
+     "url": "https://www.kurdistan24.net/en",
+     "lean": "sentrum"
+    },
+    {
+     "name": "INA",
+     "url": "https://ina.iq/eng/",
+     "lean": "statlig"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "qa",
+   "name": "Qatar",
+   "flag": "🇶🇦",
+   "lang": "en",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss/search?q=%22Qatar%22+when:1d&hl=en-US&gl=US&ceid=US:en",
+     "note": "ingen Google News-utgave for landet: engelskspråklige saker om landet"
+    }
+   ],
+   "papers": [
+    {
+     "name": "The Peninsula",
+     "url": "https://thepeninsulaqatar.com/",
+     "lean": "statlig"
+    },
+    {
+     "name": "Gulf Times",
+     "url": "https://www.gulf-times.com/",
+     "lean": "statlig"
+    },
+    {
+     "name": "Doha News",
+     "url": "https://dohanews.co/",
+     "lean": "sentrum"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "cu",
+   "name": "Cuba",
+   "flag": "🇨🇺",
+   "lang": "es",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=es-419&gl=CU&ceid=CU:es-419"
+    }
+   ],
+   "papers": [
+    {
+     "name": "Granma",
+     "url": "https://www.granma.cu/",
+     "lean": "statlig"
+    },
+    {
+     "name": "Cubadebate",
+     "url": "http://www.cubadebate.cu/",
+     "lean": "statlig"
+    },
+    {
+     "name": "14ymedio",
+     "url": "https://www.14ymedio.com/",
+     "lean": "opposisjon"
+    },
+    {
+     "name": "CiberCuba",
+     "url": "https://www.cibercuba.com/",
+     "lean": "opposisjon"
+    },
+    {
+     "name": "Diario de Cuba",
+     "url": "https://diariodecuba.com/",
+     "lean": "opposisjon"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "ma",
+   "name": "Marokko",
+   "flag": "🇲🇦",
+   "lang": "fr",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=fr&gl=MA&ceid=MA:fr"
+    }
+   ],
+   "papers": [
+    {
+     "name": "Hespress",
+     "url": "https://en.hespress.com/",
+     "lean": "sentrum",
+     "lang": "en"
+    },
+    {
+     "name": "Le360",
+     "url": "https://fr.le360.ma/",
+     "lean": "statlig"
+    },
+    {
+     "name": "Le Desk",
+     "url": "https://ledesk.ma/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Morocco World News",
+     "url": "https://www.moroccoworldnews.com/",
+     "lean": "sentrum",
+     "lang": "en"
+    },
+    {
+     "name": "Yabiladi",
+     "url": "https://www.yabiladi.com/",
+     "lean": "sentrum"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "uz",
+   "name": "Usbekistan",
+   "flag": "🇺🇿",
+   "lang": "ru",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss/search?q=%22Uzbekistan%22+when:1d&hl=en-US&gl=US&ceid=US:en",
+     "note": "ingen Google News-utgave for landet: engelskspråklige saker om landet"
+    }
+   ],
+   "papers": [
+    {
+     "name": "Gazeta.uz",
+     "url": "https://www.gazeta.uz/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Kun.uz",
+     "url": "https://kun.uz/en",
+     "lean": "sentrum",
+     "lang": "en"
+    },
+    {
+     "name": "UzDaily",
+     "url": "https://www.uzdaily.uz/en",
+     "lean": "statlig",
+     "lang": "en"
+    },
+    {
+     "name": "Daryo",
+     "url": "https://daryo.uz/en",
+     "lean": "sentrum",
+     "lang": "en"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200,
+   "top_lang": "en"
+  },
+  {
+   "code": "ao",
+   "name": "Angola",
+   "flag": "🇦🇴",
+   "lang": "pt",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss/search?q=%22Angola%22+when:1d&hl=en-US&gl=US&ceid=US:en",
+     "note": "ingen Google News-utgave for landet: engelskspråklige saker om landet"
+    }
+   ],
+   "papers": [
+    {
+     "name": "Jornal de Angola",
+     "url": "https://www.jornaldeangola.ao/",
+     "lean": "statlig"
+    },
+    {
+     "name": "Novo Jornal",
+     "url": "https://novojornal.co.ao/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Club-K",
+     "url": "https://www.club-k.net/",
+     "lean": "opposisjon"
+    },
+    {
+     "name": "ANGOP",
+     "url": "https://www.angop.ao/",
+     "lean": "statlig"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200,
+   "top_lang": "en"
+  },
+  {
+   "code": "ke",
+   "name": "Kenya",
+   "flag": "🇰🇪",
+   "lang": "en",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=en-KE&gl=KE&ceid=KE:en"
+    }
+   ],
+   "papers": [
+    {
+     "name": "Nation",
+     "url": "https://nation.africa/kenya",
+     "lean": "sentrum"
+    },
+    {
+     "name": "The Standard",
+     "url": "https://www.standardmedia.co.ke/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "The Star",
+     "url": "https://www.the-star.co.ke/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Citizen Digital",
+     "url": "https://www.citizen.digital/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "KBC",
+     "url": "https://www.kbc.co.ke/",
+     "lean": "allmenn"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "kw",
+   "name": "Kuwait",
+   "flag": "🇰🇼",
+   "lang": "en",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss/search?q=%22Kuwait%22+when:1d&hl=en-US&gl=US&ceid=US:en",
+     "note": "ingen Google News-utgave for landet: engelskspråklige saker om landet"
+    }
+   ],
+   "papers": [
+    {
+     "name": "Kuwait Times",
+     "url": "https://kuwaittimes.com/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Arab Times",
+     "url": "https://www.arabtimesonline.com/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "KUNA",
+     "url": "https://www.kuna.net.kw/",
+     "lean": "statlig"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "do",
+   "name": "Den dominikanske republikk",
+   "flag": "🇩🇴",
+   "lang": "es",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss/search?q=%22Dominican%20Republic%22+when:1d&hl=en-US&gl=US&ceid=US:en",
+     "note": "ingen Google News-utgave for landet: engelskspråklige saker om landet"
+    }
+   ],
+   "papers": [
+    {
+     "name": "Listín Diario",
+     "url": "https://listindiario.com/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Diario Libre",
+     "url": "https://www.diariolibre.com/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Dominican Today",
+     "url": "https://dominicantoday.com/",
+     "lean": "sentrum",
+     "lang": "en"
+    },
+    {
+     "name": "El Nacional",
+     "url": "https://elnacional.com.do/",
+     "lean": "sentrum"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200,
+   "top_lang": "en"
+  },
+  {
+   "code": "ec",
+   "name": "Ecuador",
+   "flag": "🇪🇨",
+   "lang": "es",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss/search?q=%22Ecuador%22+when:1d&hl=en-US&gl=US&ceid=US:en",
+     "note": "ingen Google News-utgave for landet: engelskspråklige saker om landet"
+    }
+   ],
+   "papers": [
+    {
+     "name": "El Universo",
+     "url": "https://www.eluniverso.com/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Primicias",
+     "url": "https://www.primicias.ec/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "El Comercio",
+     "url": "https://www.elcomercio.com/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Expreso",
+     "url": "https://www.expreso.ec/",
+     "lean": "høyre"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200,
+   "top_lang": "en"
+  },
+  {
+   "code": "gt",
+   "name": "Guatemala",
+   "flag": "🇬🇹",
+   "lang": "es",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss/search?q=%22Guatemala%22+when:1d&hl=en-US&gl=US&ceid=US:en",
+     "note": "ingen Google News-utgave for landet: engelskspråklige saker om landet"
+    }
+   ],
+   "papers": [
+    {
+     "name": "Prensa Libre",
+     "url": "https://www.prensalibre.com/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Plaza Pública",
+     "url": "https://www.plazapublica.com.gt/",
+     "lean": "venstre"
+    },
+    {
+     "name": "Soy502",
+     "url": "https://www.soy502.com/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "República",
+     "url": "https://republica.gt/",
+     "lean": "høyre"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200,
+   "top_lang": "en"
+  },
+  {
+   "code": "gh",
+   "name": "Ghana",
+   "flag": "🇬🇭",
+   "lang": "en",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=en-GH&gl=GH&ceid=GH:en"
+    }
+   ],
+   "papers": [
+    {
+     "name": "GhanaWeb",
+     "url": "https://www.ghanaweb.com/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "MyJoyOnline",
+     "url": "https://www.myjoyonline.com/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Graphic Online",
+     "url": "https://www.graphic.com.gh/",
+     "lean": "statlig"
+    },
+    {
+     "name": "Citi Newsroom",
+     "url": "https://citinewsroom.com/",
+     "lean": "sentrum"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "et",
+   "name": "Etiopia",
+   "flag": "🇪🇹",
+   "lang": "en",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=en-ET&gl=ET&ceid=ET:en"
+    }
+   ],
+   "papers": [
+    {
+     "name": "Addis Standard",
+     "url": "https://addisstandard.com/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "The Reporter",
+     "url": "https://www.thereporterethiopia.com/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "ENA",
+     "url": "https://www.ena.et/web/eng",
+     "lean": "statlig"
+    },
+    {
+     "name": "Borkena",
+     "url": "https://borkena.com/",
+     "lean": "opposisjon"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "ve",
+   "name": "Venezuela",
+   "flag": "🇻🇪",
+   "lang": "es",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=es-419&gl=VE&ceid=VE:es-419"
+    }
+   ],
+   "papers": [
+    {
+     "name": "El Nacional",
+     "url": "https://www.elnacional.com/",
+     "lean": "opposisjon"
+    },
+    {
+     "name": "Efecto Cocuyo",
+     "url": "https://efectococuyo.com/",
+     "lean": "opposisjon"
+    },
+    {
+     "name": "Últimas Noticias",
+     "url": "https://ultimasnoticias.com.ve/",
+     "lean": "statlig"
+    },
+    {
+     "name": "TeleSUR",
+     "url": "https://www.telesurtv.net/",
+     "lean": "statlig"
+    },
+    {
+     "name": "El Pitazo",
+     "url": "https://elpitazo.net/",
+     "lean": "opposisjon"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "cd",
+   "name": "DR Kongo",
+   "flag": "🇨🇩",
+   "lang": "fr",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss/search?q=%22Congo%20Kinshasa%22+when:1d&hl=en-US&gl=US&ceid=US:en",
+     "note": "ingen Google News-utgave for landet: engelskspråklige saker om landet"
+    }
+   ],
+   "papers": [
+    {
+     "name": "Radio Okapi",
+     "url": "https://www.radiookapi.net/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Actualite.cd",
+     "url": "https://actualite.cd/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "7sur7.cd",
+     "url": "https://7sur7.cd/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "ACP",
+     "url": "https://acp.cd/",
+     "lean": "statlig"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200,
+   "top_lang": "en"
+  },
+  {
+   "code": "om",
+   "name": "Oman",
+   "flag": "🇴🇲",
+   "lang": "en",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss/search?q=%22Oman%22+when:1d&hl=en-US&gl=US&ceid=US:en",
+     "note": "ingen Google News-utgave for landet: engelskspråklige saker om landet"
+    }
+   ],
+   "papers": [
+    {
+     "name": "Times of Oman",
+     "url": "https://timesofoman.com/",
+     "lean": "statlig"
+    },
+    {
+     "name": "Muscat Daily",
+     "url": "https://www.muscatdaily.com/",
+     "lean": "statlig"
+    },
+    {
+     "name": "Oman Observer",
+     "url": "https://www.omanobserver.om/",
+     "lean": "statlig"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "cr",
+   "name": "Costa Rica",
+   "flag": "🇨🇷",
+   "lang": "es",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss/search?q=%22Costa%20Rica%22+when:1d&hl=en-US&gl=US&ceid=US:en",
+     "note": "ingen Google News-utgave for landet: engelskspråklige saker om landet"
+    }
+   ],
+   "papers": [
+    {
+     "name": "La Nación",
+     "url": "https://www.nacion.com/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "CRHoy",
+     "url": "https://www.crhoy.com/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Tico Times",
+     "url": "https://ticotimes.net/",
+     "lean": "sentrum",
+     "lang": "en"
+    },
+    {
+     "name": "Semanario Universidad",
+     "url": "https://semanariouniversidad.com/",
+     "lean": "venstre"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200,
+   "top_lang": "en"
+  },
+  {
+   "code": "lk",
+   "name": "Sri Lanka",
+   "flag": "🇱🇰",
+   "lang": "en",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss/search?q=%22Sri%20Lanka%22+when:1d&hl=en-US&gl=US&ceid=US:en",
+     "note": "ingen Google News-utgave for landet: engelskspråklige saker om landet"
+    }
+   ],
+   "papers": [
+    {
+     "name": "Daily Mirror",
+     "url": "https://www.dailymirror.lk/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Daily FT",
+     "url": "https://www.ft.lk/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "EconomyNext",
+     "url": "https://economynext.com/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Ada Derana",
+     "url": "https://www.adaderana.lk/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Groundviews",
+     "url": "https://groundviews.org/",
+     "lean": "venstre"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "ci",
+   "name": "Elfenbenskysten",
+   "flag": "🇨🇮",
+   "lang": "fr",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss/search?q=%22Ivory%20Coast%22+when:1d&hl=en-US&gl=US&ceid=US:en",
+     "note": "ingen Google News-utgave for landet: engelskspråklige saker om landet"
+    }
+   ],
+   "papers": [
+    {
+     "name": "Fraternité Matin",
+     "url": "https://www.fratmat.info/",
+     "lean": "statlig"
+    },
+    {
+     "name": "Abidjan.net",
+     "url": "https://news.abidjan.net/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Koaci",
+     "url": "https://www.koaci.com/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "L'Infodrome",
+     "url": "https://www.linfodrome.com/",
+     "lean": "sentrum"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200,
+   "top_lang": "en"
+  },
+  {
+   "code": "pa",
+   "name": "Panama",
+   "flag": "🇵🇦",
+   "lang": "es",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss/search?q=%22Panama%22+when:1d&hl=en-US&gl=US&ceid=US:en",
+     "note": "ingen Google News-utgave for landet: engelskspråklige saker om landet"
+    }
+   ],
+   "papers": [
+    {
+     "name": "La Prensa",
+     "url": "https://www.prensa.com/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Panamá América",
+     "url": "https://www.panamaamerica.com.pa/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Newsroom Panama",
+     "url": "https://newsroom.pa/",
+     "lean": "sentrum",
+     "lang": "en"
+    },
+    {
+     "name": "TVN Noticias",
+     "url": "https://www.tvn-2.com/",
+     "lean": "sentrum"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200,
+   "top_lang": "en"
+  },
+  {
+   "code": "tz",
+   "name": "Tanzania",
+   "flag": "🇹🇿",
+   "lang": "en",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=en-TZ&gl=TZ&ceid=TZ:en"
+    }
+   ],
+   "papers": [
+    {
+     "name": "The Citizen",
+     "url": "https://www.thecitizen.co.tz/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Daily News",
+     "url": "https://dailynews.co.tz/",
+     "lean": "statlig"
+    },
+    {
+     "name": "Mwananchi",
+     "url": "https://www.mwananchi.co.tz/",
+     "lean": "sentrum",
+     "lang": "sw"
+    },
+    {
+     "name": "The Chanzo",
+     "url": "https://thechanzo.com/",
+     "lean": "opposisjon"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "uy",
+   "name": "Uruguay",
+   "flag": "🇺🇾",
+   "lang": "es",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss/search?q=%22Uruguay%22+when:1d&hl=en-US&gl=US&ceid=US:en",
+     "note": "ingen Google News-utgave for landet: engelskspråklige saker om landet"
+    }
+   ],
+   "papers": [
+    {
+     "name": "El País",
+     "url": "https://www.elpais.com.uy/",
+     "lean": "høyre"
+    },
+    {
+     "name": "El Observador",
+     "url": "https://www.elobservador.com.uy/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "la diaria",
+     "url": "https://ladiaria.com.uy/",
+     "lean": "venstre"
+    },
+    {
+     "name": "Montevideo Portal",
+     "url": "https://www.montevideo.com.uy/",
+     "lean": "sentrum"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200,
+   "top_lang": "en"
+  },
+  {
+   "code": "az",
+   "name": "Aserbajdsjan",
+   "flag": "🇦🇿",
+   "lang": "en",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss/search?q=%22Azerbaijan%22+when:1d&hl=en-US&gl=US&ceid=US:en",
+     "note": "ingen Google News-utgave for landet: engelskspråklige saker om landet"
+    }
+   ],
+   "papers": [
+    {
+     "name": "APA",
+     "url": "https://apa.az/en",
+     "lean": "statlig"
+    },
+    {
+     "name": "Trend",
+     "url": "https://en.trend.az/",
+     "lean": "statlig"
+    },
+    {
+     "name": "Report.az",
+     "url": "https://report.az/en/",
+     "lean": "statlig"
+    },
+    {
+     "name": "Meydan TV",
+     "url": "https://www.meydan.tv/en/",
+     "lean": "opposisjon"
+    },
+    {
+     "name": "Turan",
+     "url": "https://turan.az/en",
+     "lean": "sentrum"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "mm",
+   "name": "Myanmar",
+   "flag": "🇲🇲",
+   "lang": "en",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss/search?q=%22Myanmar%22+when:1d&hl=en-US&gl=US&ceid=US:en",
+     "note": "ingen Google News-utgave for landet: engelskspråklige saker om landet"
+    }
+   ],
+   "papers": [
+    {
+     "name": "The Irrawaddy",
+     "url": "https://www.irrawaddy.com/",
+     "lean": "opposisjon"
+    },
+    {
+     "name": "Myanmar Now",
+     "url": "https://myanmar-now.org/en/",
+     "lean": "opposisjon"
+    },
+    {
+     "name": "Frontier Myanmar",
+     "url": "https://www.frontiermyanmar.net/en/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Global New Light of Myanmar",
+     "url": "https://www.gnlm.com.mm/",
+     "lean": "statlig"
+    },
+    {
+     "name": "Mizzima",
+     "url": "https://eng.mizzima.com/",
+     "lean": "opposisjon"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "tm",
+   "name": "Turkmenistan",
+   "flag": "🇹🇲",
+   "lang": "ru",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss/search?q=%22Turkmenistan%22+when:1d&hl=en-US&gl=US&ceid=US:en",
+     "note": "ingen Google News-utgave for landet: engelskspråklige saker om landet"
+    }
+   ],
+   "papers": [
+    {
+     "name": "Turkmenportal",
+     "url": "https://turkmenportal.com/",
+     "lean": "statlig"
+    },
+    {
+     "name": "Turkmen.news",
+     "url": "https://turkmen.news/",
+     "lean": "opposisjon"
+    },
+    {
+     "name": "Chronicles of Turkmenistan",
+     "url": "https://www.hronikatm.com/",
+     "lean": "opposisjon"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200,
+   "top_lang": "en"
+  },
+  {
+   "code": "ug",
+   "name": "Uganda",
+   "flag": "🇺🇬",
+   "lang": "en",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=en-UG&gl=UG&ceid=UG:en"
+    }
+   ],
+   "papers": [
+    {
+     "name": "Daily Monitor",
+     "url": "https://www.monitor.co.ug/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "New Vision",
+     "url": "https://www.newvision.co.ug/",
+     "lean": "statlig"
+    },
+    {
+     "name": "Nile Post",
+     "url": "https://nilepost.co.ug/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "The Observer",
+     "url": "https://observer.ug/",
+     "lean": "sentrum"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "zw",
+   "name": "Zimbabwe",
+   "flag": "🇿🇼",
+   "lang": "en",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=en-ZW&gl=ZW&ceid=ZW:en"
+    }
+   ],
+   "papers": [
+    {
+     "name": "The Herald",
+     "url": "https://www.herald.co.zw/",
+     "lean": "statlig"
+    },
+    {
+     "name": "NewsDay",
+     "url": "https://www.newsday.co.zw/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "ZimLive",
+     "url": "https://www.zimlive.com/",
+     "lean": "opposisjon"
+    },
+    {
+     "name": "NewZimbabwe",
+     "url": "https://www.newzimbabwe.com/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Nehanda Radio",
+     "url": "https://nehandaradio.com/",
+     "lean": "opposisjon"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "jo",
+   "name": "Jordan",
+   "flag": "🇯🇴",
+   "lang": "en",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss/search?q=%22Jordan%20Amman%22+when:1d&hl=en-US&gl=US&ceid=US:en",
+     "note": "ingen Google News-utgave for landet: engelskspråklige saker om landet"
+    }
+   ],
+   "papers": [
+    {
+     "name": "Jordan Times",
+     "url": "https://jordantimes.com/",
+     "lean": "statlig"
+    },
+    {
+     "name": "Roya News",
+     "url": "https://en.royanews.tv/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Petra",
+     "url": "https://petra.gov.jo/",
+     "lean": "statlig"
+    },
+    {
+     "name": "Ammon News",
+     "url": "https://en.ammonnews.net/",
+     "lean": "sentrum"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "cm",
+   "name": "Kamerun",
+   "flag": "🇨🇲",
+   "lang": "fr",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss/search?q=%22Cameroon%22+when:1d&hl=en-US&gl=US&ceid=US:en",
+     "note": "ingen Google News-utgave for landet: engelskspråklige saker om landet"
+    }
+   ],
+   "papers": [
+    {
+     "name": "Cameroon Tribune",
+     "url": "https://www.cameroon-tribune.cm/",
+     "lean": "statlig"
+    },
+    {
+     "name": "Journal du Cameroun",
+     "url": "https://www.journalducameroun.com/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Actu Cameroun",
+     "url": "https://actucameroun.com/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "The Guardian Post",
+     "url": "https://theguardianpostcameroon.com/",
+     "lean": "sentrum",
+     "lang": "en"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200,
+   "top_lang": "en"
+  },
+  {
+   "code": "py",
+   "name": "Paraguay",
+   "flag": "🇵🇾",
+   "lang": "es",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss/search?q=%22Paraguay%22+when:1d&hl=en-US&gl=US&ceid=US:en",
+     "note": "ingen Google News-utgave for landet: engelskspråklige saker om landet"
+    }
+   ],
+   "papers": [
+    {
+     "name": "ABC Color",
+     "url": "https://www.abc.com.py/",
+     "lean": "høyre"
+    },
+    {
+     "name": "Última Hora",
+     "url": "https://www.ultimahora.com/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "La Nación",
+     "url": "https://www.lanacion.com.py/",
+     "lean": "høyre"
+    },
+    {
+     "name": "El Surtidor",
+     "url": "https://elsurti.com/",
+     "lean": "venstre"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200,
+   "top_lang": "en"
+  },
+  {
+   "code": "tn",
+   "name": "Tunisia",
+   "flag": "🇹🇳",
+   "lang": "fr",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss/search?q=%22Tunisia%22+when:1d&hl=en-US&gl=US&ceid=US:en",
+     "note": "ingen Google News-utgave for landet: engelskspråklige saker om landet"
+    }
+   ],
+   "papers": [
+    {
+     "name": "TAP",
+     "url": "https://www.tap.info.tn/en",
+     "lean": "statlig",
+     "lang": "en"
+    },
+    {
+     "name": "La Presse",
+     "url": "https://lapresse.tn/",
+     "lean": "statlig"
+    },
+    {
+     "name": "Business News",
+     "url": "https://www.businessnews.com.tn/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Nawaat",
+     "url": "https://nawaat.org/",
+     "lean": "opposisjon"
+    },
+    {
+     "name": "Kapitalis",
+     "url": "https://kapitalis.com/",
+     "lean": "sentrum"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200,
+   "top_lang": "en"
+  },
+  {
+   "code": "ly",
+   "name": "Libya",
+   "flag": "🇱🇾",
+   "lang": "en",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss/search?q=%22Libya%22+when:1d&hl=en-US&gl=US&ceid=US:en",
+     "note": "ingen Google News-utgave for landet: engelskspråklige saker om landet"
+    }
+   ],
+   "papers": [
+    {
+     "name": "Libya Observer",
+     "url": "https://libyaobserver.ly/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Libya Herald",
+     "url": "https://libyaherald.com/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Al Wasat",
+     "url": "https://alwasat.ly/",
+     "lean": "sentrum",
+     "lang": "ar"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "kh",
+   "name": "Kambodsja",
+   "flag": "🇰🇭",
+   "lang": "en",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss/search?q=%22Cambodia%22+when:1d&hl=en-US&gl=US&ceid=US:en",
+     "note": "ingen Google News-utgave for landet: engelskspråklige saker om landet"
+    }
+   ],
+   "papers": [
+    {
+     "name": "Khmer Times",
+     "url": "https://www.khmertimeskh.com/",
+     "lean": "statlig"
+    },
+    {
+     "name": "Phnom Penh Post",
+     "url": "https://www.phnompenhpost.com/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "CamboJA News",
+     "url": "https://cambojanews.com/",
+     "lean": "opposisjon"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "bo",
+   "name": "Bolivia",
+   "flag": "🇧🇴",
+   "lang": "es",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss/search?q=%22Bolivia%22+when:1d&hl=en-US&gl=US&ceid=US:en",
+     "note": "ingen Google News-utgave for landet: engelskspråklige saker om landet"
+    }
+   ],
+   "papers": [
+    {
+     "name": "La Razón",
+     "url": "https://www.la-razon.com/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "El Deber",
+     "url": "https://eldeber.com.bo/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Opinión",
+     "url": "https://www.opinion.com.bo/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "ABI",
+     "url": "https://abi.bo/",
+     "lean": "statlig"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200,
+   "top_lang": "en"
+  },
+  {
+   "code": "bh",
+   "name": "Bahrain",
+   "flag": "🇧🇭",
+   "lang": "en",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss/search?q=%22Bahrain%22+when:1d&hl=en-US&gl=US&ceid=US:en",
+     "note": "ingen Google News-utgave for landet: engelskspråklige saker om landet"
+    }
+   ],
+   "papers": [
+    {
+     "name": "GDN Online",
+     "url": "https://www.newsofbahrain.com/",
+     "lean": "statlig"
+    },
+    {
+     "name": "Daily Tribune",
+     "url": "https://www.newsofbahrain.com/",
+     "lean": "statlig"
+    },
+    {
+     "name": "BNA",
+     "url": "https://www.bna.bh/en/",
+     "lean": "statlig"
+    },
+    {
+     "name": "Bahrain Mirror",
+     "url": "https://bahrainmirror.com/en/",
+     "lean": "opposisjon"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
+  },
+  {
+   "code": "np",
+   "name": "Nepal",
+   "flag": "🇳🇵",
+   "lang": "en",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss/search?q=%22Nepal%22+when:1d&hl=en-US&gl=US&ceid=US:en",
+     "note": "ingen Google News-utgave for landet: engelskspråklige saker om landet"
+    }
+   ],
+   "papers": [
+    {
+     "name": "Kathmandu Post",
+     "url": "https://kathmandupost.com/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Himalayan Times",
+     "url": "https://thehimalayantimes.com/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Republica",
+     "url": "https://myrepublica.nagariknetwork.com/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Kantipur",
+     "url": "https://ekantipur.com/",
+     "lean": "sentrum",
+     "lang": "ne"
+    },
+    {
+     "name": "Setopati",
+     "url": "https://en.setopati.com/",
+     "lean": "sentrum"
+    }
+   ],
+   "tier": 2,
+   "per_top": 5,
+   "per_paper": 5,
+   "refresh": 7200
   }
  ],
  "topics": [
@@ -1956,10 +5865,15 @@
   },
   {
    "code": "t-bil",
-   "name": "Bil og elbil",
+   "name": "Bil, elbil og Clarkson",
    "flag": "🚗",
    "lang": "en",
-   "sources": [],
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss/search?q=%22Jeremy%20Clarkson%22%20OR%20%22Clarkson%27s%20Farm%22%20OR%20%22Diddly%20Squat%22+when:2d&hl=en-US&gl=US&ceid=US:en"
+    }
+   ],
    "papers": [
     {
      "name": "Top Gear",
@@ -1997,6 +5911,42 @@
      "url": "https://elbil.no/",
      "lang": "no",
      "added": true
+    },
+    {
+     "name": "Clarkson i The Sunday Times",
+     "url": "https://www.thetimes.com/profiles/jeremy-clarkson"
+    },
+    {
+     "name": "Clarkson i The Sun",
+     "url": "https://www.thesun.co.uk/topic/jeremy-clarkson/"
+    },
+    {
+     "name": "Harry's Garage",
+     "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCIB5XXHNAWWzTOw6guIMYCg"
+    },
+    {
+     "name": "Top Gear (YouTube)",
+     "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCjOl2AUblVmg2rA_cRgZkFg"
+    },
+    {
+     "name": "The Grand Tour",
+     "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCZ1Sc5xjWpUnp_o_lUTkvgQ"
+    },
+    {
+     "name": "Doug DeMuro",
+     "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCsqjHFMB_JYTaEnf_vmTNqg"
+    },
+    {
+     "name": "carwow",
+     "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCUhFaUpnq31m6TNX2VKVSVA"
+    },
+    {
+     "name": "The Smoking Tire",
+     "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCgeGealT0QYcrnoYRMltDZg"
+    },
+    {
+     "name": "Throttle House",
+     "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCyXiDU5qjfOPxgOPeFWGwKw"
     }
    ]
   },
@@ -2166,6 +6116,164 @@
      "lang": "no"
     }
    ]
+  },
+  {
+   "code": "t-pod",
+   "name": "Podkaster (YouTube)",
+   "flag": "🎙️",
+   "lang": "en",
+   "per_paper": 5,
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss/search?q=podcast%20%22Joe%20Rogan%22%20OR%20%22Theo%20Von%22%20OR%20%22Tucker%20Carlson%22%20OR%20%22Adam%20Carolla%22+when:2d&hl=en-US&gl=US&ceid=US:en"
+    }
+   ],
+   "papers": [
+    {
+     "name": "Joe Rogan Experience",
+     "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCzQUP1qoWDoEbmsQxvdjxgQ",
+     "lean": "høyre"
+    },
+    {
+     "name": "JRE Clips",
+     "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCnxGkOGNMqQEUMvroOWps6Q",
+     "lean": "høyre"
+    },
+    {
+     "name": "The Adam Carolla Show",
+     "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCoAlA2LmVsL2tbi9odYoQtg",
+     "lean": "høyre"
+    },
+    {
+     "name": "Theo Von",
+     "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UC5AQEUAwCh1sGDvkQtkDWUQ",
+     "lean": "sentrum"
+    },
+    {
+     "name": "The Tim Dillon Show",
+     "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UC4woSp8ITBoYDmjkukhEhxg",
+     "lean": "høyre"
+    },
+    {
+     "name": "Flagrant",
+     "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UC0D-L0HfHHEQ5eePZv0vMOA",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Lex Fridman",
+     "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCSHZKyawb77ixDdsGog4iWA",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Huberman Lab",
+     "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UC2D2CMWXMOVWx7giW1n3LIg",
+     "lean": "allmenn"
+    },
+    {
+     "name": "All-In Podcast",
+     "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCESLZhusAkFfsNsApnjF_Cg",
+     "lean": "høyre"
+    },
+    {
+     "name": "The Diary Of A CEO",
+     "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCGq-a57w-aPwyi3pW7XLiHw",
+     "lean": "allmenn"
+    },
+    {
+     "name": "Shawn Ryan Show",
+     "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCkoujZQZatbqy4KGcgjpVxQ",
+     "lean": "høyre"
+    },
+    {
+     "name": "PBD Podcast",
+     "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCGX7nGXpz-CmO_Arg-cgJ7A",
+     "lean": "høyre"
+    },
+    {
+     "name": "Megyn Kelly",
+     "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCzJXNzqz6VMHSNInQt_7q6w",
+     "lean": "høyre"
+    },
+    {
+     "name": "Tucker Carlson",
+     "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCGttrUON87gWfU6dMWm1fcA",
+     "lean": "ytre høyre"
+    },
+    {
+     "name": "Breaking Points",
+     "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCDRIjKy6eZOvKtOELtTdeUA",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Pod Save America",
+     "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCKRoXz3hHAu2XL_k3Ef4vJQ",
+     "lean": "venstre"
+    },
+    {
+     "name": "TRIGGERnometry (UK)",
+     "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCzebnLCkmyVHkTQEoix3t8A",
+     "lean": "høyre"
+    },
+    {
+     "name": "The Rest Is Politics (UK)",
+     "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCsufaClk5if2RGqABb-09Uw",
+     "lean": "sentrum"
+    }
+   ]
+  },
+  {
+   "code": "t-stream",
+   "name": "Strømmere (YouTube/Twitch)",
+   "flag": "🎮",
+   "lang": "en",
+   "per_paper": 5,
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss/search?q=Twitch%20OR%20Kick%20streamer+when:1d&hl=en-US&gl=US&ceid=US:en"
+    },
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss/search?q=%22Kai%20Cenat%22%20OR%20IShowSpeed%20OR%20xQc%20OR%20Asmongold%20OR%20MrBeast+when:2d&hl=en-US&gl=US&ceid=US:en"
+    }
+   ],
+   "papers": [
+    {
+     "name": "Kai Cenat",
+     "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCoEmptob-eEGKk18c2VplJg"
+    },
+    {
+     "name": "IShowSpeed",
+     "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCWsDFcIhY2DBi3GB5uykGXA"
+    },
+    {
+     "name": "xQc",
+     "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCmDTrq0LNgPodDOFZiSbsww"
+    },
+    {
+     "name": "Asmongold (zackrawrr)",
+     "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCq2jigrIGtupbTXiNjq6Wrw",
+     "lean": "høyre"
+    },
+    {
+     "name": "HasanAbi",
+     "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCtoaZpBnrd0lhycxYJ4MNOQ",
+     "lean": "ytre venstre"
+    },
+    {
+     "name": "Ludwig",
+     "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCrPseYLGpNygVi34QpGNqpA"
+    },
+    {
+     "name": "CaseOh",
+     "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UC63anZxfVGHUEmfBAf5w7pw"
+    },
+    {
+     "name": "MrBeast",
+     "url": "https://www.youtube.com/feeds/videos.xml?channel_id=UCX6OQ3DkcsbYNE6H8uQQuVA"
+    }
+   ]
   }
  ],
  "order": [
@@ -2176,6 +6284,8 @@
   "gb",
   "t-x",
   "t-forum",
+  "t-pod",
+  "t-stream",
   "t-ki",
   "t-tek",
   "t-vit",
@@ -2194,12 +6304,100 @@
   "it",
   "ru",
   "es",
-  "tr",
+  "nl",
+  "ch",
+  "pl",
+  "be",
+  "ro",
+  "cz",
+  "pt",
   "fi",
   "gr",
   "hu",
+  "ua",
+  "sk",
+  "bg",
+  "hr",
+  "rs",
+  "lu",
+  "by",
+  "lt",
+  "si",
+  "lv",
+  "ee",
+  "is",
+  "ba",
+  "al",
+  "mt",
+  "md",
+  "mk",
+  "me",
+  "cn",
+  "jp",
+  "in",
+  "br",
+  "ca",
+  "kr",
+  "mx",
+  "au",
+  "tr",
+  "id",
+  "sa",
+  "ar",
   "il",
+  "sg",
+  "ae",
+  "th",
+  "co",
+  "my",
+  "vn",
+  "bd",
+  "ph",
+  "za",
+  "pk",
+  "eg",
+  "cl",
+  "pe",
+  "kz",
+  "ng",
+  "dz",
   "ir",
-  "me"
+  "nz",
+  "iq",
+  "qa",
+  "cu",
+  "ma",
+  "uz",
+  "ao",
+  "ke",
+  "kw",
+  "do",
+  "ec",
+  "gt",
+  "gh",
+  "et",
+  "ve",
+  "cd",
+  "om",
+  "cr",
+  "lk",
+  "ci",
+  "pa",
+  "tz",
+  "uy",
+  "az",
+  "mm",
+  "tm",
+  "ug",
+  "zw",
+  "jo",
+  "cm",
+  "py",
+  "tn",
+  "ly",
+  "kh",
+  "bo",
+  "bh",
+  "np"
  ]
 }
