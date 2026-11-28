@@ -20,7 +20,9 @@ services:
       # Oslo Børs (C64-emulator): kilde i GitHub, ikke i Gitea. Egen mappe utenfor kart-webroten.
       - ./oslo-bors.html:/usr/share/nginx/oslo/oslo-bors.html:ro
       # Nyheter: siden fra GitHub, data.json fra nyheter-containeren (eget volum).
-      - ./nyheter/index.html:/usr/share/nginx/nyheter/index.html:ro
+      # Hele mappen monteres (ikke enkeltfila): en enkeltfil-bind-mount henger igjen
+      # på den gamle inoden når Git bytter ut fila, så nginx ville vist gammel side.
+      - ./nyheter:/usr/share/nginx/nyheter:ro
       - nyheter-data:/usr/share/nginx/nyheter-data:ro
 
   # Henter toppsaker per land (Google News) + dine aviser (RSS), oversetter
