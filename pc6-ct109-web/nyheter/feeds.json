@@ -1,0 +1,708 @@
+{
+ "_info": "Land på nyhetssiden /nyheter. sources/gnews = Google News toppsaker for landet (rangert etter hvor store sakene er i lokale medier). papers = dine egne aviser (fra Chrome-bokmerkene under N): oppgi forsidens adresse, så finner tjenesten RSS-feeden selv. lang styrer om overskrifter oversettes til norsk (ikke for no/sv/da/en); lang på en avis overstyrer landets. lean = omtrentlig politisk ståsted (venstre, sentrum-venstre, sentrum, sentrum-høyre, høyre, allmenn, statlig, regjeringsvennlig, opposisjon, ukjent) – basert på vanlige vurderinger (AllSides, Ad Fontes, Media Bias/Fact Check) der de finnes, ellers allmenn oppfatning. Rett fritt.",
+ "countries": [
+  {
+   "code": "no",
+   "name": "Norge",
+   "flag": "🇳🇴",
+   "lang": "no",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=no&gl=NO&ceid=NO:no"
+    }
+   ],
+   "papers": [
+    {
+     "name": "NRK",
+     "url": "https://www.nrk.no/",
+     "lean": "allmenn"
+    },
+    {
+     "name": "VG",
+     "url": "https://www.vg.no/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Dagbladet",
+     "url": "https://www.dagbladet.no/",
+     "lean": "sentrum-venstre"
+    },
+    {
+     "name": "Nettavisen",
+     "url": "https://www.nettavisen.no/",
+     "lean": "sentrum-høyre"
+    },
+    {
+     "name": "Bergens Tidende",
+     "url": "https://www.bt.no/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Bergensavisen",
+     "url": "https://www.ba.no/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Stavanger Aftenblad",
+     "url": "https://www.aftenbladet.no/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Dagens Næringsliv",
+     "url": "https://www.dn.no/",
+     "lean": "sentrum-høyre"
+    },
+    {
+     "name": "Avisen Kristiansand",
+     "url": "https://www.krs.no/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Document",
+     "url": "https://www.document.no/",
+     "lean": "høyre"
+    },
+    {
+     "name": "Filter Nyheter",
+     "url": "https://filternyheter.no/",
+     "lean": "sentrum-venstre"
+    },
+    {
+     "name": "inyheter.no",
+     "url": "https://inyheter.no/",
+     "lean": "høyre"
+    },
+    {
+     "name": "Rabulisten",
+     "url": "https://rabulisten.no/",
+     "lean": "høyre"
+    },
+    {
+     "name": "Uten Filter",
+     "url": "https://www.utenfilter.no/",
+     "lean": "høyre"
+    }
+   ]
+  },
+  {
+   "code": "se",
+   "name": "Sverige",
+   "flag": "🇸🇪",
+   "lang": "sv",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=sv&gl=SE&ceid=SE:sv"
+    }
+   ],
+   "papers": [
+    {
+     "name": "Expressen / Kvällsposten",
+     "url": "https://www.expressen.se/",
+     "lean": "sentrum-høyre"
+    },
+    {
+     "name": "Samnytt",
+     "url": "https://samnytt.se/",
+     "lean": "høyre"
+    }
+   ]
+  },
+  {
+   "code": "dk",
+   "name": "Danmark",
+   "flag": "🇩🇰",
+   "lang": "da",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss/search?q=%28site%3Adr.dk%20OR%20site%3Atv2.dk%20OR%20site%3Apolitiken.dk%20OR%20site%3Aberlingske.dk%20OR%20site%3Ajyllands-posten.dk%20OR%20site%3Abt.dk%20OR%20site%3Aekstrabladet.dk%29%20when%3A1d&hl=da&gl=DK&ceid=DK:da",
+     "note": "Google har ingen dansk forside-utgave (gir norsk), så dette er et søk i de største danske mediene"
+    }
+   ],
+   "papers": [
+    {
+     "name": "Den Korte Avis",
+     "url": "https://denkorteavis.dk/",
+     "lean": "høyre"
+    }
+   ]
+  },
+  {
+   "code": "fi",
+   "name": "Finland",
+   "flag": "🇫🇮",
+   "lang": "fi",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=fi&gl=FI&ceid=FI:fi"
+    }
+   ],
+   "papers": [
+    {
+     "name": "Suomen Uutiset",
+     "url": "https://www.suomenuutiset.fi/",
+     "lean": "høyre"
+    }
+   ]
+  },
+  {
+   "code": "gb",
+   "name": "Storbritannia og Irland",
+   "flag": "🇬🇧",
+   "lang": "en",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=en-GB&gl=GB&ceid=GB:en"
+    }
+   ],
+   "papers": [
+    {
+     "name": "BBC",
+     "url": "https://www.bbc.com/news",
+     "lean": "allmenn"
+    },
+    {
+     "name": "Sky News",
+     "url": "https://news.sky.com/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "The Guardian",
+     "url": "https://www.theguardian.com/",
+     "lean": "sentrum-venstre"
+    },
+    {
+     "name": "The Independent",
+     "url": "https://www.independent.co.uk/",
+     "lean": "sentrum-venstre"
+    },
+    {
+     "name": "Daily Mail",
+     "url": "https://www.dailymail.co.uk/",
+     "lean": "høyre"
+    },
+    {
+     "name": "Express",
+     "url": "https://www.express.co.uk/",
+     "lean": "høyre"
+    },
+    {
+     "name": "The Sun",
+     "url": "https://www.thesun.co.uk/",
+     "lean": "høyre"
+    },
+    {
+     "name": "GB News",
+     "url": "https://www.gbnews.com/",
+     "lean": "høyre"
+    },
+    {
+     "name": "The Spectator",
+     "url": "https://spectator.com/",
+     "lean": "sentrum-høyre"
+    },
+    {
+     "name": "spiked",
+     "url": "https://www.spiked-online.com/",
+     "lean": "sentrum-høyre"
+    },
+    {
+     "name": "Conservative Home",
+     "url": "https://conservativehome.com/",
+     "lean": "høyre"
+    },
+    {
+     "name": "Private Eye",
+     "url": "https://www.private-eye.co.uk/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Gript (Irland)",
+     "url": "https://gript.ie/",
+     "lean": "høyre"
+    }
+   ]
+  },
+  {
+   "code": "us",
+   "name": "USA",
+   "flag": "🇺🇸",
+   "lang": "en",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=en-US&gl=US&ceid=US:en"
+    }
+   ],
+   "papers": [
+    {
+     "name": "AP News",
+     "url": "https://apnews.com/",
+     "lean": "sentrum-venstre"
+    },
+    {
+     "name": "Reuters",
+     "url": "https://www.reuters.com/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "New York Post",
+     "url": "https://nypost.com/",
+     "lean": "sentrum-høyre"
+    },
+    {
+     "name": "NY Daily News",
+     "url": "https://www.nydailynews.com/",
+     "lean": "sentrum-venstre"
+    },
+    {
+     "name": "Breitbart",
+     "url": "https://www.breitbart.com/",
+     "lean": "høyre"
+    },
+    {
+     "name": "The Gateway Pundit",
+     "url": "https://www.thegatewaypundit.com/",
+     "lean": "høyre"
+    },
+    {
+     "name": "Just The News",
+     "url": "https://justthenews.com/",
+     "lean": "sentrum-høyre"
+    },
+    {
+     "name": "The National Pulse",
+     "url": "https://thenationalpulse.com/",
+     "lean": "høyre"
+    },
+    {
+     "name": "The Bulwark",
+     "url": "https://www.thebulwark.com/",
+     "lean": "sentrum-venstre"
+    },
+    {
+     "name": "Citizen Free Press",
+     "url": "https://citizenfreepress.com/",
+     "lean": "høyre"
+    },
+    {
+     "name": "patriots.win",
+     "url": "https://patriots.win/",
+     "lean": "høyre"
+    },
+    {
+     "name": "Ann Coulter",
+     "url": "https://www.anncoulter.com/",
+     "lean": "høyre"
+    },
+    {
+     "name": "ABC7 Chicago",
+     "url": "https://abc7chicago.com/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "CBS Chicago",
+     "url": "https://www.cbsnews.com/chicago/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "FOX 32 Chicago",
+     "url": "https://www.fox32chicago.com/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Spectrum News St. Louis",
+     "url": "https://spectrumlocalnews.com/",
+     "lean": "sentrum"
+    }
+   ]
+  },
+  {
+   "code": "de",
+   "name": "Tyskland og Østerrike",
+   "flag": "🇩🇪",
+   "lang": "de",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=de&gl=DE&ceid=DE:de"
+    }
+   ],
+   "papers": [
+    {
+     "name": "DIE ZEIT",
+     "url": "https://www.zeit.de/",
+     "lean": "sentrum-venstre"
+    },
+    {
+     "name": "taz",
+     "url": "https://taz.de/",
+     "lean": "venstre"
+    },
+    {
+     "name": "WDR",
+     "url": "https://www1.wdr.de/",
+     "lean": "allmenn"
+    },
+    {
+     "name": "DW (engelsk)",
+     "url": "https://www.dw.com/en/",
+     "lang": "en",
+     "lean": "statlig"
+    },
+    {
+     "name": "NIUS",
+     "url": "https://nius.de/",
+     "lean": "høyre"
+    },
+    {
+     "name": "Epoch Times DE",
+     "url": "https://www.epochtimes.de/",
+     "lean": "høyre"
+    },
+    {
+     "name": "Junge Freiheit",
+     "url": "https://jungefreiheit.de/",
+     "lean": "høyre"
+    },
+    {
+     "name": "Unzensuriert (AT)",
+     "url": "https://unzensuriert.at/",
+     "lean": "høyre"
+    },
+    {
+     "name": "Brussels Report",
+     "url": "https://www.brusselsreport.eu/",
+     "lang": "en",
+     "lean": "sentrum-høyre"
+    }
+   ]
+  },
+  {
+   "code": "fr",
+   "name": "Frankrike",
+   "flag": "🇫🇷",
+   "lang": "fr",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=fr&gl=FR&ceid=FR:fr"
+    }
+   ],
+   "papers": [
+    {
+     "name": "Le Figaro",
+     "url": "https://www.lefigaro.fr/",
+     "lean": "sentrum-høyre"
+    },
+    {
+     "name": "Le Monde",
+     "url": "https://www.lemonde.fr/",
+     "lean": "sentrum-venstre"
+    },
+    {
+     "name": "CNEWS",
+     "url": "https://www.cnews.fr/",
+     "lean": "høyre"
+    },
+    {
+     "name": "Valeurs actuelles",
+     "url": "https://www.valeursactuelles.com/",
+     "lean": "høyre"
+    }
+   ]
+  },
+  {
+   "code": "it",
+   "name": "Italia",
+   "flag": "🇮🇹",
+   "lang": "it",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=it&gl=IT&ceid=IT:it"
+    }
+   ],
+   "papers": [
+    {
+     "name": "Corriere della Sera",
+     "url": "https://www.corriere.it/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Corriere Milano",
+     "url": "https://milano.corriere.it/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "la Repubblica",
+     "url": "https://www.repubblica.it/",
+     "lean": "sentrum-venstre"
+    },
+    {
+     "name": "La Stampa",
+     "url": "https://www.lastampa.it/",
+     "lean": "sentrum-venstre"
+    },
+    {
+     "name": "Il Messaggero",
+     "url": "https://www.ilmessaggero.it/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Sky TG24",
+     "url": "https://tg24.sky.it/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Avvenire",
+     "url": "https://www.avvenire.it/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Il Dubbio",
+     "url": "https://www.ildubbio.news/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "Secolo d'Italia",
+     "url": "https://www.secoloditalia.it/",
+     "lean": "høyre"
+    }
+   ]
+  },
+  {
+   "code": "es",
+   "name": "Spania",
+   "flag": "🇪🇸",
+   "lang": "es",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=es&gl=ES&ceid=ES:es"
+    }
+   ],
+   "papers": [
+    {
+     "name": "ABC",
+     "url": "https://www.abc.es/",
+     "lean": "sentrum-høyre"
+    },
+    {
+     "name": "RTVE",
+     "url": "https://www.rtve.es/",
+     "lean": "allmenn"
+    },
+    {
+     "name": "La Razón",
+     "url": "https://www.larazon.es/",
+     "lean": "sentrum-høyre"
+    },
+    {
+     "name": "20minutos",
+     "url": "https://www.20minutos.es/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "OKdiario",
+     "url": "https://okdiario.com/",
+     "lean": "høyre"
+    },
+    {
+     "name": "EL PAÍS (engelsk)",
+     "url": "https://english.elpais.com/",
+     "lang": "en",
+     "lean": "sentrum-venstre"
+    }
+   ]
+  },
+  {
+   "code": "gr",
+   "name": "Hellas",
+   "flag": "🇬🇷",
+   "lang": "el",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=el&gl=GR&ceid=GR:el"
+    }
+   ],
+   "papers": [
+    {
+     "name": "Kathimerini",
+     "url": "https://www.kathimerini.gr/",
+     "lean": "sentrum-høyre"
+    },
+    {
+     "name": "Proto Thema",
+     "url": "https://www.protothema.gr/",
+     "lean": "sentrum-høyre"
+    },
+    {
+     "name": "ProtoThema English",
+     "url": "https://en.protothema.gr/",
+     "lang": "en",
+     "lean": "sentrum-høyre"
+    },
+    {
+     "name": "News 24/7",
+     "url": "https://www.news247.gr/",
+     "lean": "sentrum"
+    },
+    {
+     "name": "iefimerida",
+     "url": "https://www.iefimerida.gr/",
+     "lean": "sentrum-høyre"
+    },
+    {
+     "name": "SKAI",
+     "url": "https://www.skai.gr/",
+     "lean": "sentrum-høyre"
+    },
+    {
+     "name": "Newsbomb",
+     "url": "https://www.newsbomb.gr/",
+     "lean": "sentrum"
+    }
+   ]
+  },
+  {
+   "code": "hu",
+   "name": "Ungarn",
+   "flag": "🇭🇺",
+   "lang": "hu",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=hu&gl=HU&ceid=HU:hu"
+    }
+   ],
+   "papers": [
+    {
+     "name": "Origo",
+     "url": "https://www.origo.hu/",
+     "lean": "regjeringsvennlig"
+    },
+    {
+     "name": "Bors",
+     "url": "https://www.borsonline.hu/",
+     "lean": "regjeringsvennlig"
+    }
+   ]
+  },
+  {
+   "code": "il",
+   "name": "Israel",
+   "flag": "🇮🇱",
+   "lang": "he",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=he&gl=IL&ceid=IL:he"
+    }
+   ],
+   "papers": [
+    {
+     "name": "Israel National News",
+     "url": "https://www.israelnationalnews.com/",
+     "lang": "en",
+     "lean": "høyre"
+    },
+    {
+     "name": "Haaretz",
+     "url": "https://www.haaretz.com/",
+     "lang": "en",
+     "lean": "venstre"
+    },
+    {
+     "name": "Israel Hayom",
+     "url": "https://www.israelhayom.co.il/",
+     "lean": "høyre"
+    },
+    {
+     "name": "Globes",
+     "url": "https://en.globes.co.il/",
+     "lang": "en",
+     "lean": "sentrum"
+    }
+   ]
+  },
+  {
+   "code": "ir",
+   "name": "Iran",
+   "flag": "🇮🇷",
+   "lang": "en",
+   "sources": [],
+   "papers": [
+    {
+     "name": "Iran International",
+     "url": "https://www.iranintl.com/en",
+     "lean": "opposisjon"
+    },
+    {
+     "name": "Tehran Times",
+     "url": "https://www.tehrantimes.com/rss",
+     "lean": "statlig"
+    }
+   ]
+  },
+  {
+   "code": "me",
+   "name": "Midtøsten",
+   "flag": "🌍",
+   "lang": "en",
+   "sources": [],
+   "papers": [
+    {
+     "name": "Middle East 24",
+     "url": "https://www.middleeast24.org/",
+     "lean": "ukjent"
+    }
+   ]
+  },
+  {
+   "code": "tr",
+   "name": "Tyrkia",
+   "flag": "🇹🇷",
+   "lang": "tr",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=tr&gl=TR&ceid=TR:tr"
+    }
+   ],
+   "papers": [
+    {
+     "name": "Türkiye Today",
+     "url": "https://www.turkiyetoday.com/",
+     "lang": "en",
+     "lean": "regjeringsvennlig"
+    }
+   ]
+  },
+  {
+   "code": "ru",
+   "name": "Russland",
+   "flag": "🇷🇺",
+   "lang": "ru",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss?hl=ru&gl=RU&ceid=RU:ru"
+    }
+   ],
+   "papers": [
+    {
+     "name": "Meduza (engelsk)",
+     "url": "https://meduza.io/en",
+     "lang": "en",
+     "lean": "opposisjon"
+    }
+   ]
+  }
+ ]
+}

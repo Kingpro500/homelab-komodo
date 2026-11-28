@@ -36,3 +36,21 @@ kart som er en måned gammelt, uten å se at det er feil versjon.
 
 Denne stacken bør bort, men er ikke slettet: det er Rogers avgjørelse, og en
 sletting av en kjørende stack kjører `compose down` på CT-en.
+
+## Nyheter — `http://10.0.0.124:3020/nyheter/` (lagt til 28. nov 2026)
+
+Egen nyhetsside for Roger: toppsakene per land, med overskrifter på andre språk
+enn norsk, svensk, dansk og engelsk maskinoversatt til norsk.
+
+| Del | Hvor |
+| --- | --- |
+| Siden | `nyheter/index.html` (montert i nginx som `/nyheter/`) |
+| Land og aviser | `nyheter/feeds.json` — rediger her, og deploy stacken |
+| Henter | containeren `nyheter` (`python:3.13-alpine`, kun standardbibliotek), `nyheter/fetch.py`, hvert 30. min |
+| Data | Docker-volumet `nyheter-data` (`data.json`, oversettelsescache, funne RSS-adresser) — monteres read-only i nginx som `/nyheter/data.json` |
+
+- **Toppsaker:** Google News sin forside per land (rangert etter hvor store sakene er i lokale medier). Danmark har ingen egen Google-utgave og bruker et søk i de største danske mediene.
+- **Dine aviser:** nyhetsmappene i Rogers Chrome-bokmerker (`N/…`). Tjenesten finner RSS-feeden fra forsiden; aviser uten åpen RSS (eller som blokkerer) hentes via Google News-søk på eget domene og merkes «via søk».
+- **Ståsted:** hver avis har `lean` i `feeds.json` (omtrentlig, etter AllSides/Ad Fontes/MBFC der det finnes, ellers allmenn oppfatning).
+- **Oversettelse:** `clients5.google.com` (gratis, uten nøkkel), med MyMemory som reserve. `translate.googleapis.com` er blokkert fra hjemmenettet («Sorry»-side). Kall til `news.google.com` strupes til minst 2 s mellomrom.
+- Første henting etter en tom cache tar ca. 6–7 minutter; siden viser «Fant ingen data ennå» så lenge.
