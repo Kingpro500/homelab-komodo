@@ -55,6 +55,8 @@ li a:hover{color:var(--accent);text-decoration:underline}
 .m{color:var(--dim);font-size:11px;font-weight:400;white-space:nowrap}
 .orig{display:none;color:var(--dim);font-size:11px;font-style:italic}
 body.showorig .orig{display:block}
+.ing{display:none;white-space:normal;color:var(--dim);font-size:11.5px;line-height:1.35;margin:1px 0 4px 0}
+body.ingress .ing{display:block}
 button.more{background:none;border:0;color:var(--accent);cursor:pointer;padding:0;font-size:12px}
 .err{color:#e0af68;font-size:11px;margin:2px 0}
 .papers{margin-top:6px;border-top:1px solid var(--line);padding-top:4px}
@@ -86,6 +88,7 @@ body.pp2 .paper li:nth-child(n+3),body.pp3 .paper li:nth-child(n+4),body.pp5 .pa
     <span id="meta">Laster …</span> · <a class="meta" href="/">← Nettverkskartet</a>
     <span style="margin-left:10px">Ståsted (klikk for å skjule):</span> <span id="chips"></span>
     <label><input type="checkbox" id="optWrap"> hele titler</label>
+    <label title="Kort sammendrag under overskriften, der kilden har det (ikke for Google News-toppsaker)"><input type="checkbox" id="optIng"> ingress</label>
     <label><input type="checkbox" id="optOrig"> vis originaltekst</label>
     <label>saker per avis <select id="optPP"><option>2</option><option>3</option><option>5</option><option>10</option></select></label>
     <label><input type="checkbox" id="optShut"> lukk alle land</label>
@@ -116,8 +119,9 @@ let DATA = null;
 const hidden = new Set(store("hidden") || []);
 function applyPrefs(){
   const view = store("view") || "alle";
-  document.body.className = ["v-" + view, view.startsWith("r-") ? "vr vr-" + view.slice(2) : "", store("orig") ? "showorig" : "", store("wrap") ? "wrap" : "", "pp" + (store("pp") || (store("three") ? 3 : 2)), ...[...hidden].map(l => "hide-" + cls(l))].join(" ");
+  document.body.className = ["v-" + view, view.startsWith("r-") ? "vr vr-" + view.slice(2) : "", store("orig") ? "showorig" : "", store("ing") ? "ingress" : "", store("wrap") ? "wrap" : "", "pp" + (store("pp") || (store("three") ? 3 : 2)), ...[...hidden].map(l => "hide-" + cls(l))].join(" ");
   document.getElementById("optOrig").checked = !!store("orig");
+  document.getElementById("optIng").checked = !!store("ing");
   document.getElementById("optWrap").checked = !!store("wrap");
   document.getElementById("optPP").value = String(store("pp") || (store("three") ? 3 : 2));
   document.querySelectorAll(".chip").forEach(c => c.classList.toggle("off", hidden.has(c.dataset.l)));
@@ -131,6 +135,7 @@ document.getElementById("chips").onclick = e => {
 document.getElementById("tabs").onclick = e => { const v = e.target.dataset?.v; if (!v) return; store("view", v); applyPrefs(); relayout(); };
 document.getElementById("optWrap").onchange = e => { store("wrap", e.target.checked); applyPrefs(); relayout(); };
 document.getElementById("optOrig").onchange = e => { store("orig", e.target.checked); applyPrefs(); relayout(); };
+document.getElementById("optIng").onchange = e => { store("ing", e.target.checked); applyPrefs(); relayout(); };
 document.getElementById("optPP").onchange = e => { store("pp", +e.target.value); applyPrefs(); relayout(); };
 document.getElementById("optShut").onchange = e => {
   document.querySelectorAll("section").forEach(s => {
@@ -164,7 +169,7 @@ function goTo(code){
   setTimeout(() => s.scrollIntoView({behavior: "smooth", block: "start"}), 50);
 }
 const li = (it, extraCls, showSource) => `
-  <li class="${extraCls}"><span class="t">${esc(ago(it.published))}</span><a href="${esc(it.link)}" target="_blank" rel="noopener noreferrer" title="${esc(it.title)}${it.original ? "\n\n" + esc(it.original) : ""}${showSource && it.source ? "\n— " + esc(it.source) : ""}">${esc(it.title)}</a>${showSource && it.source ? `<span class="m"> · ${esc(it.source)}</span>` : ""}${it.original ? `<span class="orig">${esc(it.original)}</span>` : ""}</li>`;
+  <li class="${extraCls}"><span class="t">${esc(ago(it.published))}</span><a href="${esc(it.link)}" target="_blank" rel="noopener noreferrer" title="${esc(it.title)}${it.ingress ? "\n\n" + esc(it.ingress) : ""}${it.original ? "\n\n" + esc(it.original) : ""}${showSource && it.source ? "\n— " + esc(it.source) : ""}">${esc(it.title)}</a>${showSource && it.source ? `<span class="m"> · ${esc(it.source)}</span>` : ""}${it.original ? `<span class="orig">${esc(it.original)}</span>` : ""}${it.ingress ? `<span class="ing">${esc(it.ingress)}</span>` : ""}</li>`;
 async function load(){
   let d;
   try {
