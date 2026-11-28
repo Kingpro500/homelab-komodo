@@ -17,6 +17,7 @@ h1{font-size:16px;margin:0 8px 0 0;white-space:nowrap}
 nav a{font-size:12px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:1px 8px}
 nav a:hover{border-color:var(--accent)}
 nav a.tema{border-style:dashed}
+nav select{font-size:12px;background:var(--card);color:inherit;border:1px solid var(--line);border-radius:999px;padding:1px 6px}
 #rnd{cursor:pointer;font:600 12px system-ui;background:#2b3b5a;color:var(--text);border:1px solid var(--accent);border-radius:6px;padding:3px 10px;margin-right:6px}
 #rnd:hover{background:#34507d}
 #rndbox{display:none;position:fixed;top:70px;right:16px;z-index:5;max-width:520px;background:var(--card);border:1px solid var(--accent);border-radius:8px;padding:8px 12px;box-shadow:0 6px 24px #000a}
@@ -25,7 +26,7 @@ nav a.tema{border-style:dashed}
 .tabs{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-right:6px}
 .tabs b{cursor:pointer;font-weight:500;font-size:12px;padding:2px 10px;color:var(--dim)}
 .tabs b.on{background:#24324a;color:var(--text)}
-body.v-land section.k-tema,body.v-tema section.k-land,body.v-land nav a.tema,body.v-tema nav a.land{display:none}
+body.v-land section.k-tema,body.v-tema section.k-land,body.v-land nav a.tema,body.v-tema nav a.land,body.v-tema nav select.land{display:none}
 .ctl{margin-top:4px;font-size:12px;color:var(--dim)}
 .chip{cursor:pointer;user-select:none;display:inline-block;font-size:11px;border-radius:999px;padding:0 7px;border:1px solid currentColor;margin-right:3px}
 .chip.off{opacity:.3;text-decoration:line-through}
@@ -91,7 +92,7 @@ body.pp2 .paper li:nth-child(n+3),body.pp3 .paper li:nth-child(n+4),body.pp5 .pa
 <script>
 const SHOW = 5;
 const LEANS = ["ytre venstre","venstre","sentrum","høyre","ytre høyre","allmenn","statlig","opposisjon"];
-const TRANSLATED_FROM = {fi:"finsk",de:"tysk",fr:"fransk",it:"italiensk",es:"spansk",el:"gresk",hu:"ungarsk",he:"hebraisk",fa:"persisk",tr:"tyrkisk",ru:"russisk"};
+const TRANSLATED_FROM = {fi:"finsk",de:"tysk",fr:"fransk",it:"italiensk",es:"spansk",el:"gresk",hu:"ungarsk",he:"hebraisk",fa:"persisk",tr:"tyrkisk",ru:"russisk",nl:"nederlandsk",pl:"polsk",ro:"rumensk",cs:"tsjekkisk",pt:"portugisisk",uk:"ukrainsk",sk:"slovakisk",bg:"bulgarsk",hr:"kroatisk",sr:"serbisk",lt:"litauisk",sl:"slovensk",lv:"latvisk",et:"estisk",is:"islandsk",bs:"bosnisk",sq:"albansk",mk:"makedonsk",zh:"kinesisk",ja:"japansk",ko:"koreansk",id:"indonesisk",ar:"arabisk",th:"thai",vi:"vietnamesisk",bn:"bengali"};
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const cls = s => String(s || "ukjent").replace(/ /g, "-");
 const store = (k, v) => v === undefined ? JSON.parse(localStorage.getItem("nyh-" + k) || "null") : localStorage.setItem("nyh-" + k, JSON.stringify(v));
@@ -105,6 +106,9 @@ function ago(iso){
 }
 const open = new Set(store("open") || []);
 const shut = new Set(store("shut") || []);
+const unshut = new Set(store("unshut") || []);  // mindre land er lukket som standard; disse har du åpnet
+const isShut = c => c.tier === 2 ? !unshut.has(c.code) : shut.has(c.code);
+let DATA = null;
 const hidden = new Set(store("hidden") || []);
 function applyPrefs(){
   document.body.className = ["v-" + (store("view") || "alle"), store("orig") ? "showorig" : "", store("wrap") ? "wrap" : "", "pp" + (store("pp") || (store("three") ? 3 : 2)), ...[...hidden].map(l => "hide-" + cls(l))].join(" ");
@@ -124,8 +128,11 @@ document.getElementById("optWrap").onchange = e => { store("wrap", e.target.chec
 document.getElementById("optOrig").onchange = e => { store("orig", e.target.checked); applyPrefs(); relayout(); };
 document.getElementById("optPP").onchange = e => { store("pp", +e.target.value); applyPrefs(); relayout(); };
 document.getElementById("optShut").onchange = e => {
-  document.querySelectorAll("section").forEach(s => { s.classList.toggle("shut", e.target.checked); e.target.checked ? shut.add(s.id) : shut.delete(s.id); });
-  store("shut", [...shut]); relayout();
+  document.querySelectorAll("section").forEach(s => {
+    if (e.target.checked) { s.classList.add("shut"); shut.add(s.id); unshut.delete(s.id); }
+    else { shut.delete(s.id); s.classList.toggle("shut", s.dataset.tier === "2" && !unshut.has(s.id)); }
+  });
+  store("shut", [...shut]); store("unshut", [...unshut]); relayout();
 };
 function toggleMore(code, btn){
   const s = document.getElementById(code);
@@ -138,9 +145,15 @@ function toggleMore(code, btn){
 function toggleShut(code){
   const s = document.getElementById(code);
   s.classList.toggle("shut");
-  s.classList.contains("shut") ? shut.add(code) : shut.delete(code);
-  store("shut", [...shut]);
+  const closed = s.classList.contains("shut");
+  if (s.dataset.tier === "2") { closed ? unshut.delete(code) : unshut.add(code); store("unshut", [...unshut]); }
+  else { closed ? shut.add(code) : shut.delete(code); store("shut", [...shut]); }
   relayout();
+}
+function goTo(code){
+  const s = document.getElementById(code); if (!s) return;
+  if (s.classList.contains("shut")) toggleShut(code);
+  setTimeout(() => s.scrollIntoView({behavior: "smooth", block: "start"}), 50);
 }
 const li = (it, extraCls, showSource) => `
   <li class="${extraCls}"><span class="t">${esc(ago(it.published))}</span><a href="${esc(it.link)}" target="_blank" rel="noopener noreferrer" title="${esc(it.title)}${it.original ? "\n\n" + esc(it.original) : ""}${showSource && it.source ? "\n— " + esc(it.source) : ""}">${esc(it.title)}</a>${showSource && it.source ? `<span class="m"> · ${esc(it.source)}</span>` : ""}${it.original ? `<span class="orig">${esc(it.original)}</span>` : ""}</li>`;
@@ -156,7 +169,9 @@ async function load(){
   }
   document.getElementById("meta").textContent = "Oppdatert " +
     new Date(d.updated).toLocaleString("no-NO",{dateStyle:"short",timeStyle:"short"}) + " · hvert " + Math.round(d.interval/60) + ". min · utenlandske overskrifter maskinoversatt (hold musen over for original)";
-  document.getElementById("nav").innerHTML = d.countries.map(c => `<a class="${c.kind === "tema" ? "tema" : "land"}" href="#${esc(c.code)}">${esc(c.flag)} ${esc(c.name)}</a>`).join("");
+  const more = d.countries.filter(c => c.tier === 2);
+  document.getElementById("nav").innerHTML = d.countries.filter(c => c.tier !== 2).map(c => `<a class="${c.kind === "tema" ? "tema" : "land"}" href="#${esc(c.code)}">${esc(c.flag)} ${esc(c.name)}</a>`).join("") +
+    (more.length ? ` <select class="land" id="moreland" onchange="if(this.value){goTo(this.value);this.value=''}"><option value="">🌐 Flere land (${more.length}) …</option>${more.map(c => `<option value="${esc(c.code)}">${esc(c.flag)} ${esc(c.name)}</option>`).join("")}</select>` : "");
   lastCols = 0;
   document.getElementById("main").innerHTML = d.countries.map(c => {
     const items = c.items.map((it, i) => li(it, i >= SHOW ? "extra" : "", true)).join("");
@@ -167,7 +182,7 @@ async function load(){
         ${p.items.length ? `<ul>${p.items.map((it, i) => li(it, "", false)).join("")}</ul>` : ""}
         ${p.error ? `<p class="err">⚠ ${esc(p.error)}</p>` : ""}</div>`).join("");
     const from = TRANSLATED_FROM[c.lang];
-    return `<section data-i="${d.countries.indexOf(c)}" id="${esc(c.code)}" class="k-${c.kind === "tema" ? "tema" : "land"} ${open.has(c.code) ? "open" : ""} ${shut.has(c.code) ? "shut" : ""}">
+    return `<section data-i="${d.countries.indexOf(c)}" id="${esc(c.code)}" data-tier="${c.tier || 1}" class="k-${c.kind === "tema" ? "tema" : "land"} ${open.has(c.code) ? "open" : ""} ${isShut(c) ? "shut" : ""}">
       <h2 onclick="toggleShut('${esc(c.code)}')"><span>${esc(c.flag)} ${esc(c.name)}</span><small>${from ? "oversatt fra " + from + " · " : ""}${(c.papers||[]).length} ${c.kind === "tema" ? "kilder" : "aviser"}</small></h2>
       ${c.items.length ? `<ol>${items}</ol>` : ""}
       ${c.error ? `<p class="err">⚠ ${esc(c.error)}</p>` : ""}
@@ -177,7 +192,7 @@ async function load(){
   }).join("");
   applyPrefs();
   layout();
-  if (location.hash) document.querySelector(location.hash)?.scrollIntoView();
+  if (location.hash) goTo(decodeURIComponent(location.hash.slice(1)));
 }
 // Murstein: legg landene i rekkefølge, hver i den korteste kolonnen (radvis lesing).
 let lastCols = 0;

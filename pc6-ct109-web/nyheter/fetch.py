@@ -22,6 +22,8 @@ DATA = os.environ.get("DATA_DIR", "/data")
 INTERVAL = int(os.environ.get("INTERVAL", "1800"))
 PER_COUNTRY = int(os.environ.get("PER_COUNTRY", "10"))
 PER_PAPER = int(os.environ.get("PER_PAPER", "3"))
+MAX_NEW_TR = int(os.environ.get("MAX_NEW_TRANSLATIONS", "700"))  # nye oversettelser per runde; resten vises på originalspråket til neste runde
+new_tr = 0
 TARGET = "no"
 NO_TRANSLATE = {"no", "nb", "nn", "sv", "da", "en"}
 UA = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131 Safari/537.36"
@@ -41,7 +43,7 @@ def log(*a):
 _last_google = 0.0
 _google_lock = threading.Lock()
 # Andre nettsteder som sperrer ved mange kall: minste antall sekunder mellom kall
-THROTTLE = {"www.bing.com": 2.0, "www.reddit.com": 7.0}
+THROTTLE = {"www.bing.com": 2.0, "www.reddit.com": 7.0, "www.youtube.com": 1.0}
 _host_locks = {h: threading.Lock() for h in THROTTLE}
 _host_last = {}
 
@@ -192,6 +194,10 @@ def translate(s, lang):
     if key in cache:
         cache[key]["seen"] = time.time()
         return cache[key]["t"]
+    global new_tr
+    if new_tr >= MAX_NEW_TR:
+        return None
+    new_tr += 1
     t = None
     try:
         q = urllib.parse.quote(s)
@@ -252,6 +258,7 @@ def save_json(path, obj):
 def fetch_paper(pp, c):
     """Hent én avis/kilde. Returnerer (oppføring, uoversatte saker)."""
     plang = pp.get("lang", c.get("lang", "en"))
+    n = c.get("per_paper", PER_PAPER)
     entry = {"name": pp["name"], "home": pp["url"], "lang": plang, "lean": pp.get("lean"), "items": [], "error": None, "via": "rss"}
     try:
         got = parse_feed(get(find_feed(pp["url"])), "rss")
@@ -269,7 +276,7 @@ def fetch_paper(pp, c):
                 else:
                     got = parse_feed(get(su), engine if engine == "gnews" else "rss")
                     got.sort(key=lambda x: x["published"] or "", reverse=True)
-                    got = got[:PER_PAPER]
+                    got = got[:n]
                     search_cache[su] = {"t": time.time(), "items": [dict(x) for x in got]}
                 if got:
                     entry["via"] = engine
@@ -279,7 +286,7 @@ def fetch_paper(pp, c):
         if not got:
             entry["error"] = "; ".join(errs) or "ingen saker funnet"
             log(c["name"], pp["name"], "feilet:", entry["error"])
-    return entry, got[:PER_PAPER]
+    return entry, got[:n]
 
 
 def fetch_top(c):
@@ -298,7 +305,7 @@ def fetch_top(c):
                 seen.add(l[i]["link"])
                 seen.add(l[i]["original"].lower())
                 items.append(l[i])
-    return items[:PER_COUNTRY], errors
+    return items[:c.get("per_top", PER_COUNTRY)], errors
 
 
 def run_once():
@@ -308,12 +315,26 @@ def run_once():
     order = conf.get("order", [])
     sections.sort(key=lambda s: order.index(s["code"]) if s["code"] in order else len(order))
     t0 = time.time()
+    global new_tr
+    new_tr = 0
+    # seksjoner med "refresh" (de mindre landene) hentes sjeldnere: gjenbruk forrige resultat til det er gammelt nok
+    prev = {}
+    try:
+        with open(os.path.join(DATA, "data.json")) as f:
+            prev = {x["code"]: x for x in json.load(f).get("countries", []) if x.get("fetched")}
+    except Exception:
+        pass
+    reuse = {si for si, c in enumerate(sections)
+             if c.get("refresh") and c["code"] in prev and t0 - prev[c["code"]]["fetched"] < c["refresh"] - 300}
     with ThreadPoolExecutor(max_workers=8) as pool:
-        tops = list(pool.map(fetch_top, sections))
-        jobs = [(si, pool.submit(fetch_paper, pp, c)) for si, c in enumerate(sections) for pp in c.get("papers", [])]
+        tops = list(pool.map(lambda sc: ([], []) if sc[0] in reuse else fetch_top(sc[1]), enumerate(sections)))
+        jobs = [(si, pool.submit(fetch_paper, pp, c)) for si, c in enumerate(sections) if si not in reuse for pp in c.get("papers", [])]
         results = [(si, f.result()) for si, f in jobs]
     out = []
     for si, c in enumerate(sections):
+        if si in reuse:
+            out.append(prev[c["code"]] | {k: c.get(k) for k in ("name", "flag", "kind")} | {"tier": c.get("tier", 1)})
+            continue
         lang = c.get("lang", "en")
         items, errors = tops[si]
         papers = []
@@ -321,7 +342,8 @@ def run_once():
             if sj == si:
                 entry["items"] = tr_items(got, entry["lang"])
                 papers.append(entry)
-        out.append({k: c.get(k) for k in ("code", "name", "flag", "kind")} | {"lang": lang, "items": tr_items(items, lang), "papers": papers, "error": "; ".join(errors) or None})
+        out.append({k: c.get(k) for k in ("code", "name", "flag", "kind")} | {"lang": lang, "items": tr_items(items, c.get("top_lang", lang)), "papers": papers,
+                    "error": "; ".join(errors) or None, "tier": c.get("tier", 1), "fetched": t0})
     # rydd cache: glem oversettelser som ikke er brukt på 7 dager
     cutoff = time.time() - 7 * 86400
     for k in [k for k, v in cache.items() if v.get("seen", 0) < cutoff]:
@@ -332,7 +354,7 @@ def run_once():
         del search_cache[k]
     save_json(SEARCH_FILE, search_cache)
     save_json(os.path.join(DATA, "data.json"), {"updated": datetime.now(timezone.utc).isoformat(), "interval": INTERVAL, "countries": out})
-    log("ferdig på", int(time.time() - t0), "s:", sum(len(c["items"]) for c in out), "toppsaker,",
+    log("ferdig på", int(time.time() - t0), "s:", len(reuse), "seksjoner gjenbrukt,", new_tr, "nye oversettelser,", sum(len(c["items"]) for c in out), "toppsaker,",
         sum(len(p["items"]) for c in out for p in c["papers"]), "kildesaker fra", len(out), "seksjoner")
 
 
