@@ -2355,7 +2355,8 @@
    "tier": 2,
    "per_top": 5,
    "per_paper": 5,
-   "refresh": 7200
+   "refresh": 7200,
+   "region": "asia"
   },
   {
    "code": "jp",
@@ -2418,7 +2419,8 @@
    "tier": 2,
    "per_top": 5,
    "per_paper": 5,
-   "refresh": 7200
+   "refresh": 7200,
+   "region": "asia"
   },
   {
    "code": "in",
@@ -2481,7 +2483,8 @@
    "tier": 2,
    "per_top": 5,
    "per_paper": 5,
-   "refresh": 7200
+   "refresh": 7200,
+   "region": "asia"
   },
   {
    "code": "br",
@@ -2534,7 +2537,8 @@
    "tier": 2,
    "per_top": 5,
    "per_paper": 5,
-   "refresh": 7200
+   "refresh": 7200,
+   "region": "amerika"
   },
   {
    "code": "ca",
@@ -2593,7 +2597,8 @@
    "tier": 2,
    "per_top": 5,
    "per_paper": 5,
-   "refresh": 7200
+   "refresh": 7200,
+   "region": "amerika"
   },
   {
    "code": "kr",
@@ -2641,7 +2646,8 @@
    "tier": 2,
    "per_top": 5,
    "per_paper": 5,
-   "refresh": 7200
+   "refresh": 7200,
+   "region": "asia"
   },
   {
    "code": "mx",
@@ -2690,7 +2696,8 @@
    "tier": 2,
    "per_top": 5,
    "per_paper": 5,
-   "refresh": 7200
+   "refresh": 7200,
+   "region": "amerika"
   },
   {
    "code": "au",
@@ -2743,7 +2750,8 @@
    "tier": 2,
    "per_top": 5,
    "per_paper": 5,
-   "refresh": 7200
+   "refresh": 7200,
+   "region": "amerika"
   },
   {
    "code": "id",
@@ -2793,7 +2801,8 @@
    "tier": 2,
    "per_top": 5,
    "per_paper": 5,
-   "refresh": 7200
+   "refresh": 7200,
+   "region": "asia"
   },
   {
    "code": "sa",
@@ -2835,7 +2844,8 @@
    "tier": 2,
    "per_top": 5,
    "per_paper": 5,
-   "refresh": 7200
+   "refresh": 7200,
+   "region": "midtosten"
   },
   {
    "code": "ar",
@@ -2884,7 +2894,8 @@
    "tier": 2,
    "per_top": 5,
    "per_paper": 5,
-   "refresh": 7200
+   "refresh": 7200,
+   "region": "amerika"
   },
   {
    "code": "sg",
@@ -2922,7 +2933,8 @@
    "tier": 2,
    "per_top": 5,
    "per_paper": 5,
-   "refresh": 7200
+   "refresh": 7200,
+   "region": "asia"
   },
   {
    "code": "ae",
@@ -2958,7 +2970,8 @@
    "tier": 2,
    "per_top": 5,
    "per_paper": 5,
-   "refresh": 7200
+   "refresh": 7200,
+   "region": "midtosten"
   },
   {
    "code": "th",
@@ -3011,7 +3024,8 @@
    "tier": 2,
    "per_top": 5,
    "per_paper": 5,
-   "refresh": 7200
+   "refresh": 7200,
+   "region": "asia"
   },
   {
    "code": "co",
@@ -3049,7 +3063,8 @@
    "tier": 2,
    "per_top": 5,
    "per_paper": 5,
-   "refresh": 7200
+   "refresh": 7200,
+   "region": "amerika"
   },
   {
    "code": "my",
@@ -3092,7 +3107,8 @@
    "tier": 2,
    "per_top": 5,
    "per_paper": 5,
-   "refresh": 7200
+   "refresh": 7200,
+   "region": "asia"
   },
   {
    "code": "vn",
@@ -3134,7 +3150,8 @@
    "tier": 2,
    "per_top": 5,
    "per_paper": 5,
-   "refresh": 7200
+   "refresh": 7200,
+   "region": "asia"
   },
   {
    "code": "bd",
@@ -3182,7 +3199,8 @@
    "tier": 2,
    "per_top": 5,
    "per_paper": 5,
-   "refresh": 7200
+   "refresh": 7200,
+   "region": "asia"
   },
   {
    "code": "ph",
@@ -3230,7 +3248,8 @@
    "tier": 2,
    "per_top": 5,
    "per_paper": 5,
-   "refresh": 7200
+   "refresh": 7200,
+   "region": "asia"
   },
   {
    "code": "za",
@@ -3278,7 +3297,8 @@
    "tier": 2,
    "per_top": 5,
    "per_paper": 5,
-   "refresh": 7200
+   "refresh": 7200,
+   "region": "afrika"
   },
   {
    "code": "pk",
@@ -3321,7 +3341,8 @@
    "tier": 2,
    "per_top": 5,
    "per_paper": 5,
-   "refresh": 7200
+   "refresh": 7200,
+   "region": "asia"
   },
   {
    "code": "eg",
@@ -3363,7 +3384,8 @@
    "tier": 2,
    "per_top": 5,
    "per_paper": 5,
-   "refresh": 7200
+   "refresh": 7200,
+   "region": "afrika"
   },
   {
    "code": "cl",
@@ -3411,7 +3433,8 @@
    "tier": 2,
    "per_top": 5,
    "per_paper": 5,
-   "refresh": 7200
+   "refresh": 7200,
+   "region": "amerika"
   },
   {
    "code": "pe",
@@ -3454,7 +3477,8 @@
    "tier": 2,
    "per_top": 5,
    "per_paper": 5,
-   "refresh": 7200
+   "refresh": 7200,
+   "region": "amerika"
   },
   {
    "code": "kz",
@@ -3496,7 +3520,8 @@
    "per_top": 5,
    "per_paper": 5,
    "refresh": 7200,
-   "top_lang": "en"
+   "top_lang": "en",
+   "region": "asia"
   },
   {
    "code": "ng",
@@ -3544,7 +3569,8 @@
    "tier": 2,
    "per_top": 5,
    "per_paper": 5,
-   "refresh": 7200
+   "refresh": 7200,
+   "region": "afrika"
   },
   {
    "code": "dz",
@@ -3584,7 +3610,8 @@
    "per_top": 5,
    "per_paper": 5,
    "refresh": 7200,
-   "top_lang": "en"
+   "top_lang": "en",
+   "region": "afrika"
   },
   {
    "code": "nz",
@@ -3632,7 +3659,8 @@
    "tier": 2,
    "per_top": 5,
    "per_paper": 5,
-   "refresh": 7200
+   "refresh": 7200,
+   "region": "amerika"
   },
   {
    "code": "iq",
@@ -3671,7 +3699,8 @@
    "tier": 2,
    "per_top": 5,
    "per_paper": 5,
-   "refresh": 7200
+   "refresh": 7200,
+   "region": "midtosten"
   },
   {
    "code": "qa",
@@ -3705,7 +3734,8 @@
    "tier": 2,
    "per_top": 5,
    "per_paper": 5,
-   "refresh": 7200
+   "refresh": 7200,
+   "region": "midtosten"
   },
   {
    "code": "cu",
@@ -3748,7 +3778,8 @@
    "tier": 2,
    "per_top": 5,
    "per_paper": 5,
-   "refresh": 7200
+   "refresh": 7200,
+   "region": "amerika"
   },
   {
    "code": "ma",
@@ -3793,7 +3824,8 @@
    "tier": 2,
    "per_top": 5,
    "per_paper": 5,
-   "refresh": 7200
+   "refresh": 7200,
+   "region": "afrika"
   },
   {
    "code": "uz",
@@ -3836,7 +3868,8 @@
    "per_top": 5,
    "per_paper": 5,
    "refresh": 7200,
-   "top_lang": "en"
+   "top_lang": "en",
+   "region": "asia"
   },
   {
    "code": "ao",
@@ -3876,7 +3909,8 @@
    "per_top": 5,
    "per_paper": 5,
    "refresh": 7200,
-   "top_lang": "en"
+   "top_lang": "en",
+   "region": "afrika"
   },
   {
    "code": "ke",
@@ -3919,7 +3953,8 @@
    "tier": 2,
    "per_top": 5,
    "per_paper": 5,
-   "refresh": 7200
+   "refresh": 7200,
+   "region": "afrika"
   },
   {
    "code": "kw",
@@ -3953,7 +3988,8 @@
    "tier": 2,
    "per_top": 5,
    "per_paper": 5,
-   "refresh": 7200
+   "refresh": 7200,
+   "region": "midtosten"
   },
   {
    "code": "do",
@@ -3994,7 +4030,8 @@
    "per_top": 5,
    "per_paper": 5,
    "refresh": 7200,
-   "top_lang": "en"
+   "top_lang": "en",
+   "region": "amerika"
   },
   {
    "code": "ec",
@@ -4034,7 +4071,8 @@
    "per_top": 5,
    "per_paper": 5,
    "refresh": 7200,
-   "top_lang": "en"
+   "top_lang": "en",
+   "region": "amerika"
   },
   {
    "code": "gt",
@@ -4074,7 +4112,8 @@
    "per_top": 5,
    "per_paper": 5,
    "refresh": 7200,
-   "top_lang": "en"
+   "top_lang": "en",
+   "region": "amerika"
   },
   {
    "code": "gh",
@@ -4112,7 +4151,8 @@
    "tier": 2,
    "per_top": 5,
    "per_paper": 5,
-   "refresh": 7200
+   "refresh": 7200,
+   "region": "afrika"
   },
   {
    "code": "et",
@@ -4150,7 +4190,8 @@
    "tier": 2,
    "per_top": 5,
    "per_paper": 5,
-   "refresh": 7200
+   "refresh": 7200,
+   "region": "afrika"
   },
   {
    "code": "ve",
@@ -4193,7 +4234,8 @@
    "tier": 2,
    "per_top": 5,
    "per_paper": 5,
-   "refresh": 7200
+   "refresh": 7200,
+   "region": "amerika"
   },
   {
    "code": "cd",
@@ -4233,7 +4275,8 @@
    "per_top": 5,
    "per_paper": 5,
    "refresh": 7200,
-   "top_lang": "en"
+   "top_lang": "en",
+   "region": "afrika"
   },
   {
    "code": "om",
@@ -4267,7 +4310,8 @@
    "tier": 2,
    "per_top": 5,
    "per_paper": 5,
-   "refresh": 7200
+   "refresh": 7200,
+   "region": "midtosten"
   },
   {
    "code": "cr",
@@ -4308,7 +4352,8 @@
    "per_top": 5,
    "per_paper": 5,
    "refresh": 7200,
-   "top_lang": "en"
+   "top_lang": "en",
+   "region": "amerika"
   },
   {
    "code": "lk",
@@ -4352,7 +4397,8 @@
    "tier": 2,
    "per_top": 5,
    "per_paper": 5,
-   "refresh": 7200
+   "refresh": 7200,
+   "region": "asia"
   },
   {
    "code": "ci",
@@ -4392,7 +4438,8 @@
    "per_top": 5,
    "per_paper": 5,
    "refresh": 7200,
-   "top_lang": "en"
+   "top_lang": "en",
+   "region": "afrika"
   },
   {
    "code": "pa",
@@ -4433,7 +4480,8 @@
    "per_top": 5,
    "per_paper": 5,
    "refresh": 7200,
-   "top_lang": "en"
+   "top_lang": "en",
+   "region": "amerika"
   },
   {
    "code": "tz",
@@ -4472,7 +4520,8 @@
    "tier": 2,
    "per_top": 5,
    "per_paper": 5,
-   "refresh": 7200
+   "refresh": 7200,
+   "region": "afrika"
   },
   {
    "code": "uy",
@@ -4512,7 +4561,8 @@
    "per_top": 5,
    "per_paper": 5,
    "refresh": 7200,
-   "top_lang": "en"
+   "top_lang": "en",
+   "region": "amerika"
   },
   {
    "code": "az",
@@ -4556,7 +4606,8 @@
    "tier": 2,
    "per_top": 5,
    "per_paper": 5,
-   "refresh": 7200
+   "refresh": 7200,
+   "region": "asia"
   },
   {
    "code": "mm",
@@ -4600,7 +4651,8 @@
    "tier": 2,
    "per_top": 5,
    "per_paper": 5,
-   "refresh": 7200
+   "refresh": 7200,
+   "region": "asia"
   },
   {
    "code": "tm",
@@ -4635,7 +4687,8 @@
    "per_top": 5,
    "per_paper": 5,
    "refresh": 7200,
-   "top_lang": "en"
+   "top_lang": "en",
+   "region": "asia"
   },
   {
    "code": "ug",
@@ -4673,7 +4726,8 @@
    "tier": 2,
    "per_top": 5,
    "per_paper": 5,
-   "refresh": 7200
+   "refresh": 7200,
+   "region": "afrika"
   },
   {
    "code": "zw",
@@ -4716,7 +4770,8 @@
    "tier": 2,
    "per_top": 5,
    "per_paper": 5,
-   "refresh": 7200
+   "refresh": 7200,
+   "region": "afrika"
   },
   {
    "code": "jo",
@@ -4755,7 +4810,8 @@
    "tier": 2,
    "per_top": 5,
    "per_paper": 5,
-   "refresh": 7200
+   "refresh": 7200,
+   "region": "midtosten"
   },
   {
    "code": "cm",
@@ -4796,7 +4852,8 @@
    "per_top": 5,
    "per_paper": 5,
    "refresh": 7200,
-   "top_lang": "en"
+   "top_lang": "en",
+   "region": "afrika"
   },
   {
    "code": "py",
@@ -4836,7 +4893,8 @@
    "per_top": 5,
    "per_paper": 5,
    "refresh": 7200,
-   "top_lang": "en"
+   "top_lang": "en",
+   "region": "amerika"
   },
   {
    "code": "tn",
@@ -4882,7 +4940,8 @@
    "per_top": 5,
    "per_paper": 5,
    "refresh": 7200,
-   "top_lang": "en"
+   "top_lang": "en",
+   "region": "afrika"
   },
   {
    "code": "ly",
@@ -4917,7 +4976,8 @@
    "tier": 2,
    "per_top": 5,
    "per_paper": 5,
-   "refresh": 7200
+   "refresh": 7200,
+   "region": "afrika"
   },
   {
    "code": "kh",
@@ -4951,7 +5011,8 @@
    "tier": 2,
    "per_top": 5,
    "per_paper": 5,
-   "refresh": 7200
+   "refresh": 7200,
+   "region": "asia"
   },
   {
    "code": "bo",
@@ -4991,7 +5052,8 @@
    "per_top": 5,
    "per_paper": 5,
    "refresh": 7200,
-   "top_lang": "en"
+   "top_lang": "en",
+   "region": "amerika"
   },
   {
    "code": "bh",
@@ -5030,7 +5092,8 @@
    "tier": 2,
    "per_top": 5,
    "per_paper": 5,
-   "refresh": 7200
+   "refresh": 7200,
+   "region": "midtosten"
   },
   {
    "code": "np",
@@ -5075,7 +5138,8 @@
    "tier": 2,
    "per_top": 5,
    "per_paper": 5,
-   "refresh": 7200
+   "refresh": 7200,
+   "region": "asia"
   }
  ],
  "topics": [
