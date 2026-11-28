@@ -17,6 +17,7 @@ Står i Komodo-stackens **Environment**, aldri i git:
 
 ## Kilder
 
+- **Sonos** (kilde `sonos`): lokal Sonos-API via Arc på 10.0.0.15 (`SONOS_HOST`). Dekker alt som spilles på Sonos (alle soner).
 - **Last.fm** (kilde `lastfm`): henter avspillinger som Spotify/Sonos m.fl. allerede scrobbler til Last.fm. Godkjennes én gang via (Re)authenticate i http://10.0.0.172:9078. Merk: Last.fm varsler at API-nøkler krever Pro fra 1. des 2026.
 - **Web Scrobbler** (nettleserutvidelse, dekker Qobuz/YouTube Music i nettleser): Accounts → Webhook → API URL `http://10.0.0.172:9078/api/webscrobbler`.
 - **Navidrome**: kan sende direkte til Koito via ListenBrainz (`ND_LISTENBRAINZ_BASEURL=http://10.0.0.172:4110/apis/listenbrainz/1/`), eller via multi-scrobbler (`SUBSONIC_*`).

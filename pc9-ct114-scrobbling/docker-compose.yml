@@ -47,6 +47,9 @@ services:
       SOURCE_LASTFM_API_KEY: ${LASTFM_API_KEY:?settes i Komodo-stackens Environment}
       SOURCE_LASTFM_SECRET: ${LASTFM_API_SECRET:?settes i Komodo-stackens Environment}
       SOURCE_LASTFM_REDIRECT_URI: http://10.0.0.172:9078/lastfm/callback
+      # Kilde: Sonos (lokal API). Én høyttaler holder; multi-scrobbler ser alle soner/grupper derfra.
+      SONOS_ID: sonos
+      SONOS_HOST: 10.0.0.15   # Sonos Arc, «Stue Arc Sonos»
     volumes:
       - /opt/scrobbling/multi-scrobbler/config:/config
     logging:
