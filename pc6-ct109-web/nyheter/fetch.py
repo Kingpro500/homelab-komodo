@@ -333,7 +333,7 @@ def run_once():
     out = []
     for si, c in enumerate(sections):
         if si in reuse:
-            out.append(prev[c["code"]] | {k: c.get(k) for k in ("name", "flag", "kind")} | {"tier": c.get("tier", 1)})
+            out.append(prev[c["code"]] | {k: c.get(k) for k in ("name", "flag", "kind", "region")} | {"tier": c.get("tier", 1)})
             continue
         lang = c.get("lang", "en")
         items, errors = tops[si]
@@ -342,7 +342,7 @@ def run_once():
             if sj == si:
                 entry["items"] = tr_items(got, entry["lang"])
                 papers.append(entry)
-        out.append({k: c.get(k) for k in ("code", "name", "flag", "kind")} | {"lang": lang, "items": tr_items(items, c.get("top_lang", lang)), "papers": papers,
+        out.append({k: c.get(k) for k in ("code", "name", "flag", "kind", "region")} | {"lang": lang, "items": tr_items(items, c.get("top_lang", lang)), "papers": papers,
                     "error": "; ".join(errors) or None, "tier": c.get("tier", 1), "fetched": t0})
     # rydd cache: glem oversettelser som ikke er brukt på 7 dager
     cutoff = time.time() - 7 * 86400
