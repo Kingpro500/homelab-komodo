@@ -17,9 +17,10 @@ h1{font-size:16px;margin:0 8px 0 0;white-space:nowrap}
 nav a{font-size:12px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:1px 8px}
 nav a:hover{border-color:var(--accent)}
 nav a.tema{border-style:dashed}
-/* regioner: egne faner; landene der vises ikke i Alle/Land/Tema */
-body:not(.vr) section.reg,body:not(.vr) nav a.reg,body.vr section:not(.reg),body.vr nav a:not(.reg),body.vr nav select,
-body.vr-asia .reg:not(.reg-asia),body.vr-afrika .reg:not(.reg-afrika),body.vr-midtosten .reg:not(.reg-midtosten),body.vr-amerika .reg:not(.reg-amerika){display:none}
+/* regioner: hver region har sin fane. De store landene vises også under Alle/Land; de mindre (regonly) bare i regionfanen */
+body:not(.vr) .regonly,body.vr section:not(.reg),body.vr nav a:not(.reg),body.vr nav select,
+body.vr-norden .reg:not(.reg-norden),body.vr-europa .reg:not(.reg-europa),body.vr-amerika .reg:not(.reg-amerika),
+body.vr-asia .reg:not(.reg-asia),body.vr-afrika .reg:not(.reg-afrika),body.vr-midtosten .reg:not(.reg-midtosten){display:none}
 nav select{font-size:12px;background:var(--card);color:inherit;border:1px solid var(--line);border-radius:999px;padding:1px 6px}
 #rnd{cursor:pointer;font:600 12px system-ui;background:#2b3b5a;color:var(--text);border:1px solid var(--accent);border-radius:6px;padding:3px 10px;margin-right:6px}
 #rnd:hover{background:#34507d}
@@ -78,7 +79,7 @@ body.pp2 .paper li:nth-child(n+3),body.pp3 .paper li:nth-child(n+4),body.pp5 .pa
   <div class="row">
     <h1>📰 Nyheter</h1>
     <button id="rnd" title="Åpner 5 tilfeldige saker fra det som vises nå (tillat sprettoppvinduer for 10.0.0.124 første gang)">🎲 5 tilfeldige</button>
-    <span class="tabs" id="tabs"><b data-v="alle">Alle</b><b data-v="land">Land</b><b data-v="tema">Tema</b><b data-v="r-asia">🌏 Asia</b><b data-v="r-afrika">🌍 Afrika</b><b data-v="r-midtosten">🕌 Midtøsten</b><b data-v="r-amerika">🌎 Amerika og Oseania</b></span>
+    <span class="tabs" id="tabs"><b data-v="alle">Alle</b><b data-v="land">Land</b><b data-v="tema">Tema</b><b data-v="r-norden">🇳🇴 Skandinavia</b><b data-v="r-europa">🇪🇺 Europa</b><b data-v="r-amerika">🌎 Amerika</b><b data-v="r-asia">🌏 Asia</b><b data-v="r-afrika">🌍 Afrika</b><b data-v="r-midtosten">🕌 Midtøsten</b></span>
     <nav class="row" id="nav"></nav>
   </div>
   <div class="ctl">
@@ -156,8 +157,9 @@ function toggleShut(code){
 }
 function goTo(code){
   const s = document.getElementById(code); if (!s) return;
-  const v = store("view") || "alle", r = s.dataset.region;
-  if (r ? v !== "r-" + r : v.startsWith("r-")) { store("view", r ? "r-" + r : "alle"); applyPrefs(); }
+  const v = store("view") || "alle", r = s.dataset.region, only = s.classList.contains("regonly");
+  const visible = v.startsWith("r-") ? v === "r-" + r : !only;
+  if (!visible) { store("view", only || v.startsWith("r-") ? "r-" + r : "alle"); applyPrefs(); }
   if (s.classList.contains("shut")) toggleShut(code);
   setTimeout(() => s.scrollIntoView({behavior: "smooth", block: "start"}), 50);
 }
@@ -176,7 +178,7 @@ async function load(){
   document.getElementById("meta").textContent = "Oppdatert " +
     new Date(d.updated).toLocaleString("no-NO",{dateStyle:"short",timeStyle:"short"}) + " · hvert " + Math.round(d.interval/60) + ". min · utenlandske overskrifter maskinoversatt (hold musen over for original)";
   const more = d.countries.filter(c => c.tier === 2 && !c.region);
-  document.getElementById("nav").innerHTML = d.countries.filter(c => c.tier !== 2 || c.region).map(c => `<a class="${c.kind === "tema" ? "tema" : "land"}${c.region ? " reg reg-" + c.region : ""}" href="#${esc(c.code)}">${esc(c.flag)} ${esc(c.name)}</a>`).join("") +
+  document.getElementById("nav").innerHTML = d.countries.filter(c => c.tier !== 2 || c.region).map(c => `<a class="${c.kind === "tema" ? "tema" : "land"}${c.region ? " reg reg-" + c.region : ""}${c.tier === 2 ? " regonly" : ""}" href="#${esc(c.code)}">${esc(c.flag)} ${esc(c.name)}</a>`).join("") +
     (more.length ? ` <select class="land" id="moreland" onchange="if(this.value){goTo(this.value);this.value=''}"><option value="">🌐 Flere land (${more.length}) …</option>${more.map(c => `<option value="${esc(c.code)}">${esc(c.flag)} ${esc(c.name)}</option>`).join("")}</select>` : "");
   lastCols = 0;
   document.getElementById("main").innerHTML = d.countries.map(c => {
@@ -188,7 +190,7 @@ async function load(){
         ${p.items.length ? `<ul>${p.items.map((it, i) => li(it, "", false)).join("")}</ul>` : ""}
         ${p.error ? `<p class="err">⚠ ${esc(p.error)}</p>` : ""}</div>`).join("");
     const from = TRANSLATED_FROM[c.lang];
-    return `<section data-i="${d.countries.indexOf(c)}" id="${esc(c.code)}" data-tier="${c.tier || 1}" ${c.region ? `data-region="${esc(c.region)}"` : ""} ${c.tier === 2 && !c.region ? "data-defshut=1" : ""} class="${c.region ? "reg reg-" + esc(c.region) : ""} k-${c.kind === "tema" ? "tema" : "land"} ${open.has(c.code) ? "open" : ""} ${isShut(c) ? "shut" : ""}">
+    return `<section data-i="${d.countries.indexOf(c)}" id="${esc(c.code)}" data-tier="${c.tier || 1}" ${c.region ? `data-region="${esc(c.region)}"` : ""} ${c.tier === 2 && !c.region ? "data-defshut=1" : ""} class="${c.region ? "reg reg-" + esc(c.region) : ""} ${c.tier === 2 && c.region ? "regonly" : ""} k-${c.kind === "tema" ? "tema" : "land"} ${open.has(c.code) ? "open" : ""} ${isShut(c) ? "shut" : ""}">
       <h2 onclick="toggleShut('${esc(c.code)}')"><span>${esc(c.flag)} ${esc(c.name)}</span><small>${from ? "oversatt fra " + from + " · " : ""}${(c.papers||[]).length} ${c.kind === "tema" ? "kilder" : "aviser"}</small></h2>
       ${c.items.length ? `<ol>${items}</ol>` : ""}
       ${c.error ? `<p class="err">⚠ ${esc(c.error)}</p>` : ""}
