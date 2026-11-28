@@ -17,6 +17,11 @@ h1{font-size:16px;margin:0 8px 0 0;white-space:nowrap}
 nav a{font-size:12px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:1px 8px}
 nav a:hover{border-color:var(--accent)}
 nav a.tema{border-style:dashed}
+#rnd{cursor:pointer;font:600 12px system-ui;background:#2b3b5a;color:var(--text);border:1px solid var(--accent);border-radius:6px;padding:3px 10px;margin-right:6px}
+#rnd:hover{background:#34507d}
+#rndbox{display:none;position:fixed;top:70px;right:16px;z-index:5;max-width:520px;background:var(--card);border:1px solid var(--accent);border-radius:8px;padding:8px 12px;box-shadow:0 6px 24px #000a}
+#rndbox li{white-space:normal;margin:4px 0}
+#rndbox .x{float:right;cursor:pointer;color:var(--dim)}
 .tabs{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-right:6px}
 .tabs b{cursor:pointer;font-weight:500;font-size:12px;padding:2px 10px;color:var(--dim)}
 .tabs b.on{background:#24324a;color:var(--text)}
@@ -68,6 +73,7 @@ body.three .paper li.p3{display:list-item}
 <header>
   <div class="row">
     <h1>📰 Nyheter</h1>
+    <button id="rnd" title="Åpner 5 tilfeldige saker fra det som vises nå (tillat sprettoppvinduer for 10.0.0.124 første gang)">🎲 5 tilfeldige</button>
     <span class="tabs" id="tabs"><b data-v="alle">Alle</b><b data-v="land">Land</b><b data-v="tema">Tema</b></span>
     <nav class="row" id="nav"></nav>
   </div>
@@ -80,6 +86,7 @@ body.three .paper li.p3{display:list-item}
     <label><input type="checkbox" id="optShut"> lukk alle land</label>
   </div>
 </header>
+<div id="rndbox"><span class="x" onclick="this.parentNode.style.display='none'">✕</span><b>🎲 Tilfeldige saker</b><ul id="rndlist"></ul><div class="meta" id="rndnote"></div></div>
 <main id="main"></main>
 <script>
 const SHOW = 5;
@@ -188,6 +195,23 @@ function layout(force){
 }
 window.addEventListener("resize", () => layout());
 const relayout = () => layout(true);
+// 🎲 5 tilfeldige saker blant det som er synlig (respekterer fane og skjulte fløyer)
+document.getElementById("rnd").onclick = () => {
+  const vis = el => !el || getComputedStyle(el).display !== "none";
+  const links = [...document.querySelectorAll("#main li a")]
+    .filter(a => vis(a.closest("section")) && !a.closest("section.shut") && vis(a.closest(".paper")));
+  const pick = [];
+  const pool = links.slice();
+  while (pick.length < 5 && pool.length) pick.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]);
+  let blocked = 0;
+  for (const a of pick) { const w = window.open(a.href, "_blank"); if (w) { try { w.opener = null; } catch (e) {} } else blocked++; }
+  document.getElementById("rndlist").innerHTML = pick.map(a => {
+    const sec = a.closest("section").querySelector("h2 span").textContent;
+    return `<li><a href="${esc(a.href)}" target="_blank" rel="noopener noreferrer">${esc(a.textContent)}</a> <span class="m">· ${esc(sec)}</span></li>`;
+  }).join("");
+  document.getElementById("rndnote").textContent = blocked ? "Nettleseren blokkerte noen faner – klikk sakene over, eller tillat sprettoppvinduer for denne siden." : "Åpnet i nye faner.";
+  document.getElementById("rndbox").style.display = "block";
+};
 applyPrefs();
 load();
 setInterval(load, 10 * 60 * 1000);
