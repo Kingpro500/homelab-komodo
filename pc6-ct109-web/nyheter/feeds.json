@@ -1,5 +1,5 @@
 {
- "_info": "Land på nyhetssiden /nyheter. sources/gnews = Google News toppsaker for landet. papers = aviser: fra Rogers Chrome-bokmerker (N/…), supplert (added=true) så hvert land har aviser over hele skalaen. Oppgi forsidens adresse; tjenesten finner RSS selv, ellers Google News-søk på domenet. lean (omtrentlig, etter Wikipedia-beskrivelser, AllSides/Ad Fontes/MBFC der de finnes): ytre venstre, venstre, sentrum, høyre, ytre høyre, allmenn (allmennkringkaster), statlig (statseid/regjeringsstyrt), opposisjon (eksil/regimekritisk). I Iran, Russland og Tyrkia følger skalaen landets egne fløyer (f.eks. reformister=venstre, hardlinere=ytre høyre). lang overstyrer landets språk. topics = temaseksjoner (samme format som land; sources kan være Google News-emne). Reddit blokkerer RSS uten innlogging fra hjemmenettet (nov 2026); subreddits hentes derfor via Google News-søk på reddit.com/r/<navn>. order = rekkefølgen på siden (Skandinavia, USA, UK, forum, tema, Tyskland, Frankrike, resten av Europa etter BNP, så resten etter BNP).",
+ "_info": "Land på nyhetssiden /nyheter. sources/gnews = Google News toppsaker for landet. papers = aviser: fra Rogers Chrome-bokmerker (N/…), supplert (added=true) så hvert land har aviser over hele skalaen. Oppgi forsidens adresse; tjenesten finner RSS selv, ellers Google News-søk på domenet. lean (omtrentlig, etter Wikipedia-beskrivelser, AllSides/Ad Fontes/MBFC der de finnes): ytre venstre, venstre, sentrum, høyre, ytre høyre, allmenn (allmennkringkaster), statlig (statseid/regjeringsstyrt), opposisjon (eksil/regimekritisk). I Iran, Russland og Tyrkia følger skalaen landets egne fløyer (f.eks. reformister=venstre, hardlinere=ytre høyre). lang overstyrer landets språk. topics = temaseksjoner (samme format som land; sources kan være Google News-emne). Reddit blokkerer RSS uten innlogging fra hjemmenettet (nov 2026); subreddits hentes derfor via Google News-søk på reddit.com/r/<navn>. order = rekkefølgen på siden (Skandinavia, USA, UK, forum, tema, Tyskland, Frankrike, resten av Europa etter BNP, så resten etter BNP). X/Twitter: ingen åpen RSS, Nitter nede (nov 2026); kontoer hentes via nyhetssøk på x.com/<konto>.",
  "countries": [
   {
    "code": "no",
@@ -2084,6 +2084,88 @@
      "url": "https://www.private-eye.co.uk/"
     }
    ]
+  },
+  {
+   "code": "t-x",
+   "name": "X (Twitter)",
+   "flag": "𝕏",
+   "lang": "en",
+   "sources": [
+    {
+     "type": "gnews",
+     "url": "https://news.google.com/rss/search?q=site%3Ax.com%20when%3A1d&hl=en-US&gl=US&ceid=US:en",
+     "note": "X har ikke åpen RSS og Nitter er nede; innlegg hentes via Google News-søk på x.com"
+    }
+   ],
+   "papers": [
+    {
+     "name": "BNO News (@BNONews)",
+     "url": "https://x.com/BNONews",
+     "lean": "sentrum",
+     "added": true
+    },
+    {
+     "name": "Reuters (@Reuters)",
+     "url": "https://x.com/Reuters",
+     "lean": "sentrum",
+     "added": true
+    },
+    {
+     "name": "The Spectator Index (@spectatorindex)",
+     "url": "https://x.com/spectatorindex",
+     "lean": "sentrum",
+     "added": true
+    },
+    {
+     "name": "OSINTtechnical (@Osinttechnical)",
+     "url": "https://x.com/Osinttechnical",
+     "lean": "sentrum",
+     "added": true
+    },
+    {
+     "name": "Jacobin (@jacobin)",
+     "url": "https://x.com/jacobin",
+     "lean": "ytre venstre",
+     "added": true
+    },
+    {
+     "name": "Bernie Sanders (@BernieSanders)",
+     "url": "https://x.com/BernieSanders",
+     "lean": "venstre",
+     "added": true
+    },
+    {
+     "name": "Alexandria Ocasio-Cortez (@AOC)",
+     "url": "https://x.com/AOC",
+     "lean": "venstre",
+     "added": true
+    },
+    {
+     "name": "Elon Musk (@elonmusk)",
+     "url": "https://x.com/elonmusk",
+     "lean": "høyre",
+     "added": true
+    },
+    {
+     "name": "Visegrad 24 (@visegrad24)",
+     "url": "https://x.com/visegrad24",
+     "lean": "høyre",
+     "added": true
+    },
+    {
+     "name": "Disclose.tv (@disclosetv)",
+     "url": "https://x.com/disclosetv",
+     "lean": "ytre høyre",
+     "added": true
+    },
+    {
+     "name": "NRK Nyheter (@nrknyheter)",
+     "url": "https://x.com/nrknyheter",
+     "lean": "allmenn",
+     "added": true,
+     "lang": "no"
+    }
+   ]
   }
  ],
  "order": [
@@ -2092,6 +2174,7 @@
   "dk",
   "us",
   "gb",
+  "t-x",
   "t-forum",
   "t-ki",
   "t-tek",
