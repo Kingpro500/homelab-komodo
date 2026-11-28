@@ -10,6 +10,10 @@ services:
       ND_SESSIONTIMEOUT: "24h"
       ND_BASEURL: ""
       TZ: "${TZ:-Europe/Oslo}"
+      # Scrobbling til Koito (pc9-ct114-scrobbling) via ListenBrainz-API. Kobles per bruker
+      # i Navidrome: Personal -> ListenBrainz -> lim inn Koito API-nøkkel (KOITO_TOKEN).
+      ND_LISTENBRAINZ_ENABLED: "true"
+      ND_LISTENBRAINZ_BASEURL: "http://10.0.0.172:4110/apis/listenbrainz/1/"
     ports:
       - "4533:4533"
     volumes:
