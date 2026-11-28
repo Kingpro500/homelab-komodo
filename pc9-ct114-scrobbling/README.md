@@ -17,7 +17,8 @@ Står i Komodo-stackens **Environment**, aldri i git:
 
 ## Kilder
 
-- **Sonos** (kilde `sonos`): lokal Sonos-API via Arc på 10.0.0.15 (`SONOS_HOST`). Dekker alt som spilles på Sonos (alle soner).
+- **Sonos** (kilde `sonos`): lokal Sonos-API via Arc på 10.0.0.15 (`SONOS_HOST`). Scrobbler alle soner unntatt Lampe (`SONOS_DEVICES_BLOCK: lampe`; den spiller bare sovemusikk).
+  **Felle:** Sonos-kilden i multi-scrobbler har `multiPlatform = false`, så én kilde følger bare én spiller om gangen. Spiller to soner samtidig, hopper den mellom dem hvert 5. sekund («Removed due to player transfer» i loggen) og scrobbler bare den ene. Skal flere soner scrobbles samtidig, må hver ha sin egen kilde i `/config/sonos.json` (`devicesAllow`/`devicesBlock`).
 - **Web Scrobbler** (nettleserutvidelse, dekker Qobuz/YouTube Music i nettleser): Accounts → Webhook → API URL `http://10.0.0.172:9078/api/webscrobbler`.
 - **Navidrome**: scrobbler direkte til Koito via ListenBrainz-API (`ND_LISTENBRAINZ_BASEURL` i `pc9-ct114-navidrome`). Kobles per bruker i Navidrome: Personal → ListenBrainz → lim inn `KOITO_TOKEN`.
 - **Spotify** (kilde `spotify`): godkjennes i dashbordet; nettleseren havner på `127.0.0.1:9078/callback?code=…` – bytt `127.0.0.1` med `10.0.0.172` og trykk Enter.

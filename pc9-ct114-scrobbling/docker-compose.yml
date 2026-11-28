@@ -49,8 +49,10 @@ services:
       SPOTIFY_CLIENT_SECRET: ${SPOTIFY_CLIENT_SECRET:?settes i Komodo-stackens Environment}
       SPOTIFY_REDIRECT_URI: http://127.0.0.1:9078/callback
       # Kilde: Sonos (lokal API). Én høyttaler holder; multi-scrobbler ser alle soner/grupper derfra.
+      # Sonos-kilden følger bare én spiller om gangen (se README), så Lampe (sovemusikk) er blokkert.
       SONOS_ID: sonos
       SONOS_HOST: 10.0.0.15   # Sonos Arc, «Stue Arc Sonos»
+      SONOS_DEVICES_BLOCK: lampe
     volumes:
       - /opt/scrobbling/multi-scrobbler/config:/config
     logging:
