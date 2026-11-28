@@ -23,19 +23,12 @@ dukker opp i GitHub igjen, eller hvis nginx ikke monterer `/srv/nettkart/www`.
 En endring i `docker-compose.yml` eller `default.conf` merges i GitHub og deployes med
 Komodo (`PullStack` + `DeployStack` på `pc6-ct120-web`). Det påvirker ikke kartinnholdet.
 
-## 13. november 2026 — denne nginx-en serverer et gammelt kart
+## 28. november 2026 — den gamle tvillingstacken er fjernet
 
-Stacken kjører en `nettkart`-container i CT210 på `http://10.0.0.128:3020`, med
-webrot `/opt/komodo/stacks/pc6-ct109-web/docs/network-map`. Innholdet der er
-fra 23. oktober 2026.
-
-**Det ekte nettverkskartet kjører i CT120 på `http://10.0.0.124:3020`** og
-oppdateres av `nettkart-publish` fra Gitea-arbeidskopien i
-`/opt/moved-services/nettkart-repo`. Den som åpner .128-adressen får altså et
-kart som er en måned gammelt, uten å se at det er feil versjon.
-
-Denne stacken bør bort, men er ikke slettet: det er Rogers avgjørelse, og en
-sletting av en kjørende stack kjører `compose down` på CT-en.
+Komodo-stacken `pc6-ct109-web` i CT210 (`10.0.0.128:3020`, kart fra 23. okt. 2026) brukte samme
+mappe som `pc6-ct120-web` og ble derfor også deployet ved hver endring her. Den er fjernet etter
+Rogers ja (`DestroyStack` + `DeleteStack`, 28. nov 2026). Mappen deployes nå bare av `pc6-ct120-web` (CT120).
+Checkout-mappen `/opt/komodo/stacks/pc6-ct109-web` i CT210 er ikke slettet.
 
 ## Nyheter — `http://10.0.0.124:3020/nyheter/` (lagt til 28. nov 2026)
 
